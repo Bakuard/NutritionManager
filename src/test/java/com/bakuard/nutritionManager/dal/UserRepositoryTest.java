@@ -70,7 +70,9 @@ class UserRepositoryTest {
     @BeforeEach
     void beforeEach() {
         try(Connection conn = dataSource.getConnection(); Statement statement = conn.createStatement()) {
-            statement.execute("CREATE SCHEMA IF NOT EXISTS public AUTHORIZATION nutritionmanagertester;");
+            statement.execute(
+                    "CREATE SCHEMA IF NOT EXISTS public AUTHORIZATION " +
+                            appConfiguration.getDatabaseUser() + ";");
             conn.commit();
         } catch(SQLException e) {
             throw new RuntimeException(e);
