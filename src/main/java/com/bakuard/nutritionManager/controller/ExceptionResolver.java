@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class ExceptionResolver {
@@ -26,14 +27,7 @@ public class ExceptionResolver {
         this.mapper = mapper;
     }
 
-    public ResponseEntity<ExceptionResponse> commonHandle(RuntimeException e) {
-        if(e instanceof UnknownSourceException ex) return handle(ex);
-        else if(e instanceof ValidateException ex) return handle(ex);
-        else if(e instanceof AuthException ex) return handle(ex);
-        else if(e instanceof AbstractDomainException ex)  return handle(ex);
-        else return handle(e);
-    }
-
+    @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<ExceptionResponse> handle(RuntimeException e) {
         logger.error("Unexpected exception", e);
         return ResponseEntity.
@@ -41,6 +35,7 @@ public class ExceptionResolver {
                 body(mapper.toExceptionResponse(e, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
+    @ExceptionHandler(value = AbstractDomainException.class)
     public ResponseEntity<ExceptionResponse> handle(AbstractDomainException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.
@@ -48,6 +43,7 @@ public class ExceptionResolver {
                 body(mapper.toExceptionResponse(e, HttpStatus.BAD_REQUEST));
     }
 
+    @ExceptionHandler(value = UnknownSourceException.class)
     public ResponseEntity<ExceptionResponse> handle(UnknownSourceException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.
@@ -55,6 +51,7 @@ public class ExceptionResolver {
                 body(mapper.toExceptionResponse(e, HttpStatus.NOT_FOUND));
     }
 
+    @ExceptionHandler(value = ValidateException.class)
     public ResponseEntity<ExceptionResponse> handle(ValidateException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.
@@ -62,6 +59,7 @@ public class ExceptionResolver {
                 body(mapper.toExceptionResponse(e, HttpStatus.BAD_REQUEST));
     }
 
+    @ExceptionHandler(value = AuthException.class)
     public ResponseEntity<ExceptionResponse> handle(AuthException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.

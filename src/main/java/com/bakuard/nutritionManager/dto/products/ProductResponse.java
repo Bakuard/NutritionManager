@@ -20,7 +20,7 @@ public class ProductResponse {
     private UUID id;
     @Schema(description = "Учетные данные и ID пользователя к которому относится данный продукт")
     private UserResponse user;
-    @Schema(description = "Категория к которой относится продукт", example = "Помидор, картофель, кукуруза, сыр и т.д.")
+    @Schema(description = "Категория к которой относится продукт", example = "Помидор")
     private String category;
     @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
     private String shop;

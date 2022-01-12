@@ -18,7 +18,7 @@ public class ProductRequest {
     private UUID id;
     @Schema(description = "Уникальный идентификатор пользователя в формате UUID")
     private UUID userId;
-    @Schema(description = "Категория к которой относится продукт", example = "Помидор, картофель, кукуруза, сыр и т.д.")
+    @Schema(description = "Категория к которой относится продукт", example = "Помидор")
     private String category;
     @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
     private String shop;
