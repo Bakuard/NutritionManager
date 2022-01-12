@@ -1,10 +1,21 @@
 package com.bakuard.nutritionManager.dto.tags;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
+@Schema(description = """
+        Данные о теге продукта
+        """)
 public class TagRequestAndResponse {
 
+    @Schema(description = """
+            Значение тега. Данное поле ничем не оличается от поля code.
+            """)
     private String name;
+    @Schema(description = """
+            Значение тега. Данное поле ничем не оличается от поля name.
+            """)
     private String code;
 
     public TagRequestAndResponse() {

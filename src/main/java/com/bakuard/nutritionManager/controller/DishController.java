@@ -6,6 +6,7 @@ import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Hidden
 @RestController
 @RequestMapping("/dishes")
 public class DishController {

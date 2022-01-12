@@ -1,9 +1,13 @@
 package com.bakuard.nutritionManager.dto.auth;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
+@Schema(description = "Почта пользователя")
 public class EmailRequest {
 
+    @Schema(description = "Почта пользователя")
     private String email;
 
     public EmailRequest() {

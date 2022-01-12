@@ -5,6 +5,9 @@ import com.bakuard.nutritionManager.services.AuthService;
 import com.bakuard.nutritionManager.dto.auth.CredentialsRequest;
 import com.bakuard.nutritionManager.dto.auth.EmailRequest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +16,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(
+        name = "Контроллер аутентификации",
+        description = """
+                Используется для регистрации новых пользователей,
+                 аутентификации существующих и смены учетных данных
+                """
+)
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -31,6 +41,10 @@ public class AuthController {
         this.exceptionResolver = exceptionResolver;
     }
 
+    @Operation(
+            summary = "Аутентификация существующего пользователя",
+            description = "Используется для входа существующего пользователя в систему"
+    )
     @Transactional
     @PostMapping("/enter")
     public ResponseEntity<?> enter(@RequestBody CredentialsRequest dto) {
@@ -39,10 +53,19 @@ public class AuthController {
             String jws = authService.enter(dto.getUserName(), dto.getUserPassword());
             return ResponseEntity.ok(mapper.toJwsResponse(jws));
         } catch(RuntimeException e) {
-            return exceptionResolver.handle(e);
+            return exceptionResolver.commonHandle(e);
         }
     }
 
+    @Operation(
+            summary = "Верификация почты пользователя для регистрации",
+            description = """
+                    Первый из двух шагов для регистрации нового пользователя.
+                     Отправляет на указанную почту письмо с ссылкой для подтверждения почты.
+                     При переходе по ссылке в письме пользователь переходит ко второму шагу регистрации -
+                     добавление своих учетных данных.
+                    """
+    )
     @Transactional
     @PostMapping("/verifyEmailForRegistration")
     public ResponseEntity<?> verifyEmailForRegistration(@RequestBody EmailRequest dto) {
@@ -51,10 +74,19 @@ public class AuthController {
             authService.verifyEmailForRegistration(dto.getEmail());
             return ResponseEntity.ok("the letter was sent to the mail for registration");
         } catch(RuntimeException e) {
-            return exceptionResolver.handle(e);
+            return exceptionResolver.commonHandle(e);
         }
     }
 
+    @Operation(
+            summary = "Верификация почты пользователя для смены учетных данных",
+            description = """
+                    Первый из двух шагов для смены учетных данных существующего пользователя.
+                     Отправляет на указанную почту письмо с ссылкой для подтверждения почты.
+                     При переходе по ссылке в письме пользователь переходит ко второму шагу смены учетных данных -
+                     указание своих новых учетных данных.
+                    """
+    )
     @Transactional
     @PostMapping("/verifyEmailForChangeCredentials")
     public ResponseEntity<?> verifyEmailForChangeCredentials(@RequestBody EmailRequest dto) {
@@ -63,10 +95,18 @@ public class AuthController {
             authService.verifyEmailForChangeCredentials(dto.getEmail());
             return ResponseEntity.ok("the letter was sent to the mail for change credentials");
         } catch(RuntimeException e) {
-            return exceptionResolver.handle(e);
+            return exceptionResolver.commonHandle(e);
         }
     }
 
+    @Operation(
+            summary = "Добавление учетных данных пользователя при регистрации",
+            description = """
+                    Второй и завершающий шаг регистрации нового пользователя.
+                     На этом шаге пользователь указывает свои учетные данные.
+                     Необходимо указать в http заголовке Authorization токен полученный на предыдущем шаге.
+                    """
+    )
     @Transactional
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody CredentialsRequest dto,
@@ -77,10 +117,18 @@ public class AuthController {
             String accessJws = authService.registration(registrationJws, dto.getUserName(), dto.getUserPassword());
             return ResponseEntity.ok(mapper.toJwsResponse(accessJws));
         } catch(RuntimeException e) {
-            return exceptionResolver.handle(e);
+            return exceptionResolver.commonHandle(e);
         }
     }
 
+    @Operation(
+            summary = "Указание новых учетных данных пользователя",
+            description = """
+                    Второй и завершающий шаг смены учетных данных пользователя.
+                     На этом шаге пользователь указывает свои учетные данные.
+                     Необходимо указать в http заголовке Authorization токен полученный на предыдущем шаге.
+                    """
+    )
     @Transactional
     @PostMapping("/changeCredential")
     public ResponseEntity<?> changeCredential(@RequestBody CredentialsRequest dto,
@@ -91,7 +139,7 @@ public class AuthController {
             String accessJws = authService.changeCredential(changeCredentialsJws, dto.getUserName(), dto.getUserPassword());
             return ResponseEntity.ok(mapper.toJwsResponse(accessJws));
         } catch(RuntimeException e) {
-            return exceptionResolver.handle(e);
+            return exceptionResolver.commonHandle(e);
         }
     }
 

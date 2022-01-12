@@ -1,9 +1,16 @@
 package com.bakuard.nutritionManager.dto.auth;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
+@Schema(description = """
+        JWS токен доступа возвращаемый пользователю в случае успешного заверешения регистрации,
+         смены учетных данны или аутентификации. Используется для вызова методов котролерров продуктов, блюд и меню.
+        """)
 public class JwsResponse {
 
+    @Schema(description = "JWS токен доступа")
     private String jws;
 
     public JwsResponse() {

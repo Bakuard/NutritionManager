@@ -2,27 +2,45 @@ package com.bakuard.nutritionManager.dto.products;
 
 import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@Schema(description = """
+        Возвращаемые данные о продукте
+        """)
 public class ProductResponse {
 
+    @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Product.")
     private String type;
+    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
     private UUID id;
+    @Schema(description = "Учетные данные и ID пользователя к которому относится данный продукт")
     private UserResponse user;
+    @Schema(description = "Категория к которой относится продукт", example = "Помидор, картофель, кукуруза, сыр и т.д.")
     private String category;
+    @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
     private String shop;
+    @Schema(description = "Один из сортов продуктов указанной категории")
     private String variety;
+    @Schema(description = "Один из производителей продуктов указанной категории")
     private String manufacturer;
+    @Schema(description = "Цена прдукта указанной категории, сорта, производителя и продающегося в указанном магазине")
     private BigDecimal price;
+    @Schema(description = "Размер упаковки")
     private BigDecimal packingSize;
+    @Schema(description = "Единица измерения кол-ва продукта")
     private String unit;
+    @Schema(description = "Кол-во продукта имеющегося в наличии у пользователя")
     private BigDecimal quantity;
+    @Schema(description = "Описание продукта")
     private String description;
+    @Schema(description = "Путь к изображению данного продукта")
     private String imagePath;
+    @Schema(description = "Теги указаныне для данного продукта")
     private List<TagRequestAndResponse> tags;
 
     public ProductResponse() {

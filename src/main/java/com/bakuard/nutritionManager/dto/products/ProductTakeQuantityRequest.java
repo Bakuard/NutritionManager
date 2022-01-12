@@ -1,13 +1,22 @@
 package com.bakuard.nutritionManager.dto.products;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
+@Schema(description = """
+        Указывает на сколько нужно уменьшить кол-во указанного продукта имеющегося в наличии у указанного
+        пользователя.
+        """)
 public class ProductTakeQuantityRequest {
 
+    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
     private UUID productId;
+    @Schema(description = "Уникальный идентификатор пользователя в формате UUID")
     private UUID userId;
+    @Schema(description = "Отнимаемое кол-во продукта")
     private BigDecimal takeQuantity;
 
     public ProductTakeQuantityRequest() {
