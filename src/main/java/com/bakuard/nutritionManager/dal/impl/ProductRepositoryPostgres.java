@@ -672,7 +672,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                                             (UUID) rs.getObject("userId"),
                                             rs.getString("name"),
                                             rs.getString("passwordHash"),
-                                            rs.getString("emailHash"),
+                                            rs.getString("email"),
                                             rs.getString("salt")
                                     )).
                                     setCategory(rs.getString("category")).

@@ -174,7 +174,7 @@ class UserRepositoryTest {
                 toUUID(2),
                 "user2",
                 user1.getPasswordHash(),
-                "emailHash",
+                "email",
                 user1.getSalt()
         );
 
@@ -191,7 +191,7 @@ class UserRepositoryTest {
                 toUUID(2),
                 "user2",
                 "passwordHash",
-                user1.getEmailHash(),
+                user1.getEmail(),
                 user1.getSalt()
         );
 
@@ -272,7 +272,7 @@ class UserRepositoryTest {
                 toUUID(3),
                 "user3",
                 user1.getPasswordHash(),
-                "emailHash",
+                "email",
                 user1.getSalt()
         );
 
@@ -297,7 +297,7 @@ class UserRepositoryTest {
                 toUUID(3),
                 "user3",
                 "passwordHash",
-                user1.getEmailHash(),
+                user1.getEmail(),
                 user1.getSalt()
         );
 

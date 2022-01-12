@@ -74,7 +74,7 @@ public class UserRepositoryPostgres implements UserRepository {
                                 (UUID) rs.getObject("userId"),
                                 name,
                                 rs.getString("passwordHash"),
-                                rs.getString("emailHash"),
+                                rs.getString("email"),
                                 rs.getString("salt")
                         );
                     }
@@ -88,22 +88,20 @@ public class UserRepositoryPostgres implements UserRepository {
         if(email == null)
             throw new UnknownUserException("Unknown user with email=null");
 
-        String emailHash = Hashing.sha256().hashBytes(email.getBytes(StandardCharsets.UTF_8)).toString();
-
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
                         SELECT Users.*
                             FROM Users
-                            WHERE Users.emailHash = ?
+                            WHERE Users.email = ?
                         """),
-                (PreparedStatement ps) -> ps.setObject(1, emailHash),
+                (PreparedStatement ps) -> ps.setObject(1, email),
                 (ResultSet rs) -> {
                     if(rs.next()) {
                         return new User(
                                 (UUID) rs.getObject("userId"),
                                 rs.getString("name"),
                                 rs.getString("passwordHash"),
-                                emailHash,
+                                email,
                                 rs.getString("salt")
                         );
                     }
@@ -130,7 +128,7 @@ public class UserRepositoryPostgres implements UserRepository {
                                 userId,
                                 rs.getString("name"),
                                 rs.getString("passwordHash"),
-                                rs.getString("emailHash"),
+                                rs.getString("email"),
                                 rs.getString("salt")
                         );
                     }
@@ -142,14 +140,14 @@ public class UserRepositoryPostgres implements UserRepository {
     private void addNewUser(User user) {
         statement.update(
                 """
-                        INSERT INTO Users(userId, name, passwordHash, emailHash, salt)
+                        INSERT INTO Users(userId, name, passwordHash, email, salt)
                          VALUES (?,?,?,?,?);
                         """,
                 (PreparedStatement ps) -> {
                     ps.setObject(1, user.getId());
                     ps.setString(2, user.getName());
                     ps.setString(3, user.getPasswordHash());
-                    ps.setString(4, user.getEmailHash());
+                    ps.setString(4, user.getEmail());
                     ps.setString(5, user.getSalt());
                 }
         );
@@ -159,13 +157,13 @@ public class UserRepositoryPostgres implements UserRepository {
         statement.update(
                 """
                         UPDATE Users
-                         SET name=?, passwordHash=?, emailHash=?, salt=?
+                         SET name=?, passwordHash=?, email=?, salt=?
                          WHERE userId=?;
                         """,
                 (PreparedStatement ps) -> {
                     ps.setString(1, user.getName());
                     ps.setString(2, user.getPasswordHash());
-                    ps.setString(3, user.getEmailHash());
+                    ps.setString(3, user.getEmail());
                     ps.setString(4, user.getSalt());
                     ps.setObject(5, user.getId());
                 }

@@ -2,12 +2,12 @@ CREATE TABLE Users (
     userId UUID NOT NULL,
     name VARCHAR(64) NOT NULL,
     passwordHash VARCHAR(512) NOT NULL,
-    emailHash VARCHAR(512) NOT NULL,
+    email VARCHAR(512) NOT NULL,
     salt VARCHAR(512) NOT NULL,
     PRIMARY KEY(userId),
     UNIQUE(name),
     UNIQUE(passwordHash),
-    UNIQUE(emailHash),
+    UNIQUE(email),
     UNIQUE(salt)
 );
 
