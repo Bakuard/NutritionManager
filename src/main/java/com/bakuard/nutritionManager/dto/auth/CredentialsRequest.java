@@ -1,10 +1,18 @@
 package com.bakuard.nutritionManager.dto.auth;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
+@Schema(description = """
+        Учетные данные пользователя указываемые им при аутентификации, регистарции или смене учетных данных.
+        """)
 public class CredentialsRequest {
 
+    @Schema(description = "Имя пользователя")
     private String userName;
+
+    @Schema(description = "Пароль пользователя")
     private String userPassword;
 
     public CredentialsRequest() {

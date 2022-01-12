@@ -1,10 +1,15 @@
 package com.bakuard.nutritionManager.dto.products;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
+@Schema(description = "Категория продукта.")
 public class CategoryResponse {
 
+    @Schema(description = "Наименование категории продукта. Данное поле не отличается от поля code.")
     private String name;
+    @Schema(description = "Наименование категории продукта. Данное поле не отличается от поля name.")
     private String code;
 
     public CategoryResponse() {

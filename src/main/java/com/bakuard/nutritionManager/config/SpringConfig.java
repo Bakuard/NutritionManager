@@ -8,6 +8,9 @@ import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
 import org.flywaydb.core.Flyway;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,7 +32,10 @@ import java.io.IOException;
 
 @SpringBootApplication(
         exclude = {SecurityAutoConfiguration.class},
-        scanBasePackages = {"com.bakuard.nutritionManager.controller", "com.bakuard.nutritionManager.config"}
+        scanBasePackages = {
+                "com.bakuard.nutritionManager.controller",
+                "com.bakuard.nutritionManager.config"
+        }
 )
 @EnableTransactionManagement
 public class SpringConfig implements WebMvcConfigurer {
@@ -132,6 +138,18 @@ public class SpringConfig implements WebMvcConfigurer {
         LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
         localeChangeInterceptor.setParamName("lang");
         registry.addInterceptor(localeChangeInterceptor);
+    }
+
+
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI().
+                info(
+                        new Info().
+                                title("Nutrition Manager API").
+                                version("0.2.0").
+                                contact(new Contact().email("purplespicemerchant@gmail.com"))
+                );
     }
 
 }
