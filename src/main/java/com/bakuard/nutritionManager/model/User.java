@@ -15,14 +15,14 @@ public class User {
     private final UUID id;
     private String name;
     private String passwordHash;
-    private String emailHash;
+    private String email;
     private final String salt;
 
     public User(User other) {
         id = other.id;
         name = other.name;
         passwordHash = other.passwordHash;
-        emailHash = other.emailHash;
+        email = other.email;
         salt = other.salt;
     }
 
@@ -38,14 +38,14 @@ public class User {
         this.name = name;
         this.salt = Base64.getEncoder().encodeToString(SecureRandom.getSeed(255));
         this.passwordHash = calculatePasswordHash(password, salt);
-        this.emailHash = calculateEmailHash(email);
+        this.email = email;
     }
 
-    public User(UUID id, String name, String passwordHash, String emailHash, String salt) {
+    public User(UUID id, String name, String passwordHash, String email, String salt) {
         this.id = id;
         this.name = name;
         this.passwordHash = passwordHash;
-        this.emailHash = emailHash;
+        this.email = email;
         this.salt = salt;
     }
 
@@ -71,13 +71,13 @@ public class User {
         this.passwordHash = calculatePasswordHash(password, salt);
     }
 
-    public String getEmailHash() {
-        return emailHash;
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {
         tryThrow(checkEmail(email));
-        this.emailHash = calculateEmailHash(email);
+        this.email = email;
     }
 
     public String getSalt() {
@@ -95,7 +95,7 @@ public class User {
         return id.equals(other.id) &&
                 name.equals(other.name) &&
                 passwordHash.equals(other.passwordHash) &&
-                emailHash.equals(other.emailHash) &&
+                email.equals(other.email) &&
                 salt.equals(other.salt);
     }
 
@@ -168,10 +168,6 @@ public class User {
 
     private String calculatePasswordHash(String password, String salt) {
         return Hashing.sha256().hashBytes(password.concat(salt).getBytes(StandardCharsets.UTF_8)).toString();
-    }
-
-    private String calculateEmailHash(String email) {
-        return Hashing.sha256().hashBytes(email.getBytes(StandardCharsets.UTF_8)).toString();
     }
 
 }

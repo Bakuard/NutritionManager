@@ -221,6 +221,7 @@ public class DtoMapper {
         UserResponse response = new UserResponse();
         response.setId(user.getId());
         response.setName(user.getName());
+        response.setEmail(user.getEmail());
         return response;
     }
 
