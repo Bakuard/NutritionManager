@@ -39,7 +39,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     ).
                 and().
                     authorizeRequests().
-                        antMatchers("/products/**", "/dishes/**", "/menus/**").authenticated().
+                        antMatchers(
+                                "/products/**",
+                                "/dishes/**",
+                                "/menus/**",
+                                "/auth/getUserByJws"
+                        ).authenticated().
                 and().
                     addFilterBefore(new JwsFilter(), UsernamePasswordAuthenticationFilter.class);
     }
