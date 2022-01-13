@@ -2,6 +2,9 @@ package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
+import com.bakuard.nutritionManager.dto.users.UserResponse;
+import com.bakuard.nutritionManager.model.User;
+import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.services.AuthService;
 import com.bakuard.nutritionManager.dto.auth.CredentialsRequest;
 import com.bakuard.nutritionManager.dto.auth.EmailRequest;
@@ -49,8 +52,8 @@ public class AuthController {
     public ResponseEntity<JwsResponse> enter(@RequestBody CredentialsRequest dto) {
         logger.info("User " + dto.getUserName() + " try enter");
 
-        String jws = authService.enter(dto.getUserName(), dto.getUserPassword());
-        return ResponseEntity.ok(mapper.toJwsResponse(jws));
+        Pair<String, User> jws = authService.enter(dto.getUserName(), dto.getUserPassword());
+        return ResponseEntity.ok(mapper.toJwsResponse(jws.getFirst(), jws.getSecond()));
     }
 
     @Operation(
@@ -103,8 +106,8 @@ public class AuthController {
                                           @RequestHeader("Authorization") String registrationJws) {
         logger.info("registration new user = " + dto.getUserName() + ". registrationJws=" + registrationJws);
 
-        String accessJws = authService.registration(registrationJws, dto.getUserName(), dto.getUserPassword());
-        return ResponseEntity.ok(mapper.toJwsResponse(accessJws));
+        Pair<String, User> accessJws = authService.registration(registrationJws, dto.getUserName(), dto.getUserPassword());
+        return ResponseEntity.ok(mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond()));
     }
 
     @Operation(
@@ -122,8 +125,20 @@ public class AuthController {
         logger.info("change credentials for user with new name = " + dto.getUserName() +
                 ". changeCredentialsJws=" + changeCredentialsJws);
 
-        String accessJws = authService.changeCredential(changeCredentialsJws, dto.getUserName(), dto.getUserPassword());
-        return ResponseEntity.ok(mapper.toJwsResponse(accessJws));
+        Pair<String, User> accessJws = authService.changeCredential(changeCredentialsJws, dto.getUserName(), dto.getUserPassword());
+        return ResponseEntity.ok(mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond()));
+    }
+
+    @Operation(
+            summary = "Возвращает пользователя в соответствии с токеном доступа"
+    )
+    @Transactional
+    @GetMapping("/getUserByJws")
+    public ResponseEntity<UserResponse> getUserByJws(@RequestHeader("Authorization") String accessJws) {
+        logger.info("Get user by accessJws");
+
+        User user = authService.getUserByJws(accessJws);
+        return ResponseEntity.ok(mapper.toUserResponse(user));
     }
 
 }

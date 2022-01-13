@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.services;
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.model.util.Pair;
 
 import java.util.UUID;
 
@@ -18,13 +19,14 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
-    public String enter(String name, String password) {
+    public Pair<String, User> enter(String name, String password) {
         try {
             User user = userRepository.getByName(name);
             if(!user.isCorrectPassword(password)) {
                 throw new FailEnterException("Incorrect password for user=" + name);
             }
-            return jwsService.generateAccessJws(user);
+            String jws = jwsService.generateAccessJws(user);
+            return new Pair<>(jws, user);
         } catch(UnknownUserException e) {
             throw new FailEnterException("Unknown user=" + name);
         }
@@ -40,7 +42,7 @@ public class AuthService {
         emailService.confirmEmailForChangeCredentials(jws, email);
     }
 
-    public String registration(String jws, String name, String password) {
+    public Pair<String, User> registration(String jws, String name, String password) {
         try {
             String email = jwsService.parseRegistrationJws(jws);
 
@@ -52,13 +54,14 @@ public class AuthService {
             );
             userRepository.save(user);
 
-            return jwsService.generateAccessJws(user);
+            String accessJws = jwsService.generateAccessJws(user);
+            return new Pair<>(accessJws, user);
         } catch(AbstractDomainException e) {
             throw new FailRegistrationException("Fail registration user=" + name, e);
         }
     }
 
-    public String changeCredential(String jws, String name, String password) {
+    public Pair<String, User> changeCredential(String jws, String name, String password) {
         try {
             String email = jwsService.parseChangeCredentialsJws(jws);
 
@@ -67,10 +70,16 @@ public class AuthService {
             user.setName(name);
             userRepository.save(user);
 
-            return jwsService.generateAccessJws(user);
+            String accessJws = jwsService.generateAccessJws(user);
+            return new Pair<>(accessJws, user);
         } catch(AbstractDomainException e) {
             throw new FailChangeCredentialsException("Fail change credential user=" + name, e);
         }
+    }
+
+    public User getUserByJws(String jws) {
+        UUID userId = jwsService.parseAccessJws(jws);
+        return userRepository.getById(userId);
     }
 
 }

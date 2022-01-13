@@ -1,5 +1,7 @@
 package com.bakuard.nutritionManager.dto.auth;
 
+import com.bakuard.nutritionManager.dto.users.UserResponse;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
@@ -12,6 +14,8 @@ public class JwsResponse {
 
     @Schema(description = "JWS токен доступа")
     private String jws;
+    @Schema(description = "Учетные данные пользователя")
+    private UserResponse user;
 
     public JwsResponse() {
     }
@@ -24,23 +28,32 @@ public class JwsResponse {
         this.jws = jws;
     }
 
+    public UserResponse getUser() {
+        return user;
+    }
+
+    public void setUser(UserResponse user) {
+        this.user = user;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JwsResponse that = (JwsResponse) o;
-        return Objects.equals(jws, that.jws);
+        return Objects.equals(jws, that.jws) && Objects.equals(user, that.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(jws);
+        return Objects.hash(jws, user);
     }
 
     @Override
     public String toString() {
         return "JwsResponse{" +
                 "jws='" + jws + '\'' +
+                ", user=" + user +
                 '}';
     }
 

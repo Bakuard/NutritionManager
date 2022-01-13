@@ -44,7 +44,7 @@ public class DtoMapper {
     public ProductResponse toProductResponse(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
-        response.setUser(mapToUserResponse(product.getUser()));
+        response.setUser(toUserResponse(product.getUser()));
         response.setCategory(product.getContext().getCategory());
         response.setShop(product.getContext().getShop());
         response.setVariety(product.getContext().getVariety());
@@ -195,10 +195,19 @@ public class DtoMapper {
     }
 
 
-    public JwsResponse toJwsResponse(String jws) {
+    public JwsResponse toJwsResponse(String jws, User user) {
         JwsResponse dto = new JwsResponse();
         dto.setJws(jws);
+        dto.setUser(toUserResponse(user));
         return dto;
+    }
+
+    public UserResponse toUserResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        return response;
     }
 
 
@@ -216,14 +225,6 @@ public class DtoMapper {
         return response;
     }
 
-
-    private UserResponse mapToUserResponse(User user) {
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setName(user.getName());
-        response.setEmail(user.getEmail());
-        return response;
-    }
 
     private List<TagRequestAndResponse> toTagResponse(Collection<Tag> tags) {
         return tags.stream().map(tag -> {
