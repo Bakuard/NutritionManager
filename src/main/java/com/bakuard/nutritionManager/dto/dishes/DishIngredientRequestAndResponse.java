@@ -8,7 +8,7 @@ public class DishIngredientRequestAndResponse {
 
     private String name;
     private BigDecimal quantity;
-    private List<List<String>> filter;
+    private List<DishIngredientFilterRequestResponse> filter;
 
     public DishIngredientRequestAndResponse() {
 
@@ -30,11 +30,11 @@ public class DishIngredientRequestAndResponse {
         this.quantity = quantity;
     }
 
-    public List<List<String>> getFilter() {
+    public List<DishIngredientFilterRequestResponse> getFilter() {
         return filter;
     }
 
-    public void setFilter(List<List<String>> filter) {
+    public void setFilter(List<DishIngredientFilterRequestResponse> filter) {
         this.filter = filter;
     }
 

@@ -1,5 +1,7 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
+import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -11,7 +13,7 @@ public class DishForListResponse {
     private BigDecimal servingSize;
     private String unit;
     private BigDecimal averagePrice;
-    private List<String> tags;
+    private List<TagRequestAndResponse> tags;
 
     public DishForListResponse() {
 
@@ -57,11 +59,11 @@ public class DishForListResponse {
         this.averagePrice = averagePrice;
     }
 
-    public List<String> getTags() {
+    public List<TagRequestAndResponse> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(List<TagRequestAndResponse> tags) {
         this.tags = tags;
     }
 
