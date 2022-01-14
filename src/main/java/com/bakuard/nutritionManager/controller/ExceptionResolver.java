@@ -32,7 +32,7 @@ public class ExceptionResolver {
         logger.error("Unexpected exception", e);
         return ResponseEntity.
                 status(HttpStatus.INTERNAL_SERVER_ERROR).
-                body(mapper.toExceptionResponse(e, HttpStatus.INTERNAL_SERVER_ERROR));
+                body(mapper.toExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     @ExceptionHandler(value = AbstractDomainException.class)

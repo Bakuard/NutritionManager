@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.criteria.ProductCategoryCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductFieldCriteria;
+import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.model.Product;
@@ -12,7 +13,9 @@ import com.bakuard.nutritionManager.dto.DtoMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.slf4j.Logger;
@@ -47,7 +50,19 @@ public class ProductController {
         this.productRepository = productRepository;
     }
 
-    @Operation(summary = "Добавление нового продукта")
+    @Operation(summary = "Добавление нового продукта",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @PostMapping("/add")
     public ResponseEntity<ProductResponse> add(@RequestBody ProductRequest dto) {
@@ -58,7 +73,19 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 
-    @Operation(summary = "Обновление продукта")
+    @Operation(summary = "Обновление продукта",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @PutMapping("/update")
     public ResponseEntity<ProductResponse> update(@RequestBody ProductRequest dto) {
@@ -69,7 +96,19 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 
-    @Operation(summary = "Удаление продукта")
+    @Operation(summary = "Удаление продукта",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти продукт с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @DeleteMapping("/delete")
     public ResponseEntity<ProductResponse> delete(@RequestParam("id")
@@ -81,7 +120,23 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 
-    @Operation(summary = "Увеличение кол-ва продукта имеющегося в наличии у пользователя")
+    @Operation(summary = "Увеличение кол-ва продукта имеющегося в наличии у пользователя",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если указано не корректное значение для добавляемого кол-ва кол-ва продукта",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти продукт с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @PatchMapping("/addQuantity")
     public ResponseEntity<ProductResponse> addQuantity(@RequestBody ProductAddedQuantityRequest dto) {
@@ -93,7 +148,23 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 
-    @Operation(summary = "Уменьшение кол-ва продукта имеющегося в наличии у пользователя")
+    @Operation(summary = "Уменьшение кол-ва продукта имеющегося в наличии у пользователя",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если указано не корректное значение для добавляемого кол-ва кол-ва продукта",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти продукт с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @PatchMapping("/takeQuantity")
     public ResponseEntity<ProductResponse> takeQuantity(@RequestBody ProductTakeQuantityRequest dto) {
@@ -105,7 +176,19 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 
-    @Operation(summary = "Получение продукта по его ID")
+    @Operation(summary = "Получение продукта по его ID",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти продукт с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @GetMapping("/getById")
     public ResponseEntity<ProductResponse> getById(@RequestParam("id")
@@ -117,7 +200,23 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 
-    @Operation(summary = "Получение выборки продуктов указанного пользователя")
+    @Operation(summary = "Получение выборки продуктов указанного пользователя",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти пользователя с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @GetMapping("/getByFilter")
     public ResponseEntity<Page<ProductResponse>> getByFilter(
@@ -128,7 +227,10 @@ public class ProductController {
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
             int size,
             @RequestParam("userId")
-            @Parameter(description = "Уникальный идентификатор пользователя в формате UUID", required = true)
+            @Parameter(description = """
+                    Уникальный идентификатор пользователя в формате UUID.
+                     Пользователь с таким ID должен существовать в БД.
+                    """, required = true)
             UUID userId,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
@@ -167,6 +269,8 @@ public class ProductController {
                       которые связаны с любым из указанных магазинов. Если параметр
                       имеет значение null - в выборку попадут продукты связанные с любыми
                       магазинами.
+                      Если массив задается - он должен содержать как минимум один элемент,
+                      все эелементы должны содержать как минимум один отображаемый символ.
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> shops,
@@ -176,6 +280,8 @@ public class ProductController {
                       которые имеют с любой из указанных сортов. Если параметр
                       имеет значение null - в выборку попадут продукты имеющие любой
                       сорт.
+                      Если массив задается - он должен содержать как минимум один элемент,
+                      все эелементы должны содержать как минимум один отображаемый символ.
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> varieties,
@@ -185,6 +291,8 @@ public class ProductController {
                       которые связаны с любым из указанных производителей. Если параметр
                       имеет значение null - в выборку попадут продукты связанные с любыми
                       производителями.
+                      Если массив задается - он должен содержать как минимум один элемент,
+                      все эелементы должны содержать как минимум один отображаемый символ.
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> manufacturers,
@@ -194,6 +302,8 @@ public class ProductController {
                       которые имеют как минимум все указанные теги. Если параметр
                       имеет значение null - в выборку попадут продукты имющие любые теги
                       или не имющие их вовсе.
+                      Если массив задается - он должен содержать как минимум один элемент,
+                      все эелементы должны содержать как минимум один отображаемый символ.
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> tags) {
@@ -207,7 +317,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех тегов использующихся для продуктов")
+    @Operation(summary = "Получение выборки из всех тегов использующихся для продуктов",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти пользователя с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @GetMapping("/getTags")
     public ResponseEntity<Page<TagRequestAndResponse>> getTags(
@@ -218,7 +344,10 @@ public class ProductController {
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
             int size,
             @RequestParam("userId")
-            @Parameter(description = "Уникальный идентификатор пользователя в формате UUID", required = true)
+            @Parameter(description = """
+                    Уникальный идентификатор пользователя в формате UUID.
+                     Пользователь с таким ID должен существовать в БД.
+                    """, required = true)
             UUID userId,
             @RequestParam(value = "productCategory", required = false)
             @Parameter(description = """
@@ -240,7 +369,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех магазинов продуктов")
+    @Operation(summary = "Получение выборки из всех магазинов продуктов",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти пользователя с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @GetMapping("/getShops")
     public ResponseEntity<Page<ShopResponse>> getShops(
@@ -251,7 +396,10 @@ public class ProductController {
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
             int size,
             @RequestParam("userId")
-            @Parameter(description = "Уникальный идентификатор пользователя в формате UUID", required = true)
+            @Parameter(description = """
+                    Уникальный идентификатор пользователя в формате UUID.
+                     Пользователь с таким ID должен существовать в БД.
+                    """, required = true)
             UUID userId,
             @RequestParam(value = "productCategory", required = false)
             @Parameter(description = """
@@ -273,7 +421,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех сортов продуктов")
+    @Operation(summary = "Получение выборки из всех сортов продуктов",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти пользователя с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @GetMapping("/getVarieties")
     public ResponseEntity<Page<VarietyResponse>> getVarieties(
@@ -284,7 +448,10 @@ public class ProductController {
           @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
           int size,
           @RequestParam("userId")
-          @Parameter(description = "Уникальный идентификатор пользователя в формате UUID", required = true)
+          @Parameter(description = """
+                    Уникальный идентификатор пользователя в формате UUID.
+                     Пользователь с таким ID должен существовать в БД.
+                    """, required = true)
           UUID userId,
           @RequestParam(value = "productCategory", required = false)
           @Parameter(description = """
@@ -306,7 +473,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех категорий продуктов")
+    @Operation(summary = "Получение выборки из всех категорий продуктов",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти пользователя с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @GetMapping("/getCategories")
     public ResponseEntity<Page<CategoryResponse>> getCategories(
@@ -317,7 +500,10 @@ public class ProductController {
            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
            int size,
            @RequestParam("userId")
-           @Parameter(description = "Уникальный идентификатор пользователя в формате UUID", required = true)
+           @Parameter(description = """
+                    Уникальный идентификатор пользователя в формате UUID.
+                     Пользователь с таким ID должен существовать в БД.
+                    """, required = true)
            UUID userId) {
         logger.info("Get products categories by userId. page={}, size={}, userId={}", page, size, userId);
 
@@ -330,7 +516,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех производителей продуктов")
+    @Operation(summary = "Получение выборки из всех производителей продуктов",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти пользователя с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
     @Transactional
     @GetMapping("/getManufacturers")
     public ResponseEntity<Page<ManufacturerResponse>> getManufacturers(
@@ -341,7 +543,10 @@ public class ProductController {
           @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
           int size,
           @RequestParam("userId")
-          @Parameter(description = "Уникальный идентификатор пользователя в формате UUID", required = true)
+          @Parameter(description = """
+                    Уникальный идентификатор пользователя в формате UUID.
+                     Пользователь с таким ID должен существовать в БД.
+                    """, required = true)
           UUID userId,
           @RequestParam(value = "productCategory", required = false)
           @Parameter(description = """
