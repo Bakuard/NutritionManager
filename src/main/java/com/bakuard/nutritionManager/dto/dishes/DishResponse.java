@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
+import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ public class DishResponse {
     private String description;
     private String imagePath;
     private List<DishIngredientRequestAndResponse> ingredients;
-    private List<String> tags;
+    private List<TagRequestAndResponse> tags;
 
     public UUID getId() {
         return id;
@@ -83,11 +84,11 @@ public class DishResponse {
         this.ingredients = ingredients;
     }
 
-    public List<String> getTags() {
+    public List<TagRequestAndResponse> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(List<TagRequestAndResponse> tags) {
         this.tags = tags;
     }
 

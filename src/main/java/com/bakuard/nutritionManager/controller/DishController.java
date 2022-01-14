@@ -6,7 +6,6 @@ import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Hidden
 @RestController
 @RequestMapping("/dishes")
 public class DishController {
@@ -39,27 +37,11 @@ public class DishController {
     }
 
     @Transactional
-    @PostMapping("/addUnit")
-    public ResponseEntity<DishUnitResponse> addUnit(@RequestBody DishUnitRequest dto) {
-        logger.info("Add dish unit");
-
-        return ResponseEntity.status(HttpStatus.OK).body(new DishUnitResponse());
-    }
-
-    @Transactional
-    @PutMapping("/updateUnit")
-    public ResponseEntity<DishUnitResponse> updateUnit(@RequestBody DishUnitRequest dto) {
-        logger.info("Update dish unit");
-
-        return ResponseEntity.status(HttpStatus.OK).body(new DishUnitResponse());
-    }
-
-    @Transactional
     @PostMapping("/add")
     public ResponseEntity<DishResponse> add(@RequestBody DishRequest dto) {
         logger.info("Add new dish. dto={}", dto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new DishResponse());
+        return ResponseEntity.ok(new DishResponse());
     }
 
     @Transactional
@@ -67,42 +49,32 @@ public class DishController {
     public ResponseEntity<DishResponse> update(@RequestBody DishRequest dto) {
         logger.info("Update dish. dto={}", dto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new DishResponse());
+        return ResponseEntity.ok(new DishResponse());
     }
 
     @Transactional
     @DeleteMapping("/delete")
     public ResponseEntity<DishResponse> delete(@RequestParam("id") UUID id) {
-        logger.info("Delete dish with id={}", id);
+        logger.info("Delete dish by id={}", id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new DishResponse());
-    }
-
-    @Transactional
-    @GetMapping("/getUnits")
-    public ResponseEntity<List<DishUnitResponse>> getUnits(@RequestParam("userId") UUID userId) {
-        logger.info("Get dish units by userId={}", userId);
-        List<DishUnitResponse> response = List.of();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(new DishResponse());
     }
 
     @Transactional
     @GetMapping("/getById")
     public ResponseEntity<DishResponse> getById(@RequestParam("id") UUID id) {
-        logger.info("Get dish for form with id = {}", id);
+        logger.info("Get dish by id = {}", id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new DishResponse());
+        return ResponseEntity.ok(new DishResponse());
     }
 
     @Transactional
     @GetMapping("/getByName")
-    public ResponseEntity<Page<DishResponse>> getByName(@RequestParam("page") int page,
-                                                        @RequestParam("size") int size,
-                                                        @RequestParam("name") String name,
-                                                        @RequestParam("userId") UUID userId) {
-        logger.info("Get dish for list by name={} and userId={}", name, userId);
+    public ResponseEntity<DishResponse> getByName(@RequestParam("name") String name,
+                                                  @RequestParam("userId") UUID userId) {
+        logger.info("Get dish by name={} and userId={}", name, userId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(Pageable.firstEmptyPage());
+        return ResponseEntity.ok(new DishResponse());
     }
 
     @Transactional
@@ -111,11 +83,19 @@ public class DishController {
                                                                  @RequestParam("size") int size,
                                                                  @RequestParam("sort") String sortRule,
                                                                  @RequestParam("userId") UUID userId,
-                                                                 @RequestParam("tags") Optional<List<String>> tags) {
+                                                                 @RequestParam(value = "tags", required = false) List<String> tags) {
         logger.info("Get dishes for list by filter: page={}, size={}, sortRule={}, userId={}, tags={}",
                 page, size, sortRule, userId, tags);
 
-        return ResponseEntity.status(HttpStatus.OK).body(Pageable.firstEmptyPage());
+        return ResponseEntity.ok(Pageable.firstEmptyPage());
+    }
+
+    @Transactional
+    @GetMapping("/getUnits")
+    public ResponseEntity<List<DishUnitResponse>> getUnits(@RequestParam("userId") UUID userId) {
+        logger.info("Get dish units by userId={}", userId);
+        List<DishUnitResponse> response = List.of();
+        return ResponseEntity.ok(response);
     }
 
     @Transactional
@@ -125,19 +105,19 @@ public class DishController {
                                              @RequestParam("userId") UUID userId) {
         logger.info("Get dishes tags by userId. page={}, size={}, userId={}", page, size, userId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(Pageable.firstEmptyPage());
+        return ResponseEntity.ok(Pageable.firstEmptyPage());
     }
 
     @Transactional
     @GetMapping("/pickProductsList")
     public ResponseEntity<DishProductsListResponse> pickProductsList(
-            @RequestParam("servingNumber") Optional<BigDecimal> servingNumber,
+            @RequestParam(value = "servingNumber", required = false) BigDecimal servingNumber,
             @RequestParam("ingredients") List<Integer> ingredients,
             @RequestParam("dishId") UUID dishId) {
         logger.info("Pick products list for dish. servingNumber={}, ingredients={}, dishId={}",
                 servingNumber, ingredients, dishId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new DishProductsListResponse());
+        return ResponseEntity.ok(new DishProductsListResponse());
     }
 
     @Transactional
@@ -148,7 +128,7 @@ public class DishController {
             @RequestParam("menuId") UUID menuId) {
         logger.info("Pick products list for dish. ingredients={}, dishId={}, menuId={}", ingredients, dishId, menuId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new DishProductsListResponse());
+        return ResponseEntity.ok(new DishProductsListResponse());
     }
 
 }
