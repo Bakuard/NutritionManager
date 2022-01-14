@@ -1,11 +1,17 @@
 package com.bakuard.nutritionManager.dto.exceptions;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
+@Schema(description = "Содержит данные об одной конкретной ошибке связанной с конкретным полем какого-либо объекта")
 public class FieldExceptionResponse {
 
+    @Schema(description = "Наименование поля")
     private String field;
+    @Schema(description = "Заголовок сообщения об ошибке")
     private String title;
+    @Schema(description = "Текст сообщения об ошибке")
     private String message;
 
     public FieldExceptionResponse() {

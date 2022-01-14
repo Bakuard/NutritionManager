@@ -211,7 +211,7 @@ public class DtoMapper {
     }
 
 
-    public ExceptionResponse toExceptionResponse(Exception e, HttpStatus httpStatus) {
+    public ExceptionResponse toExceptionResponse(HttpStatus httpStatus) {
         return new ExceptionResponse(httpStatus, "Unexpected exception", "Error");
     }
 

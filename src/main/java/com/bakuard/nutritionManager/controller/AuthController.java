@@ -2,6 +2,7 @@ package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
+import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.util.Pair;
@@ -10,6 +11,9 @@ import com.bakuard.nutritionManager.dto.auth.CredentialsRequest;
 import com.bakuard.nutritionManager.dto.auth.EmailRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.slf4j.Logger;
@@ -45,7 +49,14 @@ public class AuthController {
 
     @Operation(
             summary = "Аутентификация существующего пользователя",
-            description = "Используется для входа существующего пользователя в систему"
+            description = "Используется для входа существующего пользователя в систему",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "403",
+                            description = "Если пользователь не найден или указан неверный пароль",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
     )
     @Transactional
     @PostMapping("/enter")
@@ -63,7 +74,14 @@ public class AuthController {
                      Отправляет на указанную почту письмо с ссылкой для подтверждения почты.
                      При переходе по ссылке в письме пользователь переходит ко второму шагу регистрации -
                      добавление своих учетных данных.
-                    """
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если не удалось отправить письмо на почту",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
     )
     @Transactional
     @PostMapping("/verifyEmailForRegistration")
@@ -81,7 +99,14 @@ public class AuthController {
                      Отправляет на указанную почту письмо с ссылкой для подтверждения почты.
                      При переходе по ссылке в письме пользователь переходит ко второму шагу смены учетных данных -
                      указание своих новых учетных данных.
-                    """
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если не удалось отправить письмо на почту",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
     )
     @Transactional
     @PostMapping("/verifyEmailForChangeCredentials")
@@ -98,7 +123,14 @@ public class AuthController {
                     Второй и завершающий шаг регистрации нового пользователя.
                      На этом шаге пользователь указывает свои учетные данные.
                      Необходимо указать в http заголовке Authorization токен полученный на предыдущем шаге.
-                    """
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "403",
+                            description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
     )
     @Transactional
     @PostMapping("/registration")
@@ -116,7 +148,14 @@ public class AuthController {
                     Второй и завершающий шаг смены учетных данных пользователя.
                      На этом шаге пользователь указывает свои учетные данные.
                      Необходимо указать в http заголовке Authorization токен полученный на предыдущем шаге.
-                    """
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "403",
+                            description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
     )
     @Transactional
     @PostMapping("/changeCredential")
@@ -130,7 +169,14 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Возвращает пользователя в соответствии с токеном доступа"
+            summary = "Возвращает пользователя в соответствии с токеном доступа",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан неверный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
     )
     @Transactional
     @GetMapping("/getUserByJws")
