@@ -7,9 +7,9 @@ import java.util.function.Consumer;
  * Обобщенный тип исключений, все наследники которого указывают, что было нарушенно один или несколько
  * инвариантов при констрировании бизнес сущности.
  */
-public abstract class ValidateException extends AbstractDomainException implements Iterable<IncorrectFiledValueException> {
+public abstract class ValidateException extends AbstractDomainException implements Iterable<Constraint> {
 
-    protected List<IncorrectFiledValueException> filedValueExceptions;
+    protected List<Constraint> filedValueExceptions;
     protected List<ValidateException> validateExceptions;
 
     public ValidateException() {
@@ -39,7 +39,7 @@ public abstract class ValidateException extends AbstractDomainException implemen
         return !filedValueExceptions.isEmpty() || !validateExceptions.isEmpty();
     }
 
-    public void addReason(IncorrectFiledValueException e) {
+    public void addReason(Constraint e) {
         if(e != null) {
             filedValueExceptions.add(e);
             addSuppressed(e);
@@ -53,7 +53,7 @@ public abstract class ValidateException extends AbstractDomainException implemen
         }
     }
 
-    public List<IncorrectFiledValueException> getFiledValueExceptions() {
+    public List<Constraint> getFiledValueExceptions() {
         return filedValueExceptions;
     }
 
@@ -62,14 +62,14 @@ public abstract class ValidateException extends AbstractDomainException implemen
     }
 
     @Override
-    public Iterator<IncorrectFiledValueException> iterator() {
+    public Iterator<Constraint> iterator() {
         return new Iterator<>() {
 
-            private final Iterator<IncorrectFiledValueException> inner;
+            private final Iterator<Constraint> inner;
 
             {
                 Deque<ValidateException> stack = new ArrayDeque<>();
-                List<IncorrectFiledValueException> all = new ArrayList<>();
+                List<Constraint> all = new ArrayList<>();
 
                 stack.addFirst(ValidateException.this);
                 while(!stack.isEmpty()) {
@@ -88,7 +88,7 @@ public abstract class ValidateException extends AbstractDomainException implemen
             }
 
             @Override
-            public IncorrectFiledValueException next() {
+            public Constraint next() {
                 return inner.next();
             }
 
@@ -96,13 +96,13 @@ public abstract class ValidateException extends AbstractDomainException implemen
     }
 
     @Override
-    public void forEach(Consumer<? super IncorrectFiledValueException> action) {
+    public void forEach(Consumer<? super Constraint> action) {
         Deque<ValidateException> stack = new ArrayDeque<>();
 
         stack.addFirst(this);
         while(!stack.isEmpty()) {
             ValidateException current = stack.removeFirst();
-            for(IncorrectFiledValueException e : current.filedValueExceptions) {
+            for(Constraint e : current.filedValueExceptions) {
                 action.accept(e);
             }
             for(int i = current.validateExceptions.size() - 1; i >= 0; --i)

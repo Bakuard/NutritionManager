@@ -2,16 +2,13 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
 import com.bakuard.nutritionManager.model.exceptions.UnknownUserException;
 import com.bakuard.nutritionManager.model.exceptions.UserAlreadyExistsException;
 
-import com.google.common.hash.Hashing;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

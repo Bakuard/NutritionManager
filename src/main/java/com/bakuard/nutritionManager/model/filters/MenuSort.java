@@ -1,8 +1,5 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.exceptions.OutOfRangeException;
-
 /**
  * Задает правило сортировки меню. Объекты данного класса неизменяемы.
  */

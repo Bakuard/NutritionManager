@@ -3,7 +3,6 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
 import com.bakuard.nutritionManager.model.exceptions.UnknownUserException;
 import com.bakuard.nutritionManager.model.exceptions.UserAlreadyExistsException;
 

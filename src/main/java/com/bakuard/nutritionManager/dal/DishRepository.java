@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.DishSort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -26,11 +26,11 @@ public interface DishRepository {
 
     public Page<Dish> getDishes(Pageable pageable,
                                 User user,
-                                Constraint constraint,
+                                Filter filter,
                                 DishSort order);
 
     public int getNumberDishes(User user);
 
-    public int getNumberDishes(User user, Constraint constraint);
+    public int getNumberDishes(User user, Filter filter);
 
 }

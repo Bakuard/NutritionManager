@@ -13,7 +13,6 @@ import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -80,7 +79,7 @@ public class ProductContext {
         try {
             validTags = tags.stream().map(Tag::new).toList();
             validateException.addReason(checkTags(validTags));
-        } catch(IncorrectFiledValueException e) {
+        } catch(TagValidateException e) {
             validateException.addReason(e);
         }
 
@@ -103,8 +102,9 @@ public class ProductContext {
      * @param category задаваемая категория продукта.
      * @return новый объект, если задаваемое значение категории продукта отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws MissingValueException если указанное значение равняется null.
-     * @throws BlankValueException если указанное значение не содержит ни одного отображаемого символа.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setCategory(String category) {
         tryThrow(checkCategory(category));
@@ -130,8 +130,9 @@ public class ProductContext {
      * @param shop задаваемое наименование точки продажи.
      * @return новый объект, если задаваемое значение точки продажи продукта отличается от текущего, иначе
      *         возвращает этот же объект.
-     * @throws MissingValueException если указанное значение равняется null.
-     * @throws BlankValueException если указанное значение не содержит ни одного отображаемого символа.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setShop(String shop) {
         tryThrow(checkShop(shop));
@@ -157,8 +158,9 @@ public class ProductContext {
      * @param variety задаваемое наименование сорта продукта.
      * @return новый объект, если задаваемое значение сорта продукта отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws MissingValueException если указанное значение равняется null.
-     * @throws BlankValueException если указанное значение не содержит ни одного отображаемого символа.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setVariety(String variety) {
         tryThrow(checkVariety(variety));
@@ -184,8 +186,9 @@ public class ProductContext {
      * @param manufacturer задаваемое наименование производителя продукта.
      * @return новый объект, если задаваемое значение производителя отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws MissingValueException если указанное значение равняется null.
-     * @throws BlankValueException если указанное значение не содержит ни одного отображаемого символа.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setManufacturer(String manufacturer) {
         tryThrow(checkManufacturer(manufacturer));
@@ -211,8 +214,9 @@ public class ProductContext {
      * @param unit единица измерения кол-ва данного продукта.
      * @return новый объект, если задаваемое значение единицы измерения кол-ва отличается от текущего, иначе
      *         возвращает этот же объект.
-     * @throws MissingValueException если указанное значение unit имеет значение null.
-     * @throws BlankValueException если указанное значение unit не содержит ни одного отображаемого символа.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setUnit(String unit) {
         tryThrow(checkUnit(unit));
@@ -238,8 +242,9 @@ public class ProductContext {
      * @param price задаваемое значение цены продукта.
      * @return новый объект, если задаваемое значение цены отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws MissingValueException если указанное значение цены продукта null.
-     * @throws NegativeValueException если указанное значение цены меньше нуля.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение цены меньше нуля.
      */
     public ProductContext setPrice(BigDecimal price) {
         tryThrow(checkPrice(price));
@@ -263,8 +268,9 @@ public class ProductContext {
      * питьевая вода может продаваться в бутылках по 0.5 л., 1 л. или 2 л.
      * @param packingSize размер упаковки, которыми продается продукт.
      * @return новый объект, если указанный размер упаковки отличается от текущего, иначе - этот же объект.
-     * @throws MissingValueException если packingSize имеет значение null.
-     * @throws OutOfRangeException если packingSize меньше или равен нулю.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если packingSize меньше или равен нулю.
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
         tryThrow(checkPackingSize(packingSize));
@@ -287,8 +293,9 @@ public class ProductContext {
      * Создает и возвращает новый объект отличающийся от текущего добавленным тегом переданным в данный метод.
      * @param tag добавляемый тег.
      * @return новый объект.
-     * @throws MissingValueException если указанный объект tag имеет значение null.
-     * @throws DuplicateTagException если указанный тег уже содержится в данном объекте.
+     * @throws ProductContextValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанный тег уже содержится в данном объекте.
      */
     public ProductContext addTag(Tag tag) {
         List<Tag> tags = new ArrayList<>();
@@ -481,119 +488,72 @@ public class ProductContext {
     }
 
 
-    private void tryThrow(RuntimeException e) {
-        if(e != null) throw e;
+    private void tryThrow(Constraint constraint) {
+        if(constraint != null) {
+            ProductContextValidateException e = new ProductContextValidateException("Fail to update product context.");
+            e.addReason(constraint);
+            throw e;
+        }
     }
 
-    private IncorrectFiledValueException checkCategory(String category) {
-        IncorrectFiledValueException exception = null;
-
-        if(category == null) {
-            exception = new MissingValueException("Product category can't be null", getClass(), "category");
-        } else if(category.isBlank()) {
-            exception = new BlankValueException("Product category can't be blank", getClass(), "category");
-        }
-
-        return exception;
+    private Constraint checkCategory(String category) {
+        return Constraint.check(getClass(), "category",
+                Constraint.nullValue(category),
+                Constraint.blankValue(category)
+        );
     }
 
-    private IncorrectFiledValueException checkShop(String shop) {
-        IncorrectFiledValueException exception = null;
-
-        if(shop == null) {
-            exception = new MissingValueException("Product shop can't be null", getClass(), "shop");
-        } else if(shop.isBlank()) {
-            exception = new BlankValueException("Product shop can't be blank", getClass(), "shop");
-        }
-
-        return exception;
+    private Constraint checkShop(String shop) {
+        return Constraint.check(getClass(), "category",
+                Constraint.nullValue(shop),
+                Constraint.blankValue(shop)
+        );
     }
 
-    private IncorrectFiledValueException checkVariety(String variety) {
-        IncorrectFiledValueException exception = null;
-
-        if(variety == null) {
-            exception = new MissingValueException("Product variety can't be null", getClass(), "variety");
-        } else if(variety.isBlank()) {
-            exception = new BlankValueException("Product variety can't be blank", getClass(), "variety");
-        }
-
-        return exception;
+    private Constraint checkVariety(String variety) {
+        return Constraint.check(getClass(), "variety",
+                Constraint.nullValue(variety),
+                Constraint.blankValue(variety)
+        );
     }
 
-    private IncorrectFiledValueException checkManufacturer(String manufacturer) {
-        IncorrectFiledValueException exception = null;
-
-        if(manufacturer == null) {
-            exception = new MissingValueException("Product manufacturer can't be null", getClass(), "manufacturer");
-        } else if(manufacturer.isBlank()) {
-            exception = new BlankValueException("Product manufacturer can't be blank", getClass(), "manufacturer");
-        }
-
-        return exception;
+    private Constraint checkManufacturer(String manufacturer) {
+        return Constraint.check(getClass(), "manufacturer",
+                Constraint.nullValue(manufacturer),
+                Constraint.blankValue(manufacturer)
+        );
     }
 
-    private IncorrectFiledValueException checkUnit(String unit) {
-        IncorrectFiledValueException exception = null;
-
-        if(unit == null) {
-            exception = new MissingValueException("Product unit can't be null.", getClass(), "unit");
-        } else if(unit.isBlank()) {
-            exception = new BlankValueException("Product unit can not be blank", getClass(), "unit");
-        }
-
-        return exception;
+    private Constraint checkUnit(String unit) {
+        return Constraint.check(getClass(), unit,
+                Constraint.nullValue(unit),
+                Constraint.blankValue(unit)
+        );
     }
 
-    private IncorrectFiledValueException checkPrice(BigDecimal price) {
-        IncorrectFiledValueException exception = null;
-
-        if(price == null) {
-            exception = new MissingValueException("Product price can't be null.", getClass(), "price");
-        } else if(price.signum() < 0) {
-            exception = new NegativeValueException("Product price can't be negative", getClass(), "price");
-        }
-
-        return exception;
+    private Constraint checkPrice(BigDecimal price) {
+        return Constraint.check(getClass(), "price",
+                Constraint.nullValue(price),
+                Constraint.negativeValue(price)
+        );
     }
 
-    private IncorrectFiledValueException checkPackingSize(BigDecimal packingSize) {
-        IncorrectFiledValueException exception = null;
-
-        if(packingSize == null) {
-            exception = new MissingValueException("Product packingSize can't be null", getClass(), "packingSize");
-        } else if(packingSize.signum() <= 0) {
-            exception = new NotPositiveValueException("Product packingSize must be greater then 0",
-                    getClass(),
-                    "packingSize",
-                    packingSize);
-        }
-
-        return exception;
+    private Constraint checkPackingSize(BigDecimal packingSize) {
+        return Constraint.check(getClass(), "packingSize",
+                Constraint.nullValue(packingSize),
+                Constraint.notPositiveValue(packingSize)
+        );
     }
 
-    private IncorrectFiledValueException checkTags(List<Tag> tags) {
-        IncorrectFiledValueException exception = null;
-
-        if(tags.stream().anyMatch(Objects::isNull)) {
-            exception = new MissingValueException("Product tag can't be null.", getClass(), "tag");
-        } else if(tags.stream().anyMatch(tag -> Collections.frequency(tags, tag) > 2)) {
-            exception = new DuplicateTagException(
-                    "This tag is already specified for the product.",
-                    getClass(),
-                    "tag");
-        }
-
-        return exception;
+    private Constraint checkTags(List<Tag> tags) {
+        return Constraint.check(getClass(), "tags",
+                Constraint.containsNull(tags),
+                Constraint.duplicateTag(tags)
+        );
     }
 
-    private IncorrectFiledValueException checkAppConfig(AppConfigData config) {
-        IncorrectFiledValueException exception = null;
-        if(config == null) {
-            exception = new MissingValueException(
-                    "AppConfiguration for productContext cant' be null", getClass(), "config");
-        }
-        return exception;
+    private Constraint checkAppConfig(AppConfigData config) {
+        return Constraint.nullValue(config).check(getClass(), "config");
     }
 
 

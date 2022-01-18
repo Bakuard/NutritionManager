@@ -85,7 +85,7 @@ public class User {
     }
 
     public boolean isCorrectPassword(String password) {
-        MissingValueException.check(password, getClass(), "password");
+        tryThrow(Constraint.nullValue(password).check(getClass(), "password"));
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 
@@ -121,49 +121,39 @@ public class User {
     }
 
 
-    private IncorrectFiledValueException checkId(UUID id) {
-        MissingValueException result = null;
-        if(id == null) result = new MissingValueException("User id can't be null", getClass(), "id");
-        return result;
-    }
-
-    private IncorrectFiledValueException checkName(String name) {
-        IncorrectFiledValueException result = null;
-        if(name == null) result = new MissingValueException("User name can't be null", getClass(), "name");
-        else if(name.isBlank()) result = new BlankValueException("User name can't be blank", getClass(), "name");
-        else if(name.length() > 40) {
-            result = new IncorrectStringLengthException("User name can't be longer than 40 characters", getClass(), "name");
+    private void tryThrow(Constraint constraint) {
+        if(constraint != null) {
+            UserValidateException e = new UserValidateException("Fail to update user.");
+            e.addReason(constraint);
+            throw e;
         }
-        return result;
     }
 
-    private IncorrectFiledValueException checkPassword(String password) {
-        IncorrectFiledValueException result = null;
-        if(password == null) {
-            result = new MissingValueException("User password can't be null", getClass(), "password");
-        } else if(password.isBlank()) {
-            result = new BlankValueException("User password can't be blank", getClass(), "password");
-        } else if(password.length() < 8 || password.length() > 100) {
-            result = new IncorrectStringLengthException(
-                    "User password can't be longer than 100 and less than 8 characters. actual length = " + password.length(),
-                    getClass(),
-                    "password");
-        }
-        return result;
+    private Constraint checkId(UUID id) {
+        return Constraint.nullValue(id).check(getClass(), "id");
     }
 
-    private IncorrectFiledValueException checkEmail(String email) {
-        IncorrectFiledValueException result = null;
-        if(email == null) {
-            result = new MissingValueException("User email can't be null", getClass(), "email");
-        } else if(email.isBlank()) {
-            result = new BlankValueException("User email can't be blank", getClass(), "email");
-        }
-        return result;
+    private Constraint checkName(String name) {
+        return Constraint.check(getClass(), "name",
+                Constraint.nullValue(name),
+                Constraint.blankValue(name),
+                Constraint.incorrectStringLength(name, 1, 40)
+        );
     }
 
-    private void tryThrow(RuntimeException e) {
-        if(e != null) throw e;
+    private Constraint checkPassword(String password) {
+        return Constraint.check(getClass(), "password",
+                Constraint.nullValue(password),
+                Constraint.blankValue(password),
+                Constraint.incorrectStringLength(password, 8, 100)
+        );
+    }
+
+    private Constraint checkEmail(String email) {
+        return Constraint.check(getClass(), "password",
+                Constraint.nullValue(email),
+                Constraint.blankValue(email)
+        );
     }
 
     private String calculatePasswordHash(String password, String salt) {

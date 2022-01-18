@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.model.exceptions;
 
 /**
- * Указывает, что при создании объекта пользователя был нарушен как минимум один инвариант
+ * Указывает, что при создании или изменении объекта пользователя был нарушен как минимум один инвариант
  */
 public class UserValidateException extends ValidateException {
 

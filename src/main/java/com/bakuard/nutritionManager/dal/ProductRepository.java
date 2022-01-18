@@ -5,7 +5,7 @@ import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.ProductContext;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 import com.bakuard.nutritionManager.model.util.Pair;
@@ -71,7 +71,7 @@ public interface ProductRepository {
      *                 {@link Pageable}).
      * @param user пользователь из продуктов которого составляется выборка.
      * @param necessaryQuantity минимальное необходимое кол-во продукта.
-     * @param constraint ограничения на продукты в выборке.
+     * @param filter ограничения на продукты в выборке.
      * @return выборку из продуктов на учете пользователя.
      * @throws DataAccessException если при выполнении данной операции возникла ошибка при обращении к БД.
      * @throws MissingValueException если user, constraint, pageable или necessaryQuantity имеют значение null.
@@ -80,7 +80,7 @@ public interface ProductRepository {
     public Page<Pair<Product, BigDecimal>> getProducts(Pageable pageable,
                                                        User user,
                                                        BigDecimal necessaryQuantity,
-                                                       Constraint constraint);
+                                                       Filter filter);
 
     /**
      * Возвращает упорядоченную выборку продуктов из множества всех продуктов с учетом заданных ограничений

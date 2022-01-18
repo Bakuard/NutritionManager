@@ -1,7 +1,5 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Objects;

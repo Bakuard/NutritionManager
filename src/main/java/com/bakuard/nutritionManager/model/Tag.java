@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.model.exceptions.BlankValueException;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.TagValidateException;
 
 /**
  * Теги используются для уточнения пользвателем данных о продуктах, блюдах и меню, а также для последующей
@@ -15,8 +15,9 @@ public final class Tag implements Comparable<Tag> {
     /**
      * Создает тег с указанным значением. Все начальные и конечные пробельные символы тега будут удалены.
      * @param value значение тега.
-     * @throws MissingValueException если value являются null.
-     * @throws BlankValueException если value не содержит ни одного отображаемого символа.
+     * @throws TagValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public Tag(String value) {
         tryThrow(checkValue(value));
@@ -65,20 +66,19 @@ public final class Tag implements Comparable<Tag> {
     }
 
 
-    private void tryThrow(RuntimeException e) {
-        if(e != null) throw e;
+    private void tryThrow(Constraint constraint) {
+        if(constraint != null) {
+            TagValidateException e = new TagValidateException("Fail to create tag.");
+            e.addReason(constraint);
+            throw e;
+        }
     }
 
-    private RuntimeException checkValue(String value) {
-        RuntimeException exception = null;
-
-        if(value == null) {
-            exception = new MissingValueException("Tag value cant' be null", getClass(), "tagValue");
-        } else if(value.isBlank()) {
-            exception = new BlankValueException("Tag value can not be blank", getClass(), "tagValue");
-        }
-
-        return exception;
+    private Constraint checkValue(String value) {
+        return Constraint.check(getClass(), "value",
+                Constraint.nullValue(value),
+                Constraint.blankValue(value)
+        );
     }
 
 }

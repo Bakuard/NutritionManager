@@ -15,7 +15,6 @@ import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.AbstractDomainException;
-import com.bakuard.nutritionManager.model.exceptions.IncorrectFiledValueException;
 import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
@@ -118,23 +117,23 @@ public class DtoMapper {
                                              List<String> tags) {
         User user = userRepository.getById(userId);
 
-        List<Constraint> constraints = new ArrayList<>();
-        if(category != null) constraints.add(CategoryConstraint.of(category));
-        if(shops != null) constraints.add(ShopsConstraint.of(shops));
-        if(varieties != null) constraints.add(VarietiesConstraint.of(varieties));
-        if(manufacturers != null) constraints.add(ManufacturerConstraint.of(manufacturers));
-        if(tags != null) constraints.add(MinTags.of(toTags(tags)));
+        List<Filter> filters = new ArrayList<>();
+        if(category != null) filters.add(CategoryFilter.of(category));
+        if(shops != null) filters.add(ShopsFilter.of(shops));
+        if(varieties != null) filters.add(VarietiesFilter.of(varieties));
+        if(manufacturers != null) filters.add(ManufacturerFilter.of(manufacturers));
+        if(tags != null) filters.add(MinTagsFilter.of(toTags(tags)));
 
-        Constraint constraint = null;
-        if(constraints.size() == 1) constraint = constraints.get(0);
-        else if(constraints.size() > 1) constraint = AndConstraint.of(constraints);
+        Filter filter = null;
+        if(filters.size() == 1) filter = filters.get(0);
+        else if(filters.size() > 1) filter = AndFilter.of(filters);
 
         return ProductCriteria.of(
                 Pageable.of(page, size),
                 user).
                 setOnlyFridge(onlyFridge).
                 setProductSort(toProductSort(sortRule)).
-                setConstraint(constraint);
+                setFilter(filter);
     }
 
     public ProductFieldCriteria toProductFieldCriteria(int page, int size, UUID userId, String productCategory) {

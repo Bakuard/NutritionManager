@@ -1,8 +1,5 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.exceptions.OutOfRangeException;
-import com.bakuard.nutritionManager.model.exceptions.SortParameterFormatException;
 import com.bakuard.nutritionManager.model.util.Pair;
 
 import java.util.ArrayList;

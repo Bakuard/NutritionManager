@@ -7,7 +7,6 @@ import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
 import com.bakuard.nutritionManager.model.exceptions.ProductAlreadyExistsException;
 import com.bakuard.nutritionManager.model.exceptions.UnknownProductException;
 import com.bakuard.nutritionManager.model.filters.*;
@@ -27,8 +26,6 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -409,7 +406,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = true,
-             constraint not specified
+             filter not specified
             """)
     void getProductsNumber3() {
         User user = createAndSaveUser(1);
@@ -427,7 +424,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint not specified
+             filter not specified
             """)
     void getProductsNumber4() {
         User user = createAndSaveUser(1);
@@ -444,7 +441,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user haven't any products,
-             constraint specified
+             filter specified
             """)
     void getProductsNumber5() {
         User user1 = createAndSaveUser(1);
@@ -453,7 +450,7 @@ class ProductRepositoryTest {
 
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user2).
-                        setConstraint(MinTags.of(new Tag("common tag")))
+                        setFilter(MinTagsFilter.of(new Tag("common tag")))
         );
 
         Assertions.assertEquals(0, actual);
@@ -464,7 +461,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlFridge = true,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -478,12 +475,12 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("name B"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("variety C")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("name B"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("variety C")
                                 )
                         )
         );
@@ -496,7 +493,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is MinTags,
+             filter is MinTags,
              matches exist
             """)
     void getProductsNumber7() {
@@ -506,8 +503,8 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                MinTags.of(new Tag("common tag"))
+                        setFilter(
+                                MinTagsFilter.of(new Tag("common tag"))
                         )
         );
 
@@ -519,7 +516,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = true,
-             constraint is ShopsConstraint,
+             filter is ShopsConstraint,
              matches exist
             """)
     void getProductsNumber8() {
@@ -529,8 +526,8 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                ShopsConstraint.of("shop C")
+                        setFilter(
+                                ShopsFilter.of("shop C")
                         )
         );
 
@@ -542,7 +539,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 CategoryConstraint - matches exist,
                 VarietiesConstraints - matches exist,
              matches exist
@@ -554,10 +551,10 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        CategoryConstraint.of("name B"),
-                                        VarietiesConstraint.of("variety C")
+                        setFilter(
+                                AndFilter.of(
+                                        CategoryFilter.of("name B"),
+                                        VarietiesFilter.of("variety C")
                                 )
                         )
         );
@@ -570,7 +567,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches not exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -584,12 +581,12 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("this tag not exists")),
-                                        CategoryConstraint.of("name B"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("variety C")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("this tag not exists")),
+                                        CategoryFilter.of("name B"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("variety C")
                                 )
                         )
         );
@@ -602,7 +599,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches not exist,
                 ShopsConstraint - matches exist,
@@ -616,12 +613,12 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("this name not exists"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("variety C")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("this name not exists"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("variety C")
                                 )
                         )
         );
@@ -634,7 +631,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches not exist,
@@ -648,12 +645,12 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("name B"),
-                                        ShopsConstraint.of("this shop not exists"),
-                                        VarietiesConstraint.of("variety C")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("name B"),
+                                        ShopsFilter.of("this shop not exists"),
+                                        VarietiesFilter.of("variety C")
                                 )
                         )
         );
@@ -666,7 +663,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -680,12 +677,12 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("name B"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("this variety not exists")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("name B"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("this variety not exists")
                                 )
                         )
         );
@@ -698,7 +695,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -712,12 +709,12 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("value 2")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("variety D")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("value 2")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("variety D")
                                 )
                         )
         );
@@ -730,7 +727,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -745,13 +742,13 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("value 2")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("variety D"),
-                                        ManufacturerConstraint.of("manufacturer A")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("value 2")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("variety D"),
+                                        ManufacturerFilter.of("manufacturer A")
                                 )
                         )
         );
@@ -764,7 +761,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -779,13 +776,13 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("tag A")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety A"),
-                                        ManufacturerConstraint.of("manufacturer A")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("tag A")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety A"),
+                                        ManufacturerFilter.of("manufacturer A")
                                 )
                         )
         );
@@ -798,7 +795,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -812,13 +809,13 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("tag A")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety A"),
-                                        ManufacturerConstraint.of("manufacturer Z")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("tag A")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety A"),
+                                        ManufacturerFilter.of("manufacturer Z")
                                 )
                         )
         );
@@ -868,7 +865,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              get full page,
-             constraint not specified
+             filter not specified
             """)
     void getProducts3() {
         User user = createAndSaveUser(1);
@@ -894,7 +891,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              get partial page
-             constraint not specified
+             filter not specified
             """)
     void getProducts4() {
         User user = createAndSaveUser(1);
@@ -920,7 +917,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              get full page
-             constraint not specified
+             filter not specified
             """)
     void getProducts5() {
         User user = createAndSaveUser(1);
@@ -946,7 +943,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              get partial page
-             constraint not specified
+             filter not specified
             """)
     void getProducts6() {
         User user = createAndSaveUser(1);
@@ -970,7 +967,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user haven't any products,
-             constraint is MinTags
+             filter is MinTags
              => return empty page
             """)
     void getProducts7() {
@@ -981,7 +978,7 @@ class ProductRepositoryTest {
                         Pageable.of(6, 0),
                         user).
                         setOnlyFridge(false).
-                        setConstraint(MinTags.of(new Tag("common tag")))
+                        setFilter(MinTagsFilter.of(new Tag("common tag")))
         );
 
         Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
@@ -993,7 +990,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              pageable = full,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1012,12 +1009,12 @@ class ProductRepositoryTest {
                         Pageable.of(1, 0),
                         user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("tag B"), new Tag("common tag")),
-                                        CategoryConstraint.of("name B"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("variety D")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("tag B"), new Tag("common tag")),
+                                        CategoryFilter.of("name B"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("variety D")
                                 )
                         )
         );
@@ -1031,7 +1028,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              pageable = empty,
-             constraint is MinTags - match exists
+             filter is MinTags - match exists
             """)
     void getProducts9() {
         User user = createAndSaveUser(1);
@@ -1044,8 +1041,8 @@ class ProductRepositoryTest {
                         Pageable.of(6, 0),
                         user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                MinTags.of(new Tag("tag A"), new Tag("common tag"))
+                        setFilter(
+                                MinTagsFilter.of(new Tag("tag A"), new Tag("common tag"))
                         )
         );
 
@@ -1058,7 +1055,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = full,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1077,12 +1074,12 @@ class ProductRepositoryTest {
                         Pageable.of(2, 0),
                         user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("tag A"), new Tag("common tag")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety A")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("tag A"), new Tag("common tag")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety A")
                                 )
                         )
         );
@@ -1096,7 +1093,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = empty,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
@@ -1113,12 +1110,12 @@ class ProductRepositoryTest {
                         Pageable.of(2, 0),
                         user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("tag Z"), new Tag("common tag")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop Z"),
-                                        VarietiesConstraint.of("variety A")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("tag Z"), new Tag("common tag")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop Z"),
+                                        VarietiesFilter.of("variety A")
                                 )
                         )
         );
@@ -1132,7 +1129,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              pageable = partial,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists
             """)
@@ -1149,10 +1146,10 @@ class ProductRepositoryTest {
                         Pageable.of(3, 0),
                         user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                AndConstraint.of(
-                                        CategoryConstraint.of("name B"),
-                                        ShopsConstraint.of("shop C")
+                        setFilter(
+                                AndFilter.of(
+                                        CategoryFilter.of("name B"),
+                                        ShopsFilter.of("shop C")
                                 )
                         )
         );
@@ -1166,7 +1163,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              pageable = empty,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
                 VarietiesConstraint - match exists
@@ -1182,11 +1179,11 @@ class ProductRepositoryTest {
                         Pageable.of(2, 0),
                         user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                AndConstraint.of(
-                                        CategoryConstraint.of("name Z"),
-                                        ShopsConstraint.of("shop Z"),
-                                        VarietiesConstraint.of("variety A")
+                        setFilter(
+                                AndFilter.of(
+                                        CategoryFilter.of("name Z"),
+                                        ShopsFilter.of("shop Z"),
+                                        VarietiesFilter.of("variety A")
                                 )
                         )
         );
@@ -1200,7 +1197,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              pageable = empty,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1217,12 +1214,12 @@ class ProductRepositoryTest {
                         Pageable.of(2, 0),
                         user).
                         setOnlyFridge(true).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety Z")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety Z")
                                 )
                         )
         );
@@ -1236,7 +1233,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = partial,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match exists,
                 ShopsConstraint - match exists,
                 VarietiesConstraint - match exists
@@ -1254,11 +1251,11 @@ class ProductRepositoryTest {
                         Pageable.of(3, 0),
                         user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety A")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety A")
                                 )
                         )
         );
@@ -1272,7 +1269,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = empty,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
@@ -1289,12 +1286,12 @@ class ProductRepositoryTest {
                         Pageable.of(3, 0),
                         user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common Z")),
-                                        CategoryConstraint.of("name Z"),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety Z")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common Z")),
+                                        CategoryFilter.of("name Z"),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety Z")
                                 )
                         )
         );
@@ -1308,7 +1305,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = empty,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1327,13 +1324,13 @@ class ProductRepositoryTest {
                                 Pageable.of(6, 0),
                                 user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop C"),
-                                        VarietiesConstraint.of("variety D"),
-                                        ManufacturerConstraint.of("manufacturer A")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop C"),
+                                        VarietiesFilter.of("variety D"),
+                                        ManufacturerFilter.of("manufacturer A")
                                 )
                         )
         );
@@ -1347,7 +1344,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = full,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1368,13 +1365,13 @@ class ProductRepositoryTest {
                                 Pageable.of(2, 0),
                                 user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety A"),
-                                        ManufacturerConstraint.of("manufacturer A")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety A"),
+                                        ManufacturerFilter.of("manufacturer A")
                                 )
                         )
         );
@@ -1388,7 +1385,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = empty,
-             constraint is AndConstraint. Operands:
+             filter is AndConstraint. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1406,13 +1403,13 @@ class ProductRepositoryTest {
                                 Pageable.of(2, 0),
                                 user).
                         setOnlyFridge(false).
-                        setConstraint(
-                                AndConstraint.of(
-                                        MinTags.of(new Tag("common tag")),
-                                        CategoryConstraint.of("name A"),
-                                        ShopsConstraint.of("shop A"),
-                                        VarietiesConstraint.of("variety A"),
-                                        ManufacturerConstraint.of("manufacturer Z")
+                        setFilter(
+                                AndFilter.of(
+                                        MinTagsFilter.of(new Tag("common tag")),
+                                        CategoryFilter.of("name A"),
+                                        ShopsFilter.of("shop A"),
+                                        VarietiesFilter.of("variety A"),
+                                        ManufacturerFilter.of("manufacturer Z")
                                 )
                         )
         );

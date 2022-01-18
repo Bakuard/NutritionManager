@@ -3,7 +3,7 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.DishSort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -42,7 +42,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Page<Dish> getDishes(Pageable pageable, User user, Constraint constraint, DishSort order) {
+    public Page<Dish> getDishes(Pageable pageable, User user, Filter filter, DishSort order) {
         return null;
     }
 
@@ -52,7 +52,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public int getNumberDishes(User user, Constraint constraint) {
+    public int getNumberDishes(User user, Filter filter) {
         return 0;
     }
 

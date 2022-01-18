@@ -6,12 +6,10 @@ import com.bakuard.nutritionManager.dal.criteria.*;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.exceptions.NotPositiveValueException;
 import com.bakuard.nutritionManager.model.exceptions.ProductAlreadyExistsException;
 import com.bakuard.nutritionManager.model.exceptions.UnknownProductException;
 import com.bakuard.nutritionManager.model.filters.*;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 import com.bakuard.nutritionManager.model.util.Pair;
@@ -97,10 +95,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<Pair<Product, BigDecimal>> getProducts(Pageable pageable,
                                                        User user,
                                                        BigDecimal necessaryQuantity,
-                                                       Constraint constraint) {
+                                                       Filter filter) {
         MissingValueException.check(user, getClass(), "user");
         MissingValueException.check(necessaryQuantity, getClass(), "necessaryQuantity");
-        MissingValueException.check(constraint, getClass(), "constraint");
+        MissingValueException.check(filter, getClass(), "constraint");
 
         if(necessaryQuantity.signum() <= 0) {
             throw new NotPositiveValueException(
@@ -125,8 +123,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Condition condition = userConstraint(criteria.getUser());
         if(criteria.isOnlyFridge())
             condition = condition.and(onlyFridgeConstraint());
-        if(criteria.getConstraint().isPresent())
-            condition = condition.and(switchConstraint(criteria.getConstraint().get()));
+        if(criteria.getFilter().isPresent())
+            condition = condition.and(switchConstraint(criteria.getFilter().get()));
 
         String query =
             select(table("P").fields()).
@@ -379,8 +377,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Condition condition = userConstraint(criteria.getUser());
         if(criteria.isOnlyFridge())
             condition = condition.and(onlyFridgeConstraint());
-        if(criteria.getConstraint().isPresent())
-            condition = condition.and(switchConstraint(criteria.getConstraint().get()));
+        if(criteria.getFilter().isPresent())
+            condition = condition.and(switchConstraint(criteria.getFilter().get()));
 
         String query = selectCount().from("Products").
                 where(condition).
@@ -697,32 +695,32 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
 
-    private Condition switchConstraint(Constraint constraint) {
-        switch(constraint.getType()) {
+    private Condition switchConstraint(Filter filter) {
+        switch(filter.getType()) {
             case AND -> {
-                return andConstraint((AndConstraint) constraint);
+                return andConstraint((AndFilter) filter);
             }
             case MIN_TAGS -> {
-                return minTags((MinTags) constraint);
+                return minTags((MinTagsFilter) filter);
             }
             case CATEGORY -> {
-                return categoryConstraint((CategoryConstraint) constraint);
+                return categoryConstraint((CategoryFilter) filter);
             }
             case SHOPS -> {
-                return shopsConstraint((ShopsConstraint) constraint);
+                return shopsConstraint((ShopsFilter) filter);
             }
             case VARIETIES -> {
-                return varietiesConstraint((VarietiesConstraint) constraint);
+                return varietiesConstraint((VarietiesFilter) filter);
             }
             case MANUFACTURER -> {
-                return manufacturerConstraint((ManufacturerConstraint) constraint);
+                return manufacturerConstraint((ManufacturerFilter) filter);
             }
             default -> throw new UnsupportedOperationException(
-                        "Unsupported operation for " + constraint.getType() + " constraint");
+                        "Unsupported operation for " + filter.getType() + " constraint");
         }
     }
 
-    private Condition andConstraint(AndConstraint andConstraint) {
+    private Condition andConstraint(AndFilter andConstraint) {
         Condition condition = switchConstraint(andConstraint.getOperands().get(0));
         for(int i = 1; i < andConstraint.getOperands().size(); i++) {
             condition = condition.and(switchConstraint(andConstraint.getOperands().get(i)));
@@ -730,19 +728,19 @@ public class ProductRepositoryPostgres implements ProductRepository {
         return condition;
     }
 
-    private Condition minTags(MinTags minTags) {
+    private Condition minTags(MinTagsFilter minTagsFilter) {
         return field("Products.productId").in(
                 select(field("ProductTags.productId")).
                         from("ProductTags").
                         where(field("ProductTags.tagValue").in(
-                                minTags.getTags().stream().map(t -> inline(t.getValue())).toList()
+                                minTagsFilter.getTags().stream().map(t -> inline(t.getValue())).toList()
                         )).
                         groupBy(field("ProductTags.productId")).
-                        having(count(field("ProductTags.productId")).eq(inline(minTags.getTags().size())))
+                        having(count(field("ProductTags.productId")).eq(inline(minTagsFilter.getTags().size())))
         );
     }
 
-    private Condition categoryConstraint(CategoryConstraint categoryConstraint) {
+    private Condition categoryConstraint(CategoryFilter categoryConstraint) {
         return field("Products.category").eq(inline(categoryConstraint.getCategory()));
     }
 
@@ -750,19 +748,19 @@ public class ProductRepositoryPostgres implements ProductRepository {
         return field("Products.category").eq(inline(productName));
     }
 
-    private Condition shopsConstraint(ShopsConstraint shopsConstraint) {
+    private Condition shopsConstraint(ShopsFilter shopsConstraint) {
         return field("Products.shop").in(
                 shopsConstraint.getShops().stream().map(DSL::inline).toList()
         );
     }
 
-    private Condition varietiesConstraint(VarietiesConstraint varietiesConstraint) {
+    private Condition varietiesConstraint(VarietiesFilter varietiesConstraint) {
         return field("Products.variety").in(
                 varietiesConstraint.getVarieties().stream().map(DSL::inline).toList()
         );
     }
 
-    private Condition manufacturerConstraint(ManufacturerConstraint constraint) {
+    private Condition manufacturerConstraint(ManufacturerFilter constraint) {
         return field("Products.manufacturer").in(
                 constraint.getManufacturers().stream().map(DSL::inline).toList()
         );

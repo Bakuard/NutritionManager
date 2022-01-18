@@ -1,7 +1,6 @@
 package com.bakuard.nutritionManager.dal.criteria;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import java.util.Objects;

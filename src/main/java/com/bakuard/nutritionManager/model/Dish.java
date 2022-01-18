@@ -1,10 +1,8 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.exceptions.BlankValueException;
-import com.bakuard.nutritionManager.model.exceptions.DuplicateTagException;
-import com.bakuard.nutritionManager.model.exceptions.OutOfRangeException;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.DishValidateException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -23,8 +21,7 @@ public class Dish {
     private String description;
     private String imagePath;
     private final List<DishIngredient> ingredients;
-    private final Set<Tag> tags;
-    private final Set<Tag> readonlyTags;
+    private final SortedSet<Tag> tags;
 
     Dish(UUID id, UUID userId) {
         checkId(id);
@@ -35,8 +32,7 @@ public class Dish {
         name = "Dish #" + id;
         unit = "килограмм";
         ingredients = new ArrayList<>();
-        tags = new HashSet<>();
-        readonlyTags = Collections.unmodifiableSet(tags);
+        tags = new TreeSet<>();
     }
 
     /**
@@ -120,8 +116,9 @@ public class Dish {
     /**
      * Добавляет новый тег в указанное блюдо.
      * @param tag добавляемый тег.
-     * @throws NullPointerException если указанный тег имеет значние null.
-     * @throws DuplicateTagException если указанный уже присутсвует в объекте.
+     * @throws DishValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанный тег уже содержится в данном объекте.
      */
     public void addTag(Tag tag) {
         checkTag(tag);
@@ -212,14 +209,6 @@ public class Dish {
     }
 
     /**
-     * Возвращает все теги указанные для данного блюда. Возвращаемое множество доступно только для чтения.
-     * @return все теги указанные для данного блюда.
-     */
-    public Set<Tag> getReadonlyTags() {
-        return readonlyTags;
-    }
-
-    /**
      * Возвращает кол-во всех возможных комбинаций состава данного блюда. Если для данного блюда не было
      * указанно ни одного ингредиента - возвращает 0.
      * @param repository репозиторий продуктов.
@@ -284,56 +273,48 @@ public class Dish {
     }
 
 
-    private void checkId(UUID id) {
-        Objects.requireNonNull(id, "Dish id can't be null.");
-    }
-
-    private void checkUserId(UUID userId) {
-        Objects.requireNonNull(userId, "Dish userId can't be null.");
-    }
-
-    private void checkName(String name) {
-        Objects.requireNonNull(name, "Dish name can not be null.");
-
-        if(name.isBlank())
-            throw new BlankValueException("Dish name can not be blank", getClass(), "name");
-    }
-
-    private void checkUnit(String unit) {
-        Objects.requireNonNull(unit, "Dish unit can not be null.");
-
-        if(unit.isBlank())
-            throw new BlankValueException("Dish unit can not be blank", getClass(), "unit");
-    }
-
-    private void checkConstraint(Constraint constraint) {
-        Objects.requireNonNull(constraint, "Dish constraint can not be null.");
-    }
-
-    private void checkIngredientName(String name) {
-        Objects.requireNonNull(name, "Dish ingredient name can't be null.");
-
-        if(name.isBlank())
-            throw new BlankValueException("Dish ingredient name can't be blank.", getClass(), "Dish ingredient name");
-    }
-
-    private void checkIngredientQuantity(BigDecimal quantity) {
-        Objects.requireNonNull(quantity, "Quantity of dish ingredient can not be null.");
-
-        if(quantity.signum() <= 0) {
-            throw new OutOfRangeException("Quantity of dish ingredient must be positive.", getClass(), "quantity");
+    private void tryThrow(Constraint constraint) {
+        if(constraint != null) {
+            DishValidateException e = new DishValidateException("Fail to update dish.");
+            e.addReason(constraint);
+            throw e;
         }
     }
 
-    private void checkTag(Tag tag) {
-        Objects.requireNonNull(tag, "Dish tag can not be null.");
+    private Constraint checkId(UUID id) {
+        return Constraint.nullValue(id).check(getClass(), "id");
+    }
 
-        if(tags.contains(tag))
-            throw new DuplicateTagException(
-                    "This tag is already specified for the dish.",
-                    getClass(),
-                    "tag",
-                    tag);
+    private Constraint checkUserId(UUID userId) {
+        return Constraint.nullValue(userId).check(getClass(), "userId");
+    }
+
+    private Constraint checkName(String name) {
+        return Constraint.check(getClass(), "name",
+                Constraint.nullValue(name),
+                Constraint.blankValue(name)
+        );
+    }
+
+    private Constraint checkUnit(String unit) {
+        return Constraint.check(getClass(), "unit",
+                Constraint.nullValue(unit),
+                Constraint.blankValue(unit)
+        );
+    }
+
+    private Constraint checkIngredientQuantity(BigDecimal quantity) {
+        return Constraint.check(getClass(), "quantity",
+                Constraint.nullValue(quantity),
+                Constraint.notPositiveValue(quantity)
+        );
+    }
+
+    private Constraint checkTag(Tag tag) {
+        return Constraint.check(getClass(), "tag",
+                Constraint.nullValue(tag),
+                Constraint.duplicateTag(tags, tag)
+        );
     }
 
 }

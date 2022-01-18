@@ -60,6 +60,7 @@ public class Product {
     /**
      * Устанавливает для данного продукта указанные контекстные данные.
      * @param context контекстные данные данного продукта ({@link ProductContext}).
+     * @throws ProductValidateException если указанное значение равняется null
      */
     public void setContext(ProductContext context) {
         tryThrow(checkContext(context));
@@ -71,8 +72,9 @@ public class Product {
      * Увеличевает кол-во данного продукта имеющегося в распоряжении у пользователя на указанное значение.
      * @param quantity значение на которое будет увеличенно кол-во данного продукта имеющегося в распряжении у
      *                 пользвателя.
-     * @throws NegativeValueException если quantity меньше нуля.
-     * @throws NullPointerException если quantity имеет значение null.
+     * @throws ProductValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение меньше нуля.
      */
     public void addQuantity(BigDecimal quantity) {
         tryThrow(checkQuantity(quantity));
@@ -88,8 +90,9 @@ public class Product {
      * тогда метод вернет значение равное quantity.
      * @param quantity снимаемое кол-во продукта.
      * @return кол-во продукта, которое удалось снять.
-     * @throws NegativeValueException если quantity меньше нуля.
-     * @throws NullPointerException если quantity имеет значение null.
+     * @throws ProductValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанное значение меньше нуля.
      */
     public BigDecimal take(BigDecimal quantity) {
         tryThrow(checkQuantity(quantity));
@@ -206,46 +209,35 @@ public class Product {
     }
 
 
-    private void tryThrow(RuntimeException e) {
-        if(e != null) throw e;
-    }
-
-    private IncorrectFiledValueException checkId(UUID id) {
-        MissingValueException checkResult = null;
-        if(id == null) checkResult = new MissingValueException("Product id can't be null", getClass(), "id");
-        return checkResult;
-    }
-
-    private IncorrectFiledValueException checkUser(User user) {
-        MissingValueException checkResult = null;
-        if(user == null) checkResult = new MissingValueException("Product user can't be null", getClass(), "user");
-        return checkResult;
-    }
-
-    private IncorrectFiledValueException checkQuantity(BigDecimal quantity) {
-        IncorrectFiledValueException checkResult = null;
-
-        if(quantity == null) {
-            checkResult = new MissingValueException("Product quantity can not be null.", getClass(), "quantity");
-        } else if(quantity.signum() < 0) {
-            checkResult = new NegativeValueException("Product quantity can't be negative.", getClass(), "quantity");
+    private void tryThrow(Constraint constraint) {
+        if(constraint != null) {
+            ProductValidateException e = new ProductValidateException("Fail to update product.");
+            e.addReason(constraint);
+            throw e;
         }
-
-        return checkResult;
     }
 
-    private IncorrectFiledValueException checkContext(ProductContext context) {
-        MissingValueException checkResult = null;
-        if(context == null) checkResult = new MissingValueException("Product id can't be null", getClass(), "context");
-        return checkResult;
+    private Constraint checkId(UUID id) {
+        return Constraint.nullValue(id).check(getClass(), "id");
     }
 
-    private IncorrectFiledValueException checkAppConfig(AppConfigData config) {
-        IncorrectFiledValueException exception = null;
-        if(config == null) {
-            exception = new MissingValueException("AppConfiguration for product cant' be null", getClass(), "config");
-        }
-        return exception;
+    private Constraint checkUser(User user) {
+        return Constraint.nullValue(user).check(getClass(), "user");
+    }
+
+    private Constraint checkQuantity(BigDecimal quantity) {
+        return Constraint.check(getClass(), "quantity",
+                Constraint.nullValue(quantity),
+                Constraint.negativeValue(quantity)
+        );
+    }
+
+    private Constraint checkContext(ProductContext context) {
+        return Constraint.nullValue(context).check(getClass(), "context");
+    }
+
+    private Constraint checkAppConfig(AppConfigData config) {
+        return Constraint.nullValue(config).check(getClass(), "config");
     }
 
 
