@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.controller;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
+import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.util.Pair;
@@ -60,11 +61,13 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/enter")
-    public ResponseEntity<JwsResponse> enter(@RequestBody CredentialsRequest dto) {
+    public ResponseEntity<SuccessResponse<JwsResponse>> enter(@RequestBody CredentialsRequest dto) {
         logger.info("User " + dto.getUserName() + " try enter");
 
         Pair<String, User> jws = authService.enter(dto.getUserName(), dto.getUserPassword());
-        return ResponseEntity.ok(mapper.toJwsResponse(jws.getFirst(), jws.getSecond()));
+
+        JwsResponse response = mapper.toJwsResponse(jws.getFirst(), jws.getSecond());
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.enter", response));
     }
 
     @Operation(
@@ -85,11 +88,11 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/verifyEmailForRegistration")
-    public ResponseEntity<String> verifyEmailForRegistration(@RequestBody EmailRequest dto) {
+    public ResponseEntity<SuccessResponse<?>> verifyEmailForRegistration(@RequestBody EmailRequest dto) {
         logger.info("Verify email for registration");
 
         authService.verifyEmailForRegistration(dto.getEmail());
-        return ResponseEntity.ok("the letter was sent to the mail for registration");
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.verifyEmailForRegistration", null));
     }
 
     @Operation(
@@ -110,11 +113,11 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/verifyEmailForChangeCredentials")
-    public ResponseEntity<String> verifyEmailForChangeCredentials(@RequestBody EmailRequest dto) {
+    public ResponseEntity<SuccessResponse<?>> verifyEmailForChangeCredentials(@RequestBody EmailRequest dto) {
         logger.info("Verify email for change credentials");
 
         authService.verifyEmailForChangeCredentials(dto.getEmail());
-        return ResponseEntity.ok("the letter was sent to the mail for change credentials");
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.verifyEmailForChangeCredentials", null));
     }
 
     @Operation(
@@ -134,12 +137,14 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/registration")
-    public ResponseEntity<JwsResponse> registration(@RequestBody CredentialsRequest dto,
-                                          @RequestHeader("Authorization") String registrationJws) {
+    public ResponseEntity<SuccessResponse<JwsResponse>> registration(@RequestBody CredentialsRequest dto,
+                                                                     @RequestHeader("Authorization") String registrationJws) {
         logger.info("registration new user = " + dto.getUserName() + ". registrationJws=" + registrationJws);
 
         Pair<String, User> accessJws = authService.registration(registrationJws, dto.getUserName(), dto.getUserPassword());
-        return ResponseEntity.ok(mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond()));
+
+        JwsResponse response = mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond());
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.registration", response));
     }
 
     @Operation(
@@ -159,13 +164,15 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/changeCredential")
-    public ResponseEntity<JwsResponse> changeCredential(@RequestBody CredentialsRequest dto,
-                                              @RequestHeader("Authorization") String changeCredentialsJws) {
+    public ResponseEntity<SuccessResponse<JwsResponse>> changeCredential(@RequestBody CredentialsRequest dto,
+                                                                         @RequestHeader("Authorization") String changeCredentialsJws) {
         logger.info("change credentials for user with new name = " + dto.getUserName() +
                 ". changeCredentialsJws=" + changeCredentialsJws);
 
         Pair<String, User> accessJws = authService.changeCredential(changeCredentialsJws, dto.getUserName(), dto.getUserPassword());
-        return ResponseEntity.ok(mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond()));
+
+        JwsResponse response = mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond());
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.changeCredential", response));
     }
 
     @Operation(

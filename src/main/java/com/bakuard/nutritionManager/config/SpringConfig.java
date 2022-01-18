@@ -123,7 +123,7 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public MessageSource messageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasenames("locales/exceptions");
+        messageSource.setBasenames("locales/exceptions", "locales/success");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }

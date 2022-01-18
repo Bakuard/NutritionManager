@@ -9,9 +9,9 @@ public class FieldExceptionResponse {
 
     @Schema(description = "Наименование поля")
     private String field;
-    @Schema(description = "Заголовок сообщения об ошибке")
+    @Schema(description = "Заголовок сообщения пользователю об ошибке")
     private String title;
-    @Schema(description = "Текст сообщения об ошибке")
+    @Schema(description = "Текст сообщения пользователю об ошибке")
     private String message;
 
     public FieldExceptionResponse() {
