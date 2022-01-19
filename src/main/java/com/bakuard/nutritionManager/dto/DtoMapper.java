@@ -197,7 +197,7 @@ public class DtoMapper {
 
 
     public <T> SuccessResponse<T> toSuccessResponse(String keyMessage, T body) {
-        return new SuccessResponse<>(getSuccessMessage(keyMessage), getSuccessTitle(), body);
+        return new SuccessResponse<>(getMessage(keyMessage, "Success"), getSuccessTitle(), body);
     }
 
     public JwsResponse toJwsResponse(String jws, User user) {
@@ -220,12 +220,22 @@ public class DtoMapper {
         return new ExceptionResponse(httpStatus, "Unexpected exception", "Error");
     }
 
+    public ExceptionResponse toExceptionResponse(HttpStatus httpStatus, String keyMessage) {
+        return new ExceptionResponse(httpStatus, getMessage(keyMessage, "unauthorized"), getErrorTitle());
+    }
+
     public ExceptionResponse toExceptionResponse(AbstractDomainException e, HttpStatus httpStatus) {
-        return new ExceptionResponse(httpStatus, getErrorMessage(e), getErrorTitle());
+        return new ExceptionResponse(
+                httpStatus,
+                getMessage(e.getMessageKey(), e.getMessage()),
+                getErrorTitle());
     }
 
     public ExceptionResponse toExceptionResponse(ValidateException e, HttpStatus httpStatus) {
-        ExceptionResponse response = new ExceptionResponse(httpStatus, getErrorMessage(e), getErrorTitle());
+        ExceptionResponse response = new ExceptionResponse(
+                httpStatus,
+                getMessage(e.getMessageKey(), e.getMessage()),
+                getErrorTitle());
         e.forEach(ex -> response.addReason(toFieldExceptionResponse(ex)));
         return response;
     }
@@ -244,19 +254,13 @@ public class DtoMapper {
         FieldExceptionResponse dto = new FieldExceptionResponse();
         dto.setField(e.getFieldName());
         dto.setTitle(getErrorTitle());
-        dto.setMessage(getErrorMessage(e));
+        dto.setMessage(getMessage(e.getMessageKey(), e.getMessage()));
         return dto;
     }
 
-    private String getErrorMessage(AbstractDomainException e) {
+    private String getMessage(String key, String defaultValue) {
         return messageSource.getMessage(
-                e.getMessageKey(), null, e.getMessage(), LocaleContextHolder.getLocale()
-        );
-    }
-
-    private String getSuccessMessage(String key) {
-        return messageSource.getMessage(
-                key, null, "Success", LocaleContextHolder.getLocale()
+                key, null, defaultValue, LocaleContextHolder.getLocale()
         );
     }
 
