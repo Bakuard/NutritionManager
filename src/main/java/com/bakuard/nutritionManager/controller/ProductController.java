@@ -5,6 +5,7 @@ import com.bakuard.nutritionManager.dal.criteria.ProductCategoryCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
+import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.model.Product;
@@ -65,12 +66,14 @@ public class ProductController {
     )
     @Transactional
     @PostMapping("/add")
-    public ResponseEntity<ProductResponse> add(@RequestBody ProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody ProductRequest dto) {
         logger.info("Add new product. dto={}", dto);
 
         Product product = mapper.toProductForAdd(dto);
         productRepository.save(product);
-        return ResponseEntity.ok(mapper.toProductResponse(product));
+
+        ProductResponse response = mapper.toProductResponse(product);
+        return ResponseEntity.ok(mapper.toSuccessResponse("product.add", response));
     }
 
     @Operation(summary = "Обновление продукта",
@@ -88,12 +91,14 @@ public class ProductController {
     )
     @Transactional
     @PutMapping("/update")
-    public ResponseEntity<ProductResponse> update(@RequestBody ProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody ProductRequest dto) {
         logger.info("Update product. dto={}", dto);
 
         Product product = mapper.toProductForUpdate(dto);
         productRepository.save(product);
-        return ResponseEntity.ok(mapper.toProductResponse(product));
+
+        ProductResponse response = mapper.toProductResponse(product);
+        return ResponseEntity.ok(mapper.toSuccessResponse("product.update", response));
     }
 
     @Operation(summary = "Удаление продукта",
@@ -111,13 +116,15 @@ public class ProductController {
     )
     @Transactional
     @DeleteMapping("/delete")
-    public ResponseEntity<ProductResponse> delete(@RequestParam("id")
+    public ResponseEntity<SuccessResponse<ProductResponse>> delete(@RequestParam("id")
                                                   @Parameter(description = "Уникальный идентификатор продукта в формате UUID", required = true)
-                                                  UUID id) {
+                                                                   UUID id) {
         logger.info("Delete product with id={}", id);
 
         Product product = productRepository.remove(id);
-        return ResponseEntity.ok(mapper.toProductResponse(product));
+
+        ProductResponse response = mapper.toProductResponse(product);
+        return ResponseEntity.ok(mapper.toSuccessResponse("product.delete", response));
     }
 
     @Operation(summary = "Увеличение кол-ва продукта имеющегося в наличии у пользователя",
@@ -139,13 +146,15 @@ public class ProductController {
     )
     @Transactional
     @PatchMapping("/addQuantity")
-    public ResponseEntity<ProductResponse> addQuantity(@RequestBody ProductAddedQuantityRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> addQuantity(@RequestBody ProductAddedQuantityRequest dto) {
         logger.info("Add quantity to product. dto={}", dto);
 
         Product product = productRepository.getById(dto.getProductId());
         product.addQuantity(dto.getAddedQuantity());
         productRepository.save(product);
-        return ResponseEntity.ok(mapper.toProductResponse(product));
+
+        ProductResponse response = mapper.toProductResponse(product);
+        return ResponseEntity.ok(mapper.toSuccessResponse("product.addQuantity", response));
     }
 
     @Operation(summary = "Уменьшение кол-ва продукта имеющегося в наличии у пользователя",
@@ -167,13 +176,15 @@ public class ProductController {
     )
     @Transactional
     @PatchMapping("/takeQuantity")
-    public ResponseEntity<ProductResponse> takeQuantity(@RequestBody ProductTakeQuantityRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> takeQuantity(@RequestBody ProductTakeQuantityRequest dto) {
         logger.info("Take quantity from product. dto={}", dto);
 
         Product product = productRepository.getById(dto.getProductId());
         product.take(dto.getTakeQuantity());
         productRepository.save(product);
-        return ResponseEntity.ok(mapper.toProductResponse(product));
+
+        ProductResponse response = mapper.toProductResponse(product);
+        return ResponseEntity.ok(mapper.toSuccessResponse("product.takeQuantity", response));
     }
 
     @Operation(summary = "Получение продукта по его ID",

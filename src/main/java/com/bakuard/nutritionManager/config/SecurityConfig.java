@@ -1,8 +1,14 @@
 package com.bakuard.nutritionManager.config;
 
+import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.services.JwsService;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,10 +22,16 @@ import javax.servlet.http.HttpServletResponse;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private JwsService jwsService;
+    private DtoMapper mapper;
+    private ObjectMapper jsonWriter;
 
     @Autowired
-    public SecurityConfig(JwsService jwsService) {
+    public SecurityConfig(JwsService jwsService, DtoMapper mapper) {
         this.jwsService = jwsService;
+        this.mapper = mapper;
+        jsonWriter = new ObjectMapper();
+        jsonWriter.registerModule(new JavaTimeModule());
+        jsonWriter.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Override
@@ -29,14 +41,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
+        http.csrf().disable().cors().and().
+                sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
                 and().
-                    exceptionHandling().authenticationEntryPoint((request, response, ex) ->
-                        response.sendError(
-                                HttpServletResponse.SC_UNAUTHORIZED,
-                                ex.getMessage()
-                        )
-                    ).
+                    exceptionHandling().authenticationEntryPoint((request, response, ex) -> {
+                        response.setContentType("application/json");
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                        jsonWriter.writeValue(
+                                response.getOutputStream(),
+                                mapper.toExceptionResponse(HttpStatus.UNAUTHORIZED, "unauthorized")
+                        );
+                    }).
                 and().
                     authorizeRequests().
                         antMatchers(

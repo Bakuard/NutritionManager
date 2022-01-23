@@ -6,17 +6,12 @@ import com.bakuard.nutritionManager.dal.criteria.ProductCategoryCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
-import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
-import com.bakuard.nutritionManager.dto.exceptions.ConstraintResponse;
+import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
-import com.bakuard.nutritionManager.model.Product;
-import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.AbstractDomainException;
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.model.*;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -195,6 +190,10 @@ public class DtoMapper {
     }
 
 
+    public <T> SuccessResponse<T> toSuccessResponse(String keyMessage, T body) {
+        return new SuccessResponse<>(getMessage(keyMessage, "Success"), getSuccessTitle(), body);
+    }
+
     public JwsResponse toJwsResponse(String jws, User user) {
         JwsResponse dto = new JwsResponse();
         dto.setJws(jws);
@@ -215,13 +214,23 @@ public class DtoMapper {
         return new ExceptionResponse(httpStatus, "Unexpected exception", "Error");
     }
 
+    public ExceptionResponse toExceptionResponse(HttpStatus httpStatus, String keyMessage) {
+        return new ExceptionResponse(httpStatus, getMessage(keyMessage, "unauthorized"), getErrorTitle());
+    }
+
     public ExceptionResponse toExceptionResponse(AbstractDomainException e, HttpStatus httpStatus) {
-        return new ExceptionResponse(httpStatus, getMessage(e), getTitle());
+        return new ExceptionResponse(
+                httpStatus,
+                getMessage(e.getMessageKey(), e.getMessage()),
+                getErrorTitle());
     }
 
     public ExceptionResponse toExceptionResponse(ValidateException e, HttpStatus httpStatus) {
-        ExceptionResponse response = new ExceptionResponse(httpStatus, getMessage(e), getTitle());
-        e.forEach(ex -> response.addReason(toConstraintResponse(ex)));
+        ExceptionResponse response = new ExceptionResponse(
+                httpStatus,
+                getMessage(e.getMessageKey(), e.getMessage()),
+                getErrorTitle());
+        e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
         return response;
     }
 
@@ -235,23 +244,29 @@ public class DtoMapper {
         }).toList();
     }
 
-    private ConstraintResponse toConstraintResponse(Constraint e) {
+    private ConstraintResponse toConstraintResponse(Constraint constraint) {
         ConstraintResponse dto = new ConstraintResponse();
-        dto.setField(e.getFieldName());
-        dto.setTitle(getTitle());
-        //dto.setMessage(getMessage(e));
+        dto.setField(constraint.getFieldName());
+        dto.setTitle(getErrorTitle());
+        dto.setMessage(getMessage(constraint.getMessageKey(), constraint.getDefaultMessage()));
         return dto;
     }
 
-    private String getMessage(AbstractDomainException e) {
+    private String getMessage(String key, String defaultValue) {
         return messageSource.getMessage(
-                e.getMessageKey(), null, e.getMessage(), LocaleContextHolder.getLocale()
+                key, null, defaultValue, LocaleContextHolder.getLocale()
         );
     }
 
-    private String getTitle() {
+    private String getErrorTitle() {
         return messageSource.getMessage(
-                "title", null, "Error", LocaleContextHolder.getLocale()
+                "errorTitle", null, "Error", LocaleContextHolder.getLocale()
+        );
+    }
+
+    private String getSuccessTitle() {
+        return messageSource.getMessage(
+                "successTitle", null, "Success", LocaleContextHolder.getLocale()
         );
     }
 

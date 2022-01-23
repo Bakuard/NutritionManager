@@ -22,6 +22,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
@@ -123,7 +124,7 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public MessageSource messageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasenames("locales/exceptions");
+        messageSource.setBasenames("locales/exceptions", "locales/success");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }
@@ -150,6 +151,16 @@ public class SpringConfig implements WebMvcConfigurer {
                                 version("0.2.0").
                                 contact(new Contact().email("purplespicemerchant@gmail.com"))
                 );
+    }
+
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").
+                allowedOrigins("*").
+                allowedMethods("*").
+                allowedHeaders("*").
+                maxAge(86400);
     }
 
 }
