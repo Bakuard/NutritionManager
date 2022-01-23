@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.model.filters;
 
+import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.FilterValidateException;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class OrElseFilter implements Filter {
      * @param b второй обязательный операнд ограничения OrElse.
      * @param other необязательные операнды ограничения OrElse.
      * @return возвращает новый объект OrElse для указываемых ограничений.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если кол-во ограничений в списке filters меньше двух.<br/>
      *          2. если хотябы один из операндов имеет значение null.<br/>
      *          3. если передаваемый список операндов имеет значение null.
@@ -36,7 +37,7 @@ public class OrElseFilter implements Filter {
      * Создает и возвращает новый объект OrElse для указываемых ограничений.
      * @param filters список ограничений выступающих как операнды данного ограничения.
      * @return возвращает новый объект OrElse для указываемых ограничений.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если хотябы один из операндов имеет значение null.<br/>
      *          2. если передаваемый массив операндов имеет значение null.
      */
@@ -48,12 +49,11 @@ public class OrElseFilter implements Filter {
     private final ImmutableList<Filter> operands;
 
     private OrElseFilter(List<Filter> operands) {
-        tryThrow(
-                Constraint.check(getClass(), "operands",
-                        Constraint.nullValue(operands),
-                        Constraint.containsNull(operands),
-                        Constraint.notEnoughItems(operands, 2))
-        );
+        Checker.of(getClass(), "operands").
+                nullValue("operands", operands).
+                containsNull("operands", operands).
+                notEnoughItems("operands", operands, 2).
+                checkWithServiceException();
 
         this.operands = ImmutableList.copyOf(operands);
     }
@@ -86,15 +86,6 @@ public class OrElseFilter implements Filter {
         return "Or{" +
                 "operands=" + operands +
                 '}';
-    }
-
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            FilterValidateException e = new FilterValidateException("Fail to update user.");
-            e.addReason(constraint);
-            throw e;
-        }
     }
 
 }

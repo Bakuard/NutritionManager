@@ -7,54 +7,78 @@ import java.util.function.Consumer;
  * Обобщенный тип исключений, все наследники которого указывают, что было нарушенно один или несколько
  * инвариантов при констрировании бизнес сущности.
  */
-public abstract class ValidateException extends AbstractDomainException implements Iterable<Constraint> {
+public class ValidateException extends AbstractDomainException implements Iterable<Constraint> {
 
-    protected List<Constraint> filedValueExceptions;
-    protected List<ValidateException> validateExceptions;
+    private Class<?> checkedType;
+    private List<Constraint> constraints;
+    private List<ValidateException> validateExceptions;
 
-    public ValidateException() {
-        filedValueExceptions = new ArrayList<>();
+    public ValidateException(Class<?> checkedType) {
+        this.checkedType = checkedType;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(String message) {
+    public ValidateException(String message, Class<?> checkedType) {
         super(message);
-        filedValueExceptions = new ArrayList<>();
+        this.checkedType = checkedType;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(String message, Throwable cause) {
+    public ValidateException(String message, Throwable cause, Class<?> checkedType) {
         super(message, cause);
-        filedValueExceptions = new ArrayList<>();
+        this.checkedType = checkedType;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(Throwable cause) {
+    public ValidateException(Throwable cause, Class<?> checkedType) {
         super(cause);
-        filedValueExceptions = new ArrayList<>();
+        this.checkedType = checkedType;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public boolean violatedConstraints() {
-        return !filedValueExceptions.isEmpty() || !validateExceptions.isEmpty();
-    }
-
-    public void addReason(Constraint e) {
-        if(e != null) {
-            filedValueExceptions.add(e);
-            addSuppressed(e);
-        }
-    }
-
-    public void addReason(ValidateException e) {
+    public ValidateException addExcReason(ValidateException e) {
         if(e != null) {
             validateExceptions.add(e);
             addSuppressed(e);
         }
+        return this;
     }
 
-    public List<Constraint> getFiledValueExceptions() {
-        return filedValueExceptions;
+    public ValidateException addExcReasons(List<ValidateException> exceptions) {
+        if(exceptions != null) {
+            validateExceptions.addAll(exceptions);
+            exceptions.forEach(this::addSuppressed);
+        }
+        return this;
+    }
+
+    public ValidateException addReason(Constraint e) {
+        if(e != null) {
+            constraints.add(e);
+        }
+        return this;
+    }
+
+    public ValidateException addReasons(Constraint... constraints) {
+        if(constraints != null && constraints.length > 0) {
+            Collections.addAll(this.constraints, constraints);
+        }
+        return this;
+    }
+
+    public ValidateException addReasons(List<Constraint> constraints) {
+        if(constraints != null && constraints.size() > 0) {
+            this.constraints.addAll(constraints);
+        }
+        return this;
+    }
+
+    public List<Constraint> getConstraints() {
+        return constraints;
     }
 
     public List<ValidateException> getValidateExceptions() {
@@ -74,7 +98,7 @@ public abstract class ValidateException extends AbstractDomainException implemen
                 stack.addFirst(ValidateException.this);
                 while(!stack.isEmpty()) {
                     ValidateException current = stack.removeFirst();
-                    all.addAll(current.filedValueExceptions);
+                    all.addAll(current.constraints);
                     for(int i = current.validateExceptions.size() - 1; i >= 0; --i)
                         stack.addFirst(current.validateExceptions.get(i));
                 }
@@ -102,7 +126,7 @@ public abstract class ValidateException extends AbstractDomainException implemen
         stack.addFirst(this);
         while(!stack.isEmpty()) {
             ValidateException current = stack.removeFirst();
-            for(Constraint e : current.filedValueExceptions) {
+            for(Constraint e : current.constraints) {
                 action.accept(e);
             }
             for(int i = current.validateExceptions.size() - 1; i >= 0; --i)

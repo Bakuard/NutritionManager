@@ -26,7 +26,7 @@ public class ExceptionResponse {
     @Schema(description = "Заголовок сообщения об ошибке")
     private String title;
     @Schema(description = "Все пречины из-за которых запрос не смог завершится корректно")
-    private List<FieldExceptionResponse> reasons;
+    private List<ConstraintResponse> reasons;
 
     public ExceptionResponse(HttpStatus status,
                              String message,
@@ -39,7 +39,7 @@ public class ExceptionResponse {
         reasons = new ArrayList<>();
     }
 
-    public void addReason(FieldExceptionResponse reason) {
+    public void addReason(ConstraintResponse reason) {
         reasons.add(reason);
     }
 
@@ -63,7 +63,7 @@ public class ExceptionResponse {
         return title;
     }
 
-    public List<FieldExceptionResponse> getReasons() {
+    public List<ConstraintResponse> getReasons() {
         return reasons;
     }
 

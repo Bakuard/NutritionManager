@@ -63,27 +63,27 @@ public class ProductContext {
                            BigDecimal packingSize,
                            List<String> tags,
                            AppConfigData config) {
-        ProductContextValidateException validateException =
-                new ProductContextValidateException("Fail to create product context");
+        Checker.Container<List<Tag>> container = Checker.container();
 
-        validateException.addReason(checkCategory(category));
-        validateException.addReason(checkShop(shop));
-        validateException.addReason(checkVariety(variety));
-        validateException.addReason(checkManufacturer(manufacturer));
-        validateException.addReason(checkUnit(unit));
-        validateException.addReason(checkPrice(price));
-        validateException.addReason(checkPackingSize(packingSize));
-        validateException.addReason(checkAppConfig(config));
-
-        List<Tag> validTags = null;
-        try {
-            validTags = tags.stream().map(Tag::new).toList();
-            validateException.addReason(checkTags(validTags));
-        } catch(TagValidateException e) {
-            validateException.addReason(e);
-        }
-
-        if(validateException.violatedConstraints()) throw validateException;
+        Checker.of(getClass(), "constructor").
+                nullValue("category", category).
+                blankValue("category", category).
+                nullValue("shop", shop).
+                blankValue("shop", shop).
+                nullValue("variety", variety).
+                blankValue("variety", variety).
+                nullValue("manufacturer", manufacturer).
+                blankValue("manufacturer", manufacturer).
+                nullValue("unit", unit).
+                blankValue("unit", unit).
+                nullValue("price", price).
+                negativeValue("price", price).
+                nullValue("packingSize", packingSize).
+                notPositiveValue("packingSize", packingSize).
+                nullValue("config", config).
+                tryBuildForEach(tags, Tag::new, container).
+                duplicateTag("tags", container).
+                checkWithValidateException("Fail to create product context");
 
         this.category = category;
         this.shop = shop;
@@ -92,7 +92,7 @@ public class ProductContext {
         this.unit = unit;
         this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
         this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.tags = ImmutableSortedSet.copyOf(validTags);
+        this.tags = ImmutableSortedSet.copyOf(container.get());
         this.hashKey = calculateSha256();
     }
 
@@ -102,12 +102,15 @@ public class ProductContext {
      * @param category задаваемая категория продукта.
      * @return новый объект, если задаваемое значение категории продукта отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setCategory(String category) {
-        tryThrow(checkCategory(category));
+        Checker.of(getClass(), "setCategory").
+                nullValue("category", category).
+                blankValue("category", category).
+                checkWithValidateException("Fail to set product context category");
 
         category = category.trim();
 
@@ -130,12 +133,15 @@ public class ProductContext {
      * @param shop задаваемое наименование точки продажи.
      * @return новый объект, если задаваемое значение точки продажи продукта отличается от текущего, иначе
      *         возвращает этот же объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setShop(String shop) {
-        tryThrow(checkShop(shop));
+        Checker.of(getClass(), "setShop").
+                nullValue("shop", shop).
+                blankValue("shop", shop).
+                checkWithValidateException("Fail to set product context shop");
 
         shop = shop.trim();
 
@@ -158,12 +164,15 @@ public class ProductContext {
      * @param variety задаваемое наименование сорта продукта.
      * @return новый объект, если задаваемое значение сорта продукта отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setVariety(String variety) {
-        tryThrow(checkVariety(variety));
+        Checker.of(getClass(), "setVariety").
+                nullValue("variety", variety).
+                blankValue("variety", variety).
+                checkWithValidateException("Fail to set product context variety");
 
         variety = variety.trim();
 
@@ -186,12 +195,15 @@ public class ProductContext {
      * @param manufacturer задаваемое наименование производителя продукта.
      * @return новый объект, если задаваемое значение производителя отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setManufacturer(String manufacturer) {
-        tryThrow(checkManufacturer(manufacturer));
+        Checker.of(getClass(), "setManufacturer").
+                nullValue("manufacturer", manufacturer).
+                blankValue("manufacturer", manufacturer).
+                checkWithValidateException("Fail to set product context manufacturer");
 
         manufacturer = manufacturer.trim();
 
@@ -214,12 +226,15 @@ public class ProductContext {
      * @param unit единица измерения кол-ва данного продукта.
      * @return новый объект, если задаваемое значение единицы измерения кол-ва отличается от текущего, иначе
      *         возвращает этот же объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setUnit(String unit) {
-        tryThrow(checkUnit(unit));
+        Checker.of(getClass(), "setUnit").
+                nullValue("unit", unit).
+                blankValue("unit", unit).
+                checkWithValidateException("Fail to set product context unit");
 
         unit = unit.trim();
 
@@ -242,12 +257,15 @@ public class ProductContext {
      * @param price задаваемое значение цены продукта.
      * @return новый объект, если задаваемое значение цены отличается от текущего, иначе возвращает
      *         этот же объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение цены меньше нуля.
      */
     public ProductContext setPrice(BigDecimal price) {
-        tryThrow(checkPrice(price));
+        Checker.of(getClass(), "setPrice").
+                nullValue("price", price).
+                negativeValue("price", price).
+                checkWithValidateException("Fail to set product context price");
 
         if(this.price.equals(price)) return this;
 
@@ -268,12 +286,15 @@ public class ProductContext {
      * питьевая вода может продаваться в бутылках по 0.5 л., 1 л. или 2 л.
      * @param packingSize размер упаковки, которыми продается продукт.
      * @return новый объект, если указанный размер упаковки отличается от текущего, иначе - этот же объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если packingSize меньше или равен нулю.
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
-        tryThrow(checkPackingSize(packingSize));
+        Checker.of(getClass(), "setPackingSize").
+                nullValue("packingSize", packingSize).
+                notPositiveValue("packingSize", packingSize).
+                checkWithValidateException("Fail to set product context packing size");
 
         if(this.packingSize.equals(packingSize)) return this;
 
@@ -293,7 +314,7 @@ public class ProductContext {
      * Создает и возвращает новый объект отличающийся от текущего добавленным тегом переданным в данный метод.
      * @param tag добавляемый тег.
      * @return новый объект.
-     * @throws ProductContextValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанный тег уже содержится в данном объекте.
      */
@@ -301,7 +322,10 @@ public class ProductContext {
         List<Tag> tags = new ArrayList<>();
         tags.add(tag);
 
-        tryThrow(checkTags(tags));
+        Checker.of(getClass(), "addTag").
+                nullValue("tag", tag).
+                duplicateTag("tags", tags, tag).
+                checkWithValidateException("Fail to add tag to product context");
 
         return new ProductContext(
                 category,
@@ -485,75 +509,6 @@ public class ProductContext {
         } catch(IOException e) {
             throw new RuntimeException("Unexpected exception.", e);
         }
-    }
-
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            ProductContextValidateException e = new ProductContextValidateException("Fail to update product context.");
-            e.addReason(constraint);
-            throw e;
-        }
-    }
-
-    private Constraint checkCategory(String category) {
-        return Constraint.check(getClass(), "category",
-                Constraint.nullValue(category),
-                Constraint.blankValue(category)
-        );
-    }
-
-    private Constraint checkShop(String shop) {
-        return Constraint.check(getClass(), "category",
-                Constraint.nullValue(shop),
-                Constraint.blankValue(shop)
-        );
-    }
-
-    private Constraint checkVariety(String variety) {
-        return Constraint.check(getClass(), "variety",
-                Constraint.nullValue(variety),
-                Constraint.blankValue(variety)
-        );
-    }
-
-    private Constraint checkManufacturer(String manufacturer) {
-        return Constraint.check(getClass(), "manufacturer",
-                Constraint.nullValue(manufacturer),
-                Constraint.blankValue(manufacturer)
-        );
-    }
-
-    private Constraint checkUnit(String unit) {
-        return Constraint.check(getClass(), unit,
-                Constraint.nullValue(unit),
-                Constraint.blankValue(unit)
-        );
-    }
-
-    private Constraint checkPrice(BigDecimal price) {
-        return Constraint.check(getClass(), "price",
-                Constraint.nullValue(price),
-                Constraint.negativeValue(price)
-        );
-    }
-
-    private Constraint checkPackingSize(BigDecimal packingSize) {
-        return Constraint.check(getClass(), "packingSize",
-                Constraint.nullValue(packingSize),
-                Constraint.notPositiveValue(packingSize)
-        );
-    }
-
-    private Constraint checkTags(List<Tag> tags) {
-        return Constraint.check(getClass(), "tags",
-                Constraint.containsNull(tags),
-                Constraint.duplicateTag(tags)
-        );
-    }
-
-    private Constraint checkAppConfig(AppConfigData config) {
-        return Constraint.nullValue(config).check(getClass(), "config");
     }
 
 

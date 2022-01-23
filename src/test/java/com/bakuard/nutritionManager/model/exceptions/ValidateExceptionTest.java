@@ -16,9 +16,9 @@ class ValidateExceptionTest {
              => iterator#hasNext() return false
             """)
     public void iterator1() {
-        ProductValidateException validateException = new ProductValidateException();
+        ValidateException validateException = new ValidateException(getClass());
 
-        Iterator<IncorrectFiledValueException> iterator = validateException.iterator();
+        Iterator<Constraint> iterator = validateException.iterator();
 
         Assertions.assertFalse(iterator.hasNext());
     }
@@ -32,12 +32,12 @@ class ValidateExceptionTest {
              => iterator#hasNext() return false
             """)
     public void iterator2() {
-        ProductValidateException validateException = new ProductValidateException();
-        validateException.addReason(new ProductContextValidateException());
-        validateException.addReason(new ProductContextValidateException());
-        validateException.addReason(new ProductContextValidateException());
+        ValidateException validateException = new ValidateException(getClass());
+        validateException.addExcReason(new ValidateException(getClass()));
+        validateException.addExcReason(new ValidateException(getClass()));
+        validateException.addExcReason(new ValidateException(getClass()));
 
-        Iterator<IncorrectFiledValueException> iterator = validateException.iterator();
+        Iterator<Constraint> iterator = validateException.iterator();
 
         Assertions.assertFalse(iterator.hasNext());
     }
@@ -51,21 +51,21 @@ class ValidateExceptionTest {
              => iterator#hasNext() return true
             """)
     public void iterator3() {
-        ProductValidateException validateException = new ProductValidateException();
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
-        nestedValidateException.addReason(new BlankValueException(getClass(), "some field"));
-        nestedValidateException.addReason(new BlankValueException(getClass(), "some field"));
-        nestedValidateException.addReason(new BlankValueException(getClass(), "some field"));
-        validateException.addReason(nestedValidateException);
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
-        nestedValidateException3.addReason(new BlankValueException(getClass(), "some field"));
-        nestedValidateException3.addReason(new BlankValueException(getClass(), "some field"));
-        nestedValidateException3.addReason(new BlankValueException(getClass(), "some field"));
-        nestedValidateException2.addReason(nestedValidateException3);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException(getClass());
+        ValidateException nestedValidateException = new ValidateException(getClass());
+        nestedValidateException.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        validateException.addExcReason(nestedValidateException);
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
+        nestedValidateException3.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException3.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException3.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        validateException.addExcReason(nestedValidateException2);
 
-        Iterator<IncorrectFiledValueException> iterator = validateException.iterator();
+        Iterator<Constraint> iterator = validateException.iterator();
 
         Assertions.assertTrue(iterator.hasNext());
     }
@@ -79,28 +79,28 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator4() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
+        ValidateException nestedValidateException = new ValidateException(getClass());
         nestedValidateException.addReason(expected.get(0));
         nestedValidateException.addReason(expected.get(1));
         nestedValidateException.addReason(expected.get(2));
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
         nestedValidateException3.addReason(expected.get(3));
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
 
         Assertions.assertIterableEquals(expected, validateException);
     }
@@ -114,22 +114,22 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator5() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException nestedValidateException = new ValidateException(getClass());
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
         expected.forEach(validateException::addReason);
 
         Assertions.assertIterableEquals(expected, validateException);
@@ -144,28 +144,28 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator6() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
+        ValidateException nestedValidateException = new ValidateException(getClass());
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
 
         Assertions.assertIterableEquals(expected, validateException);
     }
@@ -179,30 +179,30 @@ class ValidateExceptionTest {
              => number iteration = number of all field exceptions
             """)
     public void iterator7() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
+        ValidateException nestedValidateException = new ValidateException(getClass());
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
 
-        Iterator<IncorrectFiledValueException> iterator = validateException.iterator();
+        Iterator<Constraint> iterator = validateException.iterator();
         int number = 0;
         while(iterator.hasNext()) {
             iterator.next();
@@ -220,9 +220,9 @@ class ValidateExceptionTest {
              => number iterations = 0
             """)
     public void forEach1() {
-        ProductValidateException validateException = new ProductValidateException();
+        ValidateException validateException = new ValidateException(getClass());
 
-        List<IncorrectFiledValueException> actual = new ArrayList<>();
+        List<Constraint> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertEquals(0, actual.size());
@@ -237,12 +237,12 @@ class ValidateExceptionTest {
              => number iterations = 0
             """)
     public void forEach2() {
-        ProductValidateException validateException = new ProductValidateException();
-        validateException.addReason(new ProductContextValidateException());
-        validateException.addReason(new ProductContextValidateException());
-        validateException.addReason(new ProductContextValidateException());;
+        ValidateException validateException = new ValidateException(getClass());
+        validateException.addExcReason(new ValidateException(getClass()));
+        validateException.addExcReason(new ValidateException(getClass()));
+        validateException.addExcReason(new ValidateException(getClass()));
 
-        List<IncorrectFiledValueException> actual = new ArrayList<>();
+        List<Constraint> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertEquals(0, actual.size());
@@ -257,30 +257,30 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach3() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
+        ValidateException nestedValidateException = new ValidateException(getClass());
         nestedValidateException.addReason(expected.get(0));
         nestedValidateException.addReason(expected.get(1));
         nestedValidateException.addReason(expected.get(2));
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
         nestedValidateException3.addReason(expected.get(3));
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
 
-        List<IncorrectFiledValueException> actual = new ArrayList<>();
+        List<Constraint> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -295,25 +295,25 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach4() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException nestedValidateException = new ValidateException(getClass());
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
         expected.forEach(validateException::addReason);
 
-        List<IncorrectFiledValueException> actual = new ArrayList<>();
+        List<Constraint> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -328,30 +328,30 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach5() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
+        ValidateException nestedValidateException = new ValidateException(getClass());
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
 
-        List<IncorrectFiledValueException> actual = new ArrayList<>();
+        List<Constraint> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -366,30 +366,30 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach6() {
-        List<IncorrectFiledValueException> expected = List.of(
-                new BlankValueException(getClass(), "some field"),
-                new MissingValueException(getClass(), "some field"),
-                new OutOfRangeException(getClass(), "some field"),
-                new DuplicateTagException(getClass(), "some field"),
-                new NegativeValueException(getClass(), "some field"),
-                new NotPositiveValueException(getClass(), "some field")
+        List<Constraint> expected = List.of(
+                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
-        ProductContextValidateException nestedValidateException = new ProductContextValidateException();
+        ValidateException nestedValidateException = new ValidateException(getClass());
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ProductContextValidateException nestedValidateException3 = new ProductContextValidateException();
+        ValidateException nestedValidateException3 = new ValidateException(getClass());
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ProductContextValidateException nestedValidateException2 = new ProductContextValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ProductValidateException validateException = new ProductValidateException();
+        ValidateException nestedValidateException2 = new ValidateException(getClass());
+        nestedValidateException2.addExcReason(nestedValidateException3);
+        ValidateException validateException = new ValidateException(getClass());
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        validateException.addExcReason(nestedValidateException);
+        validateException.addExcReason(nestedValidateException2);
 
-        List<IncorrectFiledValueException> actual = new ArrayList<>();
+        List<Constraint> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));

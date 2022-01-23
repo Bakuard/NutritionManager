@@ -1,8 +1,7 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.DishValidateException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,8 +23,7 @@ public class Dish {
     private final SortedSet<Tag> tags;
 
     Dish(UUID id, UUID userId) {
-        checkId(id);
-        checkUserId(userId);
+
 
         this.id = id;
         this.userId = userId;
@@ -39,11 +37,12 @@ public class Dish {
      * Устанавливает наименование для данного блюда. Указанное наименование будет сохранено без начальных и
      * конечных пробельных символов.
      * @param name наименование для данного блюда.
-     * @throws NullPointerException если name имеет значение null.
-     * @throws BlankValueException если name не содержит ни одного отображаемого символа.
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
+     *         1. если name имеет значение null.<br/>
+     *         2. если name не содержит ни одного отображаемого символа.
      */
     public void setName(String name) {
-        checkName(name);
+
         this.name = name.trim();
     }
 
@@ -51,11 +50,12 @@ public class Dish {
      * Задает наименование единицы измерения кол-ва для данного блюда. Заданное значение будет сохранено без
      * начальных и конечных пробельных символов.
      * @param unit наименование единицы измерения кол-ва для данного блюда.
-     * @throws NullPointerException если unit имеет значение null.
-     * @throws BlankValueException если unit не содержит ни одного отображаемого символа.
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
+     *         1. если unit имеет значение null.<br/>
+     *         2. если unit не содержит ни одного отображаемого символа.
      */
     public void setUnit(String unit) {
-        checkUnit(unit);
+
         this.unit = unit.trim();
     }
 
@@ -85,14 +85,12 @@ public class Dish {
      * @param constraint ограничение задающее множество взаимозаменяемых продуктов, каждое из которых может
      *                   выступать данным конкретным ингредиентом этого блюда.
      * @param quantity кол-во соответсвующего ингредиента.
-     * @throws OutOfRangeException если quantity меньше или равен нулю.
-     * @throws NullPointerException если один из параметров имеет значение null.
-     * @throws BlankValueException если наименование ингредиент null или пустая строка.
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
+     *         1. если quantity меньше или равен нулю.<br/>
+     *         2. если один из параметров имеет значение null.<br/>
+     *         3. если наименование ингредиент null или пустая строка.
      */
     public void putIngredient(String name, Constraint constraint, BigDecimal quantity) {
-        checkIngredientName(name);
-        checkConstraint(constraint);
-        checkIngredientQuantity(quantity);
 
     }
 
@@ -116,12 +114,12 @@ public class Dish {
     /**
      * Добавляет новый тег в указанное блюдо.
      * @param tag добавляемый тег.
-     * @throws DishValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public void addTag(Tag tag) {
-        checkTag(tag);
+
         tags.add(tag);
     }
 
@@ -270,51 +268,6 @@ public class Dish {
                 ", imagePath='" + imagePath + '\'' +
                 ", ingredients=" + ingredients +
                 '}';
-    }
-
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            DishValidateException e = new DishValidateException("Fail to update dish.");
-            e.addReason(constraint);
-            throw e;
-        }
-    }
-
-    private Constraint checkId(UUID id) {
-        return Constraint.nullValue(id).check(getClass(), "id");
-    }
-
-    private Constraint checkUserId(UUID userId) {
-        return Constraint.nullValue(userId).check(getClass(), "userId");
-    }
-
-    private Constraint checkName(String name) {
-        return Constraint.check(getClass(), "name",
-                Constraint.nullValue(name),
-                Constraint.blankValue(name)
-        );
-    }
-
-    private Constraint checkUnit(String unit) {
-        return Constraint.check(getClass(), "unit",
-                Constraint.nullValue(unit),
-                Constraint.blankValue(unit)
-        );
-    }
-
-    private Constraint checkIngredientQuantity(BigDecimal quantity) {
-        return Constraint.check(getClass(), "quantity",
-                Constraint.nullValue(quantity),
-                Constraint.notPositiveValue(quantity)
-        );
-    }
-
-    private Constraint checkTag(Tag tag) {
-        return Constraint.check(getClass(), "tag",
-                Constraint.nullValue(tag),
-                Constraint.duplicateTag(tags, tag)
-        );
     }
 
 }

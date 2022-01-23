@@ -1,7 +1,5 @@
 package com.bakuard.nutritionManager.model.util;
 
-import com.bakuard.nutritionManager.model.exceptions.NegativePageTotalItemsException;
-
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
@@ -102,7 +100,7 @@ public final class Pageable {
      * @param totalItems общее кол-во всех элементов содержащихся в исходной выборке для которой провдится пагинация.
      * @return возвращает метаданные исходной выборки и страницы.
      * @throws NullPointerException если totalItems равен null.
-     * @throws NegativePageTotalItemsException если totalItems меньше нуля.
+     * @throws IllegalArgumentException если totalItems меньше нуля.
      */
     public Page.Info createPageMetadata(BigInteger totalItems) {
         return new Page.Info(this, totalItems);

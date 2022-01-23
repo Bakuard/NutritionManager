@@ -2,8 +2,9 @@ package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.ProductContext;
 
+import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.FilterValidateException;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class ShopsFilter implements Filter {
      * Создает и возвращает ограничение ShopsConstraint для указанного списка магазинов.
      * @param shops список магазинов для котороо создается указанное ограничение.
      * @return ограничение ShopsConstraint для указанного списка магазинов.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *            1. если указанный список магазинов или любой из магазинов указанный в нем имеют
      *               значение null.<br/>
      *            2. если хотябы один из магазинов в указанном списке не содержит ни одного отображаемого
@@ -36,7 +37,7 @@ public class ShopsFilter implements Filter {
      * @param shop обязательный магазинов участвующий в создаваемом ограничении.
      * @param shops не обязательные магазины участвующие в создаваемом ограничении.
      * @return ограничение ShopsConstraint для указанных магазинов.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если любой из магазинов или массив manufacturers имеют значение null.<br/>
      *          2. если хотябы один из магазинов не содержит ни одного отображаемого символа.
      */
@@ -53,13 +54,12 @@ public class ShopsFilter implements Filter {
     private final ImmutableList<String> shops;
 
     private ShopsFilter(List<String> shops) {
-        tryThrow(
-                Constraint.check(getClass(), "shops",
-                        Constraint.nullValue(shops),
-                        Constraint.containsNull(shops),
-                        Constraint.notEnoughItems(shops, 1),
-                        Constraint.containsBlank(shops))
-        );
+        Checker.of(getClass(), "shops").
+                nullValue("shops", shops).
+                containsNull("shops", shops).
+                notEnoughItems("shops", shops, 1).
+                containsBlankValue("shops", shops).
+                checkWithServiceException();
 
         this.shops = ImmutableList.copyOf(shops);
     }
@@ -76,15 +76,6 @@ public class ShopsFilter implements Filter {
 
     public ImmutableList<String> getShops() {
         return shops;
-    }
-
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            FilterValidateException e = new FilterValidateException("Fail to update user.");
-            e.addReason(constraint);
-            throw e;
-        }
     }
 
 }

@@ -27,12 +27,17 @@ public class User {
     }
 
     public User(UUID id, String name, String password, String email) {
-        UserValidateException validateException = new UserValidateException("Fail to create user.");
-        validateException.addReason(checkId(id));
-        validateException.addReason(checkName(name));
-        validateException.addReason(checkPassword(password));
-        validateException.addReason(checkEmail(email));
-        if(validateException.violatedConstraints()) throw validateException;
+        Checker.of(getClass(), "constructor").
+                nullValue("id", id).
+                nullValue("name", name).
+                blankValue("name", name).
+                incorrectStringLength("name", name, 1, 40).
+                nullValue("password", password).
+                blankValue("password", password).
+                incorrectStringLength("password", password, 8, 100).
+                nullValue("email", email).
+                blankValue("email", email).
+                checkWithValidateException("Fail to create user");
 
         this.id = id;
         this.name = name;
@@ -58,7 +63,11 @@ public class User {
     }
 
     public void setName(String name) {
-        tryThrow(checkName(name));
+        Checker.of(getClass(), "setName").
+                nullValue("name", name).
+                blankValue("name", name).
+                incorrectStringLength("name", name, 1, 40).
+                checkWithValidateException("Fail to set user name");
         this.name = name;
     }
 
@@ -67,7 +76,11 @@ public class User {
     }
 
     public void setPassword(String password) {
-        tryThrow(checkPassword(password));
+        Checker.of(getClass(), "setPassword").
+                nullValue("password", password).
+                blankValue("password", password).
+                incorrectStringLength("password", password, 8, 100).
+                checkWithValidateException("Fail to set user password");
         this.passwordHash = calculatePasswordHash(password, salt);
     }
 
@@ -76,7 +89,10 @@ public class User {
     }
 
     public void setEmail(String email) {
-        tryThrow(checkEmail(email));
+        Checker.of(getClass(), "setEmail").
+                nullValue("email", email).
+                blankValue("email", email).
+                checkWithValidateException("Fail to set user email");
         this.email = email;
     }
 
@@ -85,7 +101,9 @@ public class User {
     }
 
     public boolean isCorrectPassword(String password) {
-        tryThrow(Constraint.nullValue(password).check(getClass(), "password"));
+        Checker.of(getClass(), "isCorrectPassword").
+                nullValue("password", password).
+                checkWithValidateException();
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 
@@ -120,41 +138,6 @@ public class User {
                 '}';
     }
 
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            UserValidateException e = new UserValidateException("Fail to update user.");
-            e.addReason(constraint);
-            throw e;
-        }
-    }
-
-    private Constraint checkId(UUID id) {
-        return Constraint.nullValue(id).check(getClass(), "id");
-    }
-
-    private Constraint checkName(String name) {
-        return Constraint.check(getClass(), "name",
-                Constraint.nullValue(name),
-                Constraint.blankValue(name),
-                Constraint.incorrectStringLength(name, 1, 40)
-        );
-    }
-
-    private Constraint checkPassword(String password) {
-        return Constraint.check(getClass(), "password",
-                Constraint.nullValue(password),
-                Constraint.blankValue(password),
-                Constraint.incorrectStringLength(password, 8, 100)
-        );
-    }
-
-    private Constraint checkEmail(String email) {
-        return Constraint.check(getClass(), "password",
-                Constraint.nullValue(email),
-                Constraint.blankValue(email)
-        );
-    }
 
     private String calculatePasswordHash(String password, String salt) {
         return Hashing.sha256().hashBytes(password.concat(salt).getBytes(StandardCharsets.UTF_8)).toString();

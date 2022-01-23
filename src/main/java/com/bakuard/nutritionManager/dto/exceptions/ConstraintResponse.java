@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
 
 @Schema(description = "Содержит данные об одной конкретной ошибке связанной с конкретным полем какого-либо объекта")
-public class FieldExceptionResponse {
+public class ConstraintResponse {
 
     @Schema(description = "Наименование поля")
     private String field;
@@ -14,7 +14,7 @@ public class FieldExceptionResponse {
     @Schema(description = "Текст сообщения об ошибке")
     private String message;
 
-    public FieldExceptionResponse() {
+    public ConstraintResponse() {
 
     }
 
@@ -46,7 +46,7 @@ public class FieldExceptionResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FieldExceptionResponse that = (FieldExceptionResponse) o;
+        ConstraintResponse that = (ConstraintResponse) o;
         return Objects.equals(field, that.field) &&
                 Objects.equals(title, that.title) &&
                 Objects.equals(message, that.message);

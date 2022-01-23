@@ -2,8 +2,9 @@ package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.Tag;
 
+import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.FilterValidateException;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 
@@ -17,7 +18,7 @@ public class MinTagsFilter implements Filter {
      * Создает и возвращает новый объект MinTags содержащий указанные теги.
      * @param tags теги для которых определяется создаваемое ограничение MinTags.
      * @return новый объект MinTags.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если хотябы один из элементов имеет значение null.<br/>
      *          2. если передаваемый массив имеет значение null.<br/>
      *          3. если передаваемый массив пустой
@@ -33,7 +34,7 @@ public class MinTagsFilter implements Filter {
      * Создает и возвращает новый объект MinTags содержащий указанные теги.
      * @param tags теги для которых определяется создаваемое ограничение MinTags.
      * @return новый объект MinTags.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если хотябы один из элементов имеет значение null.<br/>
      *          2. если передаваемый список имеет значение null.<br/>
      *          3. если передаваемый список пустой
@@ -46,12 +47,11 @@ public class MinTagsFilter implements Filter {
     private final ImmutableSortedSet<Tag> tags;
 
     private MinTagsFilter(List<Tag> tags) {
-        tryThrow(
-                Constraint.check(getClass(), "tags",
-                        Constraint.nullValue(tags),
-                        Constraint.containsNull(tags),
-                        Constraint.notEnoughItems(tags, 1))
-        );
+        Checker.of(getClass(), "tags").
+                nullValue("tags", tags).
+                containsNull("tags", tags).
+                notEnoughItems("tags", tags, 1).
+                checkWithServiceException();
 
         this.tags = ImmutableSortedSet.copyOf(tags);
     }
@@ -88,15 +88,6 @@ public class MinTagsFilter implements Filter {
         return "MinTags{" +
                 "tags=" + tags +
                 '}';
-    }
-
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            FilterValidateException e = new FilterValidateException("Fail to update user.");
-            e.addReason(constraint);
-            throw e;
-        }
     }
 
 }

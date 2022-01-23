@@ -1,8 +1,9 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.ProductContext;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.FilterValidateException;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 import com.google.common.collect.ImmutableList;
 
@@ -21,7 +22,7 @@ public class ManufacturerFilter implements Filter {
      * Создает и возвращает ограничение ManufacturerConstraint для указанного списка производителей.
      * @param manufacturers список производиетелей для котороо создается указанное ограничение.
      * @return ограничение ManufacturerConstraint для указанного списка производителей.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *            1. если указанный список производителей или любой из производителей указанный в нем имеют
      *               значение null.<br/>
      *            2. если хотябы один из производителей в указанном списке не содержит ни одного отображаемого
@@ -37,7 +38,7 @@ public class ManufacturerFilter implements Filter {
      * @param manufacturer обязательный производитель укчаствующий в создаваемом ограничении.
      * @param manufacturers не обязательные производители участвующие в создаваемо ограничении.
      * @return ограничение ManufacturerConstraint для указанных производителей.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если любой из производителей или массив manufacturers имеют значение null.<br/>
      *          2. если хотябы один из производителей не содержит ни одного отображаемого символа.
      */
@@ -54,13 +55,12 @@ public class ManufacturerFilter implements Filter {
     private final ImmutableList<String> manufacturers;
 
     private ManufacturerFilter(List<String> manufacturers) {
-        tryThrow(
-                Constraint.check(getClass(), "operands",
-                        Constraint.nullValue(manufacturers),
-                        Constraint.containsNull(manufacturers),
-                        Constraint.notEnoughItems(manufacturers, 1),
-                        Constraint.containsBlank(manufacturers))
-        );
+        Checker.of(getClass(), "manufacturers").
+                nullValue("manufacturers", manufacturers).
+                containsNull("manufacturers", manufacturers).
+                notEnoughItems("manufacturers", manufacturers, 1).
+                containsBlankValue("manufacturers", manufacturers).
+                checkWithServiceException();
 
         this.manufacturers = ImmutableList.copyOf(manufacturers);
     }
@@ -79,13 +79,5 @@ public class ManufacturerFilter implements Filter {
         return manufacturers;
     }
 
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            FilterValidateException e = new FilterValidateException("Fail to update user.");
-            e.addReason(constraint);
-            throw e;
-        }
-    }
 
 }

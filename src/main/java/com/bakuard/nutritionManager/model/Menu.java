@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.exceptions.MenuValidateException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -34,7 +34,7 @@ public class Menu {
      * Устанавливает наименование для данного меню. Указанное наименование будет сохраненно без начальных
      * и конечных символов.
      * @param name наименование для данного меню.
-     * @throws MenuValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа
      */
@@ -64,7 +64,7 @@ public class Menu {
      * указанным идентификатором уже присутвует в меню, то метод перезаписывает для него кол-во на указанное.
      * @param dishId уникальный идентификатор блюда.
      * @param quantity кол-во блюда.
-     * @throws MenuValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение меньше или равно нулю
      */
@@ -129,7 +129,7 @@ public class Menu {
      * @param menuQuantity кол-во данного меню, для которого рассчитвается список всех входящих в него блюд и их
      *                     кол-во.
      * @return все блюда входящие в данное меню вместе с указанием их кол-ва.
-     * @throws MenuValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение menuQuantity равняется null<br/>
      *         2. если указанное значение menuQuantity меньше или равно нулю
      */

@@ -2,6 +2,7 @@ package com.bakuard.nutritionManager.dal.criteria;
 
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 
 import java.util.Objects;
@@ -20,7 +21,7 @@ public class ProductsNumberCriteria {
      * Создает и возвращает новый обеъект ProductsNumberCriteria.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый обеъект ProductsNumberCriteria.
-     * @throws MissingValueException если user имеет значение null.
+     * @throws ServiceException если user имеет значение null.
      */
     public static ProductsNumberCriteria of(User user) {
         return new ProductsNumberCriteria(user);
@@ -32,7 +33,9 @@ public class ProductsNumberCriteria {
     private Filter filter;
 
     private ProductsNumberCriteria(User user) {
-        MissingValueException.check(user, getClass(), "user");
+        Checker.of(getClass(), "constructor").
+                nullValue("user", user).
+                checkWithServiceException();
 
         this.user = user;
     }

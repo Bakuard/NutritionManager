@@ -1,5 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Objects;
@@ -52,7 +54,7 @@ public final class ProductStoreFilter {
      * @param quantity кол-во в котором разрещенно использовать указанный продукт.
      * @return новый объект, если указаный продукт отсутствует в текущем фильтре или указанное кол-во
      *         отличается от такового в текущем фильтре, иначе - этот же объект.
-     * @throws MissingValueException если productId или quantity имеют значение null.
+     * @throws ServiceException если productId или quantity имеют значение null.
      */
     public ProductStoreFilter putProduct(UUID productId, BigDecimal quantity) {
         return null;

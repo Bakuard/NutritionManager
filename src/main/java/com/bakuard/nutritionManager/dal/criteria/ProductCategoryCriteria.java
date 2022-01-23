@@ -1,6 +1,8 @@
 package com.bakuard.nutritionManager.dal.criteria;
 
 import com.bakuard.nutritionManager.model.User;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import java.util.Objects;
@@ -16,8 +18,10 @@ public class ProductCategoryCriteria {
     private User user;
 
     private ProductCategoryCriteria(Pageable pageable, User user) {
-        MissingValueException.check(pageable, getClass(), "pageable");
-        MissingValueException.check(user, getClass(), "user");
+        Checker.of(getClass(), "constructor").
+                nullValue("pageable", pageable).
+                nullValue("user", user).
+                checkWithServiceException();
 
         this.pageable = pageable;
         this.user = user;

@@ -7,8 +7,9 @@ import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.ProductAlreadyExistsException;
-import com.bakuard.nutritionManager.model.exceptions.UnknownProductException;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -108,7 +109,12 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("save(product): product is null => exception")
     void save1() {
-        Assertions.assertThrows(MissingValueException.class, () -> repository.save(null));
+        assertServiceException(
+                () -> repository.save(null),
+                ProductRepositoryPostgres.class,
+                "save",
+                ConstraintType.MISSING_VALUE
+        );
     }
 
     @Test
@@ -180,8 +186,12 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        Assertions.assertThrows(ProductAlreadyExistsException.class,
-                () -> commit(() ->repository.save(addedProduct)));
+        assertServiceException(
+                () -> commit(() ->repository.save(addedProduct)),
+                ProductRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -253,8 +263,12 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        Assertions.assertThrows(ProductAlreadyExistsException.class,
-                () -> commit(() -> repository.save(updatedProduct)));
+        assertServiceException(
+                () -> commit(() -> repository.save(updatedProduct)),
+                ProductRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -304,15 +318,23 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("remove(productId): productId is null => exception")
     void remove1() {
-        Assertions.assertThrows(UnknownProductException.class,
-                () -> commit(() -> repository.remove(null)));
+        assertServiceException(
+                () -> commit(() -> repository.remove(null)),
+                ProductRepositoryPostgres.class,
+                "remove",
+                ConstraintType.MISSING_VALUE
+        );
     }
 
     @Test
     @DisplayName("remove(productId): product with such id not exists in DB => exception")
     void remove2() {
-        Assertions.assertThrows(UnknownProductException.class,
-                () -> commit(() -> repository.remove(toUUID(10))));
+        assertServiceException(
+                () -> commit(() -> repository.remove(toUUID(10))),
+                ProductRepositoryPostgres.class,
+                "remove",
+                ConstraintType.UNKNOWN_ENTITY
+        );
     }
 
     @Test
@@ -324,9 +346,11 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product));
         commit(() -> repository.remove(toUUID(1)));
 
-        Assertions.assertThrows(
-                UnknownProductException.class,
-                () -> commit(() -> repository.getById(toUUID(1)))
+        assertServiceException(
+                () -> commit(() -> repository.getById(toUUID(1))),
+                ProductRepositoryPostgres.class,
+                "getById",
+                ConstraintType.UNKNOWN_ENTITY
         );
     }
 
@@ -345,18 +369,22 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("getById(productId): productId is null => exception")
     void getById1() {
-        Assertions.assertThrows(
-                UnknownProductException.class,
-                () -> commit(() -> repository.getById(null))
+        assertServiceException(
+                () -> commit(() -> repository.getById(null)),
+                ProductRepositoryPostgres.class,
+                "getById",
+                ConstraintType.MISSING_VALUE
         );
     }
 
     @Test
     @DisplayName("getById(productId): not exists product with such id => exception")
     void getById2() {
-        Assertions.assertThrows(
-                UnknownProductException.class,
-                () -> commit(() -> repository.getById(toUUID(256)))
+        assertServiceException(
+                () -> commit(() -> repository.getById(toUUID(256))),
+                ProductRepositoryPostgres.class,
+                "getById",
+                ConstraintType.UNKNOWN_ENTITY
         );
     }
 
@@ -379,9 +407,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getProductsNumber1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getProductsNumber(null)
+        assertServiceException(
+                () -> repository.getProductsNumber(null),
+                ProductRepositoryPostgres.class,
+                "getProductsNumber",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -830,9 +860,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getProducts1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getProductsNumber(null)
+        assertServiceException(
+                () -> repository.getProducts(null),
+                ProductRepositoryPostgres.class,
+                "getProducts",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -1424,9 +1456,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getTagsNumber1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getTagsNumber(null)
+        assertServiceException(
+                () -> repository.getTagsNumber(null),
+                ProductRepositoryPostgres.class,
+                "getTagsNumber",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -1488,9 +1522,11 @@ class ProductRepositoryTest {
     void getTags1() {
         User user = createAndSaveUser(1);
 
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getTags(null)
+        assertServiceException(
+                () -> repository.getTags(null),
+                ProductRepositoryPostgres.class,
+                "getTags",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -1628,9 +1664,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getShopsNumber1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getShopsNumber(null)
+        assertServiceException(
+                () -> repository.getShopsNumber(null),
+                ProductRepositoryPostgres.class,
+                "getShopsNumber",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -1693,9 +1731,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getShops1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getShops(null)
+        assertServiceException(
+                () -> repository.getShops(null),
+                ProductRepositoryPostgres.class,
+                "getShops",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -1809,9 +1849,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getVarietiesNumber1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getVarietiesNumber(null)
+        assertServiceException(
+                () -> repository.getVarietiesNumber(null),
+                ProductRepositoryPostgres.class,
+                "getVarietiesNumber",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -1874,9 +1916,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getVarieties1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getVarieties(null)
+        assertServiceException(
+                () -> repository.getVarieties(null),
+                ProductRepositoryPostgres.class,
+                "getVarieties",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -1990,9 +2034,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getCategoriesNumber1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getCategoriesNumber(null)
+        assertServiceException(
+                () -> repository.getCategoriesNumber(null),
+                ProductRepositoryPostgres.class,
+                "getCategoriesNumber",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -2036,9 +2082,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getCategories1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getCategories(null)
+        assertServiceException(
+                () -> repository.getCategories(null),
+                ProductRepositoryPostgres.class,
+                "getCategories",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -2114,9 +2162,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getManufacturersNumber1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getManufacturersNumber(null)
+        assertServiceException(
+                () -> repository.getManufacturersNumber(null),
+                ProductRepositoryPostgres.class,
+                "getManufacturersNumber",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -2179,9 +2229,11 @@ class ProductRepositoryTest {
              => exception
             """)
     void getManufacturers1() {
-        Assertions.assertThrows(
-                MissingValueException.class,
-                () -> repository.getManufacturers(null)
+        assertServiceException(
+                () -> repository.getManufacturers(null),
+                ProductRepositoryPostgres.class,
+                "getManufacturers",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -2495,6 +2547,40 @@ class ProductRepositoryTest {
         tags.add(new Tag("value 6"));
 
         return tags;
+    }
+
+    private void assertServiceException(Action action,
+                                        Class<?> checkedType,
+                                        String operationName,
+                                        ConstraintType... expectedTypes) {
+        try {
+            action.act();
+            Assertions.fail("Expected exception, but nothing be thrown");
+        } catch(Exception e) {
+            if(!(e instanceof ServiceException)) {
+                Assertions.fail("Unexpected exception type " + e.getClass().getName());
+            }
+
+            ServiceException ex = (ServiceException) e;
+
+            for(ConstraintType type : expectedTypes) {
+                if(ex.getConstraints().stream().map(Constraint::getType).noneMatch(t -> t == type)) {
+                    Assertions.fail("Expected constraint type " + type + " is missing");
+                }
+            }
+
+            for(Constraint constraint : ex.getConstraints()) {
+                if(Arrays.stream(expectedTypes).noneMatch(t -> t == constraint.getType())) {
+                    Assertions.fail("Unexpected constraint type " + constraint.getType());
+                }
+            }
+
+            if(!ex.isOriginate(checkedType, operationName)) {
+                Assertions.fail("Unexpected checkedType or operationName. Expected: " +
+                        ex.getCheckedType().getName() + ", " + ex.getOperationName() + ". Actual: " +
+                        checkedType.getName() + ", " + operationName);
+            }
+        }
     }
 
 }

@@ -35,23 +35,21 @@ public class Product {
                     String imagePath,
                     ProductContext.Builder contextBuilder,
                     AppConfigData config) {
-        ProductValidateException validateException = new ProductValidateException("Fail to create product.");
+        Checker.Container<ProductContext> container = Checker.container();
 
-        validateException.addReason(checkId(id));
-        validateException.addReason(checkUser(user));
-        validateException.addReason(checkQuantity(quantity));
-        validateException.addReason(checkAppConfig(config));
-
-        try {
-            this.context = contextBuilder.tryBuild();
-        } catch(ValidateException e) {
-            validateException.addReason(e);
-        }
-
-        if(validateException.violatedConstraints()) throw validateException;
+        Checker.of(getClass(), "constructor").
+                nullValue("id", id).
+                nullValue("user", user).
+                nullValue("quantity", quantity).
+                negativeValue("quantity", quantity).
+                nullValue("config", config).
+                nullValue("context", contextBuilder).
+                tryBuild(contextBuilder, container).
+                checkWithValidateException("Fail to create product");
 
         this.id = id;
         this.user = user;
+        this.context = container.get();
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.description = description;
         this.imagePath = imagePath;
@@ -60,10 +58,12 @@ public class Product {
     /**
      * Устанавливает для данного продукта указанные контекстные данные.
      * @param context контекстные данные данного продукта ({@link ProductContext}).
-     * @throws ProductValidateException если указанное значение равняется null
+     * @throws ValidateException если указанное значение равняется null
      */
     public void setContext(ProductContext context) {
-        tryThrow(checkContext(context));
+        Checker.of(getClass(), "setContext").
+                nullValue("context", context).
+                checkWithValidateException("Fail to set product context");
 
         this.context = context;
     }
@@ -72,12 +72,15 @@ public class Product {
      * Увеличевает кол-во данного продукта имеющегося в распоряжении у пользователя на указанное значение.
      * @param quantity значение на которое будет увеличенно кол-во данного продукта имеющегося в распряжении у
      *                 пользвателя.
-     * @throws ProductValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение меньше нуля.
      */
     public void addQuantity(BigDecimal quantity) {
-        tryThrow(checkQuantity(quantity));
+        Checker.of(getClass(), "addQuantity").
+                nullValue("quantity", quantity).
+                negativeValue("quantity", quantity).
+                checkWithValidateException("Fail to add product quantity");
 
         this.quantity = this.quantity.add(quantity);
     }
@@ -90,12 +93,15 @@ public class Product {
      * тогда метод вернет значение равное quantity.
      * @param quantity снимаемое кол-во продукта.
      * @return кол-во продукта, которое удалось снять.
-     * @throws ProductValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение меньше нуля.
      */
     public BigDecimal take(BigDecimal quantity) {
-        tryThrow(checkQuantity(quantity));
+        Checker.of(getClass(), "take").
+                nullValue("quantity", quantity).
+                negativeValue("quantity", quantity).
+                checkWithValidateException("Fail to take product quantity");
 
         BigDecimal remain = this.quantity.min(quantity);
         this.quantity = this.quantity.subtract(remain);
@@ -206,38 +212,6 @@ public class Product {
                 ", description='" + description + '\'' +
                 ", imagePath='" + imagePath + '\'' +
                 '}';
-    }
-
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            ProductValidateException e = new ProductValidateException("Fail to update product.");
-            e.addReason(constraint);
-            throw e;
-        }
-    }
-
-    private Constraint checkId(UUID id) {
-        return Constraint.nullValue(id).check(getClass(), "id");
-    }
-
-    private Constraint checkUser(User user) {
-        return Constraint.nullValue(user).check(getClass(), "user");
-    }
-
-    private Constraint checkQuantity(BigDecimal quantity) {
-        return Constraint.check(getClass(), "quantity",
-                Constraint.nullValue(quantity),
-                Constraint.negativeValue(quantity)
-        );
-    }
-
-    private Constraint checkContext(ProductContext context) {
-        return Constraint.nullValue(context).check(getClass(), "context");
-    }
-
-    private Constraint checkAppConfig(AppConfigData config) {
-        return Constraint.nullValue(config).check(getClass(), "config");
     }
 
 

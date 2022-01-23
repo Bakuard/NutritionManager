@@ -3,7 +3,6 @@ package com.bakuard.nutritionManager.controller;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.model.exceptions.*;
-import com.bakuard.nutritionManager.model.exceptions.AuthException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,22 +34,6 @@ public class ExceptionResolver {
                 body(mapper.toExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
-    @ExceptionHandler(value = AbstractDomainException.class)
-    public ResponseEntity<ExceptionResponse> handle(AbstractDomainException e) {
-        logger.error(e.getMessage(), e);
-        return ResponseEntity.
-                status(HttpStatus.BAD_REQUEST).
-                body(mapper.toExceptionResponse(e, HttpStatus.BAD_REQUEST));
-    }
-
-    @ExceptionHandler(value = UnknownSourceException.class)
-    public ResponseEntity<ExceptionResponse> handle(UnknownSourceException e) {
-        logger.error(e.getMessage(), e);
-        return ResponseEntity.
-                status(HttpStatus.NOT_FOUND).
-                body(mapper.toExceptionResponse(e, HttpStatus.NOT_FOUND));
-    }
-
     @ExceptionHandler(value = ValidateException.class)
     public ResponseEntity<ExceptionResponse> handle(ValidateException e) {
         logger.error(e.getMessage(), e);
@@ -59,12 +42,14 @@ public class ExceptionResolver {
                 body(mapper.toExceptionResponse(e, HttpStatus.BAD_REQUEST));
     }
 
-    @ExceptionHandler(value = AuthException.class)
-    public ResponseEntity<ExceptionResponse> handle(AuthException e) {
+    @ExceptionHandler(value = ServiceException.class)
+    public ResponseEntity<ExceptionResponse> handle(ServiceException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.
                 status(HttpStatus.FORBIDDEN).
                 body(mapper.toExceptionResponse(e, HttpStatus.FORBIDDEN));
     }
+
+
 
 }

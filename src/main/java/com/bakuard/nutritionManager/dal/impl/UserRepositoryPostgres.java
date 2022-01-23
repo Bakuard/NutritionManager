@@ -2,8 +2,9 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.UnknownUserException;
-import com.bakuard.nutritionManager.model.exceptions.UserAlreadyExistsException;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,9 +25,9 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public boolean save(User user) {
-        if(user == null) {
-            throw new MissingValueException("user can't be null", getClass(), "user");
-        }
+        Checker checker = Checker.of(getClass(), "save").
+                nullValue("user", user).
+                checkWithServiceException("Fail to save user");
 
         User oldUser = getByIdOrReturnNull(user.getId());
 
@@ -40,7 +41,8 @@ public class UserRepositoryPostgres implements UserRepository {
                 wasSaved = true;
             }
         } catch(DuplicateKeyException e) {
-            throw new UserAlreadyExistsException("Such user=" + user + " already exists in DB.");
+            throw checker.addConstraint("user", ConstraintType.ALREADY_EXISTS_IN_DB).
+                    createServiceException("Fail to save user");
         }
 
         return wasSaved;
@@ -48,15 +50,24 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getById(UUID userId) {
+        Checker checker = Checker.of(getClass(), "getById").
+                nullValue("userId", userId).
+                checkWithServiceException("Fail to get user by id");
+
         User user = getByIdOrReturnNull(userId);
-        if(user == null) throw new UnknownUserException("Unknown user with id=" + userId);
+
+        if(user == null) {
+            throw checker.addConstraint("userId", ConstraintType.UNKNOWN_ENTITY).
+                    createServiceException("Fail to get user by id");
+        }
         return user;
     }
 
     @Override
     public User getByName(String name) {
-        if(name == null)
-            throw new UnknownUserException("Unknown user with name=null");
+        Checker checker = Checker.of(getClass(), "getByName").
+                nullValue("name", name).
+                checkWithServiceException("Fail to get user by name");
 
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
@@ -75,15 +86,17 @@ public class UserRepositoryPostgres implements UserRepository {
                                 rs.getString("salt")
                         );
                     }
-                    throw new UnknownUserException("Unknown user with name=" + name);
+                    throw checker.addConstraint("name", ConstraintType.UNKNOWN_ENTITY).
+                            createServiceException("Fail to get user by name=" + name);
                 }
         );
     }
 
     @Override
     public User getByEmail(String email) {
-        if(email == null)
-            throw new UnknownUserException("Unknown user with email=null");
+        Checker checker = Checker.of(getClass(), "getByEmail").
+                nullValue("email", email).
+                checkWithServiceException("Fail to get user by email");
 
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
@@ -102,16 +115,14 @@ public class UserRepositoryPostgres implements UserRepository {
                                 rs.getString("salt")
                         );
                     }
-                    throw new UnknownUserException("Unknown user with email=" + email);
+                    throw checker.addConstraint("email", ConstraintType.UNKNOWN_ENTITY).
+                            createServiceException("Fail to get user by email=" + email);
                 }
         );
     }
 
 
     private User getByIdOrReturnNull(UUID userId) {
-        if(userId == null)
-            throw new UnknownUserException("Unknown user with id=null");
-
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
                         SELECT Users.*

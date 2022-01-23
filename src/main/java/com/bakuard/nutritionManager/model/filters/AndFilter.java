@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.FilterValidateException;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 import com.google.common.collect.ImmutableList;
 
@@ -15,7 +15,7 @@ public class AndFilter implements Filter {
      * Создает и возвращает новый объект ограничения AndConstraint.
      * @param filters список ограничений выступающих как операнды данного ограничения.
      * @return новый объект ограничения AndConstraint.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если кол-во ограничений в списке filters меньше двух.<br/>
      *          2. если хотябы один из операндов имеет значение null.<br/>
      *          3. если передаваемый список операндов имеет значение null.
@@ -30,7 +30,7 @@ public class AndFilter implements Filter {
      * @param b второй обязательный операнд ограничения AndConstraint.
      * @param other другие не обязательные операнды ограничения AndConstraint.
      * @return новый объект ограничения AndConstraint.
-     * @throws FilterValidateException если выполняется одно из следующих условий:<br/>
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
      *          1. если хотябы один из операндов имеет значение null.<br/>
      *          2. если передаваемый массив операндов имеет значение null.
      */
@@ -48,12 +48,11 @@ public class AndFilter implements Filter {
     private final ImmutableList<Filter> operands;
 
     private AndFilter(List<Filter> operands) {
-        tryThrow(
-                Constraint.check(getClass(), "operands",
-                        Constraint.nullValue(operands),
-                        Constraint.containsNull(operands),
-                        Constraint.notEnoughItems(operands, 2))
-        );
+        Checker.of(getClass(), "constructor").
+                nullValue("operands", operands).
+                containsNull("operands", operands).
+                notEnoughItems("operands", operands, 2).
+                checkWithServiceException();
 
         this.operands = ImmutableList.copyOf(operands);
     }
@@ -68,13 +67,5 @@ public class AndFilter implements Filter {
         return operands;
     }
 
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            FilterValidateException e = new FilterValidateException("Fail to update user.");
-            e.addReason(constraint);
-            throw e;
-        }
-    }
 
 }

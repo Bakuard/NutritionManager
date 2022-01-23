@@ -23,12 +23,15 @@ public class AuthService {
         try {
             User user = userRepository.getByName(name);
             if(!user.isCorrectPassword(password)) {
-                throw new FailEnterException("Incorrect password for user=" + name);
+                throw Checker.of(getClass(), "enter").
+                        createServiceException("Incorrect credentials");
             }
             String jws = jwsService.generateAccessJws(user);
             return new Pair<>(jws, user);
-        } catch(UnknownUserException e) {
-            throw new FailEnterException("Unknown user=" + name);
+        } catch(ServiceException e) {
+            throw Checker.of(getClass(), "enter").
+                    createServiceException("Incorrect credentials").
+                    addReasons(e.getConstraints());
         }
     }
 
@@ -56,8 +59,14 @@ public class AuthService {
 
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
-        } catch(AbstractDomainException e) {
-            throw new FailRegistrationException("Fail registration user=" + name, e);
+        } catch(ValidateException e) {
+            throw Checker.of(getClass(), "registration").
+                    createServiceException("Fail to register new user=" + name).
+                    addReasons(e.getConstraints());
+        } catch(ServiceException e) {
+            throw Checker.of(getClass(), "registration").
+                    createServiceException("Fail to register new user=" + name).
+                    addReasons(e.getConstraints());
         }
     }
 
@@ -72,8 +81,14 @@ public class AuthService {
 
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
-        } catch(AbstractDomainException e) {
-            throw new FailChangeCredentialsException("Fail change credential user=" + name, e);
+        } catch(ValidateException e) {
+            throw Checker.of(getClass(), "registration").
+                    createServiceException("Fail to change credential for user=" + name).
+                    addReasons(e.getConstraints());
+        } catch(ServiceException e) {
+            throw Checker.of(getClass(), "registration").
+                    createServiceException("Fail to change credential for user=" + name).
+                    addReasons(e.getConstraints());
         }
     }
 

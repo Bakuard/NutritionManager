@@ -7,7 +7,7 @@ import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
-import com.bakuard.nutritionManager.dto.exceptions.FieldExceptionResponse;
+import com.bakuard.nutritionManager.dto.exceptions.ConstraintResponse;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
@@ -15,6 +15,7 @@ import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.AbstractDomainException;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
 import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
@@ -220,7 +221,7 @@ public class DtoMapper {
 
     public ExceptionResponse toExceptionResponse(ValidateException e, HttpStatus httpStatus) {
         ExceptionResponse response = new ExceptionResponse(httpStatus, getMessage(e), getTitle());
-        e.forEach(ex -> response.addReason(toFieldExceptionResponse(ex)));
+        e.forEach(ex -> response.addReason(toConstraintResponse(ex)));
         return response;
     }
 
@@ -234,11 +235,11 @@ public class DtoMapper {
         }).toList();
     }
 
-    private FieldExceptionResponse toFieldExceptionResponse(IncorrectFiledValueException e) {
-        FieldExceptionResponse dto = new FieldExceptionResponse();
+    private ConstraintResponse toConstraintResponse(Constraint e) {
+        ConstraintResponse dto = new ConstraintResponse();
         dto.setField(e.getFieldName());
         dto.setTitle(getTitle());
-        dto.setMessage(getMessage(e));
+        //dto.setMessage(getMessage(e));
         return dto;
     }
 

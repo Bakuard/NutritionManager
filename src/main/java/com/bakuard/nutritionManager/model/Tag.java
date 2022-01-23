@@ -1,7 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.TagValidateException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 /**
  * Теги используются для уточнения пользвателем данных о продуктах, блюдах и меню, а также для последующей
@@ -15,12 +14,15 @@ public final class Tag implements Comparable<Tag> {
     /**
      * Создает тег с указанным значением. Все начальные и конечные пробельные символы тега будут удалены.
      * @param value значение тега.
-     * @throws TagValidateException в следующих случаях:<br/>
+     * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public Tag(String value) {
-        tryThrow(checkValue(value));
+        Checker.of(getClass(), "constructor").
+                nullValue("value", value).
+                blankValue("value", value).
+                checkWithValidateException("Fail to create tag");
 
         this.value = value.trim();
     }
@@ -63,22 +65,6 @@ public final class Tag implements Comparable<Tag> {
         return "ProductTag{" +
                 "value='" + value + '\'' +
                 '}';
-    }
-
-
-    private void tryThrow(Constraint constraint) {
-        if(constraint != null) {
-            TagValidateException e = new TagValidateException("Fail to create tag.");
-            e.addReason(constraint);
-            throw e;
-        }
-    }
-
-    private Constraint checkValue(String value) {
-        return Constraint.check(getClass(), "value",
-                Constraint.nullValue(value),
-                Constraint.blankValue(value)
-        );
     }
 
 }

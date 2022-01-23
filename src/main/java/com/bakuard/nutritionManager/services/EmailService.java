@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.services;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.model.exceptions.EmailException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -20,15 +20,25 @@ public class EmailService {
         this.appConfigData = appConfigData;
     }
 
-    public void confirmEmailForRegistration(String jws, String email) throws EmailException {
-        sendEmail("/mail/registration.html", jws, email);
+    public void confirmEmailForRegistration(String jws, String email) throws ServiceException {
+        try {
+            sendEmail("/mail/registration.html", jws, email);
+        } catch(MessagingException e) {
+            throw Checker.of(getClass(), "confirmEmailForRegistration").
+                    createServiceException("Fail to confirm email for registration.");
+        }
     }
 
-    public void confirmEmailForChangeCredentials(String jws, String email) throws EmailException {
-        sendEmail("/mail/changeCredentials.html", jws, email);
+    public void confirmEmailForChangeCredentials(String jws, String email) throws ServiceException {
+        try {
+            sendEmail("/mail/changeCredentials.html", jws, email);
+        } catch(MessagingException e) {
+            throw Checker.of(getClass(), "confirmEmailForChangeCredentials").
+                    createServiceException("Fail to confirm email for change credentials.");
+        }
     }
 
-    private void sendEmail(String htmlFileName, String jws, String email) throws EmailException {
+    private void sendEmail(String htmlFileName, String jws, String email) throws MessagingException {
         Properties properties = new Properties();
         properties.setProperty("mail.transport.protocol", "smtps");
         properties.setProperty("mail.smtp.host", "smtp.gmail.com");
@@ -47,24 +57,20 @@ public class EmailService {
             }
         });
 
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(appConfigData.getMailServer()));
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            message.setSubject("Nutrition Manager");
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(appConfigData.getMailServer()));
+        message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
+        message.setSubject("Nutrition Manager");
 
-            InputStream in = getClass().getResourceAsStream(htmlFileName);
-            String html = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8)).
-                    lines().
-                    reduce(String::concat).
-                    orElseThrow().
-                    replaceAll("TOKEN", jws);
-            message.setContent(html, "text/html; charset=utf-8");
+        InputStream in = getClass().getResourceAsStream(htmlFileName);
+        String html = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8)).
+                lines().
+                reduce(String::concat).
+                orElseThrow().
+                replaceAll("TOKEN", jws);
+        message.setContent(html, "text/html; charset=utf-8");
 
-            Transport.send(message);
-        } catch(MessagingException e) {
-            throw new EmailException("Fail to send email to " + email, e);
-        }
+        Transport.send(message);
     }
 
 }
