@@ -51,6 +51,14 @@ public class ServiceException extends AbstractDomainException implements Iterabl
         return operationName;
     }
 
+    public String getMessageKey() {
+        return checkedType.getSimpleName() + "." + operationName;
+    }
+
+    public boolean containsConstraint(ConstraintType type) {
+        return constraints.stream().map(Constraint::getType).anyMatch(c -> c == type);
+    }
+
     public ServiceException addReason(Constraint constraint) {
         if(constraint != null) constraints.add(constraint);
         return this;
@@ -86,7 +94,22 @@ public class ServiceException extends AbstractDomainException implements Iterabl
 
     @Override
     public String getMessage() {
-        return checkedType.getSimpleName() + "." + operationName;
+        StringBuilder result = new StringBuilder("Fail to ").
+                append(checkedType.getSimpleName()).
+                append('.').
+                append(operationName).
+                append(" - ").
+                append(super.getMessage()).
+                append(". Reasons:");
+
+        constraints.forEach(
+                c -> result.append('\n').
+                        append(c.getMessageKey()).
+                        append(". Detail: ").
+                        append(c.getDetail())
+        );
+
+        return result.toString();
     }
 
 }

@@ -26,7 +26,7 @@ public interface ProductRepository {
      * ответ положительный - генерирует исключение.
      * @param product сохраняемый продукт.
      * @return true - если указанный продукт отсутсвовал в БД или отличался от переданного, иначе - false.
-     * @throws ProductRepositoryException если верно одно из следующих условий:<br/>
+     * @throws ServiceException если верно одно из следующих условий:<br/>
      *         1. если product имеет значение null.<br/>
      *         2. если в БД уже есть другой продукт с таким же контекстом ({@link ProductContext}).
      */
@@ -36,7 +36,7 @@ public interface ProductRepository {
      * Удаляет из БД продукт идентификатор которого равен productId. Если в БД нет продукта с таким
      * идентификатором - выбрасывает исключение.
      * @param productId идентификатор продукта.
-     * @throws ProductRepositoryException если верно одно из следующих условий:<br/>
+     * @throws ServiceException если верно одно из следующих условий:<br/>
      *         1. если не удалось найти продукт с таким ID.<br/>
      *         2. если productId равен null.
      */
@@ -47,7 +47,7 @@ public interface ProductRepository {
      * выбрасывает исключение.
      * @param productId идентификатор продукта.
      * @return объект Product или null.
-     * @throws ProductRepositoryException если верно одно из следующих условий:<br/>
+     * @throws ServiceException если верно одно из следующих условий:<br/>
      *         1. если не удалось найти продукт с таким ID.<br/>
      *         2. если productId равен null.
      */
@@ -72,7 +72,7 @@ public interface ProductRepository {
      * @param necessaryQuantity минимальное необходимое кол-во продукта.
      * @param filter ограничения на продукты в выборке.
      * @return выборку из продуктов на учете пользователя.
-     * @throws ProductRepositoryException если верно одно из следующих условий:<br/>
+     * @throws ServiceException если верно одно из следующих условий:<br/>
      *         1. если user равен null.<br/>
      *         2. если constraint равен null.<br/>
      *         3. если pageable равен null.<br/>
@@ -89,7 +89,7 @@ public interface ProductRepository {
      * в виде criteria (см. {@link ProductCriteria}).
      * @param criteria критерий формирования выборки продуктов.
      * @return выборку продуктов удовлетворяющую ограничениям criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public Page<Product> getProducts(ProductCriteria criteria);
 
@@ -98,7 +98,7 @@ public interface ProductRepository {
      * в порядке возрастания (см. {@link ProductFieldCriteria}).
      * @param criteria критерий формирования выборки тегов.
      * @return выборку тегов удовлетворяющую ограничению criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public Page<Tag> getTags(ProductFieldCriteria criteria);
 
@@ -107,7 +107,7 @@ public interface ProductRepository {
      * возрастания (см. {@link ProductFieldCriteria}).
      * @param criteria критерий формирования выборки магазинов продуктов.
      * @return выборку из магазинов продуктов удовлетворяющую ограничению criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public Page<String> getShops(ProductFieldCriteria criteria);
 
@@ -116,7 +116,7 @@ public interface ProductRepository {
      * возрастания (см. {@link ProductFieldCriteria}).
      * @param criteria критерий формирования выборки сортов продуктов.
      * @return выборку из сортов продуктов удовлетворяющую ограничению criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public Page<String> getVarieties(ProductFieldCriteria criteria);
 
@@ -125,7 +125,7 @@ public interface ProductRepository {
      * возрастания (см. {@link ProductCategoryCriteria}).
      * @param criteria критерий формирования выборки категорий продуктов.
      * @return выборку из категорий продуктов удовлетворяющую ограничению criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public Page<String> getCategories(ProductCategoryCriteria criteria);
 
@@ -134,7 +134,7 @@ public interface ProductRepository {
      * возрастания (см. {@link ProductFieldCriteria}).
      * @param criteria критерий формирования выборки производителей продуктов.
      * @return выборку из производителей продуктов удовлетворяющую ограничению criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public Page<String> getManufacturers(ProductFieldCriteria criteria);
 
@@ -142,7 +142,7 @@ public interface ProductRepository {
      * Возвращает кол-во всех продуктов удовлетворяющих ограничениям criteria (см. {@link ProductsNumberCriteria}).
      * @param criteria критерии указывающие какие продукты подсчитывать.
      * @return кол-во всех продуктов удовлетворяющих ограничениям criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public int getProductsNumber(ProductsNumberCriteria criteria);
 
@@ -150,7 +150,7 @@ public interface ProductRepository {
      * Возвращает кол-во всех тегов удовлетворяющих ограничению criteria (см. {@link ProductFieldNumberCriteria}).
      * @param criteria критерии указывающие какие теги подсчитывать.
      * @return кол-во всех тегов удовлетворяющих ограничению criteria.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public int getTagsNumber(ProductFieldNumberCriteria criteria);
 
@@ -158,7 +158,7 @@ public interface ProductRepository {
      * Возвращает кол-во магазинов удовлетворяющих ограничению criteria (см. {@link ProductFieldNumberCriteria}).
      * @param criteria критерии указывающие какие магазины подсчитывать.
      * @return выборку из магазинов продуктов.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public int getShopsNumber(ProductFieldNumberCriteria criteria);
 
@@ -166,7 +166,7 @@ public interface ProductRepository {
      * Возвращает кол-во сортов удовлетворяющих ограничению criteria (см. {@link ProductFieldNumberCriteria}).
      * @param criteria критерии указывающие какие сорта подсчитывать.
      * @return выборку из сортов продуктов.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public int getVarietiesNumber(ProductFieldNumberCriteria criteria);
 
@@ -174,7 +174,7 @@ public interface ProductRepository {
      * Возвращает кол-во категорий продуктов удовлетворяющих ограничению criteria (см. {@link ProductCategoryNumberCriteria}).
      * @param criteria критерии указывающие какие категории подсчитывать.
      * @return выборку из категорий продуктов.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public int getCategoriesNumber(ProductCategoryNumberCriteria criteria);
 
@@ -182,7 +182,7 @@ public interface ProductRepository {
      * Возвращает кол-во производителей продуктов удовлетворяющих ограничению criteria (см. {@link ProductFieldNumberCriteria}).
      * @param criteria критерии указывающие каких производителей подсчитывать.
      * @return выборку из производителей продуктов.
-     * @throws ProductRepositoryException если criteria является null.
+     * @throws ServiceException если criteria является null.
      */
     public int getManufacturersNumber(ProductFieldNumberCriteria criteria);
 

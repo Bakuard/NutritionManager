@@ -15,6 +15,7 @@ import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.services.AuthService;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -191,7 +192,11 @@ public class DtoMapper {
 
 
     public <T> SuccessResponse<T> toSuccessResponse(String keyMessage, T body) {
-        return new SuccessResponse<>(getMessage(keyMessage, "Success"), getSuccessTitle(), body);
+        return new SuccessResponse<>(
+                getMessage(keyMessage, "Success"),
+                getMessage("successTitle", "Success"),
+                body
+        );
     }
 
     public JwsResponse toJwsResponse(String jws, User user) {
@@ -210,28 +215,55 @@ public class DtoMapper {
     }
 
 
-    public ExceptionResponse toExceptionResponse(HttpStatus httpStatus) {
-        return new ExceptionResponse(httpStatus, "Unexpected exception", "Error");
-    }
-
     public ExceptionResponse toExceptionResponse(HttpStatus httpStatus, String keyMessage) {
-        return new ExceptionResponse(httpStatus, getMessage(keyMessage, "unauthorized"), getErrorTitle());
-    }
-
-    public ExceptionResponse toExceptionResponse(AbstractDomainException e, HttpStatus httpStatus) {
         return new ExceptionResponse(
                 httpStatus,
-                getMessage(e.getMessageKey(), e.getMessage()),
-                getErrorTitle());
+                getMessage(keyMessage, "unexpected error"),
+                getMessage("errorTitle", "Error")
+        );
     }
 
-    public ExceptionResponse toExceptionResponse(ValidateException e, HttpStatus httpStatus) {
+    public ExceptionResponse toExceptionResponse(ServiceException e) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        if(e.getCheckedType() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
+        else if(e.containsConstraint(ConstraintType.UNKNOWN_ENTITY)) httpStatus = HttpStatus.NOT_FOUND;
+
         ExceptionResponse response = new ExceptionResponse(
                 httpStatus,
                 getMessage(e.getMessageKey(), e.getMessage()),
-                getErrorTitle());
+                getMessage("errorTitle", "Error")
+        );
         e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
         return response;
+    }
+
+    public ExceptionResponse toExceptionResponse(ValidateException e) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        if(e.getCheckedType() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
+        else if(e.containsConstraint(ConstraintType.UNKNOWN_ENTITY)) httpStatus = HttpStatus.NOT_FOUND;
+
+        ExceptionResponse response = new ExceptionResponse(
+                httpStatus,
+                getMessage(e.getMessageKey(), e.getMessage()),
+                getMessage("errorTitle", "Error")
+        );
+        e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
+        return response;
+    }
+
+
+    private ConstraintResponse toConstraintResponse(Constraint constraint) {
+        ConstraintResponse dto = new ConstraintResponse();
+        dto.setField(constraint.getFieldName());
+        dto.setTitle(getMessage("constraintTitle", "Reason"));
+        dto.setMessage(getMessage(constraint.getMessageKey(), constraint.getDetail()));
+        return dto;
+    }
+
+    private String getMessage(String key, String defaultValue) {
+        return messageSource.getMessage(
+                key, null, defaultValue, LocaleContextHolder.getLocale()
+        );
     }
 
 
@@ -242,32 +274,6 @@ public class DtoMapper {
             response.setCode(tag.getValue());
             return response;
         }).toList();
-    }
-
-    private ConstraintResponse toConstraintResponse(Constraint constraint) {
-        ConstraintResponse dto = new ConstraintResponse();
-        dto.setField(constraint.getFieldName());
-        dto.setTitle(getErrorTitle());
-        dto.setMessage(getMessage(constraint.getMessageKey(), constraint.getDefaultMessage()));
-        return dto;
-    }
-
-    private String getMessage(String key, String defaultValue) {
-        return messageSource.getMessage(
-                key, null, defaultValue, LocaleContextHolder.getLocale()
-        );
-    }
-
-    private String getErrorTitle() {
-        return messageSource.getMessage(
-                "errorTitle", null, "Error", LocaleContextHolder.getLocale()
-        );
-    }
-
-    private String getSuccessTitle() {
-        return messageSource.getMessage(
-                "successTitle", null, "Success", LocaleContextHolder.getLocale()
-        );
     }
 
     private ProductSort toProductSort(String sortRuleAsString) {

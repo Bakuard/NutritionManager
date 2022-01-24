@@ -7,20 +7,20 @@ public class Constraint {
     private Class<?> classLocation;
     private String fieldName;
     private ConstraintType type;
-    private String defaultMessage;
+    private String detail;
 
     public Constraint(Class<?> classLocation, String fieldName, ConstraintType type) {
         this.classLocation = classLocation;
         this.fieldName = fieldName;
         this.type = type;
-        defaultMessage = "Incorrect " + classLocation.getName() + "." + fieldName + " -> " + type;
+        detail = type + " for " + fieldName;
     }
 
-    public Constraint(Class<?> classLocation, String fieldName, ConstraintType type, String defaultMessage) {
+    public Constraint(Class<?> classLocation, String fieldName, ConstraintType type, String detail) {
         this.classLocation = classLocation;
         this.fieldName = fieldName;
         this.type = type;
-        this.defaultMessage = defaultMessage;
+        this.detail = detail;
     }
 
     public Class<?> getClassLocation() {
@@ -35,8 +35,8 @@ public class Constraint {
         return type;
     }
 
-    public String getDefaultMessage() {
-        return defaultMessage;
+    public String getDetail() {
+        return detail;
     }
 
     public String getMessageKey() {
@@ -64,7 +64,7 @@ public class Constraint {
                 "classLocation=" + classLocation +
                 ", fieldName='" + fieldName + '\'' +
                 ", type=" + type +
-                ", defaultMessage='" + defaultMessage + '\'' +
+                ", defaultMessage='" + detail + '\'' +
                 '}';
     }
 

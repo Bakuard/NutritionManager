@@ -29,27 +29,36 @@ public class ExceptionResolver {
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<ExceptionResponse> handle(RuntimeException e) {
         logger.error("Unexpected exception", e);
+
+        ExceptionResponse response = mapper.toExceptionResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "internalServerError");
+
         return ResponseEntity.
                 status(HttpStatus.INTERNAL_SERVER_ERROR).
-                body(mapper.toExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR));
+                body(response);
     }
 
     @ExceptionHandler(value = ValidateException.class)
     public ResponseEntity<ExceptionResponse> handle(ValidateException e) {
         logger.error(e.getMessage(), e);
+
+        ExceptionResponse response = mapper.toExceptionResponse(e);
+
         return ResponseEntity.
-                status(HttpStatus.BAD_REQUEST).
-                body(mapper.toExceptionResponse(e, HttpStatus.BAD_REQUEST));
+                status(HttpStatus.resolve(response.getHttpErrorCode())).
+                body(response);
     }
 
     @ExceptionHandler(value = ServiceException.class)
     public ResponseEntity<ExceptionResponse> handle(ServiceException e) {
         logger.error(e.getMessage(), e);
+
+        ExceptionResponse response = mapper.toExceptionResponse(e);
+
         return ResponseEntity.
-                status(HttpStatus.FORBIDDEN).
-                body(mapper.toExceptionResponse(e, HttpStatus.FORBIDDEN));
+                status(HttpStatus.resolve(response.getHttpErrorCode())).
+                body(response);
     }
-
-
 
 }

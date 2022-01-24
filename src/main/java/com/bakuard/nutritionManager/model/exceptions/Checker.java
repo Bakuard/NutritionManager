@@ -42,14 +42,18 @@ public class Checker {
 
     public <T> Checker nullValue(String fieldName, T checkedValue) {
         if(checkedValue == null) {
-            constraints.add(new Constraint(checkedType, fieldName, ConstraintType.MISSING_VALUE));
+            constraints.add(
+                    new Constraint(checkedType, fieldName, ConstraintType.MISSING_VALUE,
+                            fieldName + " can't be null")
+            );
         }
         return this;
     }
 
     public Checker blankValue(String fieldName, String checkedValue) {
         if(isValid(fieldName) && checkedValue.isBlank()) {
-            constraints.add(new Constraint(checkedType, fieldName, ConstraintType.BLANK_VALUE));
+            constraints.add(new Constraint(checkedType, fieldName, ConstraintType.BLANK_VALUE,
+                    fieldName + " can't be blank"));
         }
         return this;
     }
@@ -58,7 +62,7 @@ public class Checker {
         if(isValid(fieldName) && checkedValue.stream().anyMatch(String::isBlank)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_BLANK,
-                            checkedType.getSimpleName() + "." + fieldName + " can't contains blank item.")
+                            fieldName + " can't contains blank item.")
             );
         }
         return this;
@@ -68,9 +72,10 @@ public class Checker {
         if(isValid(fieldName) && (checkedValue.length() < minLength || checkedValue.length() > maxLength)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.INCORRECT_STRING_LENGTH,
-                    "Incorrect value length for " + checkedType.getSimpleName() + "." +
-                            fieldName + ". Min length = " + minLength + ", max length = " + ", actual length = " +
-                            checkedValue.length())
+                    "Incorrect value length for " +  fieldName +
+                            ". Min length = " + minLength +
+                            ", max length = " + maxLength +
+                            ", actual length = " + checkedValue.length())
             );
         }
         return this;
@@ -79,7 +84,8 @@ public class Checker {
     public Checker negativeValue(String fieldName, BigDecimal checkedValue) {
         if(isValid(fieldName) && checkedValue.signum() < 0) {
             constraints.add(
-                    new Constraint(checkedType, fieldName, ConstraintType.NEGATIVE_VALUE)
+                    new Constraint(checkedType, fieldName, ConstraintType.NEGATIVE_VALUE,
+                             fieldName + " can't be negative. Actual = " + checkedValue)
             );
         }
         return this;
@@ -88,7 +94,8 @@ public class Checker {
     public Checker notPositiveValue(String fieldName, BigDecimal checkedValue) {
         if(isValid(fieldName) && checkedValue.signum() <= 0) {
             constraints.add(
-                    new Constraint(checkedType, fieldName, ConstraintType.NOT_POSITIVE_VALUE)
+                    new Constraint(checkedType, fieldName, ConstraintType.NOT_POSITIVE_VALUE,
+                            fieldName + " mus be positive. Actual = " + checkedValue)
             );
         }
         return this;
@@ -97,7 +104,8 @@ public class Checker {
     public Checker containsNull(String fieldName, List<?> checkedValue) {
         if(isValid(fieldName) && checkedValue.stream().anyMatch(Objects::isNull)) {
             constraints.add(
-                    new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_NULL)
+                    new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_NULL,
+                            fieldName + " can't contains null item")
             );
         }
         return this;
@@ -116,8 +124,7 @@ public class Checker {
             if(duplicate) {
                 constraints.add(
                         new Constraint(checkedType, fieldName, ConstraintType.DUPLICATE_TAG,
-                                "All tags in " + checkedType.getSimpleName() + "." + fieldName +
-                                        " must be unique.")
+                                "All tags in " + fieldName + " must be unique.")
                 );
             }
         }
@@ -128,8 +135,7 @@ public class Checker {
         if(isValid(fieldName) && checkedValue.contains(tag)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.DUPLICATE_TAG,
-                    "Tag " + tag + " already contains in " +
-                            checkedType.getSimpleName() + "." + fieldName)
+                    "Tag " + tag + " already contains in " + fieldName)
             );
         }
         return this;
@@ -139,7 +145,7 @@ public class Checker {
         if(isValid(fieldName) && checkedValue.size() < minItems) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.NOT_ENOUGH_ITEMS,
-                    checkedType.getSimpleName() + "." + fieldName + " must contains at least " +
+                    fieldName + " must contains at least " +
                             minItems + " items. Actual items number = " + checkedValue.size())
             );
         }
@@ -149,7 +155,8 @@ public class Checker {
     public Checker outOfRange(String fieldName, int checkedValue, int min, int max) {
         if(isValid(fieldName) && (checkedValue < min || checkedValue > max)) {
             constraints.add(
-                    new Constraint(checkedType, fieldName, ConstraintType.OUT_OF_RANGE)
+                    new Constraint(checkedType, fieldName, ConstraintType.OUT_OF_RANGE,
+                            fieldName + " must belong [" + min + ", " + max + "]. Actual = " + checkedValue)
             );
         }
         return this;
@@ -202,7 +209,7 @@ public class Checker {
 
     public Checker checkWithValidateException() {
         if(!validateExceptions.isEmpty() || !constraints.isEmpty()) {
-            throw new ValidateException(checkedType).
+            throw new ValidateException(checkedType, operationName).
                     addExcReasons(validateExceptions).
                     addReasons(constraints);
         }
@@ -211,7 +218,7 @@ public class Checker {
 
     public Checker checkWithValidateException(String message) {
         if(!validateExceptions.isEmpty() || !constraints.isEmpty()) {
-            throw new ValidateException(message, checkedType).
+            throw new ValidateException(message, checkedType, operationName).
                     addExcReasons(validateExceptions).
                     addReasons(constraints);
         }

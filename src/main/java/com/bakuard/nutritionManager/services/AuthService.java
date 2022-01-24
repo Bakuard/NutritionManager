@@ -82,11 +82,11 @@ public class AuthService {
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
         } catch(ValidateException e) {
-            throw Checker.of(getClass(), "registration").
+            throw Checker.of(getClass(), "changeCredential").
                     createServiceException("Fail to change credential for user=" + name).
                     addReasons(e.getConstraints());
         } catch(ServiceException e) {
-            throw Checker.of(getClass(), "registration").
+            throw Checker.of(getClass(), "changeCredential").
                     createServiceException("Fail to change credential for user=" + name).
                     addReasons(e.getConstraints());
         }
