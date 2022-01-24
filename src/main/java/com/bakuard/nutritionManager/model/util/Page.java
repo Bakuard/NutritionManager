@@ -1,8 +1,5 @@
 package com.bakuard.nutritionManager.model.util;
 
-import com.bakuard.nutritionManager.model.exceptions.NegativePageTotalItemsException;
-import com.bakuard.nutritionManager.model.exceptions.IncorrectPageContentSizeException;
-
 import com.google.common.collect.ImmutableList;
 
 import java.math.BigInteger;
@@ -22,7 +19,7 @@ public final class Page<T> {
 
     private Page(List<T> content, Info info) {
         if(content.size() != info.getActualSize()) {
-            throw new IncorrectPageContentSizeException(
+            throw new IllegalStateException(
                     "content size must be equal page actual size. contentSize=" + content.size() +
                             ", actualSize=" + info.getActualSize()
             );
@@ -102,7 +99,7 @@ public final class Page<T> {
 
             this.totalItems = Objects.requireNonNull(totalItems, "totalItems can't be null");
             if(totalItems.signum() < 0)
-                throw new NegativePageTotalItemsException("totalItems can't be negative. totalItems = " + totalItems);
+                throw new IllegalArgumentException("totalItems can't be negative. totalItems = " + totalItems);
 
             commonPageSize = BigInteger.valueOf(
                     Math.min(Math.max(pageable.getExpectedMaxPageSize(), minPageSize), maxPageSize)
@@ -217,7 +214,7 @@ public final class Page<T> {
          * @param <T> тип объектов из которых состоит выборка.
          * @return новый объект страницы.
          * @throws NullPointerException если  content равен null.
-         * @throws IncorrectPageContentSizeException если размер передаваемого списка не равен {@link #getActualSize()}.
+         * @throws IllegalArgumentException если размер передаваемого списка не равен {@link #getActualSize()}.
          */
         public <T>Page<T> createPage(List<T> content) {
             return new Page<>(content, this);

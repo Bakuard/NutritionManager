@@ -1,10 +1,7 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.exceptions.BlankValueException;
-import com.bakuard.nutritionManager.model.exceptions.DuplicateTagException;
-import com.bakuard.nutritionManager.model.exceptions.OutOfRangeException;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -23,31 +20,29 @@ public class Dish {
     private String description;
     private String imagePath;
     private final List<DishIngredient> ingredients;
-    private final Set<Tag> tags;
-    private final Set<Tag> readonlyTags;
+    private final SortedSet<Tag> tags;
 
     Dish(UUID id, UUID userId) {
-        checkId(id);
-        checkUserId(userId);
+
 
         this.id = id;
         this.userId = userId;
         name = "Dish #" + id;
         unit = "килограмм";
         ingredients = new ArrayList<>();
-        tags = new HashSet<>();
-        readonlyTags = Collections.unmodifiableSet(tags);
+        tags = new TreeSet<>();
     }
 
     /**
      * Устанавливает наименование для данного блюда. Указанное наименование будет сохранено без начальных и
      * конечных пробельных символов.
      * @param name наименование для данного блюда.
-     * @throws NullPointerException если name имеет значение null.
-     * @throws BlankValueException если name не содержит ни одного отображаемого символа.
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
+     *         1. если name имеет значение null.<br/>
+     *         2. если name не содержит ни одного отображаемого символа.
      */
     public void setName(String name) {
-        checkName(name);
+
         this.name = name.trim();
     }
 
@@ -55,11 +50,12 @@ public class Dish {
      * Задает наименование единицы измерения кол-ва для данного блюда. Заданное значение будет сохранено без
      * начальных и конечных пробельных символов.
      * @param unit наименование единицы измерения кол-ва для данного блюда.
-     * @throws NullPointerException если unit имеет значение null.
-     * @throws BlankValueException если unit не содержит ни одного отображаемого символа.
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
+     *         1. если unit имеет значение null.<br/>
+     *         2. если unit не содержит ни одного отображаемого символа.
      */
     public void setUnit(String unit) {
-        checkUnit(unit);
+
         this.unit = unit.trim();
     }
 
@@ -89,14 +85,12 @@ public class Dish {
      * @param constraint ограничение задающее множество взаимозаменяемых продуктов, каждое из которых может
      *                   выступать данным конкретным ингредиентом этого блюда.
      * @param quantity кол-во соответсвующего ингредиента.
-     * @throws OutOfRangeException если quantity меньше или равен нулю.
-     * @throws NullPointerException если один из параметров имеет значение null.
-     * @throws BlankValueException если наименование ингредиент null или пустая строка.
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
+     *         1. если quantity меньше или равен нулю.<br/>
+     *         2. если один из параметров имеет значение null.<br/>
+     *         3. если наименование ингредиент null или пустая строка.
      */
     public void putIngredient(String name, Constraint constraint, BigDecimal quantity) {
-        checkIngredientName(name);
-        checkConstraint(constraint);
-        checkIngredientQuantity(quantity);
 
     }
 
@@ -120,11 +114,12 @@ public class Dish {
     /**
      * Добавляет новый тег в указанное блюдо.
      * @param tag добавляемый тег.
-     * @throws NullPointerException если указанный тег имеет значние null.
-     * @throws DuplicateTagException если указанный уже присутсвует в объекте.
+     * @throws ValidateException в следующих случаях:<br/>
+     *         1. если указанное значение равняется null<br/>
+     *         2. если указанный тег уже содержится в данном объекте.
      */
     public void addTag(Tag tag) {
-        checkTag(tag);
+
         tags.add(tag);
     }
 
@@ -212,14 +207,6 @@ public class Dish {
     }
 
     /**
-     * Возвращает все теги указанные для данного блюда. Возвращаемое множество доступно только для чтения.
-     * @return все теги указанные для данного блюда.
-     */
-    public Set<Tag> getReadonlyTags() {
-        return readonlyTags;
-    }
-
-    /**
      * Возвращает кол-во всех возможных комбинаций состава данного блюда. Если для данного блюда не было
      * указанно ни одного ингредиента - возвращает 0.
      * @param repository репозиторий продуктов.
@@ -281,59 +268,6 @@ public class Dish {
                 ", imagePath='" + imagePath + '\'' +
                 ", ingredients=" + ingredients +
                 '}';
-    }
-
-
-    private void checkId(UUID id) {
-        Objects.requireNonNull(id, "Dish id can't be null.");
-    }
-
-    private void checkUserId(UUID userId) {
-        Objects.requireNonNull(userId, "Dish userId can't be null.");
-    }
-
-    private void checkName(String name) {
-        Objects.requireNonNull(name, "Dish name can not be null.");
-
-        if(name.isBlank())
-            throw new BlankValueException("Dish name can not be blank", getClass(), "name");
-    }
-
-    private void checkUnit(String unit) {
-        Objects.requireNonNull(unit, "Dish unit can not be null.");
-
-        if(unit.isBlank())
-            throw new BlankValueException("Dish unit can not be blank", getClass(), "unit");
-    }
-
-    private void checkConstraint(Constraint constraint) {
-        Objects.requireNonNull(constraint, "Dish constraint can not be null.");
-    }
-
-    private void checkIngredientName(String name) {
-        Objects.requireNonNull(name, "Dish ingredient name can't be null.");
-
-        if(name.isBlank())
-            throw new BlankValueException("Dish ingredient name can't be blank.", getClass(), "Dish ingredient name");
-    }
-
-    private void checkIngredientQuantity(BigDecimal quantity) {
-        Objects.requireNonNull(quantity, "Quantity of dish ingredient can not be null.");
-
-        if(quantity.signum() <= 0) {
-            throw new OutOfRangeException("Quantity of dish ingredient must be positive.", getClass(), "quantity");
-        }
-    }
-
-    private void checkTag(Tag tag) {
-        Objects.requireNonNull(tag, "Dish tag can not be null.");
-
-        if(tags.contains(tag))
-            throw new DuplicateTagException(
-                    "This tag is already specified for the dish.",
-                    getClass(),
-                    "tag",
-                    tag);
     }
 
 }

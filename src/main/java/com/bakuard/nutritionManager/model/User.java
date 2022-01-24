@@ -27,12 +27,17 @@ public class User {
     }
 
     public User(UUID id, String name, String password, String email) {
-        UserValidateException validateException = new UserValidateException("Fail to create user.");
-        validateException.addReason(checkId(id));
-        validateException.addReason(checkName(name));
-        validateException.addReason(checkPassword(password));
-        validateException.addReason(checkEmail(email));
-        if(validateException.violatedConstraints()) throw validateException;
+        Checker.of(getClass(), "constructor").
+                nullValue("id", id).
+                nullValue("name", name).
+                blankValue("name", name).
+                incorrectStringLength("name", name, 1, 40).
+                nullValue("password", password).
+                blankValue("password", password).
+                incorrectStringLength("password", password, 8, 100).
+                nullValue("email", email).
+                blankValue("email", email).
+                checkWithValidateException("Fail to create user");
 
         this.id = id;
         this.name = name;
@@ -58,7 +63,11 @@ public class User {
     }
 
     public void setName(String name) {
-        tryThrow(checkName(name));
+        Checker.of(getClass(), "setName").
+                nullValue("name", name).
+                blankValue("name", name).
+                incorrectStringLength("name", name, 1, 40).
+                checkWithValidateException("Fail to set user name");
         this.name = name;
     }
 
@@ -67,7 +76,11 @@ public class User {
     }
 
     public void setPassword(String password) {
-        tryThrow(checkPassword(password));
+        Checker.of(getClass(), "setPassword").
+                nullValue("password", password).
+                blankValue("password", password).
+                incorrectStringLength("password", password, 8, 100).
+                checkWithValidateException("Fail to set user password");
         this.passwordHash = calculatePasswordHash(password, salt);
     }
 
@@ -76,7 +89,10 @@ public class User {
     }
 
     public void setEmail(String email) {
-        tryThrow(checkEmail(email));
+        Checker.of(getClass(), "setEmail").
+                nullValue("email", email).
+                blankValue("email", email).
+                checkWithValidateException("Fail to set user email");
         this.email = email;
     }
 
@@ -85,7 +101,9 @@ public class User {
     }
 
     public boolean isCorrectPassword(String password) {
-        MissingValueException.check(password, getClass(), "password");
+        Checker.of(getClass(), "isCorrectPassword").
+                nullValue("password", password).
+                checkWithValidateException();
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 
@@ -120,51 +138,6 @@ public class User {
                 '}';
     }
 
-
-    private IncorrectFiledValueException checkId(UUID id) {
-        MissingValueException result = null;
-        if(id == null) result = new MissingValueException("User id can't be null", getClass(), "id");
-        return result;
-    }
-
-    private IncorrectFiledValueException checkName(String name) {
-        IncorrectFiledValueException result = null;
-        if(name == null) result = new MissingValueException("User name can't be null", getClass(), "name");
-        else if(name.isBlank()) result = new BlankValueException("User name can't be blank", getClass(), "name");
-        else if(name.length() > 40) {
-            result = new IncorrectStringLengthException("User name can't be longer than 40 characters", getClass(), "name");
-        }
-        return result;
-    }
-
-    private IncorrectFiledValueException checkPassword(String password) {
-        IncorrectFiledValueException result = null;
-        if(password == null) {
-            result = new MissingValueException("User password can't be null", getClass(), "password");
-        } else if(password.isBlank()) {
-            result = new BlankValueException("User password can't be blank", getClass(), "password");
-        } else if(password.length() < 8 || password.length() > 100) {
-            result = new IncorrectStringLengthException(
-                    "User password can't be longer than 100 and less than 8 characters. actual length = " + password.length(),
-                    getClass(),
-                    "password");
-        }
-        return result;
-    }
-
-    private IncorrectFiledValueException checkEmail(String email) {
-        IncorrectFiledValueException result = null;
-        if(email == null) {
-            result = new MissingValueException("User email can't be null", getClass(), "email");
-        } else if(email.isBlank()) {
-            result = new BlankValueException("User email can't be blank", getClass(), "email");
-        }
-        return result;
-    }
-
-    private void tryThrow(RuntimeException e) {
-        if(e != null) throw e;
-    }
 
     private String calculatePasswordHash(String password, String salt) {
         return Hashing.sha256().hashBytes(password.concat(salt).getBytes(StandardCharsets.UTF_8)).toString();

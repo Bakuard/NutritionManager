@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.model.filters;
 
 import com.google.common.collect.ImmutableList;
 
-public interface Constraint {
+public interface Filter {
 
     public static enum Type {
         OR_ELSE,
@@ -16,6 +16,6 @@ public interface Constraint {
 
     public Type getType();
 
-    public ImmutableList<Constraint> getOperands();
+    public ImmutableList<Filter> getOperands();
 
 }

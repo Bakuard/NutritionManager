@@ -1,11 +1,7 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.UnknownUserException;
-import com.bakuard.nutritionManager.model.exceptions.UserAlreadyExistsException;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-
-import org.springframework.dao.DataAccessException;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 import java.util.UUID;
 
@@ -17,9 +13,9 @@ public interface UserRepository {
      * ли в БД пользователь с таким именем, паролем или почтой и если да - генерирует исключение.
      * @param user сохраняемый пользователь.
      * @return true - если указанный пользователь отсутсвовал в БД или отличался от переданного, иначе - false.
-     * @throws DataAccessException если возникла ошибка связанная с обращением к БД.
-     * @throws MissingValueException если user имеет значение null.
-     * @throws UserAlreadyExistsException если пользователь с таким именем уже есть в БД.
+     * @throws ServiceException если верно одно из следующих условий:<br/>
+     *         1. если user имеет значение null.<br/>
+     *         2. если пользователь с таким именем уже есть в БД.
      */
     public boolean save(User user);
 
@@ -27,8 +23,9 @@ public interface UserRepository {
      * Возвращает пользователя по его ID. Если пользователя с таким ID не существует - выбрасывет исключение.
      * @param userId уникальный идентификатор пользователя.
      * @return пользователя по его ID.
-     * @throws UnknownUserException если не удалось найти пользователя с таким ID или userId равен null.
-     * @throws DataAccessException если при выполнении данной операции возникла ошибка при обращении к БД.
+     * @throws ServiceException если верно одно из следующих условий:<br/>
+     *         1. если не удалось найти пользователя с таким ID.<br/>
+     *         2. если userId равен null.
      */
     public User getById(UUID userId);
 
@@ -36,8 +33,9 @@ public interface UserRepository {
      * Возвращает пользователя по его имени. Если пользователя с таким именем не сущестует  - выбрасывает исключение.
      * @param name уникальное имя пользователя.
      * @return пользователя по его имени.
-     * @throws UnknownUserException если не удалось найти пользователя с таким именем или name равен null.
-     * @throws DataAccessException если при выполнении данной операции возникла ошибка при обращении к БД.
+     * @throws ServiceException если верно одно из следующих условий:<br/>
+     *         1. если не удалось найти пользователя с таким name.<br/>
+     *         2. если name равен null.
      */
     public User getByName(String name);
 
@@ -45,8 +43,9 @@ public interface UserRepository {
      * Возвращает пользователя по его почте. Если пользователя с такой почтой не сущестует  - выбрасывает исключение.
      * @param email уникальная почта пользователя.
      * @return пользователя по его почте.
-     * @throws UnknownUserException если не удалось найти пользователя с такой почтой или email равен null.
-     * @throws DataAccessException если при выполнении данной операции возникла ошибка при обращении к БД.
+     * @throws ServiceException если верно одно из следующих условий:<br/>
+     *         1. если не удалось найти пользователя с таким email.<br/>
+     *         2. если email равен null.
      */
     public User getByEmail(String email);
 

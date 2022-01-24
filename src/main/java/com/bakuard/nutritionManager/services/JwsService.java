@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.services;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.IncorrectJwsException;
 
+import com.bakuard.nutritionManager.model.exceptions.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -49,7 +49,7 @@ public class JwsService {
                 compact();
     }
 
-    public UUID parseAccessJws(String jws) throws IncorrectJwsException {
+    public UUID parseAccessJws(String jws) throws ServiceException {
         jws = jws.replaceFirst("Bearer ", "");
 
         try {
@@ -61,7 +61,9 @@ public class JwsService {
 
             return UUID.fromString(claims.getSubject());
         } catch(JwtException e) {
-            throw new IncorrectJwsException("Fail to parse access JWS", e);
+            throw Checker.of(getClass(), "parseAccessJws").
+                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
+                    createServiceException("Incorrect access jws");
         }
     }
 
@@ -76,7 +78,7 @@ public class JwsService {
                 compact();
     }
 
-    public String parseRegistrationJws(String jws) throws IncorrectJwsException {
+    public String parseRegistrationJws(String jws) throws ServiceException {
         jws = jws.replaceFirst("Bearer ", "");
 
         try {
@@ -88,7 +90,9 @@ public class JwsService {
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw new IncorrectJwsException("Fail to parse registration JWS", e);
+            throw Checker.of(getClass(), "parseRegistrationJws").
+                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
+                    createServiceException("Incorrect registration jws");
         }
     }
 
@@ -103,7 +107,7 @@ public class JwsService {
                 compact();
     }
 
-    public String parseChangeCredentialsJws(String jws) throws IncorrectJwsException {
+    public String parseChangeCredentialsJws(String jws) throws ServiceException {
         jws = jws.replaceFirst("Bearer ", "");
 
         try {
@@ -115,7 +119,9 @@ public class JwsService {
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw new IncorrectJwsException("Fail to parse change credentials JWS", e);
+            throw Checker.of(getClass(), "parseChangeCredentialsJws").
+                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
+                    createServiceException("Incorrect change credential jws");
         }
     }
 

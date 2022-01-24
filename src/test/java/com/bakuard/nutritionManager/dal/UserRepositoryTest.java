@@ -3,10 +3,11 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.exceptions.UnknownUserException;
-import com.bakuard.nutritionManager.model.exceptions.UserAlreadyExistsException;
 
+import com.bakuard.nutritionManager.model.exceptions.AbstractDomainException;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -103,7 +105,12 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): user is null => exception")
     public void save1() {
-        Assertions.assertThrows(MissingValueException.class, () -> repository.save(null));
+        assertServiceException(
+                () -> repository.save(null),
+                UserRepositoryPostgres.class,
+                "save",
+                ConstraintType.MISSING_VALUE
+        );
     }
 
     @Test
@@ -161,7 +168,12 @@ class UserRepositoryTest {
         User addedUser = createDefaultUser(2);
         addedUser.setName("User1");
 
-        Assertions.assertThrows(UserAlreadyExistsException.class, () -> repository.save(addedUser));
+        assertServiceException(
+                () -> repository.save(addedUser),
+                UserRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -178,7 +190,12 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        Assertions.assertThrows(UserAlreadyExistsException.class, () -> repository.save(addedUser));
+        assertServiceException(
+                () -> repository.save(addedUser),
+                UserRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -195,7 +212,12 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        Assertions.assertThrows(UserAlreadyExistsException.class, () -> repository.save(addedUser));
+        assertServiceException(
+                () -> repository.save(addedUser),
+                UserRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -251,7 +273,12 @@ class UserRepositoryTest {
         User expected = new User(user1);
         expected.setName("User2");
 
-        Assertions.assertThrows(UserAlreadyExistsException.class, () -> repository.save(expected));
+        assertServiceException(
+                () -> repository.save(expected),
+                UserRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -276,7 +303,12 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        Assertions.assertThrows(UserAlreadyExistsException.class, () -> repository.save(expected));
+        assertServiceException(
+                () -> repository.save(expected),
+                UserRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -301,7 +333,12 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        Assertions.assertThrows(UserAlreadyExistsException.class, () -> repository.save(expected));
+        assertServiceException(
+                () -> repository.save(expected),
+                UserRepositoryPostgres.class,
+                "save",
+                ConstraintType.ALREADY_EXISTS_IN_DB
+        );
     }
 
     @Test
@@ -339,7 +376,12 @@ class UserRepositoryTest {
     @Test
     @DisplayName("getById(userId): userId is null => exception")
     public void getById1() {
-        Assertions.assertThrows(UnknownUserException.class, () -> repository.getById(null));
+        assertServiceException(
+                () -> repository.getById(null),
+                UserRepositoryPostgres.class,
+                "getById",
+                ConstraintType.MISSING_VALUE
+        );
     }
 
     @Test
@@ -348,7 +390,12 @@ class UserRepositoryTest {
         User user = createDefaultUser(1);
         repository.save(user);
 
-        Assertions.assertThrows(UnknownUserException.class, () -> repository.getById(toUUID(2)));
+        assertServiceException(
+                () -> repository.getById(toUUID(2)),
+                UserRepositoryPostgres.class,
+                "getById",
+                ConstraintType.UNKNOWN_ENTITY
+        );
     }
 
     @Test
@@ -370,9 +417,11 @@ class UserRepositoryTest {
              => exception
             """)
     public void getByName1() {
-        Assertions.assertThrows(
-                UnknownUserException.class,
-                () -> repository.getByName(null)
+        assertServiceException(
+                () -> repository.getByName(null),
+                UserRepositoryPostgres.class,
+                "getByName",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -386,9 +435,11 @@ class UserRepositoryTest {
         User user = createDefaultUser(1);
         commit(() -> repository.save(user));
 
-        Assertions.assertThrows(
-                UnknownUserException.class,
-                () -> repository.getByName("some user")
+        assertServiceException(
+                () -> repository.getByName("some user"),
+                UserRepositoryPostgres.class,
+                "getByName",
+                ConstraintType.UNKNOWN_ENTITY
         );
     }
 
@@ -414,9 +465,11 @@ class UserRepositoryTest {
              => exception
             """)
     public void getByEmail1() {
-        Assertions.assertThrows(
-                UnknownUserException.class,
-                () -> repository.getByEmail(null)
+        assertServiceException(
+                () -> repository.getByEmail(null),
+                UserRepositoryPostgres.class,
+                "getByEmail",
+                ConstraintType.MISSING_VALUE
         );
     }
 
@@ -430,9 +483,11 @@ class UserRepositoryTest {
         User user = createDefaultUser(1);
         commit(() -> repository.save(user));
 
-        Assertions.assertThrows(
-                UnknownUserException.class,
-                () -> repository.getByEmail("newEmail@mail.com")
+        assertServiceException(
+                () -> repository.getByEmail("newEmail@mail.com"),
+                UserRepositoryPostgres.class,
+                "getByEmail",
+                ConstraintType.UNKNOWN_ENTITY
         );
     }
 
@@ -474,6 +529,40 @@ class UserRepositoryTest {
 
     private UUID toUUID(int number) {
         return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
+    }
+
+    private void assertServiceException(Action action,
+                                        Class<?> checkedType,
+                                        String operationName,
+                                        ConstraintType... expectedTypes) {
+        try {
+            action.act();
+            Assertions.fail("Expected exception, but nothing be thrown");
+        } catch(Exception e) {
+            if(!(e instanceof ServiceException)) {
+                Assertions.fail("Unexpected exception type " + e.getClass().getName());
+            }
+
+            ServiceException ex = (ServiceException) e;
+
+            for(ConstraintType type : expectedTypes) {
+                if(ex.getConstraints().stream().map(Constraint::getType).noneMatch(t -> t == type)) {
+                    Assertions.fail("Expected constraint type " + type + " is missing");
+                }
+            }
+
+            for(Constraint constraint : ex.getConstraints()) {
+                if(Arrays.stream(expectedTypes).noneMatch(t -> t == constraint.getType())) {
+                    Assertions.fail("Unexpected constraint type " + constraint.getType());
+                }
+            }
+
+            if(!ex.isOriginate(checkedType, operationName)) {
+                Assertions.fail("Unexpected checkedType or operationName. Expected: " +
+                        ex.getCheckedType().getName() + ", " + ex.getOperationName() + ". Actual: " +
+                        checkedType.getName() + ", " + operationName);
+            }
+        }
     }
 
 }

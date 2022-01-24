@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -19,7 +19,7 @@ public class ProductFieldNumberCriteria {
      * Создает и возвращает новый обеъект ProductFieldNumberCriteria.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый объект ProductFieldNumberCriteria.
-     * @throws MissingValueException если user имеет значение null.
+     * @throws ServiceException если user имеет значение null.
      */
     public static ProductFieldNumberCriteria of(User user) {
         return new ProductFieldNumberCriteria(user);
@@ -30,7 +30,9 @@ public class ProductFieldNumberCriteria {
     private String productCategory;
 
     private ProductFieldNumberCriteria(User user) {
-        MissingValueException.check(user, getClass(), "user");
+        Checker.of(getClass(), "constructor").
+                nullValue("user", user).
+                checkWithServiceException();
 
         this.user = user;
     }

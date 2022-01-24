@@ -1,7 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.exceptions.OutOfRangeException;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 /**
  * Задает правило сортировки блюд. Объекты данного класса неизменяемы.
@@ -27,7 +26,7 @@ public final class DishSort {
      * Создает объект представляющий правило сортировки блюд по параметру parameter.
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание ил убывание).
-     * @throws MissingValueException если parameter или direction является null.
+     * @throws ServiceException если parameter или direction является null.
      */
     public DishSort(Parameter parameter, SortDirection direction) {
 
@@ -41,7 +40,7 @@ public final class DishSort {
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание ил убывание).
      * @return новый объект сортировки.
-     * @throws MissingValueException если parameter или direction является null.
+     * @throws ServiceException если parameter или direction является null.
      */
     public ProductSort byParameter(Parameter parameter, SortDirection direction) {
         return null;
@@ -61,7 +60,9 @@ public final class DishSort {
      * Чем выше индекс, тем ниже приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return параметр сортировки.
-     * @throws OutOfRangeException если parameterIndex < 0 или parameterIndex >= {@link #getCountParameters()}.
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     *                          1. если parameterIndex < 0.<br/>
+     *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public Parameter getParameterType(int parameterIndex) {
         return null;
@@ -73,7 +74,9 @@ public final class DishSort {
      * приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return направление сортировки.
-     * @throws OutOfRangeException если parameterIndex < 0 или parameterIndex >= {@link #getCountParameters()}.
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     *                          1. если parameterIndex < 0.<br/>
+     *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public SortDirection getDirection(int parameterIndex) {
         return null;

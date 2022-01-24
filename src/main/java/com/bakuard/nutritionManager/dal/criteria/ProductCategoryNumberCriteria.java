@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.dal.criteria;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.Constraint;
 
 import java.util.Objects;
 
@@ -15,7 +16,9 @@ public class ProductCategoryNumberCriteria {
     private User user;
 
     private ProductCategoryNumberCriteria(User user) {
-        MissingValueException.check(user, getClass(), "user");
+        Checker.of(getClass(), "constructor").
+                nullValue("user", user).
+                checkWithServiceException();
 
         this.user = user;
     }

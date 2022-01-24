@@ -7,54 +7,99 @@ import java.util.function.Consumer;
  * Обобщенный тип исключений, все наследники которого указывают, что было нарушенно один или несколько
  * инвариантов при констрировании бизнес сущности.
  */
-public abstract class ValidateException extends AbstractDomainException implements Iterable<IncorrectFiledValueException> {
+public class ValidateException extends AbstractDomainException implements Iterable<Constraint> {
 
-    protected List<IncorrectFiledValueException> filedValueExceptions;
-    protected List<ValidateException> validateExceptions;
+    private Class<?> checkedType;
+    private final String operationName;
+    private List<Constraint> constraints;
+    private List<ValidateException> validateExceptions;
 
-    public ValidateException() {
-        filedValueExceptions = new ArrayList<>();
+    public ValidateException(Class<?> checkedType, String operationName) {
+        this.checkedType = checkedType;
+        this.operationName = operationName;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(String message) {
+    public ValidateException(String message, Class<?> checkedType, String operationName) {
         super(message);
-        filedValueExceptions = new ArrayList<>();
+        this.checkedType = checkedType;
+        this.operationName = operationName;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(String message, Throwable cause) {
+    public ValidateException(String message, Throwable cause, Class<?> checkedType, String operationName) {
         super(message, cause);
-        filedValueExceptions = new ArrayList<>();
+        this.checkedType = checkedType;
+        this.operationName = operationName;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(Throwable cause) {
+    public ValidateException(Throwable cause, Class<?> checkedType, String operationName) {
         super(cause);
-        filedValueExceptions = new ArrayList<>();
+        this.checkedType = checkedType;
+        this.operationName = operationName;
+        constraints = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public boolean violatedConstraints() {
-        return !filedValueExceptions.isEmpty() || !validateExceptions.isEmpty();
+    public Class<?> getCheckedType() {
+        return checkedType;
     }
 
-    public void addReason(IncorrectFiledValueException e) {
-        if(e != null) {
-            filedValueExceptions.add(e);
-            addSuppressed(e);
-        }
+    public String getOperationName() {
+        return operationName;
     }
 
-    public void addReason(ValidateException e) {
+    public String getMessageKey() {
+        return checkedType.getSimpleName() + "." + operationName;
+    }
+
+    public boolean containsConstraint(ConstraintType type) {
+        return constraints.stream().map(Constraint::getType).anyMatch(c -> c == type);
+    }
+
+    public ValidateException addExcReason(ValidateException e) {
         if(e != null) {
             validateExceptions.add(e);
             addSuppressed(e);
         }
+        return this;
     }
 
-    public List<IncorrectFiledValueException> getFiledValueExceptions() {
-        return filedValueExceptions;
+    public ValidateException addExcReasons(List<ValidateException> exceptions) {
+        if(exceptions != null) {
+            validateExceptions.addAll(exceptions);
+            exceptions.forEach(this::addSuppressed);
+        }
+        return this;
+    }
+
+    public ValidateException addReason(Constraint e) {
+        if(e != null) {
+            constraints.add(e);
+        }
+        return this;
+    }
+
+    public ValidateException addReasons(Constraint... constraints) {
+        if(constraints != null && constraints.length > 0) {
+            Collections.addAll(this.constraints, constraints);
+        }
+        return this;
+    }
+
+    public ValidateException addReasons(List<Constraint> constraints) {
+        if(constraints != null && constraints.size() > 0) {
+            this.constraints.addAll(constraints);
+        }
+        return this;
+    }
+
+    public List<Constraint> getConstraints() {
+        return constraints;
     }
 
     public List<ValidateException> getValidateExceptions() {
@@ -62,19 +107,19 @@ public abstract class ValidateException extends AbstractDomainException implemen
     }
 
     @Override
-    public Iterator<IncorrectFiledValueException> iterator() {
+    public Iterator<Constraint> iterator() {
         return new Iterator<>() {
 
-            private final Iterator<IncorrectFiledValueException> inner;
+            private final Iterator<Constraint> inner;
 
             {
                 Deque<ValidateException> stack = new ArrayDeque<>();
-                List<IncorrectFiledValueException> all = new ArrayList<>();
+                List<Constraint> all = new ArrayList<>();
 
                 stack.addFirst(ValidateException.this);
                 while(!stack.isEmpty()) {
                     ValidateException current = stack.removeFirst();
-                    all.addAll(current.filedValueExceptions);
+                    all.addAll(current.constraints);
                     for(int i = current.validateExceptions.size() - 1; i >= 0; --i)
                         stack.addFirst(current.validateExceptions.get(i));
                 }
@@ -88,7 +133,7 @@ public abstract class ValidateException extends AbstractDomainException implemen
             }
 
             @Override
-            public IncorrectFiledValueException next() {
+            public Constraint next() {
                 return inner.next();
             }
 
@@ -96,18 +141,38 @@ public abstract class ValidateException extends AbstractDomainException implemen
     }
 
     @Override
-    public void forEach(Consumer<? super IncorrectFiledValueException> action) {
+    public void forEach(Consumer<? super Constraint> action) {
         Deque<ValidateException> stack = new ArrayDeque<>();
 
         stack.addFirst(this);
         while(!stack.isEmpty()) {
             ValidateException current = stack.removeFirst();
-            for(IncorrectFiledValueException e : current.filedValueExceptions) {
+            for(Constraint e : current.constraints) {
                 action.accept(e);
             }
             for(int i = current.validateExceptions.size() - 1; i >= 0; --i)
                 stack.addFirst(current.validateExceptions.get(i));
         }
+    }
+
+    @Override
+    public String getMessage() {
+        StringBuilder result = new StringBuilder("Fail to ").
+                append(checkedType.getSimpleName()).
+                append('.').
+                append(operationName).
+                append(" - ").
+                append(super.getMessage()).
+                append(". Reasons:");
+
+        constraints.forEach(
+                c -> result.append('\n').
+                        append(c.getMessageKey()).
+                        append(". Detail: ").
+                        append(c.getDetail())
+        );
+
+        return result.toString();
     }
 
 }

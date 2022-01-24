@@ -2,8 +2,8 @@ package com.bakuard.nutritionManager.dal.criteria;
 
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.model.filters.Filter;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,7 +21,7 @@ public class ProductsNumberCriteria {
      * Создает и возвращает новый обеъект ProductsNumberCriteria.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый обеъект ProductsNumberCriteria.
-     * @throws MissingValueException если user имеет значение null.
+     * @throws ServiceException если user имеет значение null.
      */
     public static ProductsNumberCriteria of(User user) {
         return new ProductsNumberCriteria(user);
@@ -30,10 +30,12 @@ public class ProductsNumberCriteria {
 
     private User user;
     private boolean onlyFridge;
-    private Constraint constraint;
+    private Filter filter;
 
     private ProductsNumberCriteria(User user) {
-        MissingValueException.check(user, getClass(), "user");
+        Checker.of(getClass(), "constructor").
+                nullValue("user", user).
+                checkWithServiceException();
 
         this.user = user;
     }
@@ -68,23 +70,23 @@ public class ProductsNumberCriteria {
     }
 
     /**
-     * Устанавливает ограничения для отбираемых продуктов (подробнее см. {@link Constraint} и его подтипы).
+     * Устанавливает ограничения для отбираемых продуктов (подробнее см. {@link Filter} и его подтипы).
      * Значение по умолчанию - пустой Optional (т.е. выборка формируется из всех продуктов пользвателя, если
      * не учитывать другие параметры данного объекта).
-     * @param constraint ограничения для отбираемых продуктов.
+     * @param filter ограничения для отбираемых продуктов.
      * @return этот же объект.
      */
-    public ProductsNumberCriteria setConstraint(Constraint constraint) {
-        this.constraint = constraint;
+    public ProductsNumberCriteria setFilter(Filter filter) {
+        this.filter = filter;
         return this;
     }
 
     /**
-     * Возвращает ограничения для отбираемых продуктов (подробнее см. {@link Constraint} и его подтипы).
+     * Возвращает ограничения для отбираемых продуктов (подробнее см. {@link Filter} и его подтипы).
      * @return ограничения для отбираемых продуктов.
      */
-    public Optional<Constraint> getConstraint() {
-        return Optional.ofNullable(constraint);
+    public Optional<Filter> getFilter() {
+        return Optional.ofNullable(filter);
     }
 
     @Override
@@ -94,12 +96,12 @@ public class ProductsNumberCriteria {
         ProductsNumberCriteria that = (ProductsNumberCriteria) o;
         return onlyFridge == that.onlyFridge &&
                 Objects.equals(user, that.user) &&
-                Objects.equals(constraint, that.constraint);
+                Objects.equals(filter, that.filter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user, onlyFridge, constraint);
+        return Objects.hash(user, onlyFridge, filter);
     }
 
     @Override
@@ -107,7 +109,7 @@ public class ProductsNumberCriteria {
         return "ProductsNumberCriteria{" +
                 "user=" + user +
                 ", onlyFridge=" + onlyFridge +
-                ", constraint=" + constraint +
+                ", constraint=" + filter +
                 '}';
     }
 

@@ -1,9 +1,9 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.exceptions.OutOfRangeException;
-import com.bakuard.nutritionManager.model.exceptions.SortParameterFormatException;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.util.Pair;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,10 +62,13 @@ public final class ProductSort {
      * Создает объект представляющий правило сортировки продуктов по параметру parameter.
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание или убывание).
-     * @throws MissingValueException если parameter или direction являются null.
+     * @throws ServiceException если parameter или direction являются null.
      */
     public ProductSort(Parameter parameter, SortDirection direction) {
-        checkForNull(parameter, direction);
+        Checker.of(getClass(), "constructor").
+                nullValue("parameter", parameter).
+                nullValue("direction", direction).
+                checkWithServiceException();
 
         params = new ArrayList<>();
         params.add(new Pair<>(parameter, direction));
@@ -75,9 +78,10 @@ public final class ProductSort {
      * Создает объект представляющий правило сортировки продуктов по параметру parameter.
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание или убывание).
-     * @throws MissingValueException если parameter или direction являются null.
-     * @throws SortParameterFormatException если строка параметра или направления сортировки не соответсуют
-     *                                      ни одному известному значению.
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     *                          1. если parameter или direction являются null.<br/>
+     *                          2. если строка параметра или направления сортировки не соответсуют
+     *                             ни одному известному значению.
      */
     public ProductSort(String parameter, String direction) {
         params = new ArrayList<>();
@@ -96,10 +100,13 @@ public final class ProductSort {
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание ил убывание).
      * @return новый объект сортировки.
-     * @throws MissingValueException если parameter или direction является null.
+     * @throws ServiceException если parameter или direction является null.
      */
     public ProductSort byParameter(Parameter parameter, SortDirection direction) {
-        checkForNull(parameter, direction);
+        Checker.of(getClass(), "byParameter").
+                nullValue("parameter", parameter).
+                nullValue("direction", direction).
+                checkWithServiceException();
 
         Pair<Parameter, SortDirection> pair = new Pair<>(parameter, direction);
         ArrayList<Pair<Parameter, SortDirection>> newParams = new ArrayList<>(params);
@@ -125,15 +132,15 @@ public final class ProductSort {
      * Чем выше индекс, тем ниже приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return параметр сортировки.
-     * @throws OutOfRangeException если parameterIndex < 0 или parameterIndex >= {@link #getCountParameters()}.
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     *                          1. если parameterIndex < 0.<br/>
+     *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public Parameter getParameterType(int parameterIndex) {
-        if(parameterIndex < 0 || parameterIndex >= params.size())
-            throw new OutOfRangeException(
-                    "Expected: parameterIndex >= 0 and parameterIndex < getCountParameters. Actual: " + parameterIndex,
-                    getClass(),
-                    "parameterIndex"
-            );
+        Checker.of(getClass(), "getParameterType").
+                outOfRange("parameterIndex", parameterIndex, 0, params.size() - 1).
+                checkWithServiceException("Fail to get parameter type from ProductSort. Index must belong " +
+                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
         return params.get(parameterIndex).getFirst();
     }
@@ -144,31 +151,25 @@ public final class ProductSort {
      * приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return направление сортировки.
-     * @throws OutOfRangeException если parameterIndex < 0 или parameterIndex >= {@link #getCountParameters()}.
+     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     *                          1. если parameterIndex < 0.<br/>
+     *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public SortDirection getDirection(int parameterIndex) {
-        if(parameterIndex < 0 || parameterIndex >= params.size())
-            throw new OutOfRangeException(
-                    "Expected: parameterIndex >= 0 and parameterIndex < getCountParameters. Actual: " + parameterIndex,
-                    getClass(),
-                    "parameterIndex"
-            );
+        Checker.of(getClass(), "getParameterType").
+                outOfRange("parameterIndex", parameterIndex, 0, params.size() - 1).
+                checkWithServiceException("Fail to get direction sort from ProductSort. Index must belong " +
+                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
         return params.get(parameterIndex).getSecond();
     }
 
 
-    private void checkForNull(Parameter parameter, SortDirection direction) {
-        if(parameter == null) {
-            throw new MissingValueException("ProductsSort parameter can't be null", getClass(), "parameter");
-        } else if(direction == null) {
-            throw new MissingValueException("ProductsSort direction can't be null", getClass(), "direction");
-        }
-    }
-
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        MissingValueException.check(parameter, getClass(), "parameter");
-        MissingValueException.check(direction, getClass(), "direction");
+        Checker checker = Checker.of(getClass(), "byParameter").
+                nullValue("parameter", parameter).
+                nullValue("direction", direction).
+                checkWithServiceException();
 
         Parameter p = null;
         SortDirection d = null;
@@ -179,14 +180,18 @@ public final class ProductSort {
             case "variety" -> p = Parameter.VARIETY;
             case "shop" -> p = Parameter.SHOP;
             case "manufacturer" -> p = Parameter.MANUFACTURER;
-            default -> throw new SortParameterFormatException("Unknown parameter=" + parameter, getClass(), "parameter");
+            default -> checker.
+                    addConstraint("parameter", ConstraintType.UNKNOWN_PARAMETER);
         }
 
         switch(direction) {
             case "asc" -> d = SortDirection.ASCENDING;
             case "desc" -> d = SortDirection.DESCENDING;
-            default -> throw new SortParameterFormatException("Unknown direction=" + parameter, getClass(), "direction");
+            default -> checker.
+                    addConstraint("direction", ConstraintType.UNKNOWN_PARAMETER);
         }
+
+        checker.checkWithServiceException();
 
         return new Pair<>(p, d);
     }

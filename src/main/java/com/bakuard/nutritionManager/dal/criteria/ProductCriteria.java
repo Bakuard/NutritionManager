@@ -2,8 +2,8 @@ package com.bakuard.nutritionManager.dal.criteria;
 
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.MissingValueException;
-import com.bakuard.nutritionManager.model.filters.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.ProductSort;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
@@ -24,7 +24,7 @@ public class ProductCriteria {
      * @param pageable параметры страницы исползующиеся для пагинации.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый обеъект ProductCriteria.
-     * @throws MissingValueException если хотя бы один из параметров имеет значение null.
+     * @throws ServiceException если хотя бы один из параметров имеет значение null.
      */
     public static ProductCriteria of(Pageable pageable, User user) {
         return new ProductCriteria(pageable, user);
@@ -34,12 +34,14 @@ public class ProductCriteria {
     private Pageable pageable;
     private User user;
     private boolean onlyFridge;
-    private Constraint constraint;
+    private Filter filter;
     private ProductSort order;
 
     private ProductCriteria(Pageable pageable, User user) {
-        MissingValueException.check(pageable, getClass(), "pageable");
-        MissingValueException.check(user, getClass(), "user");
+        Checker.of(getClass(), "constructor").
+                nullValue("pageable", pageable).
+                nullValue("user", user).
+                checkWithServiceException();
 
         this.pageable = pageable;
         this.user = user;
@@ -84,23 +86,23 @@ public class ProductCriteria {
     }
 
     /**
-     * Устанавливает ограничения для отбираемых продуктов (подробнее см. {@link Constraint} и его подтипы).
+     * Устанавливает ограничения для отбираемых продуктов (подробнее см. {@link Filter} и его подтипы).
      * Значение по умолчанию - пустой Optional (т.е. выборка формируется из всех продуктов пользвателя, если
      * не учитывать другие параметры данного объекта).
-     * @param constraint ограничения для отбираемых продуктов.
+     * @param filter ограничения для отбираемых продуктов.
      * @return этот же объект.
      */
-    public ProductCriteria setConstraint(Constraint constraint) {
-        this.constraint = constraint;
+    public ProductCriteria setFilter(Filter filter) {
+        this.filter = filter;
         return this;
     }
 
     /**
-     * Возвращает ограничения для отбираемых продуктов (подробнее см. {@link Constraint} и его подтипы).
+     * Возвращает ограничения для отбираемых продуктов (подробнее см. {@link Filter} и его подтипы).
      * @return ограничения для отбираемых продуктов.
      */
-    public Optional<Constraint> getConstraint() {
-        return Optional.ofNullable(constraint);
+    public Optional<Filter> getFilter() {
+        return Optional.ofNullable(filter);
     }
 
     /**
@@ -130,7 +132,7 @@ public class ProductCriteria {
     public ProductsNumberCriteria getNumberCriteria() {
         return ProductsNumberCriteria.of(user).
                 setOnlyFridge(onlyFridge).
-                setConstraint(constraint);
+                setFilter(filter);
     }
 
     @Override
@@ -141,13 +143,13 @@ public class ProductCriteria {
         return onlyFridge == that.onlyFridge &&
                 Objects.equals(pageable, that.pageable) &&
                 Objects.equals(user, that.user) &&
-                Objects.equals(constraint, that.constraint) &&
+                Objects.equals(filter, that.filter) &&
                 Objects.equals(order, that.order);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pageable, user, onlyFridge, constraint, order);
+        return Objects.hash(pageable, user, onlyFridge, filter, order);
     }
 
     @Override
@@ -156,7 +158,7 @@ public class ProductCriteria {
                 "pageable=" + pageable +
                 ", user=" + user +
                 ", onlyFridge=" + onlyFridge +
-                ", constraint=" + constraint +
+                ", constraint=" + filter +
                 ", order=" + order +
                 '}';
     }

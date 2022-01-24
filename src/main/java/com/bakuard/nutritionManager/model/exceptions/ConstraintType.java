@@ -1,0 +1,20 @@
+package com.bakuard.nutritionManager.model.exceptions;
+
+public enum ConstraintType {
+
+    DUPLICATE_TAG,
+    INCORRECT_STRING_LENGTH,
+    NOT_ENOUGH_ITEMS,
+    NEGATIVE_VALUE,
+    MISSING_VALUE,
+    BLANK_VALUE,
+    NOT_POSITIVE_VALUE,
+    OUT_OF_RANGE,
+    CONTAINS_NULL,
+    CONTAINS_BLANK,
+    ALREADY_EXISTS_IN_DB,
+    UNKNOWN_ENTITY,
+    UNKNOWN_PARAMETER,
+    INCORRECT_JWS
+
+}

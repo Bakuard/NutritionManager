@@ -6,21 +6,16 @@ import com.bakuard.nutritionManager.dal.criteria.ProductCategoryCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
-import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
-import com.bakuard.nutritionManager.dto.exceptions.FieldExceptionResponse;
-import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
+import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
-import com.bakuard.nutritionManager.model.Product;
-import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.AbstractDomainException;
-import com.bakuard.nutritionManager.model.exceptions.IncorrectFiledValueException;
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.model.*;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.services.AuthService;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -119,23 +114,23 @@ public class DtoMapper {
                                              List<String> tags) {
         User user = userRepository.getById(userId);
 
-        List<Constraint> constraints = new ArrayList<>();
-        if(category != null) constraints.add(CategoryConstraint.of(category));
-        if(shops != null) constraints.add(ShopsConstraint.of(shops));
-        if(varieties != null) constraints.add(VarietiesConstraint.of(varieties));
-        if(manufacturers != null) constraints.add(ManufacturerConstraint.of(manufacturers));
-        if(tags != null) constraints.add(MinTags.of(toTags(tags)));
+        List<Filter> filters = new ArrayList<>();
+        if(category != null) filters.add(CategoryFilter.of(category));
+        if(shops != null) filters.add(ShopsFilter.of(shops));
+        if(varieties != null) filters.add(VarietiesFilter.of(varieties));
+        if(manufacturers != null) filters.add(ManufacturerFilter.of(manufacturers));
+        if(tags != null) filters.add(MinTagsFilter.of(toTags(tags)));
 
-        Constraint constraint = null;
-        if(constraints.size() == 1) constraint = constraints.get(0);
-        else if(constraints.size() > 1) constraint = AndConstraint.of(constraints);
+        Filter filter = null;
+        if(filters.size() == 1) filter = filters.get(0);
+        else if(filters.size() > 1) filter = AndFilter.of(filters);
 
         return ProductCriteria.of(
                 Pageable.of(page, size),
                 user).
                 setOnlyFridge(onlyFridge).
                 setProductSort(toProductSort(sortRule)).
-                setConstraint(constraint);
+                setFilter(filter);
     }
 
     public ProductFieldCriteria toProductFieldCriteria(int page, int size, UUID userId, String productCategory) {
@@ -197,7 +192,11 @@ public class DtoMapper {
 
 
     public <T> SuccessResponse<T> toSuccessResponse(String keyMessage, T body) {
-        return new SuccessResponse<>(getMessage(keyMessage, "Success"), getSuccessTitle(), body);
+        return new SuccessResponse<>(
+                getMessage(keyMessage, "Success"),
+                getMessage("successTitle", "Success"),
+                body
+        );
     }
 
     public JwsResponse toJwsResponse(String jws, User user) {
@@ -216,28 +215,55 @@ public class DtoMapper {
     }
 
 
-    public ExceptionResponse toExceptionResponse(HttpStatus httpStatus) {
-        return new ExceptionResponse(httpStatus, "Unexpected exception", "Error");
-    }
-
     public ExceptionResponse toExceptionResponse(HttpStatus httpStatus, String keyMessage) {
-        return new ExceptionResponse(httpStatus, getMessage(keyMessage, "unauthorized"), getErrorTitle());
-    }
-
-    public ExceptionResponse toExceptionResponse(AbstractDomainException e, HttpStatus httpStatus) {
         return new ExceptionResponse(
                 httpStatus,
-                getMessage(e.getMessageKey(), e.getMessage()),
-                getErrorTitle());
+                getMessage(keyMessage, "unexpected error"),
+                getMessage("errorTitle", "Error")
+        );
     }
 
-    public ExceptionResponse toExceptionResponse(ValidateException e, HttpStatus httpStatus) {
+    public ExceptionResponse toExceptionResponse(ServiceException e) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        if(e.getCheckedType() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
+        else if(e.containsConstraint(ConstraintType.UNKNOWN_ENTITY)) httpStatus = HttpStatus.NOT_FOUND;
+
         ExceptionResponse response = new ExceptionResponse(
                 httpStatus,
                 getMessage(e.getMessageKey(), e.getMessage()),
-                getErrorTitle());
-        e.forEach(ex -> response.addReason(toFieldExceptionResponse(ex)));
+                getMessage("errorTitle", "Error")
+        );
+        e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
         return response;
+    }
+
+    public ExceptionResponse toExceptionResponse(ValidateException e) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        if(e.getCheckedType() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
+        else if(e.containsConstraint(ConstraintType.UNKNOWN_ENTITY)) httpStatus = HttpStatus.NOT_FOUND;
+
+        ExceptionResponse response = new ExceptionResponse(
+                httpStatus,
+                getMessage(e.getMessageKey(), e.getMessage()),
+                getMessage("errorTitle", "Error")
+        );
+        e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
+        return response;
+    }
+
+
+    private ConstraintResponse toConstraintResponse(Constraint constraint) {
+        ConstraintResponse dto = new ConstraintResponse();
+        dto.setField(constraint.getFieldName());
+        dto.setTitle(getMessage("constraintTitle", "Reason"));
+        dto.setMessage(getMessage(constraint.getMessageKey(), constraint.getDetail()));
+        return dto;
+    }
+
+    private String getMessage(String key, String defaultValue) {
+        return messageSource.getMessage(
+                key, null, defaultValue, LocaleContextHolder.getLocale()
+        );
     }
 
 
@@ -248,32 +274,6 @@ public class DtoMapper {
             response.setCode(tag.getValue());
             return response;
         }).toList();
-    }
-
-    private FieldExceptionResponse toFieldExceptionResponse(IncorrectFiledValueException e) {
-        FieldExceptionResponse dto = new FieldExceptionResponse();
-        dto.setField(e.getFieldName());
-        dto.setTitle(getErrorTitle());
-        dto.setMessage(getMessage(e.getMessageKey(), e.getMessage()));
-        return dto;
-    }
-
-    private String getMessage(String key, String defaultValue) {
-        return messageSource.getMessage(
-                key, null, defaultValue, LocaleContextHolder.getLocale()
-        );
-    }
-
-    private String getErrorTitle() {
-        return messageSource.getMessage(
-                "errorTitle", null, "Error", LocaleContextHolder.getLocale()
-        );
-    }
-
-    private String getSuccessTitle() {
-        return messageSource.getMessage(
-                "successTitle", null, "Success", LocaleContextHolder.getLocale()
-        );
     }
 
     private ProductSort toProductSort(String sortRuleAsString) {
