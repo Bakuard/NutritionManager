@@ -97,4 +97,8 @@ public class AuthService {
         return userRepository.getById(userId);
     }
 
+    public void logout(String jws) {
+        jwsService.invalidateJws(jws);
+    }
+
 }

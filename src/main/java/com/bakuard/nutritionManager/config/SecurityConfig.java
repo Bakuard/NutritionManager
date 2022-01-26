@@ -59,7 +59,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 "/products/**",
                                 "/dishes/**",
                                 "/menus/**",
-                                "/auth/getUserByJws"
+                                "/auth/getUserByJws",
+                                "/auth/logout"
                         ).authenticated().
                 and().
                     addFilterBefore(new JwsFilter(), UsernamePasswordAuthenticationFilter.class);

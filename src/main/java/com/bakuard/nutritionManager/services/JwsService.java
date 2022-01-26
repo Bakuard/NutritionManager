@@ -1,15 +1,23 @@
 package com.bakuard.nutritionManager.services;
 
+import com.bakuard.nutritionManager.dal.JwsBlackListRepository;
 import com.bakuard.nutritionManager.model.User;
-
 import com.bakuard.nutritionManager.model.exceptions.*;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.security.KeyPair;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -17,54 +25,62 @@ import java.util.UUID;
 
 public class JwsService {
 
+    private static Logger logger = LoggerFactory.getLogger(JwsService.class);
+
+
     private enum Aim {
         ACCESS,
         REGISTRATION,
         CHANGE_CREDENTIALS
     }
 
-    
+
+    private final JwsBlackListRepository blackList;
     private final KeyPair accessKeyPair;
     private final KeyPair registrationKeyPair;
     private final KeyPair changeCredentialsKeyPair;
-    private final long lifeTimeInHours;
+    private final long lifeTimeInDays;
     private final long lifeTimeInMinutes;
 
-    public JwsService() {
+    public JwsService(JwsBlackListRepository blackList) {
+        this.blackList = blackList;
         accessKeyPair = Keys.keyPairFor(SignatureAlgorithm.RS512);
         registrationKeyPair = Keys.keyPairFor(SignatureAlgorithm.RS512);
         changeCredentialsKeyPair = Keys.keyPairFor(SignatureAlgorithm.RS512);
-        lifeTimeInHours = 5;
+        lifeTimeInDays = 7;
         lifeTimeInMinutes = 3;
     }
 
     public String generateAccessJws(User user) {
-        LocalDateTime expiration = LocalDateTime.now().plusHours(lifeTimeInHours);
+        LocalDateTime expiration = LocalDateTime.now().plusDays(lifeTimeInDays);
 
         return Jwts.builder().
                 setExpiration(Date.from(expiration.atZone(ZoneId.systemDefault()).toInstant())).
                 setSubject(user.getId().toString()).
+                setId(UUID.randomUUID().toString()).
                 claim("aim", Aim.ACCESS.toString()).
                 signWith(accessKeyPair.getPrivate()).
                 compact();
     }
 
     public UUID parseAccessJws(String jws) throws ServiceException {
-        jws = jws.replaceFirst("Bearer ", "");
-
+        Claims claims = null;
         try {
-            Claims claims = Jwts.parserBuilder().
-                    setSigningKey(accessKeyPair.getPublic()).
-                    build().
-                    parseClaimsJws(jws).
-                    getBody();
-
-            return UUID.fromString(claims.getSubject());
+            claims = parseJws(jws, accessKeyPair);
         } catch(JwtException e) {
             throw Checker.of(getClass(), "parseAccessJws").
                     addConstraint("jws", ConstraintType.INCORRECT_JWS).
                     createServiceException("Incorrect access jws");
         }
+
+        UUID accessJwsId = UUID.fromString(claims.getId());
+        if(blackList.inBlackList(accessJwsId)) {
+            throw Checker.of(getClass(), "parseAccessJws").
+                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
+                    createServiceException("Incorrect access jws");
+        }
+
+        return UUID.fromString(claims.getSubject());
     }
 
     public String generateRegistrationJws(String email) {
@@ -79,14 +95,8 @@ public class JwsService {
     }
 
     public String parseRegistrationJws(String jws) throws ServiceException {
-        jws = jws.replaceFirst("Bearer ", "");
-
         try {
-            Claims claims = Jwts.parserBuilder().
-                    setSigningKey(registrationKeyPair.getPublic()).
-                    build().
-                    parseClaimsJws(jws).
-                    getBody();
+            Claims claims = parseJws(jws, registrationKeyPair);
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
@@ -108,14 +118,8 @@ public class JwsService {
     }
 
     public String parseChangeCredentialsJws(String jws) throws ServiceException {
-        jws = jws.replaceFirst("Bearer ", "");
-
         try {
-            Claims claims = Jwts.parserBuilder().
-                    setSigningKey(changeCredentialsKeyPair.getPublic()).
-                    build().
-                    parseClaimsJws(jws).
-                    getBody();
+            Claims claims = parseJws(jws, changeCredentialsKeyPair);
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
@@ -123,6 +127,37 @@ public class JwsService {
                     addConstraint("jws", ConstraintType.INCORRECT_JWS).
                     createServiceException("Incorrect change credential jws");
         }
+    }
+
+    public void invalidateJws(String accessJws) {
+        Claims claims = parseJws(accessJws, accessKeyPair);
+
+        UUID accessJwsId = UUID.fromString(claims.getId());
+        LocalDateTime expiration = Instant.
+                ofEpochMilli(claims.getExpiration().getTime()).
+                atZone(ZoneId.systemDefault()).
+                toLocalDateTime();
+
+        blackList.addToBlackList(accessJwsId, expiration);
+    }
+
+    @Transactional
+    @Scheduled(fixedDelay = 1000 * 60 * 60)
+    public void clearJwsBlackList() {
+        logger.info("Clear jws black list");
+
+        blackList.removeAllExpired(LocalDateTime.now());
+    }
+
+
+    private Claims parseJws(String jws, KeyPair keyPair) {
+        jws = jws.replaceFirst("Bearer ", "");
+
+        return Jwts.parserBuilder().
+                setSigningKey(keyPair.getPublic()).
+                build().
+                parseClaimsJws(jws).
+                getBody();
     }
 
 }

@@ -99,3 +99,9 @@ CREATE TABLE FilterGroups (
     quantity NUMERIC(16, 6) NOT NULL,
     FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE JwsBlackList (
+    tokenId UUID NOT NULL,
+    expiration TIMESTAMP NOT NULL,
+    PRIMARY KEY(tokenId)
+);
