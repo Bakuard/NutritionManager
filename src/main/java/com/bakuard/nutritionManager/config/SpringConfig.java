@@ -19,6 +19,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.LocaleResolver;
@@ -39,6 +40,7 @@ import java.io.IOException;
         }
 )
 @EnableTransactionManagement
+@EnableScheduling
 public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
@@ -100,8 +102,13 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JwsService jwsService() {
-        return new JwsService();
+    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource) {
+        return new JwsBlackListPostgres(dataSource);
+    }
+
+    @Bean
+    public JwsService jwsService(JwsBlackListRepository jwsBlackListRepository) {
+        return new JwsService(jwsBlackListRepository);
     }
 
     @Bean

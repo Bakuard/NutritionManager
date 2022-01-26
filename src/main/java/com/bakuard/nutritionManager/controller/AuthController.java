@@ -180,7 +180,7 @@ public class AuthController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "401",
-                            description = "Если передан неверный токен или токен не указан",
+                            description = "Если передан некорректный токен или токен не указан",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class)))
             }
@@ -192,6 +192,25 @@ public class AuthController {
 
         User user = authService.getUserByJws(accessJws);
         return ResponseEntity.ok(mapper.toUserResponse(user));
+    }
+
+    @Operation(
+            summary = "Выполняет logout для пользователя определяемого по токену доступа",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PostMapping("/logout")
+    public ResponseEntity<SuccessResponse<?>> logout(@RequestHeader("Authorization") String accessJws) {
+        logger.info("Logout user by accessJws");
+
+        authService.logout(accessJws);
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.logout", null));
     }
 
 }
