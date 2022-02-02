@@ -116,9 +116,10 @@ public class ProductController {
     )
     @Transactional
     @DeleteMapping("/delete")
-    public ResponseEntity<SuccessResponse<ProductResponse>> delete(@RequestParam("id")
-                                                  @Parameter(description = "Уникальный идентификатор продукта в формате UUID", required = true)
-                                                                   UUID id) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> delete(
+            @RequestParam("id")
+            @Parameter(description = "Уникальный идентификатор продукта в формате UUID", required = true)
+            UUID id) {
         logger.info("Delete product with id={}", id);
 
         Product product = productRepository.remove(id);
@@ -328,7 +329,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех тегов использующихся для продуктов",
+    @Operation(summary = "Получение выборки из всех тегов использующихся для продуктов указанного пользователя",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
@@ -380,7 +381,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех магазинов продуктов",
+    @Operation(summary = "Получение выборки из всех магазинов продуктов указанного пользователя",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
@@ -432,7 +433,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех сортов продуктов",
+    @Operation(summary = "Получение выборки из всех сортов продуктов указанного пользователя",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
@@ -484,7 +485,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех категорий продуктов",
+    @Operation(summary = "Получение выборки из всех категорий продуктов указанного пользователя",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
@@ -527,7 +528,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех производителей продуктов",
+    @Operation(summary = "Получение выборки из всех производителей продуктов указанного пользователя",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
