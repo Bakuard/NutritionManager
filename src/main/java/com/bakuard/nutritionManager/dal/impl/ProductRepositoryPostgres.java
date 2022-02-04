@@ -521,6 +521,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
+    @Override
+    public BigDecimal getProductsSum(ProductSumCriteria criteria) {
+        return null;
+    }
+
 
     private void addNewProduct(Product product) {
         statement.update(

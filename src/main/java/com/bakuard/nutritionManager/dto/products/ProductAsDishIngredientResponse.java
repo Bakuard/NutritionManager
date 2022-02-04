@@ -24,7 +24,6 @@ public class ProductAsDishIngredientResponse {
     private String unit;
     private BigDecimal quantity;
     private BigDecimal necessaryQuantity;
-    private BigDecimal actualQuantity;
     private BigDecimal lackQuantity;
     private BigDecimal lackQuantityPrice;
     private List<TagRequestAndResponse> tags;
@@ -145,14 +144,6 @@ public class ProductAsDishIngredientResponse {
         this.necessaryQuantity = necessaryQuantity;
     }
 
-    public BigDecimal getActualQuantity() {
-        return actualQuantity;
-    }
-
-    public void setActualQuantity(BigDecimal actualQuantity) {
-        this.actualQuantity = actualQuantity;
-    }
-
     public BigDecimal getLackQuantity() {
         return lackQuantity;
     }
@@ -196,7 +187,6 @@ public class ProductAsDishIngredientResponse {
                 Objects.equals(unit, that.unit) &&
                 Objects.equals(quantity, that.quantity) &&
                 Objects.equals(necessaryQuantity, that.necessaryQuantity) &&
-                Objects.equals(actualQuantity, that.actualQuantity) &&
                 Objects.equals(lackQuantity, that.lackQuantity) &&
                 Objects.equals(lackQuantityPrice, that.lackQuantityPrice) &&
                 Objects.equals(tags, that.tags);
@@ -206,7 +196,7 @@ public class ProductAsDishIngredientResponse {
     public int hashCode() {
         return Objects.hash(type, id, user, ingredientName, imagePath, category, shop,
                 variety, manufacturer, price, packingSize, unit, quantity, necessaryQuantity,
-                actualQuantity, lackQuantity, lackQuantityPrice, tags);
+                lackQuantity, lackQuantityPrice, tags);
     }
 
     @Override
@@ -226,7 +216,6 @@ public class ProductAsDishIngredientResponse {
                 ", unit='" + unit + '\'' +
                 ", quantity=" + quantity +
                 ", necessaryQuantity=" + necessaryQuantity +
-                ", actualQuantity=" + actualQuantity +
                 ", lackQuantity=" + lackQuantity +
                 ", lackQuantityPrice=" + lackQuantityPrice +
                 ", tags=" + tags +

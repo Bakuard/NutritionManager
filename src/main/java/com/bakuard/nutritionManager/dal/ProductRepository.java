@@ -186,4 +186,11 @@ public interface ProductRepository {
      */
     public int getManufacturersNumber(ProductFieldNumberCriteria criteria);
 
+    /**
+     * Возвращает сумму цен всех продуктов удовлетворяющих ограничению criteria (см. {@link ProductSumCriteria}).
+     * @param criteria критерии указывающие какие продукты учитывать
+     * @return сумму цен всех продуктов удовлетворяющих ограничению criteria
+     */
+    public BigDecimal getProductsSum(ProductSumCriteria criteria);
+
 }

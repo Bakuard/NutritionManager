@@ -23,7 +23,7 @@ public class ProductCriteria {
      * Создает и возвращает новый обеъект ProductCriteria.
      * @param pageable параметры страницы исползующиеся для пагинации.
      * @param user пользователь из данных которого будет формироваться выборка.
-     * @return новый обеъект ProductCriteria.
+     * @return новый объект ProductCriteria.
      * @throws ServiceException если хотя бы один из параметров имеет значение null.
      */
     public static ProductCriteria of(Pageable pageable, User user) {
