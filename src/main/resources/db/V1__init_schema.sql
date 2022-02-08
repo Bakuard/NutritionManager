@@ -6,7 +6,6 @@ CREATE TABLE Users (
     salt VARCHAR(512) NOT NULL,
     PRIMARY KEY(userId),
     UNIQUE(name),
-    UNIQUE(passwordHash),
     UNIQUE(email),
     UNIQUE(salt)
 );

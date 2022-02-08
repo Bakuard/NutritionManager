@@ -92,6 +92,57 @@ public class AuthService {
         }
     }
 
+    public User changeLoginAndEmail(String jws, String newName, String newEmail, String currentPassword) {
+        try {
+            UUID userId = jwsService.parseAccessJws(jws);
+
+            User user = userRepository.getById(userId);
+            if(!user.isCorrectPassword(currentPassword)) {
+                throw Checker.of(getClass(), "changeLoginAndEmail").
+                        createServiceException("Incorrect password");
+            }
+            user.setName(newName);
+            user.setEmail(newEmail);
+
+            userRepository.save(user);
+
+            return user;
+        } catch(ValidateException e) {
+            throw Checker.of(getClass(), "changeLoginAndEmail").
+                    createServiceException("Fail to change login and email for user").
+                    addReasons(e.getConstraints());
+        } catch(ServiceException e) {
+            throw Checker.of(getClass(), "changeLoginAndEmail").
+                    createServiceException("Fail to change login and email for user").
+                    addReasons(e.getConstraints());
+        }
+    }
+
+    public User changePassword(String jws, String currentPassword, String newPassword) {
+        try {
+            UUID userId = jwsService.parseAccessJws(jws);
+
+            User user = userRepository.getById(userId);
+            if(!user.isCorrectPassword(currentPassword)) {
+                throw Checker.of(getClass(), "changePassword").
+                        createServiceException("Incorrect password");
+            }
+            user.setPassword(newPassword);
+
+            userRepository.save(user);
+
+            return user;
+        } catch(ValidateException e) {
+            throw Checker.of(getClass(), "changePassword").
+                    createServiceException("Fail to change password for user").
+                    addReasons(e.getConstraints());
+        } catch(ServiceException e) {
+            throw Checker.of(getClass(), "changePassword").
+                    createServiceException("Fail to change password for user").
+                    addReasons(e.getConstraints());
+        }
+    }
+
     public User getUserByJws(String jws) {
         UUID userId = jwsService.parseAccessJws(jws);
         return userRepository.getById(userId);
