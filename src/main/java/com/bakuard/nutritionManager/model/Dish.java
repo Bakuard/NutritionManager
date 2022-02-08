@@ -268,78 +268,90 @@ public class Dish {
 
     /**
      * Возвращает кол-во всех возможных комбинаций состава данного блюда. Если для данного блюда не было
-     * указанно ни одного ингредиента - возвращает 0.
+     * указанно ни одного ингредиента или любому ингредиенту не соответсвует ни один продукт - возвращает 0.
      * @return кол-во всех возможных комбинаций состава данного блюда.
      */
     public BigInteger getNumberIngredientCombinations() {
         BigInteger result = BigInteger.ZERO;
 
         for(DishIngredient ingredient : ingredients) {
-            if(result.signum() == 0) result = BigInteger.valueOf(ingredient.getProductsNumber());
-            result = result.multiply(BigInteger.valueOf(ingredient.getProductsNumber()));
+            int productsNumber = ingredient.getProductsNumber();
+
+            if(result.signum() == 0 && productsNumber > 0) {
+                result = BigInteger.valueOf(productsNumber);
+            } else if(productsNumber > 0) {
+                result = result.multiply(BigInteger.valueOf(productsNumber));
+            }
         }
 
         return result;
     }
 
     /**
-     * Возвращает стоимость данного блюда с учетом конкретных продуктов выбранных как его ингредиенты и
-     * кол-во порций.
+     * Возвращает стоимость данного блюда с учетом выбранных продуктов, по одному для каждго ингредиента, и
+     * кол-ва порций. Особые случаи:<br/>
+     * 1. Если для данного блюда не было указанно ни одного ингредиента или любому ингредиенту
+     *    не соответсвует ни один продукт - возвращает пустой Optional.<br/>
+     * 2. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
+     *    в рассчете цены блюда.
      * @param servingNumber кол-во порций блюда для которых рассчитывается общая стоимость.
-     * @param ingredients набор пар - [наименование ингредиента, индекс продукта], где индекс продукта
+     * @param productsIndex набор пар - [наименование ингредиента, индекс продукта], где индекс продукта
      *                    это индекс из отсортированного в порядке возрастания по имени множества взаимозаменяемых
      *                    продуктов, каждый из которых может выступать соответствующим этому множеству ингредиентом.
-     * @return цена данного блюда или пустой Optional, если блюдо не содержит ни одного ингредиента.
+     * @return цена данного блюда или пустой Optional.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber меньше или равен нулю.<br/>
      *              2. если любой из параметров имеет значение null.<br/>
-     *              3. если хотя бы одно из значений ingredients - отрицательное число.<br/>
-     *              4. если хотя бы один из ключей ingredients - наменование ингредиента, которого нет
+     *              3. если хотя бы одно из значений productsIndex - отрицательное число.<br/>
+     *              4. если хотя бы один из ключей productsIndex - наменование ингредиента, которого нет
      *                 в данном блюде.
      */
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
-                                         Map<String, Integer> ingredients) {
+                                         Map<String, Integer> productsIndex) {
         Checker checker = Checker.of(getClass(), "getPrice").
                 nullValue("servingNumber", servingNumber).
-                nullValue("ingredients", ingredients).
+                nullValue("productsIndex", productsIndex).
                 notPositiveValue("servingNumber", servingNumber).
-                containsNegative("ingredients", ingredients.values()).
+                containsNegative("productsIndex", productsIndex.values()).
                 checkWithValidateException("Fail to get dish price");
 
-        if(this.ingredients.size() != ingredients.size() ||
-                this.ingredients.stream().
+        if(ingredients.size() != productsIndex.size() ||
+                ingredients.stream().
                 map(DishIngredient::getName).
-                anyMatch(i -> !ingredients.containsKey(i))) {
-            checker.addConstraint("ingredients", ConstraintType.UNKNOWN_ITEM).
+                anyMatch(i -> !productsIndex.containsKey(i))) {
+            checker.addConstraint("productsIndex", ConstraintType.UNKNOWN_ITEM).
                     checkWithValidateException("Fail to get dish price");
         }
 
-        BigDecimal result = this.ingredients.isEmpty() ? null : BigDecimal.ZERO;
-
-        for(DishIngredient ingredient : this.ingredients) {
-            int productIndex = ingredients.get(ingredient.getName());
-            result = result.add(ingredient.getLackQuantityPrice(productIndex, servingNumber));
-        }
-
-        return Optional.ofNullable(result);
+        return ingredients.stream().
+                map(i -> i.getLackQuantityPrice(productsIndex.get(i.getName()), servingNumber)).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add);
     }
 
     /**
-     * Возвращает среднюю арифметическую цену для данного блюда. Если для блюда не было указанно ни одного
-     * ингредиента - возвращает пустой Optional.
+     * Возвращает среднюю арифметическую цену для данного блюда. Особые случаи:<br/>
+     * 1. Если для данного блюда не было указанно ни одного ингредиента или любому ингредиенту
+     *    не соответсвует ни один продукт - возвращает пустой Optional.<br/>
+     * 2. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
+     *    в рассчете средней арифметической цены блюда.
      * @return средня арифметическая цена данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
-        if(ingredients.isEmpty()) return Optional.empty();
+        return ingredients.stream().
+                map(DishIngredient::getProductsPriceSum).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add).
+                map(totalPrice -> {
+                    BigDecimal totalNumber = ingredients.stream().
+                            map(i -> new BigDecimal(i.getProductsNumber())).
+                            reduce(BigDecimal::add).
+                            get();
 
-        BigDecimal productTotalNumber = BigDecimal.ZERO;
-        BigDecimal productsPriceSum = BigDecimal.ZERO;
-        for(DishIngredient ingredient : ingredients) {
-            productTotalNumber = productTotalNumber.add(BigDecimal.valueOf(ingredient.getProductsNumber()));
-            productsPriceSum = productsPriceSum.add(ingredient.getProductsPriceSum());
-        }
-
-        return Optional.of(productsPriceSum.divide(productTotalNumber, config.getMathContext()));
+                    return totalPrice.divide(totalNumber, config.getMathContext());
+                });
     }
 
     /**

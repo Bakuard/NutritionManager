@@ -13,7 +13,6 @@ public class ProductAsDishIngredientResponse {
     private String type;
     private UUID id;
     private UserResponse user;
-    private String ingredientName;
     private String imagePath;
     private String category;
     private String shop;
@@ -54,14 +53,6 @@ public class ProductAsDishIngredientResponse {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public String getIngredientName() {
-        return ingredientName;
-    }
-
-    public void setIngredientName(String ingredientName) {
-        this.ingredientName = ingredientName;
     }
 
     public String getImagePath() {
@@ -176,7 +167,6 @@ public class ProductAsDishIngredientResponse {
         return Objects.equals(type, that.type) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(user, that.user) &&
-                Objects.equals(ingredientName, that.ingredientName) &&
                 Objects.equals(imagePath, that.imagePath) &&
                 Objects.equals(category, that.category) &&
                 Objects.equals(shop, that.shop) &&
@@ -194,9 +184,8 @@ public class ProductAsDishIngredientResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, id, user, ingredientName, imagePath, category, shop,
-                variety, manufacturer, price, packingSize, unit, quantity, necessaryQuantity,
-                lackQuantity, lackQuantityPrice, tags);
+        return Objects.hash(type, id, user, imagePath, category, shop, variety, manufacturer, price,
+                packingSize, unit, quantity, necessaryQuantity, lackQuantity, lackQuantityPrice, tags);
     }
 
     @Override
@@ -205,7 +194,6 @@ public class ProductAsDishIngredientResponse {
                 "type='" + type + '\'' +
                 ", id=" + id +
                 ", user=" + user +
-                ", ingredientName='" + ingredientName + '\'' +
                 ", imagePath='" + imagePath + '\'' +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +

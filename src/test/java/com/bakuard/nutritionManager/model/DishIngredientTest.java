@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 class DishIngredientTest {
@@ -152,7 +153,7 @@ class DishIngredientTest {
     @Test
     @DisplayName("""
             getLackQuantity(productIndex, servingNumber):
-             servingNumber = 0 (is not positive)
+             servingNumber is not positive
              => exception
             """)
     public void getLackQuantity2() {
@@ -214,20 +215,34 @@ class DishIngredientTest {
                 conf
         );
 
-        BigDecimal actual = ingredient.getLackQuantity(5, new BigDecimal("2"));
+        Optional<BigDecimal> actual = ingredient.getLackQuantity(5, new BigDecimal("2"));
 
         BigDecimal expected = new BigDecimal("");
-        Assertions.assertEquals(0, expected.compareTo(actual));
+        Assertions.assertAll(
+                () -> Assertions.assertTrue(actual.isPresent()),
+                () -> Assertions.assertEquals(0, expected.compareTo(actual.get()))
+        );
     }
 
     @Test
     @DisplayName("""
             getLackQuantity(productIndex, servingNumber):
              productIndex = ingredient products set size,
-             there are not product in DB
-             => calculate result for last product
+             there are not products in DB
+             => return empty Optional
             """)
     public void getLackQuantity5() {
+
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(productIndex, servingNumber):
+             productIndex = ingredient products set size,
+             there are not products matching this ingredient
+             => return empty Optional
+            """)
+    public void getLackQuantity6() {
 
     }
 
@@ -237,7 +252,29 @@ class DishIngredientTest {
              productIndex > ingredient products set size
              => calculate result for last product
             """)
-    public void getLackQuantity5() {
+    public void getLackQuantity7() {
+
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(productIndex, servingNumber):
+             productIndex > ingredient products set size,
+             there are not products in DB
+             => return empty Optional
+            """)
+    public void getLackQuantity8() {
+
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(productIndex, servingNumber):
+             productIndex > ingredient products set size,
+             there are not products matching this ingredient
+             => return empty Optional
+            """)
+    public void getLackQuantity9() {
 
     }
 
@@ -248,7 +285,31 @@ class DishIngredientTest {
              servingNumber is positive value
              => return correct result
             """)
-    public void getLackQuantity6() {
+    public void getLackQuantity10() {
+
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(productIndex, servingNumber):
+             productIndex belongs to interval [0, ingredient products set size - 1],
+             servingNumber is positive value,
+             there are not products in DB
+             => return correct result
+            """)
+    public void getLackQuantity11() {
+
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(productIndex, servingNumber):
+             productIndex belongs to interval [0, ingredient products set size - 1],
+             servingNumber is positive value,
+             there are not products matching this ingredient
+             => return correct result
+            """)
+    public void getLackQuantity12() {
 
     }
 
