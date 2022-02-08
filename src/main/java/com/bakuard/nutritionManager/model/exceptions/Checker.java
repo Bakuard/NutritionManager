@@ -91,6 +91,16 @@ public class Checker {
         return this;
     }
 
+    public Checker negativeValue(String fieldName, long checkedValue) {
+        if(isValid(fieldName) && checkedValue < 0) {
+            constraints.add(
+                    new Constraint(checkedType, fieldName, ConstraintType.NEGATIVE_VALUE,
+                            fieldName + " can't be negative. Actual = " + checkedValue)
+            );
+        }
+        return this;
+    }
+
     public Checker notPositiveValue(String fieldName, BigDecimal checkedValue) {
         if(isValid(fieldName) && checkedValue.signum() <= 0) {
             constraints.add(

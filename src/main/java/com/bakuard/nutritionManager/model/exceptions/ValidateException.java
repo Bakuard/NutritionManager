@@ -45,6 +45,10 @@ public class ValidateException extends AbstractDomainException implements Iterab
         validateExceptions = new ArrayList<>();
     }
 
+    public boolean isOriginate(Class<?> checkedType, String operationName) {
+        return this.checkedType == checkedType && this.operationName.equals(operationName);
+    }
+
     public Class<?> getCheckedType() {
         return checkedType;
     }

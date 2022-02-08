@@ -5,8 +5,7 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductSumCriteria;
 import com.bakuard.nutritionManager.dal.criteria.ProductsNumberCriteria;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.ProductSort;
 import com.bakuard.nutritionManager.model.filters.SortDirection;
@@ -16,6 +15,7 @@ import com.bakuard.nutritionManager.model.util.Pageable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Ингредиент блюда. В качестве ингредиента можно задать не только один конкретный продукт, а множетсво
@@ -94,46 +94,88 @@ public class DishIngredient {
      * Возвращает кол-во данного ингредиента необходимого для приготовления указанного кол-ва порций блюда.
      * @param servingNumber кол-во порций блюда.
      * @return кол-во данного ингредиента необходимого для приготовления указанного кол-ва порций блюда.
+     * @throws ValidateException если указанное значение null или не является положительным.
      */
     public BigDecimal getNecessaryQuantity(BigDecimal servingNumber) {
+        Checker.of(getClass(), "getNecessaryQuantity").
+                nullValue("servingNumber", servingNumber).
+                notPositiveValue("servingNumber", servingNumber).
+                checkWithValidateException("Fail to get necessary ingredient quantity.");
+
         return quantity.multiply(servingNumber);
     }
 
     /**
-     * Для любого продукта, из множества взаимозаменямых продуктов данного ингредиента, может понадобиться
-     * рассчитать - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
+     * Для любого указанного продукта, из множества взаимозаменямых продуктов данного ингредиента, вычисляет
+     * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
      * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
+     * Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
+     * то метод вернет результат для последнего продукта.<br/>
+     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
+     * то метод вернет пустой Optional.
      * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
      * @param servingNumber кол-во порций блюда.
      * @return кол-во "упаковок" докупаемого продукта.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. servingNumber является null.<br/>
+     *              2. productIndex < 0 <br/>
+     *              3. servingNumber <= 0
      */
-    public BigDecimal getLackQuantity(int productIndex, BigDecimal servingNumber) {
-        Product product = getProductByIndex(productIndex);
+    public Optional<BigDecimal> getLackQuantity(int productIndex, BigDecimal servingNumber) {
+        Checker.of(getClass(), "getLackQuantity").
+                nullValue("servingNumber", servingNumber).
+                negativeValue("productIndex", productIndex).
+                notPositiveValue("servingNumber", servingNumber).
+                checkWithValidateException("Fail to get product lack quantity");
 
-        BigDecimal lackQuantity = getNecessaryQuantity(servingNumber).
-                subtract(product.getQuantity()).
-                max(BigDecimal.ZERO);
+        return getProductByIndex(productIndex).
+                map(product -> {
+                    BigDecimal lackQuantity = getNecessaryQuantity(servingNumber).
+                            subtract(product.getQuantity()).
+                            max(BigDecimal.ZERO);
 
-        if(lackQuantity.signum() > 0) {
-            lackQuantity = lackQuantity.
-                    divide(product.getContext().getPackingSize(), config.getMathContext()).
-                    setScale(0, RoundingMode.UP);
-        }
+                    if(lackQuantity.signum() > 0) {
+                        lackQuantity = lackQuantity.
+                                divide(product.getContext().getPackingSize(), config.getMathContext()).
+                                setScale(0, RoundingMode.UP);
+                    }
 
-        return lackQuantity;
+                    return lackQuantity;
+                });
     }
 
     /**
-     * Возвращает общую цену за недостающее кол-во докупаемого продукта.
+     * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта.<br/>
+     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
+     * то метод вернет пустой Optional.
      * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
      * @param servingNumber кол-во порций блюда.
      * @return общую цену за недостающее кол-во докупаемого продукта.
      */
-    public BigDecimal getLackQuantityPrice(int productIndex, BigDecimal servingNumber) {
-        Product product = getProductByIndex(productIndex);
+    public Optional<BigDecimal> getLackQuantityPrice(int productIndex, BigDecimal servingNumber) {
+        return getProductByIndex(productIndex).
+                map(product ->
+                    getLackQuantity(productIndex, servingNumber).get().
+                            multiply(product.getContext().getPrice(), config.getMathContext())
+                );
+    }
 
-        return getLackQuantity(productIndex, servingNumber).
-                multiply(product.getContext().getPrice(), config.getMathContext());
+    /**
+     * Возвращает продукт из множества всех взаимозаменяемых продуктов для данноо ингредиента по его
+     * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
+     * ингредиента упорядоченно по цене.<br/>
+     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
+     * то метод вернет пустой Optional.
+     * @param productIndex порядковому номер продукта.
+     * @return продукт по его порядковому номеру.
+     */
+    public Optional<Product> getProductByIndex(int productIndex) {
+        Product product = repository.getProducts(
+                ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).
+                        setProductSort(sort)
+        ).get(productIndex);
+
+        return Optional.ofNullable(product);
     }
 
     /**
@@ -147,11 +189,13 @@ public class DishIngredient {
     }
 
     /**
-     * Возвращает суммарную цену всех продуктов которые могут использоваться в качестве данноо ингредиента.
-     * Используется при расчете средней арифметической цены блюда, в которое входит данный ингредиент.
+     * Возвращает суммарную цену всех продуктов которые могут использоваться в качестве данного ингредиента.
+     * Используется при расчете средней арифметической цены блюда, в которое входит данный ингредиент.<br/>
+     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
+     * то метод вернет пустой Optional.
      * @return суммарную цену всех продуктов которые могут использоваться в качестве данноо ингредиента.
      */
-    public BigDecimal getProductsPriceSum() {
+    public Optional<BigDecimal> getProductsPriceSum() {
         return repository.getProductsSum(ProductSumCriteria.of(user, filter));
     }
 
@@ -177,14 +221,6 @@ public class DishIngredient {
                 ", filter=" + filter +
                 ", quantity=" + quantity +
                 '}';
-    }
-
-
-    private Product getProductByIndex(int productIndex) {
-        return repository.getProducts(
-                ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).
-                        setProductSort(sort)
-        ).get(productIndex);
     }
 
 

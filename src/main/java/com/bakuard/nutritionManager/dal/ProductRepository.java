@@ -12,6 +12,7 @@ import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.model.exceptions.*;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -52,37 +53,6 @@ public interface ProductRepository {
      *         2. если productId равен null.
      */
     public Product getById(UUID productId);
-
-    /**
-     * Возвращает упорядоченную выборку пар(продукт, кол-во) из множества всех продуктов на учете пользователя и
-     * удовлетворяющих ограничениям constraint, где кол-во - это кол-во продукта купленного упаковками размером
-     * ({@link ProductContext#getPackingSize()}). Возвращаемое подмножество продуктов удовлетворяющее указанному
-     * огрничению определяется параметром pageable. Возвращаемое множество продуктов упорядочеваются по суммарной
-     * цене с учетом необходимого кол-ва продукта и размера упаковки. Продукты с одинаковой суммарной ценой
-     * упорядочеваюся по идентификатору. Особые случаи:<br/>
-     * 1. Если в БД нет ни одного продукта соответствующего указанным ограничениям, то метод вернет пустую
-     * выборку.<br/>
-     * 2. Возвращаемое подмножество из множества всех продуктов удовлетворяющих заданным ограничениям определяется
-     * параметром pageable (а также зависит от сортировки). Подробнее об исключительных ситуациях смотри
-     * {@link Pageable}.<br/>
-     * 3. Если в БД есть указанный пользователь, но у него нет ни одного продукта - метод вернет пустую выборку.
-     * @param pageable содержит данные о номере и размере страницы используемых для пагинации (подробнее см.
-     *                 {@link Pageable}).
-     * @param user пользователь из продуктов которого составляется выборка.
-     * @param necessaryQuantity минимальное необходимое кол-во продукта.
-     * @param filter ограничения на продукты в выборке.
-     * @return выборку из продуктов на учете пользователя.
-     * @throws ServiceException если верно одно из следующих условий:<br/>
-     *         1. если user равен null.<br/>
-     *         2. если constraint равен null.<br/>
-     *         3. если pageable равен null.<br/>
-     *         4. если necessaryQuantity равен null.<br/>
-     *         5. если necessaryQuantity <= 0
-     */
-    public Page<Pair<Product, BigDecimal>> getProducts(Pageable pageable,
-                                                       User user,
-                                                       BigDecimal necessaryQuantity,
-                                                       Filter filter);
 
     /**
      * Возвращает упорядоченную выборку продуктов из множества всех продуктов с учетом заданных ограничений
@@ -191,6 +161,6 @@ public interface ProductRepository {
      * @param criteria критерии указывающие какие продукты учитывать
      * @return сумму цен всех продуктов удовлетворяющих ограничению criteria
      */
-    public BigDecimal getProductsSum(ProductSumCriteria criteria);
+    public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria);
 
 }

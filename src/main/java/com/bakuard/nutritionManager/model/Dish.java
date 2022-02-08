@@ -291,7 +291,7 @@ public class Dish {
      *                    продуктов, каждый из которых может выступать соответствующим этому множеству ингредиентом.
      * @return цена данного блюда или пустой Optional, если блюдо не содержит ни одного ингредиента.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
-     *              1. если servingNumber меньше нуля.<br/>
+     *              1. если servingNumber меньше или равен нулю.<br/>
      *              2. если любой из параметров имеет значение null.<br/>
      *              3. если хотя бы одно из значений ingredients - отрицательное число.<br/>
      *              4. если хотя бы один из ключей ingredients - наменование ингредиента, которого нет
@@ -302,7 +302,7 @@ public class Dish {
         Checker checker = Checker.of(getClass(), "getPrice").
                 nullValue("servingNumber", servingNumber).
                 nullValue("ingredients", ingredients).
-                negativeValue("servingNumber", servingNumber).
+                notPositiveValue("servingNumber", servingNumber).
                 containsNegative("ingredients", ingredients.values()).
                 checkWithValidateException("Fail to get dish price");
 

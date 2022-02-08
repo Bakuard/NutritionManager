@@ -106,14 +106,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Page<Pair<Product, BigDecimal>> getProducts(Pageable pageable,
-                                                       User user,
-                                                       BigDecimal necessaryQuantity,
-                                                       Filter filter) {
-        return null;
-    }
-
-    @Override
     public Page<Product> getProducts(ProductCriteria criteria) {
         Checker.of(getClass(), "getProducts").
                 nullValue("criteria", criteria).
@@ -522,8 +514,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public BigDecimal getProductsSum(ProductSumCriteria criteria) {
-        return null;
+    public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria) {
+        return Optional.empty();
     }
 
 
