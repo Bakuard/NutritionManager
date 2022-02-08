@@ -7,7 +7,7 @@ import java.util.Objects;
 @Schema(description = """
         Учетные данные пользователя указываемые им при аутентификации, регистарции или смене учетных данных.
         """)
-public class CredentialsRequest {
+public class CredentialsForEnterRequest {
 
     @Schema(description = "Имя пользователя")
     private String userName;
@@ -15,7 +15,7 @@ public class CredentialsRequest {
     @Schema(description = "Пароль пользователя")
     private String userPassword;
 
-    public CredentialsRequest() {
+    public CredentialsForEnterRequest() {
 
     }
 
@@ -39,8 +39,9 @@ public class CredentialsRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CredentialsRequest that = (CredentialsRequest) o;
-        return Objects.equals(userName, that.userName) && Objects.equals(userPassword, that.userPassword);
+        CredentialsForEnterRequest that = (CredentialsForEnterRequest) o;
+        return Objects.equals(userName, that.userName) &&
+                Objects.equals(userPassword, that.userPassword);
     }
 
     @Override

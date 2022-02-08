@@ -1,15 +1,13 @@
 package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.dto.DtoMapper;
-import com.bakuard.nutritionManager.dto.auth.JwsResponse;
+import com.bakuard.nutritionManager.dto.auth.*;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.services.AuthService;
-import com.bakuard.nutritionManager.dto.auth.CredentialsRequest;
-import com.bakuard.nutritionManager.dto.auth.EmailRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -61,7 +59,7 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/enter")
-    public ResponseEntity<SuccessResponse<JwsResponse>> enter(@RequestBody CredentialsRequest dto) {
+    public ResponseEntity<SuccessResponse<JwsResponse>> enter(@RequestBody CredentialsForEnterRequest dto) {
         logger.info("User " + dto.getUserName() + " try enter");
 
         Pair<String, User> jws = authService.enter(dto.getUserName(), dto.getUserPassword());
@@ -137,7 +135,7 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/registration")
-    public ResponseEntity<SuccessResponse<JwsResponse>> registration(@RequestBody CredentialsRequest dto,
+    public ResponseEntity<SuccessResponse<JwsResponse>> registration(@RequestBody CredentialsForEnterRequest dto,
                                                                      @RequestHeader("Authorization") String registrationJws) {
         logger.info("registration new user = " + dto.getUserName() + ". registrationJws=" + registrationJws);
 
@@ -164,7 +162,7 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/changeCredential")
-    public ResponseEntity<SuccessResponse<JwsResponse>> changeCredential(@RequestBody CredentialsRequest dto,
+    public ResponseEntity<SuccessResponse<JwsResponse>> changeCredential(@RequestBody CredentialsForEnterRequest dto,
                                                                          @RequestHeader("Authorization") String changeCredentialsJws) {
         logger.info("change credentials for user with new name = " + dto.getUserName() +
                 ". changeCredentialsJws=" + changeCredentialsJws);
@@ -173,6 +171,60 @@ public class AuthController {
 
         JwsResponse response = mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond());
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.changeCredential", response));
+    }
+
+    @Operation(
+            summary = "Смена логина и почты пользователя из его личного кабинета.",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "403",
+                            description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PostMapping("/changeLoginAndEmail")
+    public ResponseEntity<SuccessResponse<UserResponse>> changeLoginAndEmail(
+            @RequestBody ChangeLoginAndEmailRequest dto,
+            @RequestHeader("Authorization") String accessJws) {
+        logger.info("Change login and email from personal area. Dto = " + dto);
+
+        User user = authService.changeLoginAndEmail(
+                accessJws,
+                dto.getUserName(),
+                dto.getUserEmail(),
+                dto.getUserPassword()
+        );
+
+        UserResponse response = mapper.toUserResponse(user);
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.changeLoginAndEmail", response));
+    }
+
+    @Operation(
+            summary = "Смена пароля пользователя из его личного кабинета.",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "403",
+                            description = "Если передан неверный токен",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PostMapping("/changePassword")
+    public ResponseEntity<SuccessResponse<UserResponse>> changePassword(@RequestBody ChangePasswordRequest dto,
+                                                                        @RequestHeader("Authorization") String accessJws) {
+        logger.info("Change password from personal area. Dto = " + dto);
+
+        User user = authService.changePassword(
+                accessJws,
+                dto.getUserCurrentPassword(),
+                dto.getUserNewPassword()
+        );
+
+        UserResponse response = mapper.toUserResponse(user);
+        return ResponseEntity.ok(mapper.toSuccessResponse("auth.changePassword", response));
     }
 
     @Operation(
