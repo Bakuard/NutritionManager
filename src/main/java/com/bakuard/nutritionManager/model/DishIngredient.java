@@ -126,7 +126,6 @@ public class DishIngredient {
     public Optional<BigDecimal> getLackQuantity(int productIndex, BigDecimal servingNumber) {
         Checker.of(getClass(), "getLackQuantity").
                 nullValue("servingNumber", servingNumber).
-                negativeValue("productIndex", productIndex).
                 notPositiveValue("servingNumber", servingNumber).
                 checkWithValidateException("Fail to get product lack quantity");
 
@@ -153,8 +152,17 @@ public class DishIngredient {
      * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
      * @param servingNumber кол-во порций блюда.
      * @return общую цену за недостающее кол-во докупаемого продукта.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. servingNumber является null.<br/>
+     *              2. productIndex < 0 <br/>
+     *              3. servingNumber <= 0
      */
     public Optional<BigDecimal> getLackQuantityPrice(int productIndex, BigDecimal servingNumber) {
+        Checker.of(getClass(), "getLackQuantityPrice").
+                nullValue("servingNumber", servingNumber).
+                notPositiveValue("servingNumber", servingNumber).
+                checkWithValidateException("Fail to get price of product lack quantity");
+
         return getProductByIndex(productIndex).
                 map(product ->
                     getLackQuantity(productIndex, servingNumber).get().
@@ -175,6 +183,10 @@ public class DishIngredient {
      * @throws ValidateException если productIndex < 0
      */
     public Optional<Product> getProductByIndex(int productIndex) {
+        Checker.of(getClass(), "getProductByIndex").
+                negativeValue("productIndex", productIndex).
+                checkWithValidateException("Fail to get product bu index");
+
         Page<Product> page = repository.getProducts(
                 ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).
                         setProductSort(sort)

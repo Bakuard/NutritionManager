@@ -7,6 +7,7 @@ import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Задает правило сортировки продуктов. Объекты данного класса неизменяемы.
@@ -162,6 +163,19 @@ public final class ProductSort {
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
         return params.get(parameterIndex).getSecond();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProductSort that = (ProductSort) o;
+        return params.equals(that.params);
+    }
+
+    @Override
+    public int hashCode() {
+        return params.hashCode();
     }
 
 

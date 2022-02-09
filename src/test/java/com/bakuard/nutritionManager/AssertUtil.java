@@ -5,6 +5,7 @@ import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import org.junit.jupiter.api.Assertions;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 public class AssertUtil {
@@ -41,6 +42,10 @@ public class AssertUtil {
                         checkedType.getName() + ", " + operationName);
             }
         }
+    }
+
+    public static void assertEquals(BigDecimal a, BigDecimal b) {
+        if(a.compareTo(b) != 0) Assertions.fail("Expected: " + a + ", actual: " + b);
     }
 
 }

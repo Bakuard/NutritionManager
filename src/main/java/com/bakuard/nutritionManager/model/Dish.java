@@ -387,6 +387,7 @@ public class Dish {
                 '}';
     }
 
+
     /**
      * Реализация паттерна "Builder" для блюда ({@link Dish}).
      */
