@@ -10,9 +10,11 @@ import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.ProductSort;
 import com.bakuard.nutritionManager.model.filters.SortDirection;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
+import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Objects;
 import java.util.Optional;
@@ -161,19 +163,33 @@ public class DishIngredient {
     }
 
     /**
-     * Возвращает продукт из множества всех взаимозаменяемых продуктов для данноо ингредиента по его
+     * Возвращает продукт из множества всех взаимозаменяемых продуктов для данного ингредиента по его
      * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
-     * ингредиента упорядоченно по цене.<br/>
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
-     * то метод вернет пустой Optional.
+     * ингредиента упорядоченно по цене. Особые случаи:<br/>
+     * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
+     *    то метод вернет пустой Optional.<br/>
+     * 2. Если в БД есть продукты соответствующие данному ингредиенту и productIndex больше или равен их кол-ву,
+     *    то метод вернет последний продукт из всего множества продуктов данного ингредиента.
      * @param productIndex порядковому номер продукта.
      * @return продукт по его порядковому номеру.
+     * @throws ValidateException если productIndex < 0
      */
     public Optional<Product> getProductByIndex(int productIndex) {
-        Product product = repository.getProducts(
+        Page<Product> page = repository.getProducts(
                 ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).
                         setProductSort(sort)
-        ).get(productIndex);
+        );
+
+        Product product = null;
+
+        if(!page.getInfo().isEmpty()) {
+            product = page.get(
+                    page.getInfo().
+                            getTotalItems().
+                            subtract(BigInteger.ONE).
+                            min(BigInteger.valueOf(productIndex))
+            );
+        }
 
         return Optional.ofNullable(product);
     }
