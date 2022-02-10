@@ -7,6 +7,7 @@ import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Задает правило сортировки продуктов. Объекты данного класса неизменяемы.
@@ -98,7 +99,7 @@ public final class ProductSort {
      * для нового объекта сортировки этот параметр будет иметь наивысший приоритет при сортировке, иначе данный
      * параметр будет иметь наименьший приоритет при сортировке относительно всех параметров текущего объекта.
      * @param parameter параметр сортировки.
-     * @param direction направление сортировки (возрастание ил убывание).
+     * @param direction направление сортировки (возрастание или убывание).
      * @return новый объект сортировки.
      * @throws ServiceException если parameter или direction является null.
      */
@@ -162,6 +163,19 @@ public final class ProductSort {
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
         return params.get(parameterIndex).getSecond();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProductSort that = (ProductSort) o;
+        return params.equals(that.params);
+    }
+
+    @Override
+    public int hashCode() {
+        return params.hashCode();
     }
 
 

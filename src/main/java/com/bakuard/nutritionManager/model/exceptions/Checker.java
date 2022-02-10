@@ -91,6 +91,16 @@ public class Checker {
         return this;
     }
 
+    public Checker negativeValue(String fieldName, long checkedValue) {
+        if(isValid(fieldName) && checkedValue < 0) {
+            constraints.add(
+                    new Constraint(checkedType, fieldName, ConstraintType.NEGATIVE_VALUE,
+                            fieldName + " can't be negative. Actual = " + checkedValue)
+            );
+        }
+        return this;
+    }
+
     public Checker notPositiveValue(String fieldName, BigDecimal checkedValue) {
         if(isValid(fieldName) && checkedValue.signum() <= 0) {
             constraints.add(
@@ -101,11 +111,21 @@ public class Checker {
         return this;
     }
 
-    public Checker containsNull(String fieldName, List<?> checkedValue) {
+    public Checker containsNull(String fieldName, Collection<?> checkedValue) {
         if(isValid(fieldName) && checkedValue.stream().anyMatch(Objects::isNull)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_NULL,
                             fieldName + " can't contains null item")
+            );
+        }
+        return this;
+    }
+
+    public Checker containsNegative(String fieldName, Collection<Integer> checkedValue) {
+        if(isValid(fieldName) && checkedValue.stream().anyMatch(i -> i < 0)) {
+            constraints.add(
+                    new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_NEGATIVE,
+                            fieldName + " can't contains negative value")
             );
         }
         return this;
@@ -141,7 +161,7 @@ public class Checker {
         return this;
     }
 
-    public Checker notEnoughItems(String fieldName, List<?> checkedValue, int minItems) {
+    public Checker notEnoughItems(String fieldName, Collection<?> checkedValue, int minItems) {
         if(isValid(fieldName) && checkedValue.size() < minItems) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.NOT_ENOUGH_ITEMS,
@@ -163,7 +183,26 @@ public class Checker {
     }
 
 
-    public <S, T>Checker tryBuildForEach(List<S> values, Function<S, T> factory, Container<List<T>> container) {
+    public <T>Checker tryBuildForEach(Collection<? extends AbstractBuilder<T>> values,
+                                      Container<List<T>> container) {
+        List<T> result = new ArrayList<>();
+        container.set(result);
+
+        for(AbstractBuilder<T> builder : values) {
+            try {
+                result.add(builder.tryBuild());
+            } catch (ValidateException e) {
+                validateExceptions.add(e);
+                container.close();
+            }
+        }
+
+        return this;
+    }
+
+    public <S, T>Checker tryBuildForEach(Collection<? extends S> values,
+                                         Function<S, T> factory,
+                                         Container<List<T>> container) {
         List<T> result = new ArrayList<>();
         container.set(result);
 

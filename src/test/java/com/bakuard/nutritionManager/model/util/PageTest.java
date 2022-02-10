@@ -5,6 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.stream.IntStream;
 
 class PageTest {
 
@@ -272,6 +274,101 @@ class PageTest {
                 createPageMetadata(91);
 
         Assertions.assertEquals(BigInteger.valueOf(90), info.getOffset());
+    }
+
+    @Test
+    @DisplayName("""
+            get(globalIndex):
+             globalIndex < 0
+             => exception
+            """)
+    public void get1() {
+        Page<Integer> page = Pageable.
+                ofIndex(10, 9).
+                createPageMetadata(100).
+                createPage(createFullList(0, 10));
+
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> page.get(-1));
+    }
+
+    @Test
+    @DisplayName("""
+            get(globalIndex):
+             item with globalIndex out of page bottom line
+             => return null
+            """)
+    public void get2() {
+        Page<Integer> page = Pageable.
+                ofIndex(10, 15).
+                createPageMetadata(100).
+                createPage(createFullList(10, 10));
+
+        Assertions.assertNull(page.get(9));
+    }
+
+    @Test
+    @DisplayName("""
+            get(globalIndex):
+             item with globalIndex out of page top line
+             => return null
+            """)
+    public void get3() {
+        Page<Integer> page = Pageable.
+                ofIndex(10, 15).
+                createPageMetadata(100).
+                createPage(createFullList(10, 10));
+
+        Assertions.assertNull(page.get(20));
+    }
+
+    @Test
+    @DisplayName("""
+            get(globalIndex):
+             item with globalIndex is first page item
+             => return first page item
+            """)
+    public void get4() {
+        Page<Integer> page = Pageable.
+                ofIndex(10, 15).
+                createPageMetadata(100).
+                createPage(createFullList(10, 10));
+
+        Assertions.assertEquals(10, page.get(10));
+    }
+
+    @Test
+    @DisplayName("""
+            get(globalIndex):
+             item with globalIndex is last page item
+             => return last page item
+            """)
+    public void get5() {
+        Page<Integer> page = Pageable.
+                ofIndex(10, 15).
+                createPageMetadata(100).
+                createPage(createFullList(10, 10));
+
+        Assertions.assertEquals(19, page.get(19));
+    }
+
+    @Test
+    @DisplayName("""
+            get(globalIndex):
+             item with globalIndex is middle page item
+             => return middle page item
+            """)
+    public void get6() {
+        Page<Integer> page = Pageable.
+                ofIndex(10, 15).
+                createPageMetadata(100).
+                createPage(createFullList(10, 10));
+
+        Assertions.assertEquals(15, page.get(15));
+    }
+
+
+    private List<Integer> createFullList(int from, int itemsNumber) {
+        return IntStream.range(from, from + itemsNumber).boxed().toList();
     }
 
 }

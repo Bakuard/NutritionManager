@@ -13,7 +13,7 @@
 
     <groupId>com.bakuard</groupId>
     <artifactId>nutritionManager</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <name>nutritionManager</name>
 
     <properties>
@@ -90,6 +90,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.3.1</version>
             <scope>test</scope>
         </dependency>
 

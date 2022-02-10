@@ -51,6 +51,10 @@ public class ProductAsDishIngredientResponse {
         this.user = user;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getImagePath() {
         return imagePath;
     }
@@ -180,9 +184,8 @@ public class ProductAsDishIngredientResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, id, user, imagePath, category, shop,
-                variety, manufacturer, price, packingSize, unit, quantity,
-                necessaryQuantity, lackQuantity, lackQuantityPrice, tags);
+        return Objects.hash(type, id, user, imagePath, category, shop, variety, manufacturer, price,
+                packingSize, unit, quantity, necessaryQuantity, lackQuantity, lackQuantityPrice, tags);
     }
 
     @Override

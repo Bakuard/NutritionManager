@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.dal;
+package com.bakuard.nutritionManager;
 
 public interface Action {
 

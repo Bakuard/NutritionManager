@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.dal.criteria;
+package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.*;
@@ -78,8 +78,8 @@ public class ProductFieldCriteria {
     }
 
     /**
-     * Возвращает критерии используемые при подсчете уникальных значений продуктов. Все параметры возвращаемого
-     * критерия подсчета устанавливаются из соответствующих параметов текущего объекта.
+     * Возвращает критерии используемые при подсчете уникальных значений определенног поля продуктов. Все параметры
+     * возвращаемого критерия подсчета устанавливаются из соответствующих параметов текущего объекта.
      * @return критерии используемые при подсчете значений по определенному полю продуктов.
      */
     public ProductFieldNumberCriteria getNumberCriteria() {

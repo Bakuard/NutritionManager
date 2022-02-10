@@ -21,4 +21,56 @@ class PageableTest {
         );
     }
 
+    @Test
+    @DisplayName("""
+            ofIndex(expectedMaxPageSize, productIndex):
+             productIndex < 0
+             => correct result
+            """)
+    public void ofIndex1() {
+        Pageable actual = Pageable.ofIndex(1, -1);
+
+        Pageable expected = Pageable.of(1, 0);
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            ofIndex(expectedMaxPageSize, productIndex):
+             productIndex = 0
+             => correct result
+            """)
+    public void ofIndex2() {
+        Pageable actual = Pageable.ofIndex(5, 0);
+
+        Pageable expected = Pageable.of(5, 0);
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            ofIndex(expectedMaxPageSize, productIndex):
+             productIndex > 0
+             => correct result
+            """)
+    public void ofIndex3() {
+        Pageable actual = Pageable.ofIndex(10, 15);
+
+        Pageable expected = Pageable.of(10, 1);
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            ofIndex(expectedMaxPageSize, productIndex):
+             expectedMaxPageSize < 1
+             => correct result
+            """)
+    public void ofIndex4() {
+        Pageable actual = Pageable.ofIndex(0, 10);
+
+        Pageable expected = Pageable.of(1, 10);
+        Assertions.assertEquals(expected, actual);
+    }
+
 }

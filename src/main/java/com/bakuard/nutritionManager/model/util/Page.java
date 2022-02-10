@@ -37,8 +37,49 @@ public final class Page<T> {
         return content;
     }
 
+    /**
+     * Возвращает метаданные страницы (подробнее см. {@link Info}).
+     * @return метаданные страницы.
+     */
     public Info getInfo() {
         return info;
+    }
+
+    /**
+     * Возвращает элемет выборки по его порядковому номеру во всей выборке (глобальному индексу), по которой
+     * проводится пагинация. Если элемент с указанным глобальным индексом, на момент создания данного объекта
+     * Page, должен был находится на другой странице - метод вернет null.
+     * @param globalIndex глбальный индекс элемента, т.е. порядковый номер элемента во всей выборке.
+     * @return объект хранящийся на данной странице или null.
+     * @throws IndexOutOfBoundsException если globalIndex < 0
+     */
+    public T get(int globalIndex) {
+        return get(BigInteger.valueOf(globalIndex));
+    }
+
+    /**
+     * Возвращает элемет выборки по его порядковому номеру во всей выборке (глобальному индексу), по которой
+     * проводится пагинация. Если элемент с указанным глобальным индексом, на момент создания данного объекта
+     * Page, должен был находится на другой странице - метод вернет null.
+     * @param globalIndex глбальный индекс элемента, т.е. порядковый номер элемента во всей выборке.
+     * @return объект хранящийся на данной странице или null.
+     * @throws IndexOutOfBoundsException если globalIndex < 0
+     */
+    public T get(BigInteger globalIndex) {
+        if(globalIndex.signum() < 0)
+            throw new IndexOutOfBoundsException("globalIndex can't be less then zero. Actual value = " + globalIndex);
+
+        BigInteger offset = info.getOffset();
+        BigInteger topLine = offset.add(BigInteger.valueOf(info.getActualSize()));
+
+        T result = null;
+
+        if(globalIndex.compareTo(offset) >= 0 && globalIndex.compareTo(topLine) < 0) {
+            int index = globalIndex.subtract(offset).intValueExact();
+            result = content.get(index);
+        }
+
+        return result;
     }
 
     /**

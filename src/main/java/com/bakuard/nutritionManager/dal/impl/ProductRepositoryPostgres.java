@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.*;
+import com.bakuard.nutritionManager.dal.criteria.products.*;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
@@ -11,8 +11,6 @@ import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
-import com.bakuard.nutritionManager.model.util.Pair;
 
 import com.google.common.collect.Sets;
 
@@ -103,14 +101,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
         }
 
         return product;
-    }
-
-    @Override
-    public Page<Pair<Product, BigDecimal>> getProducts(Pageable pageable,
-                                                       User user,
-                                                       BigDecimal necessaryQuantity,
-                                                       Filter filter) {
-        return null;
     }
 
     @Override
@@ -519,6 +509,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     return rs.getInt(1);
                 }
         );
+    }
+
+    @Override
+    public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria) {
+        return Optional.empty();
     }
 
 

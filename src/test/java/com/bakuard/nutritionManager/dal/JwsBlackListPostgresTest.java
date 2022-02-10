@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.dal;
 
+import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.JwsBlackListPostgres;
 

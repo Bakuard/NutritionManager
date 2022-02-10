@@ -3,14 +3,14 @@ package com.bakuard.nutritionManager.dto.dishes;
 import com.bakuard.nutritionManager.dto.products.ProductAsDishIngredientResponse;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
+import java.util.SortedMap;
 
 public class DishProductsListResponse {
 
     private BigDecimal servingNumber;
     private BigDecimal totalPrice;
-    private List<ProductAsDishIngredientResponse> ingredients;
+    private SortedMap<String, ProductAsDishIngredientResponse> ingredients;
 
     public DishProductsListResponse() {
 
@@ -32,11 +32,11 @@ public class DishProductsListResponse {
         this.totalPrice = totalPrice;
     }
 
-    public List<ProductAsDishIngredientResponse> getIngredients() {
+    public SortedMap<String, ProductAsDishIngredientResponse> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<ProductAsDishIngredientResponse> ingredients) {
+    public void setIngredients(SortedMap<String, ProductAsDishIngredientResponse> ingredients) {
         this.ingredients = ingredients;
     }
 

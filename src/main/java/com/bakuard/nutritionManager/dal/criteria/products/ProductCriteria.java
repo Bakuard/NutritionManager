@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.dal.criteria;
+package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
@@ -23,7 +23,7 @@ public class ProductCriteria {
      * Создает и возвращает новый обеъект ProductCriteria.
      * @param pageable параметры страницы исползующиеся для пагинации.
      * @param user пользователь из данных которого будет формироваться выборка.
-     * @return новый обеъект ProductCriteria.
+     * @return новый объект ProductCriteria.
      * @throws ServiceException если хотя бы один из параметров имеет значение null.
      */
     public static ProductCriteria of(Pageable pageable, User user) {
@@ -141,8 +141,8 @@ public class ProductCriteria {
         if (o == null || getClass() != o.getClass()) return false;
         ProductCriteria that = (ProductCriteria) o;
         return onlyFridge == that.onlyFridge &&
-                Objects.equals(pageable, that.pageable) &&
-                Objects.equals(user, that.user) &&
+                pageable.equals(that.pageable) &&
+                user.equals(that.user) &&
                 Objects.equals(filter, that.filter) &&
                 Objects.equals(order, that.order);
     }

@@ -2,9 +2,9 @@ package com.bakuard.nutritionManager.dto;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.UserRepository;
-import com.bakuard.nutritionManager.dal.criteria.ProductCategoryCriteria;
-import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
-import com.bakuard.nutritionManager.dal.criteria.ProductFieldCriteria;
+import com.bakuard.nutritionManager.dal.criteria.products.ProductCategoryCriteria;
+import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
+import com.bakuard.nutritionManager.dal.criteria.products.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
