@@ -141,8 +141,8 @@ public class ProductCriteria {
         if (o == null || getClass() != o.getClass()) return false;
         ProductCriteria that = (ProductCriteria) o;
         return onlyFridge == that.onlyFridge &&
-                Objects.equals(pageable, that.pageable) &&
-                Objects.equals(user, that.user) &&
+                pageable.equals(that.pageable) &&
+                user.equals(that.user) &&
                 Objects.equals(filter, that.filter) &&
                 Objects.equals(order, that.order);
     }

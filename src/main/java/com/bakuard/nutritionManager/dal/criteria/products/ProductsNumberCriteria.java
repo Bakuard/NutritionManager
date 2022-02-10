@@ -18,9 +18,9 @@ import java.util.Optional;
 public class ProductsNumberCriteria {
 
     /**
-     * Создает и возвращает новый обеъект ProductsNumberCriteria.
-     * @param user пользователь из данных которого будет формироваться выборка.
-     * @return новый обеъект ProductsNumberCriteria.
+     * Создает и возвращает новый объект ProductsNumberCriteria.
+     * @param user пользователь для продуктов которого ведется подсчет.
+     * @return новый объект ProductsNumberCriteria.
      * @throws ServiceException если user имеет значение null.
      */
     public static ProductsNumberCriteria of(User user) {
@@ -70,10 +70,10 @@ public class ProductsNumberCriteria {
     }
 
     /**
-     * Устанавливает ограничения для отбираемых продуктов (подробнее см. {@link Filter} и его подтипы).
-     * Значение по умолчанию - пустой Optional (т.е. выборка формируется из всех продуктов пользвателя, если
+     * Устанавливает ограничения продуктов для которых ведется подсчет (подробнее см. {@link Filter} и его подтипы).
+     * Значение по умолчанию - пустой Optional (т.е. подсчет идет для всех продуктов пользвателя, если
      * не учитывать другие параметры данного объекта).
-     * @param filter ограничения для отбираемых продуктов.
+     * @param filter ограничения для подсчитываемых продуктов.
      * @return этот же объект.
      */
     public ProductsNumberCriteria setFilter(Filter filter) {

@@ -1,7 +1,12 @@
 package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.DishRepository;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishCriteria;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishFieldCriteria;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishFieldNumberCriteria;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishesNumberCriteria;
 import com.bakuard.nutritionManager.model.Dish;
+import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.DishSort;
@@ -37,22 +42,32 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Page<Dish> getDishes(Pageable pageable, User user, DishSort order) {
+    public Page<Dish> getDishes(DishCriteria criteria) {
         return null;
     }
 
     @Override
-    public Page<Dish> getDishes(Pageable pageable, User user, Filter filter, DishSort order) {
+    public Page<Tag> getTags(DishFieldCriteria criteria) {
         return null;
     }
 
     @Override
-    public int getNumberDishes(User user) {
+    public Page<String> getUnits(DishFieldCriteria criteria) {
+        return null;
+    }
+
+    @Override
+    public int getNumberDishes(DishesNumberCriteria criteria) {
         return 0;
     }
 
     @Override
-    public int getNumberDishes(User user, Filter filter) {
+    public int getNumberTags(DishFieldNumberCriteria criteria) {
+        return 0;
+    }
+
+    @Override
+    public int getNumberUnits(DishFieldNumberCriteria criteria) {
         return 0;
     }
 
