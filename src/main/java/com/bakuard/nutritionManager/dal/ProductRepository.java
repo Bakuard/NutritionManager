@@ -1,14 +1,10 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.dal.criteria.*;
+import com.bakuard.nutritionManager.dal.criteria.products.*;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.ProductContext;
 import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
-import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.model.exceptions.*;
 
 import java.math.BigDecimal;

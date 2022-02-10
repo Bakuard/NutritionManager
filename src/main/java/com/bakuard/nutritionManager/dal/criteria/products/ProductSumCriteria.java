@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.dal.criteria;
+package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.Checker;

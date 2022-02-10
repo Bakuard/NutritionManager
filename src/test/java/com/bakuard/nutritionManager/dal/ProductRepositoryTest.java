@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.criteria.*;
+import com.bakuard.nutritionManager.dal.criteria.products.*;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.Product;

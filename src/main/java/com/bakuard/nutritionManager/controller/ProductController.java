@@ -1,9 +1,9 @@
 package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.ProductCategoryCriteria;
-import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
-import com.bakuard.nutritionManager.dal.criteria.ProductFieldCriteria;
+import com.bakuard.nutritionManager.dal.criteria.products.ProductCategoryCriteria;
+import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
+import com.bakuard.nutritionManager.dal.criteria.products.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.products.*;

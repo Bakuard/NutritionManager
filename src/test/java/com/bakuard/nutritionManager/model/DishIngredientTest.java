@@ -3,7 +3,7 @@ package com.bakuard.nutritionManager.model;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.ProductCriteria;
+import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.filters.CategoryFilter;
 import com.bakuard.nutritionManager.model.filters.ProductSort;
