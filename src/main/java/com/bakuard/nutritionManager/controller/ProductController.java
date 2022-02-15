@@ -7,7 +7,6 @@ import com.bakuard.nutritionManager.dal.criteria.products.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.products.*;
-import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.dto.DtoMapper;
@@ -348,7 +347,7 @@ public class ProductController {
     )
     @Transactional
     @GetMapping("/getTags")
-    public ResponseEntity<Page<TagRequestAndResponse>> getTags(
+    public ResponseEntity<Page<String>> getTags(
             @RequestParam("page")
             @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
             int page,
@@ -374,7 +373,7 @@ public class ProductController {
 
         ProductFieldCriteria criteria = mapper.toProductFieldCriteria(page, size, userId, productCategory);
 
-        Page<TagRequestAndResponse> response = mapper.toTagsResponse(
+        Page<String> response = mapper.toTagsResponse(
                 productRepository.getTags(criteria)
         );
 
