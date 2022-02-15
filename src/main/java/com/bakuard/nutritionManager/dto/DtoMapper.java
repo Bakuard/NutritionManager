@@ -8,7 +8,6 @@ import com.bakuard.nutritionManager.dal.criteria.products.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
-import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.exceptions.*;
@@ -43,7 +42,7 @@ public class DtoMapper {
         response.setUser(toUserResponse(product.getUser()));
         response.setCategory(product.getContext().getCategory());
         response.setShop(product.getContext().getShop());
-        response.setVariety(product.getContext().getVariety());
+        response.setGrade(product.getContext().getVariety());
         response.setManufacturer(product.getContext().getManufacturer());
         response.setPrice(product.getContext().getPrice());
         response.setPackingSize(product.getContext().getPackingSize());
@@ -51,7 +50,7 @@ public class DtoMapper {
         response.setQuantity(product.getQuantity());
         response.setDescription(product.getDescription());
         response.setImagePath(product.getImagePath());
-        response.setTags(toTagResponse(product.getContext().getTags()));
+        response.setTags(toTagsResponse(product.getContext().getTags()));
         return response;
     }
 
@@ -62,7 +61,7 @@ public class DtoMapper {
                 setUser(userRepository.getById(dto.getUserId())).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
-                setVariety(dto.getVariety()).
+                setVariety(dto.getGrade()).
                 setManufacturer(dto.getManufacturer()).
                 setPrice(dto.getPrice()).
                 setPackingSize(dto.getPackingSize()).
@@ -71,7 +70,7 @@ public class DtoMapper {
                 setDescription(dto.getDescription()).
                 setImagePath(dto.getImagePath());
 
-        dto.getTags().forEach(t -> builder.addTag(t.getName()));
+        dto.getTags().forEach(builder::addTag);
 
         return builder.tryBuild();
     }
@@ -83,7 +82,7 @@ public class DtoMapper {
                 setUser(userRepository.getById(dto.getUserId())).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
-                setVariety(dto.getVariety()).
+                setVariety(dto.getGrade()).
                 setManufacturer(dto.getManufacturer()).
                 setPrice(dto.getPrice()).
                 setPackingSize(dto.getPackingSize()).
@@ -92,7 +91,7 @@ public class DtoMapper {
                 setDescription(dto.getDescription()).
                 setImagePath(dto.getImagePath());
 
-        dto.getTags().forEach(t -> builder.addTag(t.getName()));
+        dto.getTags().forEach(builder::addTag);
 
         return builder.tryBuild();
     }
@@ -145,13 +144,8 @@ public class DtoMapper {
     }
 
 
-    public Page<TagRequestAndResponse> toTagsResponse(Page<Tag> tags) {
-        return tags.map(tag -> {
-            TagRequestAndResponse response = new TagRequestAndResponse();
-            response.setName(tag.getValue());
-            response.setCode(tag.getValue());
-            return response;
-        });
+    public Page<String> toTagsResponse(Page<Tag> tags) {
+        return tags.map(Tag::getValue);
     }
 
     public Page<ShopResponse> toShopsResponse(Page<String> shops) {
@@ -267,13 +261,8 @@ public class DtoMapper {
     }
 
 
-    private List<TagRequestAndResponse> toTagResponse(Collection<Tag> tags) {
-        return tags.stream().map(tag -> {
-            TagRequestAndResponse response = new TagRequestAndResponse();
-            response.setName(tag.getValue());
-            response.setCode(tag.getValue());
-            return response;
-        }).toList();
+    private List<String> toTagsResponse(Collection<Tag> tags) {
+        return tags.stream().map(Tag::getValue).toList();
     }
 
     private ProductSort toProductSort(String sortRuleAsString) {
