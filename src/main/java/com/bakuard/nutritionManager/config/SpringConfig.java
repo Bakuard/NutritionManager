@@ -87,8 +87,8 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public DishRepository dishRepository(DataSource dataSource) {
-        return new DishRepositoryPostgres(dataSource);
+    public DishRepository dishRepository(DataSource dataSource, AppConfigData appConfiguration) {
+        return new DishRepositoryPostgres(dataSource, appConfiguration);
     }
 
     @Bean

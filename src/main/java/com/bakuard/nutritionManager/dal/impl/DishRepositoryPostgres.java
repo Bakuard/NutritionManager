@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.dal.impl;
 
+import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.criteria.dishes.DishCriteria;
 import com.bakuard.nutritionManager.dal.criteria.dishes.DishFieldCriteria;
@@ -21,8 +22,10 @@ import java.util.UUID;
 public class DishRepositoryPostgres implements DishRepository {
 
     private JdbcTemplate statement;
+    private AppConfigData appConfig;
 
-    public DishRepositoryPostgres(DataSource dataSource) {
+    public DishRepositoryPostgres(DataSource dataSource, AppConfigData appConfig) {
+        this.appConfig = appConfig;
         statement = new JdbcTemplate(dataSource);
     }
 

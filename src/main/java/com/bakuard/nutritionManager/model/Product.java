@@ -19,6 +19,10 @@ public class Product {
     private String description;
     private String imagePath;
 
+    /**
+     * Конструктор копирования. Выполняет глубокое копирование.
+     * @param other копируемый продукт.
+     */
     public Product(Product other) {
         id = other.id;
         user = new User(other.user);
@@ -182,7 +186,7 @@ public class Product {
         if(this == other) return true;
         if(getClass() != other.getClass()) return false;
         return id.equals(other.id) &&
-                user.equals(other.user) &&
+                user.equalsFullState(other.user) &&
                 quantity.equals(other.quantity) &&
                 context.equals(other.context) &&
                 Objects.equals(description, other.description) &&

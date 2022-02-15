@@ -154,8 +154,10 @@ public interface ProductRepository {
 
     /**
      * Возвращает сумму цен всех продуктов удовлетворяющих ограничению criteria (см. {@link ProductSumCriteria}).
+     * Если нет ни одного продукта удовлетворяющего ограничению criteria - возвращает пустой Optional.
      * @param criteria критерии указывающие какие продукты учитывать
      * @return сумму цен всех продуктов удовлетворяющих ограничению criteria
+     * @throws ServiceException если criteria является null.
      */
     public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria);
 

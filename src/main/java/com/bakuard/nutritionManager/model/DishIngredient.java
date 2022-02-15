@@ -36,6 +36,20 @@ public class DishIngredient {
     private final ProductSort sort;
 
     /**
+     * Конструктор копирования. Выполняет глубокое копирование.
+     * @param other копируемый ингредиент.
+     */
+    public DishIngredient(DishIngredient other) {
+        this.name = other.name;
+        this.filter = other.filter;
+        this.quantity = other.quantity;
+        this.repository = other.repository;
+        this.user = new User(other.user);
+        this.config = other.config;
+        this.sort = other.sort;
+    }
+
+    /**
      * Создает новый ингредиент блюда.
      * @param name наименование ингредиента.
      * @param filter ограничение задающее множество взаимозаменяемых продуктов, каждый из которых может
