@@ -1720,10 +1720,7 @@ class ProductRepositoryTest {
              pageable = full,
              filter is OrElse. Operands:
                 first operand is AndConstraint. Operands:
-                    MinTags - match exists,
                     CategoryConstraint - match exists,
-                    ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
@@ -1746,10 +1743,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 OrElseFilter.of(
                                         AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag B")),
                                                 CategoryFilter.of("name B"),
-                                                ShopsFilter.of("shop C"),
-                                                VarietiesFilter.of("variety D"),
                                                 ManufacturerFilter.of("manufacturer B")
                                         ),
                                         AndFilter.of(
@@ -1760,12 +1754,21 @@ class ProductRepositoryTest {
                                                 ManufacturerFilter.of("manufacturer A")
                                         )
                                 )
+                        ).setProductSort(
+                                new ProductSort(ProductSort.Parameter.PRICE, SortDirection.DESCENDING)
                         )
         );
 
         Page<Product> expected = Pageable.of(5, 0).
-                createPageMetadata(3).
-                createPage(List.of(products.get(5), products.get(0), products.get(1)));
+                createPageMetadata(4).
+                createPage(
+                        List.of(
+                                products.get(5),
+                                products.get(4),
+                                products.get(1),
+                                products.get(0)
+                        )
+                );
         Assertions.assertEquals(expected, actual);
     }
 
