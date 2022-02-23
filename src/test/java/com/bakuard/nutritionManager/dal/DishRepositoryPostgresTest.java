@@ -236,7 +236,7 @@ class DishRepositoryPostgresTest {
         Dish updatedDish = new Dish(dish);
         updatedDish.setName("New name");
         updatedDish.removeIngredient("ingredient 1");
-        updatedDish.putIngredient("ingredient 4", CategoriesFilter.of("category Z"), BigDecimal.TEN);
+        updatedDish.putIngredient("ingredient 4", Filter.anyCategory("category Z"), BigDecimal.TEN);
         updatedDish.removeTag(new Tag("tag A"));
         updatedDish.addTag(new Tag("tag Z"));
         boolean actual = commit(() -> dishRepository.save(updatedDish));
@@ -261,7 +261,7 @@ class DishRepositoryPostgresTest {
         Dish expected = new Dish(dish);
         expected.setName("New name");
         expected.removeIngredient("ingredient 1");
-        expected.putIngredient("ingredient 4", CategoriesFilter.of("category Z"), BigDecimal.TEN);
+        expected.putIngredient("ingredient 4", Filter.anyCategory("category Z"), BigDecimal.TEN);
         expected.removeTag(new Tag("tag A"));
         expected.addTag(new Tag("tag Z"));
         commit(() -> dishRepository.save(expected));
@@ -515,7 +515,7 @@ class DishRepositoryPostgresTest {
 
         int actual = dishRepository.getDishesNumber(
                 DishesNumberCriteria.of(user).
-                        setFilter(MinTagsFilter.of(new Tag("common tag"), new Tag("unknown tag")))
+                        setFilter(Filter.minTags(new Tag("common tag"), new Tag("unknown tag")))
         );
 
         Assertions.assertEquals(0, actual);
@@ -534,7 +534,7 @@ class DishRepositoryPostgresTest {
 
         int actual = dishRepository.getDishesNumber(
                 DishesNumberCriteria.of(user).
-                        setFilter(MinTagsFilter.of(new Tag("common tag"), new Tag("tag A")))
+                        setFilter(Filter.minTags(new Tag("common tag"), new Tag("tag A")))
         );
 
         Assertions.assertEquals(0, actual);
@@ -620,7 +620,7 @@ class DishRepositoryPostgresTest {
                         Pageable.of(3, 0),
                         user
                 ).setFilter(
-                        MinTagsFilter.of(new Tag("unknown tag"))
+                        Filter.minTags(new Tag("unknown tag"))
                 )
         );
 
@@ -645,7 +645,7 @@ class DishRepositoryPostgresTest {
                         Pageable.of(2, 0),
                         user
                 ).setFilter(
-                        MinTagsFilter.of(new Tag("common tag"), new Tag("tag B"))
+                        Filter.minTags(new Tag("common tag"), new Tag("tag B"))
                 )
         );
 
@@ -925,34 +925,34 @@ class DishRepositoryPostgresTest {
                 addTag("tag A").
                 addTag("common tag").
                 addIngredient("ingredient 1",
-                        OrElseFilter.of(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer A")
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 ),
-                                MinTagsFilter.of(new Tag("tag B"))
+                                Filter.minTags(new Tag("tag B"))
                         ),
                         BigDecimal.TEN).
                 addIngredient("ingredient 2",
-                        OrElseFilter.of(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("value 1")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A")
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.minTags(new Tag("value 1")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A")
                                 ),
-                                ManufacturerFilter.of("manufacturer B")
+                                Filter.anyManufacturer("manufacturer B")
                         ),
                         new BigDecimal("2.5")).
                 addIngredient("ingredient 3",
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("value 1"), new Tag("value 2")),
-                                CategoriesFilter.of("name A"),
-                                ShopsFilter.of("shop B"),
-                                VarietiesFilter.of("variety B")
+                        Filter.and(
+                                Filter.minTags(new Tag("value 1"), new Tag("value 2")),
+                                Filter.anyCategory("name A"),
+                                Filter.anyShop("shop B"),
+                                Filter.anyVariety("variety B")
                         ),
                         new BigDecimal("0.1")).
                 tryBuild();
@@ -975,34 +975,34 @@ class DishRepositoryPostgresTest {
                         addTag("tag A").
                         addTag("common tag").
                         addIngredient("ingredient 1",
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("common tag")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("common tag")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        MinTagsFilter.of(new Tag("tag B"))
+                                        Filter.minTags(new Tag("tag B"))
                                 ),
                                 BigDecimal.TEN).
                         addIngredient("ingredient 2",
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("value 1")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("variety A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("value 1")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A")
                                         ),
-                                        ManufacturerFilter.of("manufacturer B")
+                                        Filter.anyManufacturer("manufacturer B")
                                 ),
                                 new BigDecimal("2.5")).
                         addIngredient("ingredient 3",
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("value 1"), new Tag("value 2")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop B"),
-                                        VarietiesFilter.of("variety B")
+                                Filter.and(
+                                        Filter.minTags(new Tag("value 1"), new Tag("value 2")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop B"),
+                                        Filter.anyVariety("variety B")
                                 ),
                                 new BigDecimal("0.1")).
                         tryBuild()
@@ -1022,15 +1022,15 @@ class DishRepositoryPostgresTest {
                         addTag("tag A").
                         addTag("common tag").
                         addIngredient("ingredient 1",
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("common tag")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("common tag")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        MinTagsFilter.of(new Tag("tag B"))
+                                        Filter.minTags(new Tag("tag B"))
                                 ),
                                 BigDecimal.TEN).
                         tryBuild()
@@ -1050,29 +1050,29 @@ class DishRepositoryPostgresTest {
                         addTag("tag B").
                         addTag("common tag").
                         addIngredient("ingredient 1",
-                                OrElseFilter.of(
-                                        MinTagsFilter.of(new Tag("tag B")),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("common tag")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.minTags(new Tag("tag B")),
+                                        Filter.and(
+                                                Filter.minTags(new Tag("common tag")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         )
                                 ),
                                 BigDecimal.TEN).
                         addIngredient("ingredient 2",
-                                OrElseFilter.of(
-                                        ShopsFilter.of("shop B"),
-                                        ManufacturerFilter.of("manufacturer B")
+                                Filter.orElse(
+                                        Filter.anyShop("shop B"),
+                                        Filter.anyManufacturer("manufacturer B")
                                 ),
                                 new BigDecimal("2.5")).
                         addIngredient("ingredient 3",
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("value 1"), new Tag("value 2")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop B"),
-                                        VarietiesFilter.of("variety B")
+                                Filter.and(
+                                        Filter.minTags(new Tag("value 1"), new Tag("value 2")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop B"),
+                                        Filter.anyVariety("variety B")
                                 ),
                                 new BigDecimal("0.1")).
                         tryBuild()
@@ -1092,18 +1092,18 @@ class DishRepositoryPostgresTest {
                         addTag("tag B").
                         addTag("common tag").
                         addIngredient("ingredient 1",
-                                OrElseFilter.of(
-                                        MinTagsFilter.of(new Tag("tag B")),
-                                        AndFilter.of(
-                                                ShopsFilter.of("shop C"),
-                                                VarietiesFilter.of("variety D")
+                                Filter.orElse(
+                                        Filter.minTags(new Tag("tag B")),
+                                        Filter.and(
+                                                Filter.anyShop("shop C"),
+                                                Filter.anyVariety("variety D")
                                         )
                                 ),
                                 BigDecimal.TEN).
                         addIngredient("ingredient 2",
-                                OrElseFilter.of(
-                                        ShopsFilter.of("shop B"),
-                                        ManufacturerFilter.of("manufacturer B")
+                                Filter.orElse(
+                                        Filter.anyShop("shop B"),
+                                        Filter.anyManufacturer("manufacturer B")
                                 ),
                                 new BigDecimal("2.5")).
                         tryBuild()

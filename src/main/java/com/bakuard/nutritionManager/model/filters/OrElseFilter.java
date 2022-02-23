@@ -12,43 +12,9 @@ import java.util.Objects;
 
 public class OrElseFilter implements Filter {
 
-    /**
-     * Создает и возвращает новый объект OrElse для указываемых ограничений.
-     * @param a первый обязательный операнд ограничения OrElse.
-     * @param b второй обязательный операнд ограничения OrElse.
-     * @param other необязательные операнды ограничения OrElse.
-     * @return возвращает новый объект OrElse для указываемых ограничений.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
-     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
-     *          2. если хотябы один из операндов имеет значение null.<br/>
-     *          3. если передаваемый список операндов имеет значение null.
-     */
-    public static OrElseFilter of(Filter a, Filter b, Filter... other) {
-        List<Filter> list = new ArrayList<>();
-        list.add(a);
-        list.add(b);
-        if(other == null) list.add(null);
-        else list.addAll(Arrays.asList(other));
-
-        return new OrElseFilter(list);
-    }
-
-    /**
-     * Создает и возвращает новый объект OrElse для указываемых ограничений.
-     * @param filters список ограничений выступающих как операнды данного ограничения.
-     * @return возвращает новый объект OrElse для указываемых ограничений.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из операндов имеет значение null.<br/>
-     *          2. если передаваемый массив операндов имеет значение null.
-     */
-    public static OrElseFilter of(List<Filter> filters) {
-        return new OrElseFilter(filters);
-    }
-
-
     private final ImmutableList<Filter> operands;
 
-    private OrElseFilter(List<Filter> operands) {
+    OrElseFilter(List<Filter> operands) {
         Checker.of(getClass(), "operands").
                 nullValue("operands", operands).
                 containsNull("operands", operands).

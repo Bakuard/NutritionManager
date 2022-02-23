@@ -480,7 +480,7 @@ class ProductRepositoryTest {
 
         int actual = repository.getProductsNumber(
                 ProductsNumberCriteria.of(user2).
-                        setFilter(MinTagsFilter.of(new Tag("common tag")))
+                        setFilter(Filter.minTags(new Tag("common tag")))
         );
 
         Assertions.assertEquals(0, actual);
@@ -506,11 +506,11 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name B"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("variety C")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety C")
                                 )
                         )
         );
@@ -534,7 +534,7 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                MinTagsFilter.of(new Tag("common tag"))
+                                Filter.minTags(new Tag("common tag"))
                         )
         );
 
@@ -557,7 +557,7 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
                         setFilter(
-                                ShopsFilter.of("shop C")
+                                Filter.anyShop("shop C")
                         )
         );
 
@@ -582,9 +582,9 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        CategoriesFilter.of("name B"),
-                                        VarietiesFilter.of("variety C")
+                                Filter.and(
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyVariety("variety C")
                                 )
                         )
         );
@@ -612,11 +612,11 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("this tag not exists")),
-                                        CategoriesFilter.of("name B"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("variety C")
+                                Filter.and(
+                                        Filter.minTags(new Tag("this tag not exists")),
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety C")
                                 )
                         )
         );
@@ -644,11 +644,11 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("this name not exists"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("variety C")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("this name not exists"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety C")
                                 )
                         )
         );
@@ -676,11 +676,11 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name B"),
-                                        ShopsFilter.of("this shop not exists"),
-                                        VarietiesFilter.of("variety C")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyShop("this shop not exists"),
+                                        Filter.anyVariety("variety C")
                                 )
                         )
         );
@@ -708,11 +708,11 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name B"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("this variety not exists")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("this variety not exists")
                                 )
                         )
         );
@@ -740,11 +740,11 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("value 2")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("variety D")
+                                Filter.and(
+                                        Filter.minTags(new Tag("value 2")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety D")
                                 )
                         )
         );
@@ -773,12 +773,12 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("value 2")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("variety D"),
-                                        ManufacturerFilter.of("manufacturer A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("value 2")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety D"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 )
                         )
         );
@@ -807,12 +807,12 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("tag A")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 )
                         )
         );
@@ -840,12 +840,12 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("tag A")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer Z")
+                                Filter.and(
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer Z")
                                 )
                         )
         );
@@ -881,20 +881,20 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoriesFilter.of("unknown category"),
-                                                ShopsFilter.of("unknown shops"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown category"),
+                                                Filter.anyShop("unknown shops"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag A")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                        Filter.and(
+                                                Filter.minTags(new Tag("tag A")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
                         )
@@ -931,20 +931,20 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(true).
                         setFilter(
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoriesFilter.of("unknown category"),
-                                                ShopsFilter.of("unknown shops"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown category"),
+                                                Filter.anyShop("unknown shops"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag B")),
-                                                CategoriesFilter.of("name B"),
-                                                ShopsFilter.of("shop B"),
-                                                VarietiesFilter.of("variety C"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                        Filter.and(
+                                                Filter.minTags(new Tag("tag B")),
+                                                Filter.anyCategory("name B"),
+                                                Filter.anyShop("shop B"),
+                                                Filter.anyVariety("variety C"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
                         )
@@ -980,20 +980,20 @@ class ProductRepositoryTest {
                 ProductsNumberCriteria.of(user).
                         setOnlyFridge(false).
                         setFilter(
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoriesFilter.of("unknown category"),
-                                                ShopsFilter.of("unknown shops"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown category"),
+                                                Filter.anyShop("unknown shops"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag A")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("unknown variety"),
-                                                ManufacturerFilter.of("unknown manufacturer")
+                                        Filter.and(
+                                                Filter.minTags(new Tag("tag A")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("unknown variety"),
+                                                Filter.anyManufacturer("unknown manufacturer")
                                         )
                                 )
                         )
@@ -1159,7 +1159,7 @@ class ProductRepositoryTest {
                         Pageable.of(6, 0),
                         user).
                         setOnlyFridge(false).
-                        setFilter(MinTagsFilter.of(new Tag("common tag")))
+                        setFilter(Filter.minTags(new Tag("common tag")))
         );
 
         Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
@@ -1191,11 +1191,11 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("tag B"), new Tag("common tag")),
-                                        CategoriesFilter.of("name B"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("variety D")
+                                Filter.and(
+                                        Filter.minTags(new Tag("tag B"), new Tag("common tag")),
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety D")
                                 )
                         )
         );
@@ -1223,7 +1223,7 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(true).
                         setFilter(
-                                MinTagsFilter.of(new Tag("tag A"), new Tag("common tag"))
+                                Filter.minTags(new Tag("tag A"), new Tag("common tag"))
                         )
         );
 
@@ -1256,11 +1256,11 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("tag A"), new Tag("common tag")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("tag A"), new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A")
                                 )
                         )
         );
@@ -1292,11 +1292,11 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("tag Z"), new Tag("common tag")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop Z"),
-                                        VarietiesFilter.of("variety A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("tag Z"), new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop Z"),
+                                        Filter.anyVariety("variety A")
                                 )
                         )
         );
@@ -1328,9 +1328,9 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(true).
                         setFilter(
-                                AndFilter.of(
-                                        CategoriesFilter.of("name B"),
-                                        ShopsFilter.of("shop C")
+                                Filter.and(
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyShop("shop C")
                                 )
                         )
         );
@@ -1361,10 +1361,10 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(true).
                         setFilter(
-                                AndFilter.of(
-                                        CategoriesFilter.of("name Z"),
-                                        ShopsFilter.of("shop Z"),
-                                        VarietiesFilter.of("variety A")
+                                Filter.and(
+                                        Filter.anyCategory("name Z"),
+                                        Filter.anyShop("shop Z"),
+                                        Filter.anyVariety("variety A")
                                 )
                         )
         );
@@ -1396,11 +1396,11 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(true).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety Z")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety Z")
                                 )
                         )
         );
@@ -1433,10 +1433,10 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A")
                                 )
                         )
         );
@@ -1468,11 +1468,11 @@ class ProductRepositoryTest {
                         user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common Z")),
-                                        CategoriesFilter.of("name Z"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety Z")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common Z")),
+                                        Filter.anyCategory("name Z"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety Z")
                                 )
                         )
         );
@@ -1506,12 +1506,12 @@ class ProductRepositoryTest {
                                 user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop C"),
-                                        VarietiesFilter.of("variety D"),
-                                        ManufacturerFilter.of("manufacturer A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety D"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 )
                         )
         );
@@ -1547,12 +1547,12 @@ class ProductRepositoryTest {
                                 user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 )
                         )
         );
@@ -1585,12 +1585,12 @@ class ProductRepositoryTest {
                                 user).
                         setOnlyFridge(false).
                         setFilter(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("common tag")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer Z")
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer Z")
                                 )
                         )
         );
@@ -1630,20 +1630,20 @@ class ProductRepositoryTest {
                                 user).
                         setOnlyFridge(false).
                         setFilter(
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoriesFilter.of("unknown name"),
-                                                ShopsFilter.of("unknown shop"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown name"),
+                                                Filter.anyShop("unknown shop"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag A")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                        Filter.and(
+                                                Filter.minTags(new Tag("tag A")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
                         )
@@ -1687,20 +1687,20 @@ class ProductRepositoryTest {
                                 user).
                         setOnlyFridge(true).
                         setFilter(
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoriesFilter.of("unknown category"),
-                                                ShopsFilter.of("unknown shops"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown category"),
+                                                Filter.anyShop("unknown shops"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag B")),
-                                                CategoriesFilter.of("name B"),
-                                                ShopsFilter.of("shop B"),
-                                                VarietiesFilter.of("variety C"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                        Filter.and(
+                                                Filter.minTags(new Tag("tag B")),
+                                                Filter.anyCategory("name B"),
+                                                Filter.anyShop("shop B"),
+                                                Filter.anyVariety("variety C"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
                         )
@@ -1741,17 +1741,17 @@ class ProductRepositoryTest {
                                 user).
                         setOnlyFridge(false).
                         setFilter(
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                CategoriesFilter.of("name B"),
-                                                ManufacturerFilter.of("manufacturer B")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.anyCategory("name B"),
+                                                Filter.anyManufacturer("manufacturer B")
                                         ),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag A")),
-                                                CategoriesFilter.of("name A"),
-                                                ShopsFilter.of("shop A"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                        Filter.and(
+                                                Filter.minTags(new Tag("tag A")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
                         ).setProductSort(
@@ -1803,20 +1803,20 @@ class ProductRepositoryTest {
                                 user).
                         setOnlyFridge(true).
                         setFilter(
-                                OrElseFilter.of(
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoriesFilter.of("unknown category"),
-                                                ShopsFilter.of("unknown shops"),
-                                                VarietiesFilter.of("variety A"),
-                                                ManufacturerFilter.of("manufacturer A")
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown category"),
+                                                Filter.anyShop("unknown shops"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
                                         ),
-                                        AndFilter.of(
-                                                MinTagsFilter.of(new Tag("tag B")),
-                                                CategoriesFilter.of("name B"),
-                                                ShopsFilter.of("shop B"),
-                                                VarietiesFilter.of("unknown variety"),
-                                                ManufacturerFilter.of("unknown manufacturer")
+                                        Filter.and(
+                                                Filter.minTags(new Tag("tag B")),
+                                                Filter.anyCategory("name B"),
+                                                Filter.anyShop("shop B"),
+                                                Filter.anyVariety("unknown variety"),
+                                                Filter.anyManufacturer("unknown manufacturer")
                                         )
                                 )
                         )
@@ -2748,10 +2748,10 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("unknown tag")),
-                                ShopsFilter.of("unknown shop"),
-                                ManufacturerFilter.of("manufacturer A")
+                        Filter.and(
+                                Filter.minTags(new Tag("unknown tag")),
+                                Filter.anyShop("unknown shop"),
+                                Filter.anyManufacturer("manufacturer A")
                         )
                 )
         );
@@ -2776,11 +2776,11 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                CategoriesFilter.of("unknown name"),
-                                ShopsFilter.of("shop A"),
-                                VarietiesFilter.of("variety A"),
-                                ManufacturerFilter.of("manufacturer A")
+                        Filter.and(
+                                Filter.anyCategory("unknown name"),
+                                Filter.anyShop("shop A"),
+                                Filter.anyVariety("variety A"),
+                                Filter.anyManufacturer("manufacturer A")
                         )
                 )
         );
@@ -2804,10 +2804,10 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("unknown tag")),
-                                CategoriesFilter.of("name A"),
-                                VarietiesFilter.of("variety A")
+                        Filter.and(
+                                Filter.minTags(new Tag("unknown tag")),
+                                Filter.anyCategory("name A"),
+                                Filter.anyVariety("variety A")
                         )
                 )
         );
@@ -2833,12 +2833,12 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("tag A")),
-                                CategoriesFilter.of("name A"),
-                                ShopsFilter.of("unknown shop"),
-                                VarietiesFilter.of("unknown variety"),
-                                ManufacturerFilter.of("unknown manufacturer")
+                        Filter.and(
+                                Filter.minTags(new Tag("tag A")),
+                                Filter.anyCategory("name A"),
+                                Filter.anyShop("unknown shop"),
+                                Filter.anyVariety("unknown variety"),
+                                Filter.anyManufacturer("unknown manufacturer")
                         )
                 )
         );
@@ -2862,10 +2862,10 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("tag A")),
-                                ShopsFilter.of("shop A"),
-                                VarietiesFilter.of("unknown variety")
+                        Filter.and(
+                                Filter.minTags(new Tag("tag A")),
+                                Filter.anyShop("shop A"),
+                                Filter.anyVariety("unknown variety")
                         )
                 )
         );
@@ -2888,9 +2888,9 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("tag A")),
-                                CategoriesFilter.of("unknown name")
+                        Filter.and(
+                                Filter.minTags(new Tag("tag A")),
+                                Filter.anyCategory("unknown name")
                         )
                 )
         );
@@ -2914,10 +2914,10 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("unknown tag")),
-                                VarietiesFilter.of("variety A"),
-                                ManufacturerFilter.of("unknown manufacturer")
+                        Filter.and(
+                                Filter.minTags(new Tag("unknown tag")),
+                                Filter.anyVariety("variety A"),
+                                Filter.anyManufacturer("unknown manufacturer")
                         )
                 )
         );
@@ -2941,10 +2941,10 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                CategoriesFilter.of("name A"),
-                                ShopsFilter.of("shop A"),
-                                VarietiesFilter.of("variety A")
+                        Filter.and(
+                                Filter.anyCategory("name A"),
+                                Filter.anyShop("shop A"),
+                                Filter.anyVariety("variety A")
                         )
                 )
         );
@@ -2970,11 +2970,11 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("tag A")),
-                                CategoriesFilter.of("unknown name"),
-                                ShopsFilter.of("unknown shop"),
-                                VarietiesFilter.of("variety A")
+                        Filter.and(
+                                Filter.minTags(new Tag("tag A")),
+                                Filter.anyCategory("unknown name"),
+                                Filter.anyShop("unknown shop"),
+                                Filter.anyVariety("variety A")
                         )
                 )
         );
@@ -3000,12 +3000,12 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("unknown tag")),
-                                CategoriesFilter.of("unknown name"),
-                                ShopsFilter.of("shop A"),
-                                VarietiesFilter.of("unknown variety"),
-                                ManufacturerFilter.of("manufacturer A")
+                        Filter.and(
+                                Filter.minTags(new Tag("unknown tag")),
+                                Filter.anyCategory("unknown name"),
+                                Filter.anyShop("shop A"),
+                                Filter.anyVariety("unknown variety"),
+                                Filter.anyManufacturer("manufacturer A")
                         )
                 )
         );
@@ -3029,10 +3029,10 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("tag A")),
-                                CategoriesFilter.of("name A"),
-                                ManufacturerFilter.of("manufacturer A")
+                        Filter.and(
+                                Filter.minTags(new Tag("tag A")),
+                                Filter.anyCategory("name A"),
+                                Filter.anyManufacturer("manufacturer A")
                         )
                 )
         );
@@ -3056,9 +3056,9 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                VarietiesFilter.of("variety A"),
-                                ManufacturerFilter.of("manufacturer A")
+                        Filter.and(
+                                Filter.anyVariety("variety A"),
+                                Filter.anyManufacturer("manufacturer A")
                         )
                 )
         );
@@ -3084,11 +3084,11 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                CategoriesFilter.of("name A"),
-                                ShopsFilter.of("unknown shop"),
-                                VarietiesFilter.of("unknown variety"),
-                                ManufacturerFilter.of("manufacturer A")
+                        Filter.and(
+                                Filter.anyCategory("name A"),
+                                Filter.anyShop("unknown shop"),
+                                Filter.anyVariety("unknown variety"),
+                                Filter.anyManufacturer("manufacturer A")
                         )
                 )
         );
@@ -3109,7 +3109,7 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        ShopsFilter.of("shop A")
+                        Filter.anyShop("shop A")
                 )
         );
 
@@ -3134,11 +3134,11 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        AndFilter.of(
-                                MinTagsFilter.of(new Tag("unknown tag")),
-                                CategoriesFilter.of("unknown name"),
-                                ShopsFilter.of("unknown shop"),
-                                ManufacturerFilter.of("unknown manufacturer")
+                        Filter.and(
+                                Filter.minTags(new Tag("unknown tag")),
+                                Filter.anyCategory("unknown name"),
+                                Filter.anyShop("unknown shop"),
+                                Filter.anyManufacturer("unknown manufacturer")
                         )
                 )
         );
@@ -3171,20 +3171,20 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        OrElseFilter.of(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("unknown tag")),
-                                        CategoriesFilter.of("unknown category"),
-                                        ShopsFilter.of("unknown shops"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer A")
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.minTags(new Tag("unknown tag")),
+                                        Filter.anyCategory("unknown category"),
+                                        Filter.anyShop("unknown shops"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 ),
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("tag A")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer A")
+                                Filter.and(
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 )
                         )
                 )
@@ -3219,20 +3219,20 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 ProductSumCriteria.of(
                         user,
-                        OrElseFilter.of(
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("unknown tag")),
-                                        CategoriesFilter.of("unknown category"),
-                                        ShopsFilter.of("unknown shops"),
-                                        VarietiesFilter.of("variety A"),
-                                        ManufacturerFilter.of("manufacturer A")
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.minTags(new Tag("unknown tag")),
+                                        Filter.anyCategory("unknown category"),
+                                        Filter.anyShop("unknown shops"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
                                 ),
-                                AndFilter.of(
-                                        MinTagsFilter.of(new Tag("tag A")),
-                                        CategoriesFilter.of("name A"),
-                                        ShopsFilter.of("shop A"),
-                                        VarietiesFilter.of("unknown variety"),
-                                        ManufacturerFilter.of("unknown manufacturer")
+                                Filter.and(
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("unknown variety"),
+                                        Filter.anyManufacturer("unknown manufacturer")
                                 )
                         )
                 )
