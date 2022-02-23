@@ -839,10 +839,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
-    private Condition categoryFilter(String productName) {
-        return field("category").eq(inline(productName));
-    }
-
     private Condition shopFilter(AnyFilter filter) {
         return field("shop").in(
                 filter.getValues().stream().map(DSL::inline).toList()

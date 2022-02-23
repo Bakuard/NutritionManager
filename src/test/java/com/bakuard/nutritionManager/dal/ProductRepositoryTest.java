@@ -1884,7 +1884,7 @@ class ProductRepositoryTest {
 
         int actual = repository.getTagsNumber(
                 ProductFieldNumberCriteria.of(user).
-                        setProductCategory("name A")
+                        setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(5, actual);
@@ -2001,7 +2001,7 @@ class ProductRepositoryTest {
                 ProductFieldCriteria.of(
                         Pageable.of(5, 0),
                         user
-                ).setProductCategory("name A")
+                ).setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2028,7 +2028,7 @@ class ProductRepositoryTest {
                 ProductFieldCriteria.of(
                         Pageable.of(4, 1),
                         user
-                ).setProductCategory("name A")
+                ).setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2095,7 +2095,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getShopsNumber(
-                ProductFieldNumberCriteria.of(user).setProductCategory("name A")
+                ProductFieldNumberCriteria.of(user).setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2191,7 +2191,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 ProductFieldCriteria.of(Pageable.of(2, 0), user).
-                        setProductCategory("name A")
+                        setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2213,7 +2213,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 ProductFieldCriteria.of(Pageable.of(5, 0), user).
-                        setProductCategory("name A")
+                        setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2280,7 +2280,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getVarietiesNumber(
-                ProductFieldNumberCriteria.of(user).setProductCategory("name A")
+                ProductFieldNumberCriteria.of(user).setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2376,7 +2376,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getVarieties(
                 ProductFieldCriteria.of(Pageable.of(2, 0), user).
-                        setProductCategory("name A")
+                        setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2398,7 +2398,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getVarieties(
                 ProductFieldCriteria.of(Pageable.of(4, 0), user).
-                        setProductCategory("name A")
+                        setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2593,7 +2593,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getManufacturersNumber(
-                ProductFieldNumberCriteria.of(user).setProductCategory("name B")
+                ProductFieldNumberCriteria.of(user).setProductCategory(Filter.anyCategory("name B"))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2689,7 +2689,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 ProductFieldCriteria.of(Pageable.of(2, 0), user).
-                        setProductCategory("name B")
+                        setProductCategory(Filter.anyCategory("name B"))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2711,7 +2711,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 ProductFieldCriteria.of(Pageable.of(5, 0), user).
-                        setProductCategory("name A")
+                        setProductCategory(Filter.anyCategory("name A"))
         );
 
         Assertions.assertEquals(expected, actual);

@@ -182,6 +182,16 @@ public class Checker {
         return this;
     }
 
+    public <T> Checker notEquals(String fieldName, T checkedValue, T expected) {
+        if(isValid(fieldName) && !checkedValue.equals(expected)) {
+            constraints.add(
+                    new Constraint(checkedType, fieldName, ConstraintType.NOT_EQUALS,
+                            fieldName + " has value " + checkedValue + ", but expected " + expected)
+            );
+        }
+        return this;
+    }
+
 
     public <T>Checker tryBuildForEach(Collection<? extends AbstractBuilder<T>> values,
                                       Container<List<T>> container) {

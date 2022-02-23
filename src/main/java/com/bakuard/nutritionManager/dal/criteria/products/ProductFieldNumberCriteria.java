@@ -1,7 +1,10 @@
 package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.filters.AnyFilter;
+import com.bakuard.nutritionManager.model.filters.Filter;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -9,7 +12,7 @@ import java.util.Optional;
 /**
  * Задает критерии подсчета по определенному полю продуктов. Все параметры фильтрации делятся на два типа: обязательные
  * и не обязательные. Обязательные параметры необходимо указать при создании объекта. Не обязательные параметры задаются
- * с помощью set етодов. Если такой метод не вызывать или передать ему null - для не обязательного параметра будет
+ * с помощью set методов. Если такой метод не вызывать или передать ему null - для не обязательного параметра будет
  * установленно значение по умолчанию (это может некоторое специальное значение определеннго типа или пустой Optional).
  * Все set методы возвращают ссылку на тот же самый объект.
  */
@@ -27,7 +30,7 @@ public class ProductFieldNumberCriteria {
 
 
     private User user;
-    private String productCategory;
+    private AnyFilter productCategory;
 
     private ProductFieldNumberCriteria(User user) {
         Checker.of(getClass(), "constructor").
@@ -46,12 +49,17 @@ public class ProductFieldNumberCriteria {
     }
 
     /**
-     * Задает категорию продуктов. Подсчет будет вестись только значений поля продуктов указанной категории.
+     * Задает категории продуктов. В подсчете будут участвовать продукты только указанных категорий.
      * Значение по умолчанию пустой Optional (т.е. в выборку попадут продукты любой категории).
-     * @param productCategory категория продуктов.
+     * @param productCategory категории продуктов.
      * @return этот же объект.
+     * @throws ServiceException
      */
-    public ProductFieldNumberCriteria setProductCategory(String productCategory) {
+    public ProductFieldNumberCriteria setProductCategory(AnyFilter productCategory) {
+        if(productCategory != null && productCategory.getType() != Filter.Type.CATEGORY) {
+            throw new IllegalArgumentException("productCategory.getType() must return Filter.Type.CATEGORY");
+        }
+
         this.productCategory = productCategory;
         return this;
     }
@@ -60,7 +68,7 @@ public class ProductFieldNumberCriteria {
      * Возвращает категорию продуктов для значений выбранного поля которых ведется подсчет.
      * @return категорию продуктов.
      */
-    public Optional<String> getProductCategory() {
+    public Optional<AnyFilter> getProductCategory() {
         return Optional.ofNullable(productCategory);
     }
 

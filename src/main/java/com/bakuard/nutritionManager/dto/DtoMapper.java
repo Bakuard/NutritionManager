@@ -136,7 +136,7 @@ public class DtoMapper {
     public ProductFieldCriteria toProductFieldCriteria(int page, int size, UUID userId, String productCategory) {
         User user = userRepository.getById(userId);
         return ProductFieldCriteria.of(Pageable.of(page, size), user).
-                setProductCategory(productCategory);
+                setProductCategory(Filter.anyCategory(productCategory));
     }
 
     public ProductCategoryCriteria toProductCategoryCriteria(int page, int size, UUID userId) {
