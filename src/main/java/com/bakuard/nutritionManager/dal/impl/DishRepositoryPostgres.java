@@ -3,19 +3,20 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.dishes.*;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishCriteria;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishFieldCriteria;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishFieldNumberCriteria;
+import com.bakuard.nutritionManager.dal.criteria.dishes.DishesNumberCriteria;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
-
 import com.fasterxml.jackson.core.*;
-
 import org.jooq.Condition;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -523,7 +524,7 @@ public class DishRepositoryPostgres implements DishRepository {
             values.add(switchFilter(parser));
         }
 
-        return OrElseFilter.of(values);
+        return Filter.orElse(values);
     }
 
     private AndFilter toAndFilter(JsonParser parser) throws IOException {
@@ -534,14 +535,10 @@ public class DishRepositoryPostgres implements DishRepository {
             values.add(switchFilter(parser));
         }
 
-        return AndFilter.of(values);
+        return Filter.and(values);
     }
 
-    private CategoriesFilter toCategoryFilter(JsonParser parser) throws IOException {
-        return CategoriesFilter.of(parser.nextTextValue());
-    }
-
-    private ManufacturerFilter toManufacturerFilter(JsonParser parser) throws IOException {
+    private AnyFilter toCategoryFilter(JsonParser parser) throws IOException {
         List<String> values = new ArrayList<>();
 
         parser.nextToken(); //BEGIN_ARRAY
@@ -549,10 +546,10 @@ public class DishRepositoryPostgres implements DishRepository {
             values.add(parser.getValueAsString());
         }
 
-        return ManufacturerFilter.of(values);
+        return Filter.anyCategory(values);
     }
 
-    private ShopsFilter toShopsFilter(JsonParser parser) throws IOException {
+    private AnyFilter toManufacturerFilter(JsonParser parser) throws IOException {
         List<String> values = new ArrayList<>();
 
         parser.nextToken(); //BEGIN_ARRAY
@@ -560,10 +557,10 @@ public class DishRepositoryPostgres implements DishRepository {
             values.add(parser.getValueAsString());
         }
 
-        return ShopsFilter.of(values);
+        return Filter.anyManufacturer(values);
     }
 
-    private VarietiesFilter toVarietiesFilter(JsonParser parser) throws IOException {
+    private AnyFilter toShopsFilter(JsonParser parser) throws IOException {
         List<String> values = new ArrayList<>();
 
         parser.nextToken(); //BEGIN_ARRAY
@@ -571,7 +568,18 @@ public class DishRepositoryPostgres implements DishRepository {
             values.add(parser.getValueAsString());
         }
 
-        return VarietiesFilter.of(values);
+        return Filter.anyShop(values);
+    }
+
+    private AnyFilter toVarietiesFilter(JsonParser parser) throws IOException {
+        List<String> values = new ArrayList<>();
+
+        parser.nextToken(); //BEGIN_ARRAY
+        while(parser.nextToken() != JsonToken.END_ARRAY) {
+            values.add(parser.getValueAsString());
+        }
+
+        return Filter.anyVariety(values);
     }
 
     private MinTagsFilter toMinTagsFilter(JsonParser parser) throws IOException {
@@ -582,7 +590,7 @@ public class DishRepositoryPostgres implements DishRepository {
             tags.add(new Tag(parser.getValueAsString()));
         }
 
-        return MinTagsFilter.of(tags);
+        return Filter.minTags(tags);
     }
 
 
@@ -607,10 +615,7 @@ public class DishRepositoryPostgres implements DishRepository {
             case OR_ELSE -> toJson((OrElseFilter) filter, writer);
             case AND -> toJson((AndFilter) filter, writer);
             case MIN_TAGS -> toJson((MinTagsFilter) filter, writer);
-            case CATEGORY -> toJson((CategoriesFilter) filter, writer);
-            case SHOPS -> toJson((ShopsFilter) filter, writer);
-            case VARIETIES -> toJson((VarietiesFilter) filter, writer);
-            case MANUFACTURER -> toJson((ManufacturerFilter) filter, writer);
+            case CATEGORY, SHOPS, VARIETIES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
         }
     }
 
@@ -640,51 +645,19 @@ public class DishRepositoryPostgres implements DishRepository {
         writer.writeEndObject();
     }
 
-    private void toJson(CategoriesFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-        writer.writeStringField("type", filter.getType().name());
-        writer.writeStringField("values", filter.getCategory());
-        writer.writeEndObject();
-    }
-
-    private void toJson(ManufacturerFilter filter, JsonGenerator writer) throws IOException {
+    private void toJson(AnyFilter filter, JsonGenerator writer) throws IOException {
         writer.writeStartObject();
 
         writer.writeStringField("type", filter.getType().name());
 
         writer.writeFieldName("values");
         writer.writeStartArray();
-        for(String manufacturer : filter.getManufacturers()) writer.writeString(manufacturer);
+        for(String manufacturer : filter.getValues()) writer.writeString(manufacturer);
         writer.writeEndArray();
 
         writer.writeEndObject();
     }
 
-    private void toJson(ShopsFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-
-        writer.writeStringField("type", filter.getType().name());
-
-        writer.writeFieldName("values");
-        writer.writeStartArray();
-        for(String shop : filter.getShops()) writer.writeString(shop);
-        writer.writeEndArray();
-
-        writer.writeEndObject();
-    }
-
-    private void toJson(VarietiesFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-
-        writer.writeStringField("type", filter.getType().name());
-
-        writer.writeFieldName("values");
-        writer.writeStartArray();
-        for(String variety : filter.getVarieties()) writer.writeString(variety);
-        writer.writeEndArray();
-
-        writer.writeEndObject();
-    }
 
     private void toJson(MinTagsFilter filter, JsonGenerator writer) throws IOException {
         writer.writeStartObject();

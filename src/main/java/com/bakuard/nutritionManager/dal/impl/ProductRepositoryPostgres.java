@@ -9,14 +9,14 @@ import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.filters.*;
-import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Page;
 
 import com.google.common.collect.Sets;
 
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.Field;
+import org.jooq.SortField;
 import org.jooq.impl.DSL;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,7 +27,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.jooq.impl.DSL.*;
 
@@ -752,16 +755,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 return List.of(minTagsFilter((MinTagsFilter) filter));
             }
             case CATEGORY -> {
-                return List.of(categoryFilter((CategoriesFilter) filter));
+                return List.of(categoryFilter((AnyFilter) filter));
             }
             case SHOPS -> {
-                return List.of(shopsFilter((ShopsFilter) filter));
+                return List.of(shopFilter((AnyFilter) filter));
             }
             case VARIETIES -> {
-                return List.of(varietiesFilter((VarietiesFilter) filter));
+                return List.of(varietyFilter((AnyFilter) filter));
             }
             case MANUFACTURER -> {
-                return List.of(manufacturerFilter((ManufacturerFilter) filter));
+                return List.of(manufacturerFilter((AnyFilter) filter));
             }
             case OR_ELSE -> {
                 OrElseFilter orElse = (OrElseFilter) filter;
@@ -783,16 +786,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 return minTagsFilter((MinTagsFilter) filter);
             }
             case CATEGORY -> {
-                return categoryFilter((CategoriesFilter) filter);
+                return categoryFilter((AnyFilter) filter);
             }
             case SHOPS -> {
-                return shopsFilter((ShopsFilter) filter);
+                return shopFilter((AnyFilter) filter);
             }
             case VARIETIES -> {
-                return varietiesFilter((VarietiesFilter) filter);
+                return varietyFilter((AnyFilter) filter);
             }
             case MANUFACTURER -> {
-                return manufacturerFilter((ManufacturerFilter) filter);
+                return manufacturerFilter((AnyFilter) filter);
             }
             case OR_ELSE -> {
                 return orElseFilter((OrElseFilter) filter);
@@ -830,29 +833,27 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
-    private Condition categoryFilter(CategoriesFilter filter) {
-        return field("category").eq(inline(filter.getCategory()));
+    private Condition categoryFilter(AnyFilter filter) {
+        return field("category").in(
+                filter.getValues().stream().map(DSL::inline).toList()
+        );
     }
 
-    private Condition categoryFilter(String productName) {
-        return field("category").eq(inline(productName));
-    }
-
-    private Condition shopsFilter(ShopsFilter filter) {
+    private Condition shopFilter(AnyFilter filter) {
         return field("shop").in(
-                filter.getShops().stream().map(DSL::inline).toList()
+                filter.getValues().stream().map(DSL::inline).toList()
         );
     }
 
-    private Condition varietiesFilter(VarietiesFilter filter) {
+    private Condition varietyFilter(AnyFilter filter) {
         return field("variety").in(
-                filter.getVarieties().stream().map(DSL::inline).toList()
+                filter.getValues().stream().map(DSL::inline).toList()
         );
     }
 
-    private Condition manufacturerFilter(ManufacturerFilter filter) {
+    private Condition manufacturerFilter(AnyFilter filter) {
         return field("manufacturer").in(
-                filter.getManufacturers().stream().map(DSL::inline).toList()
+                filter.getValues().stream().map(DSL::inline).toList()
         );
     }
 

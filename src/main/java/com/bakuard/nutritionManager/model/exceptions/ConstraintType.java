@@ -17,6 +17,7 @@ public enum ConstraintType {
     UNKNOWN_ENTITY,
     UNKNOWN_PARAMETER,
     UNKNOWN_ITEM,
-    INCORRECT_JWS
+    INCORRECT_JWS,
+    NOT_EQUALS
 
 }

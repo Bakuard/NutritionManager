@@ -14,39 +14,9 @@ import java.util.Objects;
 
 public class MinTagsFilter implements Filter {
 
-    /**
-     * Создает и возвращает новый объект MinTags содержащий указанные теги.
-     * @param tags теги для которых определяется создаваемое ограничение MinTags.
-     * @return новый объект MinTags.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из элементов имеет значение null.<br/>
-     *          2. если передаваемый массив имеет значение null.<br/>
-     *          3. если передаваемый массив пустой
-     */
-    public static MinTagsFilter of(Tag... tags) {
-        List<Tag> list = null;
-        if(tags != null) list = Arrays.asList(tags);
-
-        return new MinTagsFilter(list);
-    }
-
-    /**
-     * Создает и возвращает новый объект MinTags содержащий указанные теги.
-     * @param tags теги для которых определяется создаваемое ограничение MinTags.
-     * @return новый объект MinTags.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из элементов имеет значение null.<br/>
-     *          2. если передаваемый список имеет значение null.<br/>
-     *          3. если передаваемый список пустой
-     */
-    public static MinTagsFilter of(List<Tag> tags) {
-        return new MinTagsFilter(tags);
-    }
-
-
     private final ImmutableSortedSet<Tag> tags;
 
-    private MinTagsFilter(List<Tag> tags) {
+    MinTagsFilter(List<Tag> tags) {
         Checker.of(getClass(), "tags").
                 nullValue("tags", tags).
                 containsNull("tags", tags).
