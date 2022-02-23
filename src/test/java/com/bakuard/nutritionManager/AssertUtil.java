@@ -20,7 +20,7 @@ public class AssertUtil {
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ValidateException)) {
-                Assertions.fail("Unexpected exception type " + e.getClass().getName());
+                Assertions.fail("Unexpected exception type " + e.getClass().getName() + "\n" + e.getMessage());
             }
 
             ValidateException ex = (ValidateException) e;
@@ -46,15 +46,15 @@ public class AssertUtil {
     }
 
     public static void assertServiceException(Action action,
-                                        Class<?> checkedType,
-                                        String operationName,
-                                        ConstraintType... expectedTypes) {
+                                              Class<?> checkedType,
+                                              String operationName,
+                                              ConstraintType... expectedTypes) {
         try {
             action.act();
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ServiceException)) {
-                Assertions.fail("Unexpected exception type " + e.getClass().getName());
+                Assertions.fail("Unexpected exception type " + e.getClass().getName() + "\n" + e.getMessage());
             }
 
             ServiceException ex = (ServiceException) e;

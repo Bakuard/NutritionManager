@@ -256,7 +256,7 @@ public class Dish {
      * Возвращает все ингредиенты данного блюда в виде списка доступного только для чтения.
      * @return все ингрединты данного блюда.
      */
-    public List<DishIngredient> getReadonlyIngredients() {
+    public List<DishIngredient> getIngredients() {
         return Collections.unmodifiableList(ingredients);
     }
 
@@ -273,7 +273,7 @@ public class Dish {
      * Возвращает все теги данного блюда в виде списка доступного только для чтения.
      * @return все теги данного блюда.
      */
-    public List<Tag> getReadonlyTags() {
+    public List<Tag> getTags() {
         return Collections.unmodifiableList(tags);
     }
 
@@ -420,8 +420,8 @@ public class Dish {
                 ", unit='" + unit + '\'' +
                 ", description='" + description + '\'' +
                 ", imagePath='" + imagePath + '\'' +
-                ", ingredients=" + ingredients +
                 ", tags=" + tags +
+                ", ingredients=" + ingredients +
                 '}';
     }
 
@@ -522,6 +522,14 @@ public class Dish {
             ingredients.forEach(b -> b.setRepository(repository));
 
             return this;
+        }
+
+        public boolean containsTag(String tag) {
+            return tags.contains(tag);
+        }
+
+        public boolean containsIngredient(String name, Filter filter, BigDecimal quantity) {
+            return ingredients.stream().anyMatch(i -> i.contains(name, filter, quantity));
         }
 
         @Override

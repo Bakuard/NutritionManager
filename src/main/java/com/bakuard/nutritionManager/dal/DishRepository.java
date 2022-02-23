@@ -80,7 +80,7 @@ public interface DishRepository {
      * @return  кол-во всех блюд удовлетворяющих ограничению criteria.
      * @throws ServiceException если criteria является null.
      */
-    public int getNumberDishes(DishesNumberCriteria criteria);
+    public int getDishesNumber(DishesNumberCriteria criteria);
 
     /**
      * Возвращает кол-во всех тегов блюд удовлетворяющих ограничению criteria (см. {@link DishFieldNumberCriteria}).
@@ -88,7 +88,7 @@ public interface DishRepository {
      * @return  кол-во всех блюд удовлетворяющих ограничению criteria.
      * @throws ServiceException если criteria является null.
      */
-    public int getNumberTags(DishFieldNumberCriteria criteria);
+    public int getTagsNumber(DishFieldNumberCriteria criteria);
 
     /**
      * Возвращает общее число всех единиц измерения кол-ва блюд удовлетворяющих ограничению criteria
@@ -97,6 +97,6 @@ public interface DishRepository {
      * @return общее число всех единиц измерения кол-ва блюд удовлетворяющих ограничению criteria.
      * @throws ServiceException если criteria является null.
      */
-    public int getNumberUnits(DishFieldNumberCriteria criteria);
+    public int getUnitsNumber(DishFieldNumberCriteria criteria);
 
 }

@@ -508,7 +508,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name B"),
+                                        CategoriesFilter.of("name B"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("variety C")
                                 )
@@ -583,7 +583,7 @@ class ProductRepositoryTest {
                         setOnlyFridge(false).
                         setFilter(
                                 AndFilter.of(
-                                        CategoryFilter.of("name B"),
+                                        CategoriesFilter.of("name B"),
                                         VarietiesFilter.of("variety C")
                                 )
                         )
@@ -614,7 +614,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("this tag not exists")),
-                                        CategoryFilter.of("name B"),
+                                        CategoriesFilter.of("name B"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("variety C")
                                 )
@@ -646,7 +646,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("this name not exists"),
+                                        CategoriesFilter.of("this name not exists"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("variety C")
                                 )
@@ -678,7 +678,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name B"),
+                                        CategoriesFilter.of("name B"),
                                         ShopsFilter.of("this shop not exists"),
                                         VarietiesFilter.of("variety C")
                                 )
@@ -710,7 +710,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name B"),
+                                        CategoriesFilter.of("name B"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("this variety not exists")
                                 )
@@ -742,7 +742,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("value 2")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("variety D")
                                 )
@@ -775,7 +775,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("value 2")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("variety D"),
                                         ManufacturerFilter.of("manufacturer A")
@@ -809,7 +809,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("tag A")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer A")
@@ -842,7 +842,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("tag A")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer Z")
@@ -884,14 +884,14 @@ class ProductRepositoryTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoryFilter.of("unknown category"),
+                                                CategoriesFilter.of("unknown category"),
                                                 ShopsFilter.of("unknown shops"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
                                         ),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("tag A")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -934,14 +934,14 @@ class ProductRepositoryTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoryFilter.of("unknown category"),
+                                                CategoriesFilter.of("unknown category"),
                                                 ShopsFilter.of("unknown shops"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
                                         ),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("tag B")),
-                                                CategoryFilter.of("name B"),
+                                                CategoriesFilter.of("name B"),
                                                 ShopsFilter.of("shop B"),
                                                 VarietiesFilter.of("variety C"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -983,14 +983,14 @@ class ProductRepositoryTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoryFilter.of("unknown category"),
+                                                CategoriesFilter.of("unknown category"),
                                                 ShopsFilter.of("unknown shops"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
                                         ),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("tag A")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("unknown variety"),
                                                 ManufacturerFilter.of("unknown manufacturer")
@@ -1193,7 +1193,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("tag B"), new Tag("common tag")),
-                                        CategoryFilter.of("name B"),
+                                        CategoriesFilter.of("name B"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("variety D")
                                 )
@@ -1258,7 +1258,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("tag A"), new Tag("common tag")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A")
                                 )
@@ -1294,7 +1294,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("tag Z"), new Tag("common tag")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop Z"),
                                         VarietiesFilter.of("variety A")
                                 )
@@ -1329,7 +1329,7 @@ class ProductRepositoryTest {
                         setOnlyFridge(true).
                         setFilter(
                                 AndFilter.of(
-                                        CategoryFilter.of("name B"),
+                                        CategoriesFilter.of("name B"),
                                         ShopsFilter.of("shop C")
                                 )
                         )
@@ -1362,7 +1362,7 @@ class ProductRepositoryTest {
                         setOnlyFridge(true).
                         setFilter(
                                 AndFilter.of(
-                                        CategoryFilter.of("name Z"),
+                                        CategoriesFilter.of("name Z"),
                                         ShopsFilter.of("shop Z"),
                                         VarietiesFilter.of("variety A")
                                 )
@@ -1398,7 +1398,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety Z")
                                 )
@@ -1470,7 +1470,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common Z")),
-                                        CategoryFilter.of("name Z"),
+                                        CategoriesFilter.of("name Z"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety Z")
                                 )
@@ -1508,7 +1508,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop C"),
                                         VarietiesFilter.of("variety D"),
                                         ManufacturerFilter.of("manufacturer A")
@@ -1549,7 +1549,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer A")
@@ -1587,7 +1587,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer Z")
@@ -1633,14 +1633,14 @@ class ProductRepositoryTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoryFilter.of("unknown name"),
+                                                CategoriesFilter.of("unknown name"),
                                                 ShopsFilter.of("unknown shop"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
                                         ),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("tag A")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -1690,14 +1690,14 @@ class ProductRepositoryTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoryFilter.of("unknown category"),
+                                                CategoriesFilter.of("unknown category"),
                                                 ShopsFilter.of("unknown shops"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
                                         ),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("tag B")),
-                                                CategoryFilter.of("name B"),
+                                                CategoriesFilter.of("name B"),
                                                 ShopsFilter.of("shop B"),
                                                 VarietiesFilter.of("variety C"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -1743,12 +1743,12 @@ class ProductRepositoryTest {
                         setFilter(
                                 OrElseFilter.of(
                                         AndFilter.of(
-                                                CategoryFilter.of("name B"),
+                                                CategoriesFilter.of("name B"),
                                                 ManufacturerFilter.of("manufacturer B")
                                         ),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("tag A")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -1806,14 +1806,14 @@ class ProductRepositoryTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                                CategoryFilter.of("unknown category"),
+                                                CategoriesFilter.of("unknown category"),
                                                 ShopsFilter.of("unknown shops"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
                                         ),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("tag B")),
-                                                CategoryFilter.of("name B"),
+                                                CategoriesFilter.of("name B"),
                                                 ShopsFilter.of("shop B"),
                                                 VarietiesFilter.of("unknown variety"),
                                                 ManufacturerFilter.of("unknown manufacturer")
@@ -2777,7 +2777,7 @@ class ProductRepositoryTest {
                 ProductSumCriteria.of(
                         user,
                         AndFilter.of(
-                                CategoryFilter.of("unknown name"),
+                                CategoriesFilter.of("unknown name"),
                                 ShopsFilter.of("shop A"),
                                 VarietiesFilter.of("variety A"),
                                 ManufacturerFilter.of("manufacturer A")
@@ -2806,7 +2806,7 @@ class ProductRepositoryTest {
                         user,
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                CategoryFilter.of("name A"),
+                                CategoriesFilter.of("name A"),
                                 VarietiesFilter.of("variety A")
                         )
                 )
@@ -2835,7 +2835,7 @@ class ProductRepositoryTest {
                         user,
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("tag A")),
-                                CategoryFilter.of("name A"),
+                                CategoriesFilter.of("name A"),
                                 ShopsFilter.of("unknown shop"),
                                 VarietiesFilter.of("unknown variety"),
                                 ManufacturerFilter.of("unknown manufacturer")
@@ -2890,7 +2890,7 @@ class ProductRepositoryTest {
                         user,
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("tag A")),
-                                CategoryFilter.of("unknown name")
+                                CategoriesFilter.of("unknown name")
                         )
                 )
         );
@@ -2942,7 +2942,7 @@ class ProductRepositoryTest {
                 ProductSumCriteria.of(
                         user,
                         AndFilter.of(
-                                CategoryFilter.of("name A"),
+                                CategoriesFilter.of("name A"),
                                 ShopsFilter.of("shop A"),
                                 VarietiesFilter.of("variety A")
                         )
@@ -2972,7 +2972,7 @@ class ProductRepositoryTest {
                         user,
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("tag A")),
-                                CategoryFilter.of("unknown name"),
+                                CategoriesFilter.of("unknown name"),
                                 ShopsFilter.of("unknown shop"),
                                 VarietiesFilter.of("variety A")
                         )
@@ -3002,7 +3002,7 @@ class ProductRepositoryTest {
                         user,
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                CategoryFilter.of("unknown name"),
+                                CategoriesFilter.of("unknown name"),
                                 ShopsFilter.of("shop A"),
                                 VarietiesFilter.of("unknown variety"),
                                 ManufacturerFilter.of("manufacturer A")
@@ -3031,7 +3031,7 @@ class ProductRepositoryTest {
                         user,
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("tag A")),
-                                CategoryFilter.of("name A"),
+                                CategoriesFilter.of("name A"),
                                 ManufacturerFilter.of("manufacturer A")
                         )
                 )
@@ -3085,7 +3085,7 @@ class ProductRepositoryTest {
                 ProductSumCriteria.of(
                         user,
                         AndFilter.of(
-                                CategoryFilter.of("name A"),
+                                CategoriesFilter.of("name A"),
                                 ShopsFilter.of("unknown shop"),
                                 VarietiesFilter.of("unknown variety"),
                                 ManufacturerFilter.of("manufacturer A")
@@ -3136,7 +3136,7 @@ class ProductRepositoryTest {
                         user,
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("unknown tag")),
-                                CategoryFilter.of("unknown name"),
+                                CategoriesFilter.of("unknown name"),
                                 ShopsFilter.of("unknown shop"),
                                 ManufacturerFilter.of("unknown manufacturer")
                         )
@@ -3174,14 +3174,14 @@ class ProductRepositoryTest {
                         OrElseFilter.of(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("unknown tag")),
-                                        CategoryFilter.of("unknown category"),
+                                        CategoriesFilter.of("unknown category"),
                                         ShopsFilter.of("unknown shops"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer A")
                                 ),
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("tag A")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer A")
@@ -3222,14 +3222,14 @@ class ProductRepositoryTest {
                         OrElseFilter.of(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("unknown tag")),
-                                        CategoryFilter.of("unknown category"),
+                                        CategoriesFilter.of("unknown category"),
                                         ShopsFilter.of("unknown shops"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer A")
                                 ),
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("tag A")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("unknown variety"),
                                         ManufacturerFilter.of("unknown manufacturer")

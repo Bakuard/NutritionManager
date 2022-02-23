@@ -269,6 +269,11 @@ public class Checker {
                 addReasons(constraints);
     }
 
+    public ServiceException createServiceException(String message, Throwable cause) {
+        return new ServiceException(message, cause, checkedType, operationName).
+                addReasons(constraints);
+    }
+
 
     private boolean isValid(String fieldName) {
         boolean isValid  = true;

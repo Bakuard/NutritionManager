@@ -115,7 +115,7 @@ public class DtoMapper {
         User user = userRepository.getById(userId);
 
         List<Filter> filters = new ArrayList<>();
-        if(category != null) filters.add(CategoryFilter.of(category));
+        if(category != null) filters.add(CategoriesFilter.of(category));
         if(shops != null) filters.add(ShopsFilter.of(shops));
         if(varieties != null) filters.add(VarietiesFilter.of(varieties));
         if(manufacturers != null) filters.add(ManufacturerFilter.of(manufacturers));

@@ -15,7 +15,6 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.google.common.collect.Sets;
 
 import org.jooq.*;
-import org.jooq.Record;
 import org.jooq.impl.DSL;
 
 import org.springframework.dao.DuplicateKeyException;
@@ -61,7 +60,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
             }
         } catch(DuplicateKeyException e) {
             throw checker.addConstraint("product", ConstraintType.ALREADY_EXISTS_IN_DB).
-                    createServiceException("Fail to save product");
+                    createServiceException("Fail to save product", e);
         }
 
         return newData;
@@ -197,7 +196,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<Tag> getTags(ProductFieldCriteria criteria) {
         Checker.of(getClass(), "getTags").
                 nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get tags by criteria");
+                checkWithServiceException("Fail to get products tags by criteria");
 
         Page.Info info = criteria.getPageable().createPageMetadata(
                 getTagsNumber(criteria.getNumberCriteria())
@@ -411,7 +410,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getTagsNumber(ProductFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getTagsNumber").
                 nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get tags number by criteria");
+                checkWithServiceException("Fail to get products tags number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -601,7 +600,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
                     @Override
                     public int getBatchSize() {
-                        return product.getContext().getTags().size();
+                        return tags.size();
                     }
                 }
         );
@@ -753,7 +752,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 return List.of(minTagsFilter((MinTagsFilter) filter));
             }
             case CATEGORY -> {
-                return List.of(categoryFilter((CategoryFilter) filter));
+                return List.of(categoryFilter((CategoriesFilter) filter));
             }
             case SHOPS -> {
                 return List.of(shopsFilter((ShopsFilter) filter));
@@ -784,7 +783,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 return minTagsFilter((MinTagsFilter) filter);
             }
             case CATEGORY -> {
-                return categoryFilter((CategoryFilter) filter);
+                return categoryFilter((CategoriesFilter) filter);
             }
             case SHOPS -> {
                 return shopsFilter((ShopsFilter) filter);
@@ -831,7 +830,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
-    private Condition categoryFilter(CategoryFilter filter) {
+    private Condition categoryFilter(CategoriesFilter filter) {
         return field("category").eq(inline(filter.getCategory()));
     }
 

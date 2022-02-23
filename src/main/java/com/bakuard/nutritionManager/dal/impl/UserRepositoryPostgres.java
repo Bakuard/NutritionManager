@@ -42,7 +42,7 @@ public class UserRepositoryPostgres implements UserRepository {
             }
         } catch(DuplicateKeyException e) {
             throw checker.addConstraint("user", ConstraintType.ALREADY_EXISTS_IN_DB).
-                    createServiceException("Fail to save user");
+                    createServiceException("Fail to save user", e);
         }
 
         return wasSaved;

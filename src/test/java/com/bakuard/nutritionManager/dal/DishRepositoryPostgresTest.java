@@ -78,7 +78,7 @@ class DishRepositoryPostgresTest {
 
         userRepository = new UserRepositoryPostgres(dataSource);
         productRepository = new ProductRepositoryPostgres(dataSource, appConfiguration);
-        dishRepository = new DishRepositoryPostgres(dataSource, appConfiguration);
+        dishRepository = new DishRepositoryPostgres(dataSource, appConfiguration, productRepository);
     }
 
     @BeforeEach
@@ -157,7 +157,8 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.getById(toUUID(1));
 
-        Assertions.assertTrue(expected.equalsFullState(actual));
+        Assertions.assertTrue(expected.equalsFullState(actual),
+                "expected: " + expected + "\nactual: " + actual);
     }
 
     @Test
@@ -192,7 +193,8 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.getById(toUUID(7));
 
-        Assertions.assertTrue(expected.equalsFullState(actual));
+        Assertions.assertTrue(expected.equalsFullState(actual),
+                "expected: " + expected + "\nactual: " + actual);
     }
 
     @Test
@@ -207,10 +209,10 @@ class DishRepositoryPostgresTest {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
         Dish dish = createDish(7, user);
-        dish.setName("name 1");
+        dish.setName("dish 1");
 
         AssertUtil.assertServiceException(
-                () -> dishRepository.save(dish),
+                () -> commit(() -> dishRepository.save(dish)),
                 DishRepositoryPostgres.class,
                 "save",
                 ConstraintType.ALREADY_EXISTS_IN_DB
@@ -233,6 +235,10 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(dish));
         Dish updatedDish = new Dish(dish);
         updatedDish.setName("New name");
+        updatedDish.removeIngredient("ingredient 1");
+        updatedDish.putIngredient("ingredient 4", CategoriesFilter.of("category Z"), BigDecimal.TEN);
+        updatedDish.removeTag(new Tag("tag A"));
+        updatedDish.addTag(new Tag("tag Z"));
         boolean actual = commit(() -> dishRepository.save(updatedDish));
 
         Assertions.assertTrue(actual);
@@ -254,10 +260,15 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(dish));
         Dish expected = new Dish(dish);
         expected.setName("New name");
+        expected.removeIngredient("ingredient 1");
+        expected.putIngredient("ingredient 4", CategoriesFilter.of("category Z"), BigDecimal.TEN);
+        expected.removeTag(new Tag("tag A"));
+        expected.addTag(new Tag("tag Z"));
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.getById(toUUID(7));
 
-        Assertions.assertTrue(expected.equalsFullState(actual));
+        Assertions.assertTrue(expected.equalsFullState(actual),
+                "expected: " + expected + "\nactual: " + actual);
     }
 
     @Test
@@ -276,7 +287,7 @@ class DishRepositoryPostgresTest {
 
         commit(() -> dishRepository.save(dish));
         Dish updatedDish = new Dish(dish);
-        updatedDish.setName("name 1");
+        updatedDish.setName("dish 1");
 
         AssertUtil.assertServiceException(
                 () -> dishRepository.save(updatedDish),
@@ -290,7 +301,7 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             save(dish):
              there are dishes in DB,
-             dish id not exists,
+             dish id exists,
              dish state wasn't changed,
              => return false
             """)
@@ -309,7 +320,7 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             save(dish):
              there are dishes in DB,
-             dish id not exists,
+             dish id exists,
              dish state wasn't changed,
              => don't update dish
             """)
@@ -322,7 +333,8 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(expected));
 
         Dish actual = dishRepository.getById(toUUID(7));
-        Assertions.assertTrue(expected.equalsFullState(actual));
+        Assertions.assertTrue(expected.equalsFullState(actual),
+                "expected: " + expected + "\nactual: " + actual);
     }
 
     @Test
@@ -369,7 +381,7 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        dishRepository.remove(toUUID(100));
+        commit(() -> dishRepository.remove(toUUID(100)));
 
         AssertUtil.assertServiceException(
                 () -> dishRepository.getById(toUUID(100)),
@@ -438,6 +450,8 @@ class DishRepositoryPostgresTest {
 
         Dish actual = dishRepository.getById(toUUID(100));
 
+        System.out.println(expected);
+        System.out.println(actual);
         Assertions.assertTrue(expected.equalsFullState(actual));
     }
 
@@ -447,9 +461,9 @@ class DishRepositoryPostgresTest {
              criteria is null
              => exception
             """)
-    public void getNumberDishes1() {
+    public void getDishesNumber1() {
         AssertUtil.assertServiceException(
-                () -> dishRepository.getNumberDishes(null),
+                () -> dishRepository.getDishesNumber(null),
                 DishRepositoryPostgres.class,
                 "getNumberDishes",
                 ConstraintType.MISSING_VALUE
@@ -462,12 +476,12 @@ class DishRepositoryPostgresTest {
              user haven't any dishes
              => return 0
             """)
-    public void getNumberDishes2() {
+    public void getDishesNumber2() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(2);
 
-        int actual = dishRepository.getNumberDishes(DishesNumberCriteria.of(actualUser));
+        int actual = dishRepository.getDishesNumber(DishesNumberCriteria.of(actualUser));
 
         Assertions.assertEquals(0, actual);
     }
@@ -479,11 +493,11 @@ class DishRepositoryPostgresTest {
              filter not set
              => return all user dishes
             """)
-    public void getNumberDishes3() {
+    public void getDishesNumber3() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
-        int actual = dishRepository.getNumberDishes(DishesNumberCriteria.of(user));
+        int actual = dishRepository.getDishesNumber(DishesNumberCriteria.of(user));
 
         Assertions.assertEquals(4, actual);
     }
@@ -495,11 +509,11 @@ class DishRepositoryPostgresTest {
              filter is set - matching not exists
              => return 0
             """)
-    public void getNumberDishes4() {
+    public void getDishesNumber4() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
-        int actual = dishRepository.getNumberDishes(
+        int actual = dishRepository.getDishesNumber(
                 DishesNumberCriteria.of(user).
                         setFilter(MinTagsFilter.of(new Tag("common tag"), new Tag("unknown tag")))
         );
@@ -514,11 +528,11 @@ class DishRepositoryPostgresTest {
              filter is set - matching exists
              => return correct result
             """)
-    public void getNumberDishes5() {
+    public void getDishesNumber5() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
-        int actual = dishRepository.getNumberDishes(
+        int actual = dishRepository.getDishesNumber(
                 DishesNumberCriteria.of(user).
                         setFilter(MinTagsFilter.of(new Tag("common tag"), new Tag("tag A")))
         );
@@ -647,11 +661,11 @@ class DishRepositoryPostgresTest {
              criteria is null
              => exception
             """)
-    public void getNumberTags1() {
+    public void getTagsNumber1() {
         AssertUtil.assertServiceException(
-                () -> dishRepository.getNumberTags(null),
+                () -> dishRepository.getTagsNumber(null),
                 DishRepositoryPostgres.class,
-                "getNumberTags",
+                "getTagsNumber",
                 ConstraintType.MISSING_VALUE
         );
     }
@@ -662,13 +676,13 @@ class DishRepositoryPostgresTest {
              user haven't any dishes
              => return 0
             """)
-    public void getNumberTags2() {
+    public void getTagsNumber2() {
         User user = createAndSaveUser(1);
         List<Dish> dishes = createDishes(user);
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
-        int actual = dishRepository.getNumberTags(
+        int actual = dishRepository.getTagsNumber(
                 DishFieldNumberCriteria.of(actualUser)
         );
 
@@ -681,12 +695,12 @@ class DishRepositoryPostgresTest {
              user have dishes
              => return correct result
             """)
-    public void getNumberTags3() {
+    public void getTagsNumber3() {
         User user = createAndSaveUser(1);
         List<Dish> dishes = createDishes(user);
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
 
-        int actual = dishRepository.getNumberTags(
+        int actual = dishRepository.getTagsNumber(
                 DishFieldNumberCriteria.of(user)
         );
 
@@ -755,11 +769,11 @@ class DishRepositoryPostgresTest {
              criteria is null
              => exception
             """)
-    public void getNumberUnits1() {
+    public void getUnitsNumber1() {
         AssertUtil.assertServiceException(
-                () -> dishRepository.getNumberUnits(null),
+                () -> dishRepository.getUnitsNumber(null),
                 DishRepositoryPostgres.class,
-                "getNumberUnits",
+                "getUnitsNumber",
                 ConstraintType.MISSING_VALUE
         );
     }
@@ -770,13 +784,13 @@ class DishRepositoryPostgresTest {
              user haven't any dishes
              => return 0
             """)
-    public void getNumberUnits2() {
+    public void getUnitsNumber2() {
         User user = createAndSaveUser(1);
         List<Dish> dishes = createDishes(user);
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
-        int actual = dishRepository.getNumberUnits(
+        int actual = dishRepository.getUnitsNumber(
                 DishFieldNumberCriteria.of(actualUser)
         );
 
@@ -789,12 +803,12 @@ class DishRepositoryPostgresTest {
              user have dishes
              => return correct result
             """)
-    public void getNumberUnits3() {
+    public void getUnitsNumber3() {
         User user = createAndSaveUser(1);
         List<Dish> dishes = createDishes(user);
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
 
-        int actual = dishRepository.getNumberUnits(
+        int actual = dishRepository.getUnitsNumber(
                 DishFieldNumberCriteria.of(user)
         );
 
@@ -914,7 +928,7 @@ class DishRepositoryPostgresTest {
                         OrElseFilter.of(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("common tag")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A"),
                                         ManufacturerFilter.of("manufacturer A")
@@ -926,17 +940,17 @@ class DishRepositoryPostgresTest {
                         OrElseFilter.of(
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("value 1")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop A"),
                                         VarietiesFilter.of("variety A")
                                 ),
                                 ManufacturerFilter.of("manufacturer B")
                         ),
                         new BigDecimal("2.5")).
-                addIngredient("ingredient 2",
+                addIngredient("ingredient 3",
                         AndFilter.of(
                                 MinTagsFilter.of(new Tag("value 1"), new Tag("value 2")),
-                                CategoryFilter.of("name A"),
+                                CategoriesFilter.of("name A"),
                                 ShopsFilter.of("shop B"),
                                 VarietiesFilter.of("variety B")
                         ),
@@ -964,7 +978,7 @@ class DishRepositoryPostgresTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("common tag")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -976,17 +990,17 @@ class DishRepositoryPostgresTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("value 1")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("variety A")
                                         ),
                                         ManufacturerFilter.of("manufacturer B")
                                 ),
                                 new BigDecimal("2.5")).
-                        addIngredient("ingredient 2",
+                        addIngredient("ingredient 3",
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("value 1"), new Tag("value 2")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop B"),
                                         VarietiesFilter.of("variety B")
                                 ),
@@ -1011,7 +1025,7 @@ class DishRepositoryPostgresTest {
                                 OrElseFilter.of(
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("common tag")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -1040,7 +1054,7 @@ class DishRepositoryPostgresTest {
                                         MinTagsFilter.of(new Tag("tag B")),
                                         AndFilter.of(
                                                 MinTagsFilter.of(new Tag("common tag")),
-                                                CategoryFilter.of("name A"),
+                                                CategoriesFilter.of("name A"),
                                                 ShopsFilter.of("shop A"),
                                                 VarietiesFilter.of("variety A"),
                                                 ManufacturerFilter.of("manufacturer A")
@@ -1053,10 +1067,10 @@ class DishRepositoryPostgresTest {
                                         ManufacturerFilter.of("manufacturer B")
                                 ),
                                 new BigDecimal("2.5")).
-                        addIngredient("ingredient 2",
+                        addIngredient("ingredient 3",
                                 AndFilter.of(
                                         MinTagsFilter.of(new Tag("value 1"), new Tag("value 2")),
-                                        CategoryFilter.of("name A"),
+                                        CategoriesFilter.of("name A"),
                                         ShopsFilter.of("shop B"),
                                         VarietiesFilter.of("variety B")
                                 ),
@@ -1100,8 +1114,9 @@ class DishRepositoryPostgresTest {
 
     private List<Tag> getAllTags(List<Dish> allDishes) {
         return allDishes.stream().
-                flatMap(d -> d.getReadonlyTags().stream()).
+                flatMap(d -> d.getTags().stream()).
                 distinct().
+                sorted().
                 toList();
     }
 
@@ -1109,6 +1124,7 @@ class DishRepositoryPostgresTest {
         return allDishes.stream().
                 map(Dish::getUnit).
                 distinct().
+                sorted().
                 toList();
     }
 

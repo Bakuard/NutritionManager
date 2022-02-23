@@ -107,6 +107,14 @@ public class DishIngredient {
     }
 
     /**
+     * Возвращает кол-во данного ингредиента необходимого для приготовления одной порции блюда.
+     * @return кол-во данного ингредиента необходимого для приготовления одной порции блюда.
+     */
+    public BigDecimal getNecessaryQuantity() {
+        return quantity;
+    }
+
+    /**
      * Возвращает кол-во данного ингредиента необходимого для приготовления указанного кол-ва порций блюда.
      * @param servingNumber кол-во порций блюда.
      * @return кол-во данного ингредиента необходимого для приготовления указанного кол-ва порций блюда.
@@ -341,6 +349,19 @@ public class DishIngredient {
         public Builder setConfig(AppConfigData config) {
             this.config = config;
             return this;
+        }
+
+        /**
+         * Проверяет - имеют ли все соответсвующие поля данного объекта указанные значения.
+         * @param name наименование ингредиента.
+         * @param filter ограничение задающее множество взаимозаменяемых продуктов.
+         * @param quantity кол-во создаваемого ингредиента необходимого для приготовления одной порции блюда.
+         * @return return - если описанное условие выполняется, иначе - false.
+         */
+        public boolean contains(String name, Filter filter, BigDecimal quantity) {
+            return Objects.equals(name, this.name) &&
+                    Objects.equals(filter, this.filter) &&
+                    Objects.equals(quantity, this.quantity);
         }
 
         @Override

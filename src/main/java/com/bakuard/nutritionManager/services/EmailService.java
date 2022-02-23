@@ -25,7 +25,7 @@ public class EmailService {
             sendEmail("/mail/registration.html", jws, email);
         } catch(MessagingException e) {
             throw Checker.of(getClass(), "confirmEmailForRegistration").
-                    createServiceException("Fail to confirm email for registration.");
+                    createServiceException("Fail to confirm email for registration.", e);
         }
     }
 
@@ -34,7 +34,7 @@ public class EmailService {
             sendEmail("/mail/changeCredentials.html", jws, email);
         } catch(MessagingException e) {
             throw Checker.of(getClass(), "confirmEmailForChangeCredentials").
-                    createServiceException("Fail to confirm email for change credentials.");
+                    createServiceException("Fail to confirm email for change credentials.", e);
         }
     }
 

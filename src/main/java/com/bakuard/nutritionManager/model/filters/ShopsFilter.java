@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Данное огрнаничение используется при фильтрации продуктов по магазинам. Продукт удовлетворяет ограничению,
@@ -54,7 +55,7 @@ public class ShopsFilter implements Filter {
     private final ImmutableList<String> shops;
 
     private ShopsFilter(List<String> shops) {
-        Checker.of(getClass(), "shops").
+        Checker.of(getClass(), "constructor").
                 nullValue("shops", shops).
                 containsNull("shops", shops).
                 notEnoughItems("shops", shops, 1).
@@ -76,6 +77,26 @@ public class ShopsFilter implements Filter {
 
     public ImmutableList<String> getShops() {
         return shops;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ShopsFilter that = (ShopsFilter) o;
+        return Objects.equals(shops, that.shops);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(shops);
+    }
+
+    @Override
+    public String toString() {
+        return "ShopsFilter{" +
+                "shops=" + shops +
+                '}';
     }
 
 }
