@@ -31,7 +31,7 @@ public class DishesNumberCriteria {
 
 
     private User user;
-    private MinTagsFilter filter;
+    private Filter filter;
 
     private DishesNumberCriteria(User user) {
         Checker.of(getClass(), "constructor").
@@ -50,20 +50,20 @@ public class DishesNumberCriteria {
     }
 
     /**
-     * Возвращает ограничения для отбираемых блюд (подробнее см. {@link MinTagsFilter}).
+     * Возвращает ограничения для отбираемых блюд (подробнее см. {@link Filter}).
      * @return ограничения для отбираемых блюд.
      */
-    public Optional<MinTagsFilter> getFilter() {
+    public Optional<Filter> getFilter() {
         return Optional.ofNullable(filter);
     }
 
     /**
-     * Устанавливает ограничения блюд для которых ведется подсчет (подробнее см. {@link MinTagsFilter}).
+     * Устанавливает ограничения блюд для которых ведется подсчет (подробнее см. {@link Filter}).
      * Значение по умолчанию - пустой Optional (т.е. подсчет идет для всех блюд пользвателя).
      * @param filter ограничения для подсчитываемых блюд.
      * @return этот же объект.
      */
-    public DishesNumberCriteria setFilter(MinTagsFilter filter) {
+    public DishesNumberCriteria setFilter(Filter filter) {
         this.filter = filter;
         return this;
     }

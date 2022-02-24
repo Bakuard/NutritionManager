@@ -9,14 +9,14 @@ import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.filters.*;
-import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Page;
 
 import com.google.common.collect.Sets;
 
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.Field;
+import org.jooq.SortField;
 import org.jooq.impl.DSL;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,7 +27,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.jooq.impl.DSL.*;
 
@@ -60,7 +63,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
             }
         } catch(DuplicateKeyException e) {
             throw checker.addConstraint("product", ConstraintType.ALREADY_EXISTS_IN_DB).
-                    createServiceException("Fail to save product");
+                    createServiceException("Fail to save product", e);
         }
 
         return newData;
@@ -112,29 +115,44 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Page.Info info = criteria.getPageable().
                 createPageMetadata(getProductsNumber(criteria.getNumberCriteria()));
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.isOnlyFridge())
-            condition = condition.and(onlyFridgeConstraint());
-        if(criteria.getFilter().isPresent())
-            condition = condition.and(switchConstraint(criteria.getFilter().get()));
+            condition = condition.and(onlyFridgeFilter());
+
+        List<Condition> conditions = List.of();
+        List<String> fieldsName = new ArrayList<>();
+        List<Field<?>> fields = new ArrayList<>();
+        fields.add(field("*"));
+        if(criteria.getFilter().isPresent()) {
+            conditions = splitFilter(criteria.getFilter().get());
+            for(int i = 0; i < conditions.size(); i++) {
+                String fieldName = "condition" + i;
+                fieldsName.add(fieldName);
+                fields.add(field("(" + conditions.get(i) + ") as " + fieldName));
+            }
+        }
 
         String query =
-            select(table("P").fields()).
-                select(table("ProductTags").fields()).
+            select(field("*")).
                 from(
-                    select(table("Products").fields()).
-                        from("Products").
+                    select(field("*")).
+                        from(
+                            select(fields).
+                                from("Products").
+                                asTable("{LabeledProducts}")
+                        ).
                         where(condition).
-                        orderBy(getOrderFields(criteria.getProductSort(), "Products")).
+                        orderBy(getOrderFields(fieldsName, criteria.getProductSort(), "LabeledProducts")).
                         limit(inline(info.getActualSize())).
                         offset(inline(info.getOffset())).
                         asTable("{P}")
                 ).
                 leftJoin("ProductTags").
                     on(field("P.productId").eq(field("ProductTags.productId"))).
-                orderBy(getOrderFields(criteria.getProductSort(), "P")).
+                orderBy(getOrderFields(fieldsName, criteria.getProductSort(), "P")).
                 getSQL().
-                replace("\"{P}\"", "as P");//Этот костыль исправляет странное поведение JOOQ в конструкциях asTable()
+                replace("\"{P}\"", "as P").//Этот костыль исправляет странное поведение JOOQ в конструкциях asTable()
+                replace("\"{LabeledProducts}\"", "as LabeledProducts");
 
         List<Product> products = statement.query(
                 query,
@@ -181,16 +199,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<Tag> getTags(ProductFieldCriteria criteria) {
         Checker.of(getClass(), "getTags").
                 nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get tags by criteria");
+                checkWithServiceException("Fail to get products tags by criteria");
 
         Page.Info info = criteria.getPageable().createPageMetadata(
                 getTagsNumber(criteria.getNumberCriteria())
         );
         if(info.isEmpty()) return info.createPage(List.of());
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("ProductTags.tagValue")).
                 from("ProductTags").
@@ -229,9 +247,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
         if(info.isEmpty()) return info.createPage(List.of());
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("Products.shop")).
                 from("Products").
@@ -268,9 +286,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
         if(info.isEmpty()) return info.createPage(List.of());
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("Products.variety")).
                 from("Products").
@@ -307,7 +325,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
         if(info.isEmpty()) return info.createPage(List.of());
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
 
         String query = selectDistinct(field("Products.category")).
                 from("Products").
@@ -344,9 +362,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
         if(info.isEmpty()) return info.createPage(List.of());
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("Products.manufacturer")).
                 from("Products").
@@ -378,11 +396,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get products number by criteria");
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.isOnlyFridge())
-            condition = condition.and(onlyFridgeConstraint());
+            condition = condition.and(onlyFridgeFilter());
         if(criteria.getFilter().isPresent())
-            condition = condition.and(switchConstraint(criteria.getFilter().get()));
+            condition = condition.and(switchFilter(criteria.getFilter().get()));
 
         String query = selectCount().from("Products").
                 where(condition).
@@ -395,11 +413,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getTagsNumber(ProductFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getTagsNumber").
                 nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get tags number by criteria");
+                checkWithServiceException("Fail to get products tags number by criteria");
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("ProductTags.tagValue"))).
                 from("ProductTags").
@@ -423,9 +441,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get shops number by criteria");
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("Products.shop"))).
                 from("Products").
@@ -447,9 +465,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get varieties number by criteria");
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("Products.variety"))).
                 from("Products").
@@ -471,7 +489,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get categories number by criteria");
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
 
         String query = select(countDistinct(field("Products.category"))).
                 from("Products").
@@ -493,9 +511,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get manufacturers number by criteria");
 
-        Condition condition = userConstraint(criteria.getUser());
+        Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryConstraint(criteria.getProductCategory().get()));
+            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("Products.manufacturer"))).
                 from("Products").
@@ -513,7 +531,21 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria) {
-        return Optional.empty();
+        Checker.of(getClass(), "getProductsSum").
+                nullValue("criteria", criteria).
+                checkWithServiceException("Fail to get products number by criteria");
+
+        Condition condition = userFilter(criteria.getUser()).
+                and(switchFilter(criteria.getFilter()));
+
+        String query = select(sum(field("price", BigDecimal.class)).as("totalPrice")).
+                from("Products").
+                where(condition).
+                getSQL();
+
+        return Optional.ofNullable(
+                statement.queryForObject(query, BigDecimal.class)
+        );
     }
 
 
@@ -571,7 +603,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
                     @Override
                     public int getBatchSize() {
-                        return product.getContext().getTags().size();
+                        return tags.size();
                     }
                 }
         );
@@ -714,88 +746,133 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
 
-    private Condition switchConstraint(Filter filter) {
+    private List<Condition> splitFilter(Filter filter) {
         switch(filter.getType()) {
             case AND -> {
-                return andConstraint((AndFilter) filter);
+                return List.of(andFilter((AndFilter) filter));
             }
             case MIN_TAGS -> {
-                return minTags((MinTagsFilter) filter);
+                return List.of(minTagsFilter((MinTagsFilter) filter));
             }
             case CATEGORY -> {
-                return categoryConstraint((CategoryFilter) filter);
+                return List.of(categoryFilter((AnyFilter) filter));
             }
             case SHOPS -> {
-                return shopsConstraint((ShopsFilter) filter);
+                return List.of(shopFilter((AnyFilter) filter));
             }
             case VARIETIES -> {
-                return varietiesConstraint((VarietiesFilter) filter);
+                return List.of(varietyFilter((AnyFilter) filter));
             }
             case MANUFACTURER -> {
-                return manufacturerConstraint((ManufacturerFilter) filter);
+                return List.of(manufacturerFilter((AnyFilter) filter));
+            }
+            case OR_ELSE -> {
+                OrElseFilter orElse = (OrElseFilter) filter;
+                return orElse.getOperands().stream().
+                        map(this::switchFilter).
+                        toList();
+            }
+            default -> throw new UnsupportedOperationException(
+                    "Unsupported operation for " + filter.getType() + " constraint");
+        }
+    }
+
+    private Condition switchFilter(Filter filter) {
+        switch(filter.getType()) {
+            case AND -> {
+                return andFilter((AndFilter) filter);
+            }
+            case MIN_TAGS -> {
+                return minTagsFilter((MinTagsFilter) filter);
+            }
+            case CATEGORY -> {
+                return categoryFilter((AnyFilter) filter);
+            }
+            case SHOPS -> {
+                return shopFilter((AnyFilter) filter);
+            }
+            case VARIETIES -> {
+                return varietyFilter((AnyFilter) filter);
+            }
+            case MANUFACTURER -> {
+                return manufacturerFilter((AnyFilter) filter);
+            }
+            case OR_ELSE -> {
+                return orElseFilter((OrElseFilter) filter);
             }
             default -> throw new UnsupportedOperationException(
                         "Unsupported operation for " + filter.getType() + " constraint");
         }
     }
 
-    private Condition andConstraint(AndFilter andConstraint) {
-        Condition condition = switchConstraint(andConstraint.getOperands().get(0));
-        for(int i = 1; i < andConstraint.getOperands().size(); i++) {
-            condition = condition.and(switchConstraint(andConstraint.getOperands().get(i)));
+    private Condition orElseFilter(OrElseFilter filter) {
+        Condition condition = switchFilter(filter.getOperands().get(0));
+        for(int i = 1; i < filter.getOperands().size(); i++) {
+            condition = condition.or(switchFilter(filter.getOperands().get(i)));
         }
         return condition;
     }
 
-    private Condition minTags(MinTagsFilter minTagsFilter) {
-        return field("Products.productId").in(
+    private Condition andFilter(AndFilter filter) {
+        Condition condition = switchFilter(filter.getOperands().get(0));
+        for(int i = 1; i < filter.getOperands().size(); i++) {
+            condition = condition.and(switchFilter(filter.getOperands().get(i)));
+        }
+        return condition;
+    }
+
+    private Condition minTagsFilter(MinTagsFilter filter) {
+        return field("productId").in(
                 select(field("ProductTags.productId")).
                         from("ProductTags").
                         where(field("ProductTags.tagValue").in(
-                                minTagsFilter.getTags().stream().map(t -> inline(t.getValue())).toList()
+                                filter.getTags().stream().map(t -> inline(t.getValue())).toList()
                         )).
                         groupBy(field("ProductTags.productId")).
-                        having(count(field("ProductTags.productId")).eq(inline(minTagsFilter.getTags().size())))
+                        having(count(field("ProductTags.productId")).eq(inline(filter.getTags().size())))
         );
     }
 
-    private Condition categoryConstraint(CategoryFilter categoryConstraint) {
-        return field("Products.category").eq(inline(categoryConstraint.getCategory()));
-    }
-
-    private Condition categoryConstraint(String productName) {
-        return field("Products.category").eq(inline(productName));
-    }
-
-    private Condition shopsConstraint(ShopsFilter shopsConstraint) {
-        return field("Products.shop").in(
-                shopsConstraint.getShops().stream().map(DSL::inline).toList()
+    private Condition categoryFilter(AnyFilter filter) {
+        return field("category").in(
+                filter.getValues().stream().map(DSL::inline).toList()
         );
     }
 
-    private Condition varietiesConstraint(VarietiesFilter varietiesConstraint) {
-        return field("Products.variety").in(
-                varietiesConstraint.getVarieties().stream().map(DSL::inline).toList()
+    private Condition shopFilter(AnyFilter filter) {
+        return field("shop").in(
+                filter.getValues().stream().map(DSL::inline).toList()
         );
     }
 
-    private Condition manufacturerConstraint(ManufacturerFilter constraint) {
-        return field("Products.manufacturer").in(
-                constraint.getManufacturers().stream().map(DSL::inline).toList()
+    private Condition varietyFilter(AnyFilter filter) {
+        return field("variety").in(
+                filter.getValues().stream().map(DSL::inline).toList()
         );
     }
 
-    private Condition userConstraint(User user) {
-        return field("Products.userId").eq(inline(user.getId()));
+    private Condition manufacturerFilter(AnyFilter filter) {
+        return field("manufacturer").in(
+                filter.getValues().stream().map(DSL::inline).toList()
+        );
     }
 
-    private Condition onlyFridgeConstraint() {
-        return field("Products.quantity").greaterThan(inline(BigDecimal.ZERO));
+    private Condition userFilter(User user) {
+        return field("userId").eq(inline(user.getId()));
+    }
+
+    private Condition onlyFridgeFilter() {
+        return field("quantity").greaterThan(inline(BigDecimal.ZERO));
     }
 
 
-    private List<SortField<?>> getOrderFields(ProductSort productSort, String tableName) {
+    private List<SortField<?>> getOrderFields(List<String> optionalFields,
+                                              ProductSort productSort,
+                                              String tableName) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
+
+        optionalFields.forEach(f -> fields.add(field(tableName + "." + f).desc()));
+
         for(int i = 0; i < productSort.getCountParameters(); i++) {
             switch(productSort.getParameterType(i)) {
                 case CATEGORY -> {

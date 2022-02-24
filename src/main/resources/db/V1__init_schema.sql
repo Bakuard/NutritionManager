@@ -88,15 +88,19 @@ CREATE TABLE ProductTags (
 CREATE TABLE DishTags (
     dishId UUID NOT NULL,
     tagValue VARCHAR(256) NOT NULL,
+    index INT NOT NULL,
     FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(dishId, tagValue)
 );
 
-CREATE TABLE FilterGroups (
+CREATE TABLE DishIngredients (
     dishId UUID NOT NULL,
-    dishTagFilters JSONB NOT NULL,
+    name VARCHAR(256) NOT NULL,
     quantity NUMERIC(16, 6) NOT NULL,
-    FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE
+    filter JSONB NOT NULL,
+    index INT NOT NULL,
+    FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY(dishId, name)
 );
 
 CREATE TABLE JwsBlackList (

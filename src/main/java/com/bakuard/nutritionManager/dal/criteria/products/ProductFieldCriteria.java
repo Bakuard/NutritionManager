@@ -1,7 +1,10 @@
 package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.filters.AnyFilter;
+import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import java.util.Objects;
@@ -30,7 +33,7 @@ public class ProductFieldCriteria {
 
     private Pageable pageable;
     private User user;
-    private String productCategory;
+    private AnyFilter productCategory;
 
     private ProductFieldCriteria(Pageable pageable, User user) {
         Checker.of(getClass(), "constructor").
@@ -64,7 +67,11 @@ public class ProductFieldCriteria {
      * @param productCategory категория продуктов.
      * @return этот же объект.
      */
-    public ProductFieldCriteria setProductCategory(String productCategory) {
+    public ProductFieldCriteria setProductCategory(AnyFilter productCategory) {
+        if(productCategory != null && productCategory.getType() != Filter.Type.CATEGORY) {
+            throw new IllegalArgumentException("productCategory.getType() must return Filter.Type.CATEGORY");
+        }
+
         this.productCategory = productCategory;
         return this;
     }
@@ -73,7 +80,7 @@ public class ProductFieldCriteria {
      * Возвращает категорию продуктов по которой делается выборка.
      * @return категорию продуктов.
      */
-    public Optional<String> getProductCategory() {
+    public Optional<AnyFilter> getProductCategory() {
         return Optional.ofNullable(productCategory);
     }
 

@@ -70,7 +70,7 @@ public class JwsService {
         } catch(JwtException e) {
             throw Checker.of(getClass(), "parseAccessJws").
                     addConstraint("jws", ConstraintType.INCORRECT_JWS).
-                    createServiceException("Incorrect access jws");
+                    createServiceException("Incorrect access jws", e);
         }
 
         UUID accessJwsId = UUID.fromString(claims.getId());
@@ -102,7 +102,7 @@ public class JwsService {
         } catch(JwtException e) {
             throw Checker.of(getClass(), "parseRegistrationJws").
                     addConstraint("jws", ConstraintType.INCORRECT_JWS).
-                    createServiceException("Incorrect registration jws");
+                    createServiceException("Incorrect registration jws", e);
         }
     }
 
@@ -125,7 +125,7 @@ public class JwsService {
         } catch(JwtException e) {
             throw Checker.of(getClass(), "parseChangeCredentialsJws").
                     addConstraint("jws", ConstraintType.INCORRECT_JWS).
-                    createServiceException("Incorrect change credential jws");
+                    createServiceException("Incorrect change credential jws", e);
         }
     }
 

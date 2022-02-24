@@ -36,6 +36,20 @@ public class DishIngredient {
     private final ProductSort sort;
 
     /**
+     * Конструктор копирования. Выполняет глубокое копирование.
+     * @param other копируемый ингредиент.
+     */
+    public DishIngredient(DishIngredient other) {
+        this.name = other.name;
+        this.filter = other.filter;
+        this.quantity = other.quantity;
+        this.repository = other.repository;
+        this.user = new User(other.user);
+        this.config = other.config;
+        this.sort = other.sort;
+    }
+
+    /**
      * Создает новый ингредиент блюда.
      * @param name наименование ингредиента.
      * @param filter ограничение задающее множество взаимозаменяемых продуктов, каждый из которых может
@@ -90,6 +104,14 @@ public class DishIngredient {
      */
     public Filter getFilter() {
         return filter;
+    }
+
+    /**
+     * Возвращает кол-во данного ингредиента необходимого для приготовления одной порции блюда.
+     * @return кол-во данного ингредиента необходимого для приготовления одной порции блюда.
+     */
+    public BigDecimal getNecessaryQuantity() {
+        return quantity;
     }
 
     /**
@@ -327,6 +349,19 @@ public class DishIngredient {
         public Builder setConfig(AppConfigData config) {
             this.config = config;
             return this;
+        }
+
+        /**
+         * Проверяет - имеют ли все соответсвующие поля данного объекта указанные значения.
+         * @param name наименование ингредиента.
+         * @param filter ограничение задающее множество взаимозаменяемых продуктов.
+         * @param quantity кол-во создаваемого ингредиента необходимого для приготовления одной порции блюда.
+         * @return return - если описанное условие выполняется, иначе - false.
+         */
+        public boolean contains(String name, Filter filter, BigDecimal quantity) {
+            return Objects.equals(name, this.name) &&
+                    Objects.equals(filter, this.filter) &&
+                    Objects.equals(quantity, this.quantity);
         }
 
         @Override

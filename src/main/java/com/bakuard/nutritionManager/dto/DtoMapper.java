@@ -114,15 +114,15 @@ public class DtoMapper {
         User user = userRepository.getById(userId);
 
         List<Filter> filters = new ArrayList<>();
-        if(category != null) filters.add(CategoryFilter.of(category));
-        if(shops != null) filters.add(ShopsFilter.of(shops));
-        if(varieties != null) filters.add(VarietiesFilter.of(varieties));
-        if(manufacturers != null) filters.add(ManufacturerFilter.of(manufacturers));
-        if(tags != null) filters.add(MinTagsFilter.of(toTags(tags)));
+        if(category != null) filters.add(Filter.anyCategory(category));
+        if(shops != null) filters.add(Filter.anyShop(shops));
+        if(varieties != null) filters.add(Filter.anyVariety(varieties));
+        if(manufacturers != null) filters.add(Filter.anyManufacturer(manufacturers));
+        if(tags != null) filters.add(Filter.minTags(toTags(tags)));
 
         Filter filter = null;
         if(filters.size() == 1) filter = filters.get(0);
-        else if(filters.size() > 1) filter = AndFilter.of(filters);
+        else if(filters.size() > 1) filter = Filter.and(filters);
 
         return ProductCriteria.of(
                 Pageable.of(page, size),
@@ -135,7 +135,7 @@ public class DtoMapper {
     public ProductFieldCriteria toProductFieldCriteria(int page, int size, UUID userId, String productCategory) {
         User user = userRepository.getById(userId);
         return ProductFieldCriteria.of(Pageable.of(page, size), user).
-                setProductCategory(productCategory);
+                setProductCategory(Filter.anyCategory(productCategory));
     }
 
     public ProductCategoryCriteria toProductCategoryCriteria(int page, int size, UUID userId) {

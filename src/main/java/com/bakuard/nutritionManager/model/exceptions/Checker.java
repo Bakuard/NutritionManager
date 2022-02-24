@@ -182,6 +182,16 @@ public class Checker {
         return this;
     }
 
+    public <T> Checker notEquals(String fieldName, T checkedValue, T expected) {
+        if(isValid(fieldName) && !checkedValue.equals(expected)) {
+            constraints.add(
+                    new Constraint(checkedType, fieldName, ConstraintType.NOT_EQUALS,
+                            fieldName + " has value " + checkedValue + ", but expected " + expected)
+            );
+        }
+        return this;
+    }
+
 
     public <T>Checker tryBuildForEach(Collection<? extends AbstractBuilder<T>> values,
                                       Container<List<T>> container) {
@@ -266,6 +276,11 @@ public class Checker {
 
     public ServiceException createServiceException(String message) {
         return new ServiceException(message, checkedType, operationName).
+                addReasons(constraints);
+    }
+
+    public ServiceException createServiceException(String message, Throwable cause) {
+        return new ServiceException(message, cause, checkedType, operationName).
                 addReasons(constraints);
     }
 
