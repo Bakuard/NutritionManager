@@ -112,8 +112,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get product by criteria");
 
-        Page.Info info = criteria.getPageable().
-                createPageMetadata(getProductsNumber(criteria.getNumberCriteria()));
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(getProductsNumber(criteria.getNumberCriteria()), 40);
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.isOnlyFridge())
@@ -143,8 +143,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                         ).
                         where(condition).
                         orderBy(getOrderFields(fieldsName, criteria.getProductSort(), "LabeledProducts")).
-                        limit(inline(info.getActualSize())).
-                        offset(inline(info.getOffset())).
+                        limit(inline(metadata.getActualSize())).
+                        offset(inline(metadata.getOffset())).
                         asTable("{P}")
                 ).
                 leftJoin("ProductTags").
@@ -192,7 +192,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return info.createPage(products);
+        return metadata.createPage(products);
     }
 
     @Override
@@ -201,10 +201,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get products tags by criteria");
 
-        Page.Info info = criteria.getPageable().createPageMetadata(
-                getTagsNumber(criteria.getNumberCriteria())
+        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
+                getTagsNumber(criteria.getNumberCriteria()), 1000
         );
-        if(info.isEmpty()) return info.createPage(List.of());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -216,8 +216,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     on(field("Products.productId").eq(field("ProductTags.productId"))).
                 where(condition).
                 orderBy(field("ProductTags.tagValue").asc()).
-                limit(inline(info.getActualSize())).
-                offset(inline(info.getOffset())).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
                 getSQL();
 
         List<Tag> tags = statement.query(
@@ -233,7 +233,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return info.createPage(tags);
+        return metadata.createPage(tags);
     }
 
     @Override
@@ -242,10 +242,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get shops by criteria");
 
-        Page.Info info = criteria.getPageable().createPageMetadata(
-                getShopsNumber(criteria.getNumberCriteria())
+        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
+                getShopsNumber(criteria.getNumberCriteria()), 1000
         );
-        if(info.isEmpty()) return info.createPage(List.of());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -255,8 +255,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 from("Products").
                 where(condition).
                 orderBy(field("Products.shop").asc()).
-                limit(inline(info.getActualSize())).
-                offset(inline(info.getOffset())).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
                 getSQL();
 
         List<String> shops = statement.query(
@@ -272,7 +272,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return info.createPage(shops);
+        return metadata.createPage(shops);
     }
 
     @Override
@@ -281,10 +281,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get varieties by criteria");
 
-        Page.Info info = criteria.getPageable().createPageMetadata(
-                getVarietiesNumber(criteria.getNumberCriteria())
+        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
+                getVarietiesNumber(criteria.getNumberCriteria()), 1000
         );
-        if(info.isEmpty()) return info.createPage(List.of());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -294,8 +294,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 from("Products").
                 where(condition).
                 orderBy(field("Products.variety").asc()).
-                limit(inline(info.getActualSize())).
-                offset(inline(info.getOffset())).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
                 getSQL();
 
         List<String> varieties = statement.query(
@@ -311,7 +311,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return info.createPage(varieties);
+        return metadata.createPage(varieties);
     }
 
     @Override
@@ -320,10 +320,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get categories by criteria");
 
-        Page.Info info = criteria.getPageable().createPageMetadata(
-                getCategoriesNumber(criteria.getNumberCriteria())
+        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
+                getCategoriesNumber(criteria.getNumberCriteria()), 1000
         );
-        if(info.isEmpty()) return info.createPage(List.of());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         Condition condition = userFilter(criteria.getUser());
 
@@ -331,8 +331,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 from("Products").
                 where(condition).
                 orderBy(field("Products.category").asc()).
-                limit(inline(info.getActualSize())).
-                offset(inline(info.getOffset())).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
                 getSQL();
 
         List<String> varieties = statement.query(
@@ -348,7 +348,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return info.createPage(varieties);
+        return metadata.createPage(varieties);
     }
 
     @Override
@@ -357,10 +357,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get manufacturers by criteria");
 
-        Page.Info info = criteria.getPageable().createPageMetadata(
-                getManufacturersNumber(criteria.getNumberCriteria())
+        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
+                getManufacturersNumber(criteria.getNumberCriteria()), 1000
         );
-        if(info.isEmpty()) return info.createPage(List.of());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -370,8 +370,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 from("Products").
                 where(condition).
                 orderBy(field("Products.manufacturer").asc()).
-                limit(inline(info.getActualSize())).
-                offset(inline(info.getOffset())).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
                 getSQL();
 
         List<String> varieties = statement.query(
@@ -387,7 +387,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return info.createPage(varieties);
+        return metadata.createPage(varieties);
     }
 
     @Override

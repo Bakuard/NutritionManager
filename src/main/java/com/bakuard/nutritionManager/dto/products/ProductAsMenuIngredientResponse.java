@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.dto.products;
 
-import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 
 import java.math.BigDecimal;
@@ -16,7 +15,7 @@ public class ProductAsMenuIngredientResponse {
     private String imagePath;
     private String category;
     private String shop;
-    private String variety;
+    private String grade;
     private String manufacturer;
     private BigDecimal price;
     private BigDecimal packingSize;
@@ -26,7 +25,7 @@ public class ProductAsMenuIngredientResponse {
     private BigDecimal lackQuantity;
     private BigDecimal lackQuantityPrice;
     private List<String> dishes;
-    private List<TagRequestAndResponse> tags;
+    private List<String> tags;
 
     public ProductAsMenuIngredientResponse() {
         type = "Product";
@@ -76,12 +75,12 @@ public class ProductAsMenuIngredientResponse {
         this.shop = shop;
     }
 
-    public String getVariety() {
-        return variety;
+    public String getGrade() {
+        return grade;
     }
 
-    public void setVariety(String variety) {
-        this.variety = variety;
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     public String getManufacturer() {
@@ -156,11 +155,11 @@ public class ProductAsMenuIngredientResponse {
         this.dishes = dishes;
     }
 
-    public List<TagRequestAndResponse> getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<TagRequestAndResponse> tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 
@@ -175,7 +174,7 @@ public class ProductAsMenuIngredientResponse {
                 Objects.equals(imagePath, that.imagePath) &&
                 Objects.equals(category, that.category) &&
                 Objects.equals(shop, that.shop) &&
-                Objects.equals(variety, that.variety) &&
+                Objects.equals(grade, that.grade) &&
                 Objects.equals(manufacturer, that.manufacturer) &&
                 Objects.equals(price, that.price) &&
                 Objects.equals(packingSize, that.packingSize) &&
@@ -191,7 +190,7 @@ public class ProductAsMenuIngredientResponse {
     @Override
     public int hashCode() {
         return Objects.hash(type, id, user, imagePath, category, shop,
-                variety, manufacturer, price, packingSize, unit, quantity, necessaryQuantity,
+                grade, manufacturer, price, packingSize, unit, quantity, necessaryQuantity,
                 lackQuantity, lackQuantityPrice, dishes, tags);
     }
 
@@ -204,7 +203,7 @@ public class ProductAsMenuIngredientResponse {
                 ", imagePath='" + imagePath + '\'' +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
-                ", variety='" + variety + '\'' +
+                ", grade='" + grade + '\'' +
                 ", manufacturer='" + manufacturer + '\'' +
                 ", price=" + price +
                 ", packingSize=" + packingSize +

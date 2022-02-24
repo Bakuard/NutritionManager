@@ -1,6 +1,7 @@
 package com.bakuard.nutritionManager.dto;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCategoryCriteria;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
@@ -8,7 +9,6 @@ import com.bakuard.nutritionManager.dal.criteria.products.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
-import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.exceptions.*;
@@ -25,14 +25,17 @@ import java.util.*;
 
 public class DtoMapper {
 
-    private AppConfigData appConfiguration;
     private UserRepository userRepository;
+    private ProductRepository productRepository;
+    private AppConfigData appConfiguration;
     private MessageSource messageSource;
 
     public DtoMapper(UserRepository userRepository,
+                     ProductRepository productRepository,
                      MessageSource messageSource,
                      AppConfigData appConfiguration) {
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
         this.messageSource = messageSource;
         this.appConfiguration = appConfiguration;
     }
@@ -43,7 +46,7 @@ public class DtoMapper {
         response.setUser(toUserResponse(product.getUser()));
         response.setCategory(product.getContext().getCategory());
         response.setShop(product.getContext().getShop());
-        response.setVariety(product.getContext().getVariety());
+        response.setGrade(product.getContext().getVariety());
         response.setManufacturer(product.getContext().getManufacturer());
         response.setPrice(product.getContext().getPrice());
         response.setPackingSize(product.getContext().getPackingSize());
@@ -51,7 +54,7 @@ public class DtoMapper {
         response.setQuantity(product.getQuantity());
         response.setDescription(product.getDescription());
         response.setImagePath(product.getImagePath());
-        response.setTags(toTagResponse(product.getContext().getTags()));
+        response.setTags(toTagsResponse(product.getContext().getTags()));
         return response;
     }
 
@@ -62,7 +65,7 @@ public class DtoMapper {
                 setUser(userRepository.getById(dto.getUserId())).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
-                setVariety(dto.getVariety()).
+                setVariety(dto.getGrade()).
                 setManufacturer(dto.getManufacturer()).
                 setPrice(dto.getPrice()).
                 setPackingSize(dto.getPackingSize()).
@@ -71,7 +74,7 @@ public class DtoMapper {
                 setDescription(dto.getDescription()).
                 setImagePath(dto.getImagePath());
 
-        dto.getTags().forEach(t -> builder.addTag(t.getName()));
+        dto.getTags().forEach(builder::addTag);
 
         return builder.tryBuild();
     }
@@ -83,7 +86,7 @@ public class DtoMapper {
                 setUser(userRepository.getById(dto.getUserId())).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
-                setVariety(dto.getVariety()).
+                setVariety(dto.getGrade()).
                 setManufacturer(dto.getManufacturer()).
                 setPrice(dto.getPrice()).
                 setPackingSize(dto.getPackingSize()).
@@ -92,7 +95,7 @@ public class DtoMapper {
                 setDescription(dto.getDescription()).
                 setImagePath(dto.getImagePath());
 
-        dto.getTags().forEach(t -> builder.addTag(t.getName()));
+        dto.getTags().forEach(builder::addTag);
 
         return builder.tryBuild();
     }
@@ -133,61 +136,32 @@ public class DtoMapper {
                 setFilter(filter);
     }
 
-    public ProductFieldCriteria toProductFieldCriteria(int page, int size, UUID userId, String productCategory) {
-        User user = userRepository.getById(userId);
-        return ProductFieldCriteria.of(Pageable.of(page, size), user).
-                setProductCategory(Filter.anyCategory(productCategory));
-    }
 
-    public ProductCategoryCriteria toProductCategoryCriteria(int page, int size, UUID userId) {
-        User user = userRepository.getById(userId);
-        return ProductCategoryCriteria.of(Pageable.of(page, size), user);
-    }
+    public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
+        ProductFieldCriteria criteria = ProductFieldCriteria.of(
+                Pageable.of(0, 200),
+                userRepository.getById(userId)
+        );
 
+        ProductCategoryCriteria categoryCriteria = ProductCategoryCriteria.of(
+                Pageable.of(0, 200),
+                userRepository.getById(userId)
+        );
 
-    public Page<TagRequestAndResponse> toTagsResponse(Page<Tag> tags) {
-        return tags.map(tag -> {
-            TagRequestAndResponse response = new TagRequestAndResponse();
-            response.setName(tag.getValue());
-            response.setCode(tag.getValue());
-            return response;
-        });
-    }
+        Page<String> manufacturers = productRepository.getManufacturers(criteria);
+        Page<String> varieties = productRepository.getVarieties(criteria);
+        Page<String> shops = productRepository.getShops(criteria);
+        Page<String> categories = productRepository.getCategories(categoryCriteria);
+        Page<Tag> tags = productRepository.getTags(criteria);
 
-    public Page<ShopResponse> toShopsResponse(Page<String> shops) {
-        return shops.map(shop -> {
-            ShopResponse response = new ShopResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
-    }
+        ProductFieldsResponse response = new ProductFieldsResponse();
+        response.setTags(tags.getContent());
+        response.setVarieties(varieties.getContent());
+        response.setManufacturers(manufacturers.getContent());
+        response.setShops(shops.getContent());
+        response.setCategories(categories.getContent());
 
-    public Page<VarietyResponse> toVarietiesResponse(Page<String> varieties) {
-        return varieties.map(shop -> {
-            VarietyResponse response = new VarietyResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
-    }
-
-    public Page<ManufacturerResponse> toManufacturerResponse(Page<String> manufacturers) {
-        return manufacturers.map(shop -> {
-            ManufacturerResponse response = new ManufacturerResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
-    }
-
-    public Page<CategoryResponse> toCategoryResponse(Page<String> categories) {
-        return categories.map(shop -> {
-            CategoryResponse response = new CategoryResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
+        return response;
     }
 
 
@@ -267,13 +241,8 @@ public class DtoMapper {
     }
 
 
-    private List<TagRequestAndResponse> toTagResponse(Collection<Tag> tags) {
-        return tags.stream().map(tag -> {
-            TagRequestAndResponse response = new TagRequestAndResponse();
-            response.setName(tag.getValue());
-            response.setCode(tag.getValue());
-            return response;
-        }).toList();
+    private List<String> toTagsResponse(Collection<Tag> tags) {
+        return tags.stream().map(Tag::getValue).toList();
     }
 
     private ProductSort toProductSort(String sortRuleAsString) {

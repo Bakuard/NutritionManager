@@ -216,9 +216,9 @@ public class DishIngredient {
 
         Product product = null;
 
-        if(!page.getInfo().isEmpty()) {
+        if(!page.getMetadata().isEmpty()) {
             product = page.get(
-                    page.getInfo().
+                    page.getMetadata().
                             getTotalItems().
                             subtract(BigInteger.ONE).
                             min(BigInteger.valueOf(productIndex))

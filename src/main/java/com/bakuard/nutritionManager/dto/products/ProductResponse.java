@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.dto.products;
 
-import com.bakuard.nutritionManager.dto.tags.TagRequestAndResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,7 +24,7 @@ public class ProductResponse {
     @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
     private String shop;
     @Schema(description = "Один из сортов продуктов указанной категории")
-    private String variety;
+    private String grade;
     @Schema(description = "Один из производителей продуктов указанной категории")
     private String manufacturer;
     @Schema(description = "Цена прдукта указанной категории, сорта, производителя и продающегося в указанном магазине")
@@ -41,7 +40,7 @@ public class ProductResponse {
     @Schema(description = "Путь к изображению данного продукта")
     private String imagePath;
     @Schema(description = "Теги указаныне для данного продукта")
-    private List<TagRequestAndResponse> tags;
+    private List<String> tags;
 
     public ProductResponse() {
         type = "Product";
@@ -83,12 +82,12 @@ public class ProductResponse {
         this.shop = shop;
     }
 
-    public String getVariety() {
-        return variety;
+    public String getGrade() {
+        return grade;
     }
 
-    public void setVariety(String variety) {
-        this.variety = variety;
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     public String getManufacturer() {
@@ -147,11 +146,11 @@ public class ProductResponse {
         this.imagePath = imagePath;
     }
 
-    public List<TagRequestAndResponse> getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<TagRequestAndResponse> tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 
@@ -165,7 +164,7 @@ public class ProductResponse {
                 Objects.equals(user, response.user) &&
                 Objects.equals(category, response.category) &&
                 Objects.equals(shop, response.shop) &&
-                Objects.equals(variety, response.variety) &&
+                Objects.equals(grade, response.grade) &&
                 Objects.equals(manufacturer, response.manufacturer) &&
                 Objects.equals(price, response.price) &&
                 Objects.equals(packingSize, response.packingSize) &&
@@ -178,7 +177,7 @@ public class ProductResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, id, user, category, shop, variety, manufacturer,
+        return Objects.hash(type, id, user, category, shop, grade, manufacturer,
                 price, packingSize, unit, quantity, description, imagePath, tags);
     }
 
@@ -190,7 +189,7 @@ public class ProductResponse {
                 ", user=" + user +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
-                ", variety='" + variety + '\'' +
+                ", grade='" + grade + '\'' +
                 ", manufacturer='" + manufacturer + '\'' +
                 ", price=" + price +
                 ", packingSize=" + packingSize +

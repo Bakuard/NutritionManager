@@ -8,7 +8,7 @@ class PageableTest {
 
     @Test
     @DisplayName("""
-            getPageMetadata(BigInteger totalItems):
+            getPageMetadata(totalItems, maxPageSize):
              totalItems is negative
              => exception
             """)
@@ -17,7 +17,22 @@ class PageableTest {
                 IllegalArgumentException.class,
                 () -> Pageable.
                         of(10, 0).
-                        createPageMetadata(-1)
+                        createPageMetadata(-1, 1)
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getPageMetadata(totalItems, maxPageSize):
+             maxPageSize < 1
+             => exception
+            """)
+    public void getPageMetadata2() {
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> Pageable.
+                        of(10, 0).
+                        createPageMetadata(1, 0)
         );
     }
 
