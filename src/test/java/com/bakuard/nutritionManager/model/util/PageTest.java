@@ -13,11 +13,11 @@ class PageTest {
     @Test
     @DisplayName("getTotalPages(): totalItems is 0 => return 0")
     public void getTotalPages1() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 0).
-                createPageMetadata(0);
+                createPageMetadata(0, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, info.getTotalPages());
+        Assertions.assertEquals(BigInteger.ZERO, metadata.getTotalPages());
     }
 
     @Test
@@ -28,11 +28,11 @@ class PageTest {
                  => return 1
                 """)
     public void getTotalPages2() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 0).
-                createPageMetadata(9);
+                createPageMetadata(9, 200);
 
-        Assertions.assertEquals(BigInteger.ONE, info.getTotalPages());
+        Assertions.assertEquals(BigInteger.ONE, metadata.getTotalPages());
     }
 
     @Test
@@ -43,11 +43,11 @@ class PageTest {
                  => return 1
                 """)
     public void getTotalPages3() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 0).
-                createPageMetadata(10);
+                createPageMetadata(10, 200);
 
-        Assertions.assertEquals(BigInteger.ONE, info.getTotalPages());
+        Assertions.assertEquals(BigInteger.ONE, metadata.getTotalPages());
     }
 
     @Test
@@ -58,11 +58,11 @@ class PageTest {
              => return totalItems
             """)
     public void getTotalPage4() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(1, 0).
-                createPageMetadata(10);
+                createPageMetadata(10, 200);
 
-        Assertions.assertEquals(BigInteger.TEN, info.getTotalPages());
+        Assertions.assertEquals(BigInteger.TEN, metadata.getTotalPages());
     }
 
     @Test
@@ -73,11 +73,11 @@ class PageTest {
              => return correct positive value
             """)
     public void getTotalPage5() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 0).
-                createPageMetadata(101);
+                createPageMetadata(101, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(11), info.getTotalPages());
+        Assertions.assertEquals(BigInteger.valueOf(11), metadata.getTotalPages());
     }
 
     @Test
@@ -87,11 +87,11 @@ class PageTest {
              => actualNumber = 0
             """)
     public void getActualNumber1() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, -1).
-                createPageMetadata(1);
+                createPageMetadata(1, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, info.getActualNumber());
+        Assertions.assertEquals(BigInteger.ZERO, metadata.getActualNumber());
     }
 
     @Test
@@ -101,11 +101,11 @@ class PageTest {
              => actualNumber = maxPageNumber
             """)
     public void getActualNumber2() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 1000).
-                createPageMetadata(101);
+                createPageMetadata(101, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(10), info.getActualNumber());
+        Assertions.assertEquals(BigInteger.valueOf(10), metadata.getActualNumber());
     }
 
     @Test
@@ -115,11 +115,11 @@ class PageTest {
              => actualNumber = 0
             """)
     public void getActualNumber3() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 1).
-                createPageMetadata(0);
+                createPageMetadata(0, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, info.getActualNumber());
+        Assertions.assertEquals(BigInteger.ZERO, metadata.getActualNumber());
     }
 
     @Test
@@ -129,11 +129,11 @@ class PageTest {
              => actualSize = 1
             """)
     public void getActualSize1() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(0, 0).
-                createPageMetadata(10);
+                createPageMetadata(10, 200);
 
-        Assertions.assertEquals(1, info.getActualSize());
+        Assertions.assertEquals(1, metadata.getActualSize());
     }
 
     @Test
@@ -143,11 +143,11 @@ class PageTest {
              => actualSize = 0
             """)
     public void getActualSize2() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 1).
-                createPageMetadata(0);
+                createPageMetadata(0, 200);
 
-        Assertions.assertEquals(0, info.getActualSize());
+        Assertions.assertEquals(0, metadata.getActualSize());
     }
 
     @Test
@@ -158,11 +158,11 @@ class PageTest {
              => actualSize = 200
             """)
     public void getActualSize3() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(1000, 1).
-                createPageMetadata(1000);
+                createPageMetadata(1000, 200);
 
-        Assertions.assertEquals(200, info.getActualSize());
+        Assertions.assertEquals(200, metadata.getActualSize());
     }
 
     @Test
@@ -173,11 +173,11 @@ class PageTest {
              => actualSize = totalItems
             """)
     public void getActualSize4() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(1000, 1).
-                createPageMetadata(100);
+                createPageMetadata(100, 200);
 
-        Assertions.assertEquals(100, info.getActualSize());
+        Assertions.assertEquals(100, metadata.getActualSize());
     }
 
     @Test
@@ -189,11 +189,11 @@ class PageTest {
              => actualSize = totalItems
             """)
     public void getActualSize5() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 10).
-                createPageMetadata(101);
+                createPageMetadata(101, 200);
 
-        Assertions.assertEquals(1, info.getActualSize());
+        Assertions.assertEquals(1, metadata.getActualSize());
     }
 
     @Test
@@ -203,11 +203,11 @@ class PageTest {
              => offset is 0
             """)
     public void getOffset1() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(1, 0).
-                createPageMetadata(0);
+                createPageMetadata(0, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, info.getOffset());
+        Assertions.assertEquals(BigInteger.ZERO, metadata.getOffset());
     }
 
     @Test
@@ -219,11 +219,11 @@ class PageTest {
              => correct offset
             """)
     public void getOffset2() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 0).
-                createPageMetadata(100);
+                createPageMetadata(100, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, info.getOffset());
+        Assertions.assertEquals(BigInteger.ZERO, metadata.getOffset());
     }
 
     @Test
@@ -235,11 +235,11 @@ class PageTest {
              => correct offset
             """)
     public void getOffset3() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 5).
-                createPageMetadata(100);
+                createPageMetadata(100, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(50), info.getOffset());
+        Assertions.assertEquals(BigInteger.valueOf(50), metadata.getOffset());
     }
 
     @Test
@@ -252,11 +252,11 @@ class PageTest {
              => correct offset
             """)
     public void getOffset4() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 9).
-                createPageMetadata(100);
+                createPageMetadata(100, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(90), info.getOffset());
+        Assertions.assertEquals(BigInteger.valueOf(90), metadata.getOffset());
     }
 
     @Test
@@ -269,11 +269,11 @@ class PageTest {
              => correct offset
             """)
     public void getOffset5() {
-        Page.Info info = Pageable.
+        Page.Metadata metadata = Pageable.
                 of(10, 9).
-                createPageMetadata(91);
+                createPageMetadata(91, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(90), info.getOffset());
+        Assertions.assertEquals(BigInteger.valueOf(90), metadata.getOffset());
     }
 
     @Test
@@ -285,7 +285,7 @@ class PageTest {
     public void get1() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 9).
-                createPageMetadata(100).
+                createPageMetadata(100, 200).
                 createPage(createFullList(0, 10));
 
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> page.get(-1));
@@ -300,7 +300,7 @@ class PageTest {
     public void get2() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
-                createPageMetadata(100).
+                createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
         Assertions.assertNull(page.get(9));
@@ -315,7 +315,7 @@ class PageTest {
     public void get3() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
-                createPageMetadata(100).
+                createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
         Assertions.assertNull(page.get(20));
@@ -330,7 +330,7 @@ class PageTest {
     public void get4() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
-                createPageMetadata(100).
+                createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
         Assertions.assertEquals(10, page.get(10));
@@ -345,7 +345,7 @@ class PageTest {
     public void get5() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
-                createPageMetadata(100).
+                createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
         Assertions.assertEquals(19, page.get(19));
@@ -360,7 +360,7 @@ class PageTest {
     public void get6() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
-                createPageMetadata(100).
+                createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
         Assertions.assertEquals(15, page.get(15));

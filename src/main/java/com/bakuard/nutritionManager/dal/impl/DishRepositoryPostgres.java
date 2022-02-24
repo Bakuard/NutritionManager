@@ -124,10 +124,10 @@ public class DishRepositoryPostgres implements DishRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get dishes tags by criteria");
 
-        Page.Info info = criteria.getPageable().createPageMetadata(
-                getTagsNumber(criteria.getNumberCriteria())
+        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
+                getTagsNumber(criteria.getNumberCriteria()), 200
         );
-        if(info.isEmpty()) return info.createPage(List.of());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         Condition condition = userFilter(criteria.getUser());
 
@@ -137,8 +137,8 @@ public class DishRepositoryPostgres implements DishRepository {
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
                 where(condition).
                 orderBy(field("DishTags.tagValue").asc()).
-                limit(inline(info.getActualSize())).
-                offset(inline(info.getOffset())).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
                 getSQL();
 
         List<Tag> tags = statement.query(
@@ -154,7 +154,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 }
         );
 
-        return info.createPage(tags);
+        return metadata.createPage(tags);
     }
 
     @Override
@@ -163,10 +163,10 @@ public class DishRepositoryPostgres implements DishRepository {
                 nullValue("criteria", criteria).
                 checkWithServiceException("Fail to get dishes shops by criteria");
 
-        Page.Info info = criteria.getPageable().createPageMetadata(
-                getUnitsNumber(criteria.getNumberCriteria())
+        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
+                getUnitsNumber(criteria.getNumberCriteria()), 200
         );
-        if(info.isEmpty()) return info.createPage(List.of());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         Condition condition = userFilter(criteria.getUser());
 
@@ -174,8 +174,8 @@ public class DishRepositoryPostgres implements DishRepository {
                 from("Dishes").
                 where(condition).
                 orderBy(field("Dishes.unit").asc()).
-                limit(inline(info.getActualSize())).
-                offset(inline(info.getOffset())).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
                 getSQL();
 
         List<String> units = statement.query(
@@ -191,7 +191,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 }
         );
 
-        return info.createPage(units);
+        return metadata.createPage(units);
     }
 
     @Override

@@ -328,13 +328,12 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки из всех тегов использующихся для продуктов указанного пользователя",
+    @Operation(summary = """
+            Возвращает производителей, торговые точки, сорта, категории и теги всех продуктов указанного
+            пользователя без дубликатов.
+            """,
             responses = {
                     @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",
                             description = "Если передан некорректный токен или токен не указан",
                             content = @Content(mediaType = "application/json",
@@ -346,235 +345,17 @@ public class ProductController {
             }
     )
     @Transactional
-    @GetMapping("/getTags")
-    public ResponseEntity<Page<String>> getTags(
-            @RequestParam("page")
-            @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
-            int page,
-            @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-            int size,
+    @GetMapping("/getAllProductsFields")
+    public ResponseEntity<ProductFieldsResponse> getAllProductsFields(
             @RequestParam("userId")
             @Parameter(description = """
                     Уникальный идентификатор пользователя в формате UUID.
                      Пользователь с таким ID должен существовать в БД.
                     """, required = true)
-            UUID userId,
-            @RequestParam(value = "productCategory", required = false)
-            @Parameter(description = """
-                     Указывает, что выборка должна формироваться из тегов связанных
-                      только с продуктами указанных категорий указанного пользователя. Если
-                      задано значение null - выборка формируется из тегов связанных с любыми
-                      продуктами указанного пользователя.
-                     """, schema = @Schema(defaultValue = "null"))
-            String productCategory) {
-        logger.info("Get products tags by userId. page={}, size={}, userId={}, productCategory={}",
-                page, size, userId, productCategory);
+            UUID userId) {
+        logger.info("Get products categories, sorts, tags, manufacturers, shops for user={}", userId);
 
-        ProductFieldCriteria criteria = mapper.toProductFieldCriteria(page, size, userId, productCategory);
-
-        Page<String> response = mapper.toTagsResponse(
-                productRepository.getTags(criteria)
-        );
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Получение выборки из всех магазинов продуктов указанного пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
-    @GetMapping("/getShops")
-    public ResponseEntity<Page<ShopResponse>> getShops(
-            @RequestParam("page")
-            @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
-            int page,
-            @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-            int size,
-            @RequestParam("userId")
-            @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-            UUID userId,
-            @RequestParam(value = "productCategory", required = false)
-            @Parameter(description = """
-                   Указывает, что выборка должна формироваться из магазинов связанных
-                    только с продуктами указанных категорий указанного пользователя. Если
-                    задано значение null - выборка формируется из магазинов связанных с любыми
-                    продуктами указанного пользователя.
-                   """, schema = @Schema(defaultValue = "null"))
-            String productCategory) {
-        logger.info("Get products shops by userId. page={}, size={}, userId={}, productCategory={}",
-                page, size, userId, productCategory);
-
-        ProductFieldCriteria criteria = mapper.toProductFieldCriteria(page, size, userId, productCategory);
-
-        Page<ShopResponse> response = mapper.toShopsResponse(
-                productRepository.getShops(criteria)
-        );
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Получение выборки из всех сортов продуктов указанного пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
-    @GetMapping("/getVarieties")
-    public ResponseEntity<Page<VarietyResponse>> getVarieties(
-          @RequestParam("page")
-          @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
-          int page,
-          @RequestParam("size")
-          @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-          int size,
-          @RequestParam("userId")
-          @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-          UUID userId,
-          @RequestParam(value = "productCategory", required = false)
-          @Parameter(description = """
-             Указывает, что выборка должна формироваться из сортов связанных
-              только с продуктами указанных категорий указанного пользователя. Если
-              задано значение null - выборка формируется из сортов связанных с любыми
-              продуктами указанного пользователя.
-             """, schema = @Schema(defaultValue = "null"))
-          String productCategory) {
-        logger.info("Get products varieties by userId. page={}, size={}, userId={}, productCategory={}",
-                page, size, userId, productCategory);
-
-        ProductFieldCriteria criteria = mapper.toProductFieldCriteria(page, size, userId, productCategory);
-
-        Page<VarietyResponse> response = mapper.toVarietiesResponse(
-                productRepository.getVarieties(criteria)
-        );
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Получение выборки из всех категорий продуктов указанного пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
-    @GetMapping("/getCategories")
-    public ResponseEntity<Page<CategoryResponse>> getCategories(
-           @RequestParam("page")
-           @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
-           int page,
-           @RequestParam("size")
-           @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-           int size,
-           @RequestParam("userId")
-           @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-           UUID userId) {
-        logger.info("Get products categories by userId. page={}, size={}, userId={}", page, size, userId);
-
-        ProductCategoryCriteria criteria = mapper.toProductCategoryCriteria(page, size, userId);
-
-        Page<CategoryResponse> response = mapper.toCategoryResponse(
-                productRepository.getCategories(criteria)
-        );
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Получение выборки из всех производителей продуктов указанного пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
-    @GetMapping("/getManufacturers")
-    public ResponseEntity<Page<ManufacturerResponse>> getManufacturers(
-          @RequestParam("page")
-          @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
-          int page,
-          @RequestParam("size")
-          @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-          int size,
-          @RequestParam("userId")
-          @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-          UUID userId,
-          @RequestParam(value = "productCategory", required = false)
-          @Parameter(description = """
-             Указывает, что выборка должна формироваться из производителей связанных
-              только с продуктами указанных категорий указанного пользователя. Если
-              задано значение null - выборка формируется из производителей связанных с любыми
-              продуктами указанного пользователя.
-             """, schema = @Schema(defaultValue = "null"))
-          String productCategory) {
-        logger.info("Get products categories by userId. page={}, size={}, userId={}, productCategory={}",
-                page, size, userId, productCategory);
-
-        ProductFieldCriteria criteria = mapper.toProductFieldCriteria(page, size, userId, productCategory);
-
-        Page<ManufacturerResponse> response = mapper.toManufacturerResponse(
-                productRepository.getManufacturers(criteria)
-        );
+        ProductFieldsResponse response = mapper.toProductFieldsResponse(userId);
 
         return ResponseEntity.ok(response);
     }
