@@ -1,6 +1,7 @@
 package com.bakuard.nutritionManager.dto;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCategoryCriteria;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
@@ -24,14 +25,17 @@ import java.util.*;
 
 public class DtoMapper {
 
-    private AppConfigData appConfiguration;
     private UserRepository userRepository;
+    private ProductRepository productRepository;
+    private AppConfigData appConfiguration;
     private MessageSource messageSource;
 
     public DtoMapper(UserRepository userRepository,
+                     ProductRepository productRepository,
                      MessageSource messageSource,
                      AppConfigData appConfiguration) {
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
         this.messageSource = messageSource;
         this.appConfiguration = appConfiguration;
     }
@@ -132,56 +136,32 @@ public class DtoMapper {
                 setFilter(filter);
     }
 
-    public ProductFieldCriteria toProductFieldCriteria(int page, int size, UUID userId, String productCategory) {
-        User user = userRepository.getById(userId);
-        return ProductFieldCriteria.of(Pageable.of(page, size), user).
-                setProductCategory(Filter.anyCategory(productCategory));
-    }
 
-    public ProductCategoryCriteria toProductCategoryCriteria(int page, int size, UUID userId) {
-        User user = userRepository.getById(userId);
-        return ProductCategoryCriteria.of(Pageable.of(page, size), user);
-    }
+    public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
+        ProductFieldCriteria criteria = ProductFieldCriteria.of(
+                Pageable.of(0, 200),
+                userRepository.getById(userId)
+        );
 
+        ProductCategoryCriteria categoryCriteria = ProductCategoryCriteria.of(
+                Pageable.of(0, 200),
+                userRepository.getById(userId)
+        );
 
-    public Page<String> toTagsResponse(Page<Tag> tags) {
-        return tags.map(Tag::getValue);
-    }
+        Page<String> manufacturers = productRepository.getManufacturers(criteria);
+        Page<String> varieties = productRepository.getVarieties(criteria);
+        Page<String> shops = productRepository.getShops(criteria);
+        Page<String> categories = productRepository.getCategories(categoryCriteria);
+        Page<Tag> tags = productRepository.getTags(criteria);
 
-    public Page<ShopResponse> toShopsResponse(Page<String> shops) {
-        return shops.map(shop -> {
-            ShopResponse response = new ShopResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
-    }
+        ProductFieldsResponse response = new ProductFieldsResponse();
+        response.setTags(tags.getContent());
+        response.setVarieties(varieties.getContent());
+        response.setManufacturers(manufacturers.getContent());
+        response.setShops(shops.getContent());
+        response.setCategories(categories.getContent());
 
-    public Page<VarietyResponse> toVarietiesResponse(Page<String> varieties) {
-        return varieties.map(shop -> {
-            VarietyResponse response = new VarietyResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
-    }
-
-    public Page<ManufacturerResponse> toManufacturerResponse(Page<String> manufacturers) {
-        return manufacturers.map(shop -> {
-            ManufacturerResponse response = new ManufacturerResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
-    }
-
-    public Page<CategoryResponse> toCategoryResponse(Page<String> categories) {
-        return categories.map(shop -> {
-            CategoryResponse response = new CategoryResponse();
-            response.setName(shop);
-            response.setCode(shop);
-            return response;
-        });
+        return response;
     }
 
 
