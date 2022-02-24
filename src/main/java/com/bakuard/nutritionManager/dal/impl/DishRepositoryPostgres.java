@@ -196,6 +196,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getDishesNumber(DishesNumberCriteria criteria) {
+        
         return 0;
     }
 

@@ -11,6 +11,7 @@ import com.bakuard.nutritionManager.dal.impl.DishRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.Dish;
+import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
@@ -473,7 +474,8 @@ class DishRepositoryPostgresTest {
     @Test
     @DisplayName("""
             getNumberDishes(criteria):
-             user haven't any dishes
+             user haven't any dishes,
+             filter not set
              => return 0
             """)
     public void getDishesNumber2() {
@@ -506,7 +508,7 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             getNumberDishes(criteria):
              user have dishes,
-             filter is set - matching not exists
+             filter is MinTags - matching not exists
              => return 0
             """)
     public void getDishesNumber4() {
@@ -525,7 +527,7 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             getNumberDishes(criteria):
              user have dishes,
-             filter is set - matching exists
+             filter is MinTags - matching exists
              => return correct result
             """)
     public void getDishesNumber5() {
@@ -535,6 +537,100 @@ class DishRepositoryPostgresTest {
         int actual = dishRepository.getDishesNumber(
                 DishesNumberCriteria.of(user).
                         setFilter(Filter.minTags(new Tag("common tag"), new Tag("tag A")))
+        );
+
+        Assertions.assertEquals(3, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberDishes(criteria):
+             user have dishes,
+             filter is Ingredients - matching exists
+             => return correct result
+            """)
+    public void getDishesNumber6() {
+        User user = createAndSaveUser(1);
+        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
+        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+
+        int actual = dishRepository.getDishesNumber(
+                DishesNumberCriteria.of(user).
+                        setFilter(Filter.anyIngredient("name A", "name Z"))
+        );
+
+        Assertions.assertEquals(3, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberDishes(criteria):
+             user have dishes,
+             filter is Ingredients - matching not exists
+             => return 0
+            """)
+    public void getDishesNumber7() {
+        User user = createAndSaveUser(1);
+        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
+        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+
+        int actual = dishRepository.getDishesNumber(
+                DishesNumberCriteria.of(user).
+                        setFilter(Filter.anyIngredient("name C", "name D"))
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberDishes(criteria):
+             user have dishes,
+             filter is AndFilter - matching exists
+                MinTags - matching exists,
+                Ingredients - matching exists
+             return correct result
+            """)
+    public void getDishesNumber8() {
+        User user = createAndSaveUser(1);
+        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
+        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+
+        int actual = dishRepository.getDishesNumber(
+                DishesNumberCriteria.of(user).
+                        setFilter(
+                            Filter.and(
+                                Filter.minTags(new Tag("common tag"), new Tag("tag B")),
+                                Filter.anyIngredient("name A", "name Z")
+                            )
+                        )
+        );
+
+        Assertions.assertEquals(3, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberDishes(criteria):
+             user have dishes,
+             filter is AndFilter - matching not exists
+                MinTags - matching exists,
+                Ingredients - matching not exists
+             return 0
+            """)
+    public void getDishesNumber9() {
+        User user = createAndSaveUser(1);
+        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
+        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+
+        int actual = dishRepository.getDishesNumber(
+                DishesNumberCriteria.of(user).
+                        setFilter(
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag"), new Tag("tag B")),
+                                        Filter.anyIngredient("name C", "name D")
+                                )
+                        )
         );
 
         Assertions.assertEquals(0, actual);
@@ -583,9 +679,38 @@ class DishRepositoryPostgresTest {
             getDishes(criteria):
              user have dishes,
              filter not set
-             => return correct result
+             => return dishes in correct state
             """)
     public void getDishes3() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        Page<Dish> actual = dishRepository.getDishes(
+                DishCriteria.of(
+                        Pageable.of(4, 0),
+                        user
+                )
+        );
+
+        Assertions.assertAll(
+                () -> Assertions.assertTrue(dishes.get(0).equalsFullState(actual.get(0)),
+                        "expected: " + dishes.get(0) + "\nactual: " + actual.get(0)),
+                () -> Assertions.assertTrue(dishes.get(1).equalsFullState(actual.get(1)),
+                        "expected: " + dishes.get(1) + "\nactual: " + actual.get(1)),
+                () -> Assertions.assertTrue(dishes.get(2).equalsFullState(actual.get(2)),
+                        "expected: " + dishes.get(2) + "\nactual: " + actual.get(2))
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getDishes(criteria):
+             user have dishes,
+             filter not set
+             => return correct result
+            """)
+    public void getDishes4() {
         User user = createAndSaveUser(1);
         List<Dish> dishes = createDishes(user);
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
@@ -607,10 +732,10 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             getDishes(criteria):
              user have dishes,
-             filter is set - matching not exists
+             filter is MinTags - matching not exists
              => return empty page
             """)
-    public void getDishes4() {
+    public void getDishes5() {
         User user = createAndSaveUser(1);
         List<Dish> dishes = createDishes(user);
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
@@ -632,10 +757,10 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             getDishes(criteria):
              user have dishes,
-             filter is set - matching exists
-             => return empty page
+             filter is MinTags - matching exists
+             => return full page
             """)
-    public void getDishes5() {
+    public void getDishes6() {
         User user = createAndSaveUser(1);
         List<Dish> dishes = createDishes(user);
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
@@ -652,6 +777,130 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(2, 0).
                 createPageMetadata(2).
                 createPage(dishes.subList(0, 2));
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getDishes(criteria):
+             user have dishes,
+             filter is Ingredients - matching exists
+             => return full page
+            """)
+    public void getDishes7() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createProducts(user);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> products.forEach(p -> productRepository.save(p)));
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        Page<Dish> actual = dishRepository.getDishes(
+                DishCriteria.of(
+                        Pageable.of(0, 4),
+                        user
+                ).setFilter(
+                        Filter.anyIngredient("name A", "name C", "name D")
+                )
+        );
+
+        Page<Dish> expected = Pageable.of(0, 4).
+                createPageMetadata(3).
+                createPage(dishes.subList(0, 3));
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getDishes(criteria):
+             user have dishes,
+             filter is Ingredients - matching not exists
+             => return empty page
+            """)
+    public void getDishes8() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createProducts(user);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> products.forEach(p -> productRepository.save(p)));
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        Page<Dish> actual = dishRepository.getDishes(
+                DishCriteria.of(
+                        Pageable.of(0, 4),
+                        user
+                ).setFilter(
+                        Filter.anyIngredient("name C", "name D", "name E")
+                )
+        );
+
+        Page<Dish> expected = Pageable.firstEmptyPage();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getDishes(criteria):
+             user have dishes,
+             filter is AndFilter - matching exists
+                MinTags - matching exists,
+                Ingredients - matching exists
+             return full page
+            """)
+    public void getDishes9() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createProducts(user);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> products.forEach(p -> productRepository.save(p)));
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        Page<Dish> actual = dishRepository.getDishes(
+                DishCriteria.of(
+                                Pageable.of(0, 4),
+                                user
+                        ).
+                        setFilter(
+                                Filter.and(
+                                        Filter.minTags(new Tag("common tag"), new Tag("tag B")),
+                                        Filter.anyIngredient("name A", "name Z")
+                                )
+                        )
+        );
+
+        Page<Dish> expected = Pageable.of(0, 4).
+                createPageMetadata(3).
+                createPage(dishes.subList(0, 3));
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getDishes(criteria):
+             user have dishes,
+             filter is AndFilter - matching not exists
+                MinTags - matching exists,
+                Ingredients - matching not exists
+             return empty page
+            """)
+    public void getDishes10() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createProducts(user);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> products.forEach(p -> productRepository.save(p)));
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        Page<Dish> actual = dishRepository.getDishes(
+                DishCriteria.of(
+                        Pageable.of(0, 4),
+                        user
+                ).
+                setFilter(
+                        Filter.and(
+                                Filter.minTags(new Tag("common tag"), new Tag("tag B")),
+                                Filter.anyIngredient("name C", "name D")
+                        )
+                )
+        );
+
+        Page<Dish> expected = Pageable.firstEmptyPage();
         Assertions.assertEquals(expected, actual);
     }
 
@@ -912,6 +1161,138 @@ class DishRepositoryPostgresTest {
         return user;
     }
 
+    private List<Product> createProducts(User user) {
+        ArrayList<Product> products = new ArrayList<>();
+
+        products.add(
+                new Product.Builder().
+                        setAppConfiguration(appConfiguration).
+                        setId(toUUID(1)).
+                        setUser(user).
+                        setCategory("name A").
+                        setShop("shop A").
+                        setVariety("variety A").
+                        setManufacturer("manufacturer A").
+                        setUnit("unitA").
+                        setPrice(new BigDecimal(25)).
+                        setPackingSize(new BigDecimal("0.5")).
+                        setQuantity(BigDecimal.ZERO).
+                        setDescription("some description A").
+                        setImagePath("some image path A").
+                        addTag("common tag").
+                        addTag("tag A").
+                        addTag("value 1").
+                        tryBuild()
+        );
+
+        products.add(
+                new Product.Builder().
+                        setAppConfiguration(appConfiguration).
+                        setId(toUUID(2)).
+                        setUser(user).
+                        setCategory("name A").
+                        setShop("shop A").
+                        setVariety("variety A").
+                        setManufacturer("manufacturer A").
+                        setUnit("unitA").
+                        setPrice(new BigDecimal(37)).
+                        setPackingSize(BigDecimal.ONE).
+                        setQuantity(BigDecimal.ZERO).
+                        setDescription("some description B").
+                        setImagePath("some image path B").
+                        addTag("common tag").
+                        addTag("tag A").
+                        addTag("value 2").
+                        tryBuild()
+        );
+
+        products.add(
+                new Product.Builder().
+                        setAppConfiguration(appConfiguration).
+                        setId(toUUID(3)).
+                        setUser(user).
+                        setCategory("name A").
+                        setShop("shop B").
+                        setVariety("variety B").
+                        setManufacturer("manufacturer A").
+                        setUnit("unitA").
+                        setPrice(new BigDecimal(45)).
+                        setPackingSize(new BigDecimal("1.5")).
+                        setQuantity(BigDecimal.ZERO).
+                        setDescription("some description C").
+                        setImagePath("some image path C").
+                        addTag("common tag").
+                        addTag("tag A").
+                        addTag("value 3").
+                        tryBuild()
+        );
+
+        products.add(
+                new Product.Builder().
+                        setAppConfiguration(appConfiguration).
+                        setId(toUUID(4)).
+                        setUser(user).
+                        setCategory("name B").
+                        setShop("shop B").
+                        setVariety("variety C").
+                        setManufacturer("manufacturer A").
+                        setUnit("unitA").
+                        setPrice(new BigDecimal(60)).
+                        setPackingSize(new BigDecimal(2)).
+                        setQuantity(new BigDecimal("12.5")).
+                        setDescription("some description D").
+                        setImagePath("some image path D").
+                        addTag("common tag").
+                        addTag("tag B").
+                        addTag("value 4").
+                        tryBuild()
+        );
+
+        products.add(
+                new Product.Builder().
+                        setAppConfiguration(appConfiguration).
+                        setId(toUUID(5)).
+                        setUser(user).
+                        setCategory("name B").
+                        setShop("shop C").
+                        setVariety("variety C").
+                        setManufacturer("manufacturer B").
+                        setUnit("unitA").
+                        setPrice(new BigDecimal(95)).
+                        setPackingSize(new BigDecimal(5)).
+                        setQuantity(new BigDecimal("6")).
+                        setDescription("some description E").
+                        setImagePath("some image path E").
+                        addTag("common tag").
+                        addTag("tag B").
+                        addTag("value 5").
+                        tryBuild()
+        );
+
+        products.add(
+                new Product.Builder().
+                        setAppConfiguration(appConfiguration).
+                        setId(toUUID(6)).
+                        setUser(user).
+                        setCategory("name B").
+                        setShop("shop C").
+                        setVariety("variety D").
+                        setManufacturer("manufacturer B").
+                        setUnit("unitA").
+                        setPrice(new BigDecimal(140)).
+                        setPackingSize(BigDecimal.TEN).
+                        setQuantity(new BigDecimal("9.2")).
+                        setDescription("some description F").
+                        setImagePath("some image path F").
+                        addTag("common tag").
+                        addTag("tag B").
+                        addTag("value 6").
+                        tryBuild()
+        );
+
+        return products;
+    }
+
     private Dish createDish(int dishId, User user) {
         return new Dish.Builder().
                 setId(toUUID(dishId)).
@@ -1102,7 +1483,7 @@ class DishRepositoryPostgresTest {
                                 BigDecimal.TEN).
                         addIngredient("ingredient 2",
                                 Filter.orElse(
-                                        Filter.anyShop("shop B"),
+                                        Filter.anyShop("variety C"),
                                         Filter.anyManufacturer("manufacturer B")
                                 ),
                                 new BigDecimal("2.5")).

@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.bakuard.nutritionManager.model.filters.DishSort;
+import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.MinTagsFilter;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
@@ -33,7 +34,7 @@ public class DishCriteria {
 
     private Pageable pageable;
     private User user;
-    private MinTagsFilter filter;
+    private Filter filter;
     private DishSort order;
 
     private DishCriteria(Pageable pageable, User user) {
@@ -64,10 +65,10 @@ public class DishCriteria {
     }
 
     /**
-     * Возвращает ограничения для отбираемых блюд (подробнее см. {@link MinTagsFilter}).
+     * Возвращает ограничения для отбираемых блюд (подробнее см. {@link Filter}).
      * @return ограничения для отбираемых блюд.
      */
-    public Optional<MinTagsFilter> getFilter() {
+    public Optional<Filter> getFilter() {
         return Optional.ofNullable(filter);
     }
 
@@ -90,12 +91,12 @@ public class DishCriteria {
     }
 
     /**
-     * Устанавливает ограничения для отбираемых блюд (подробнее см. {@link MinTagsFilter}).
+     * Устанавливает ограничения для отбираемых блюд (подробнее см. {@link Filter}).
      * Значение по умолчанию - пустой Optional (т.е. выборка формируется из всех блюд пользователя).
      * @param filter ограничения для отбираемых блюд.
      * @return этот же объект.
      */
-    public DishCriteria setFilter(MinTagsFilter filter) {
+    public DishCriteria setFilter(Filter filter) {
         this.filter = filter;
         return this;
     }

@@ -108,12 +108,12 @@ public interface Filter {
         return new AnyFilter(values, 1, Type.VARIETIES);
     }
 
-    public static AnyFilter anyIngredients(String a, String... other) {
-        return new AnyFilter(toList(a, other), 1, Type.INGREDIENTS);
+    public static AnyFilter anyIngredient(String productCategory, String... other) {
+        return new AnyFilter(toList(productCategory, other), 1, Type.INGREDIENTS);
     }
 
-    public static AnyFilter anyIngredients(List<String> values) {
-        return new AnyFilter(values, 1, Type.INGREDIENTS);
+    public static AnyFilter anyIngredient(List<String> productCategories) {
+        return new AnyFilter(productCategories, 1, Type.INGREDIENTS);
     }
 
     public static MinTagsFilter minTags(Tag a, Tag... other) {
