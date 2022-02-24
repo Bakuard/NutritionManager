@@ -1053,7 +1053,7 @@ class ProductRepositoryTest {
         List<Product> products = createProducts(user);
         commit(() -> products.forEach(p -> repository.save(p)));
         Page<Product> expected = Pageable.of(5, 0).
-                createPageMetadata(6).
+                createPageMetadata(6, 200).
                 createPage(products.subList(0, 5));
 
         Page<Product> actual = repository.getProducts(
@@ -1079,7 +1079,7 @@ class ProductRepositoryTest {
         List<Product> products = createProducts(user);
         commit(() -> products.forEach(p -> repository.save(p)));
         Page<Product> expected = Pageable.of(5, 1).
-                createPageMetadata(6).
+                createPageMetadata(6, 200).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1105,7 +1105,7 @@ class ProductRepositoryTest {
         List<Product> products = createProducts(user);
         commit(() -> products.forEach(p -> repository.save(p)));
         Page<Product> expected = Pageable.of(2, 0).
-                createPageMetadata(3).
+                createPageMetadata(3, 200).
                 createPage(products.subList(3, 5));
 
         Page<Product> actual = repository.getProducts(
@@ -1131,7 +1131,7 @@ class ProductRepositoryTest {
         List<Product> products = createProducts(user);
         commit(() -> products.forEach(p -> repository.save(p)));
         Page<Product> expected = Pageable.of(2, 1).
-                createPageMetadata(3).
+                createPageMetadata(3, 200).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1181,7 +1181,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createProducts(user);
         Page<Product> expected = Pageable.of(1, 0).
-                createPageMetadata(1).
+                createPageMetadata(1, 200).
                 createPage(products.subList(5, 6));
         commit(() -> products.forEach(p -> repository.save(p)));
 
@@ -1246,7 +1246,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createProducts(user);
         Page<Product> expected = Pageable.of(2, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
         commit(() -> products.forEach(p -> repository.save(p)));
 
@@ -1318,7 +1318,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createProducts(user);
         Page<Product> expected = Pageable.of(3, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(products.subList(4, 6));
         commit(() -> products.forEach(p -> repository.save(p)));
 
@@ -1423,7 +1423,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createProducts(user);
         Page<Product> expected = Pageable.of(2, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
         commit(() -> products.forEach(p -> repository.save(p)));
 
@@ -1537,7 +1537,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createProducts(user);
         Page<Product> expected = Pageable.of(2, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
         commit(() -> products.forEach(p -> repository.save(p)));
 
@@ -1650,7 +1650,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = Pageable.of(5, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
         Assertions.assertEquals(expected, actual);
     }
@@ -1707,7 +1707,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = Pageable.of(5, 0).
-                createPageMetadata(1).
+                createPageMetadata(1, 200).
                 createPage(products.subList(3, 4));
         Assertions.assertEquals(expected, actual);
     }
@@ -1760,7 +1760,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = Pageable.of(5, 0).
-                createPageMetadata(4).
+                createPageMetadata(4, 200).
                 createPage(
                         List.of(
                                 products.get(5),
@@ -1938,7 +1938,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<Tag> expected = Pageable.of(5, 0).
-                createPageMetadata(9).
+                createPageMetadata(9, 200).
                 createPage(createTags().subList(0, 5));
 
         Page<Tag> actual = repository.getTags(
@@ -1963,7 +1963,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<Tag> expected = Pageable.of(4, 2).
-                createPageMetadata(9).
+                createPageMetadata(9, 200).
                 createPage(createTags().subList(8, 9));
 
         Page<Tag> actual = repository.getTags(
@@ -1988,7 +1988,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<Tag> expected = Pageable.of(5, 0).
-                createPageMetadata(5).
+                createPageMetadata(5, 200).
                 createPage(List.of(
                         new Tag("common tag"),
                         new Tag("tag A"),
@@ -2019,7 +2019,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<Tag> expected = Pageable.of(4, 1).
-                createPageMetadata(5).
+                createPageMetadata(5, 200).
                 createPage(List.of(
                         new Tag("value 3")
                 ));
@@ -2144,7 +2144,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(3, 0).
-                createPageMetadata(3).
+                createPageMetadata(3, 200).
                 createPage(List.of("shop A", "shop B", "shop C"));
 
         Page<String> actual = repository.getShops(
@@ -2165,7 +2165,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(2, 1).
-                createPageMetadata(3).
+                createPageMetadata(3, 200).
                 createPage(List.of("shop C"));
 
         Page<String> actual = repository.getShops(
@@ -2186,7 +2186,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(2, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
@@ -2208,7 +2208,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(5, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
@@ -2329,7 +2329,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(4, 0).
-                createPageMetadata(4).
+                createPageMetadata(4, 200).
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
 
         Page<String> actual = repository.getVarieties(
@@ -2350,7 +2350,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(3, 1).
-                createPageMetadata(4).
+                createPageMetadata(4, 200).
                 createPage(List.of("variety D"));
 
         Page<String> actual = repository.getVarieties(
@@ -2371,7 +2371,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(2, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getVarieties(
@@ -2393,7 +2393,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(4, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getVarieties(
@@ -2497,7 +2497,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(5, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("name A", "name B"));
 
         Page<String> actual = repository.getCategories(
@@ -2520,7 +2520,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(1, 1).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("name B"));
 
         Page<String> actual = repository.getCategories(
@@ -2642,7 +2642,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(2, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2663,7 +2663,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(5, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2684,7 +2684,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(2, 0).
-                createPageMetadata(2).
+                createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2706,7 +2706,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(5, 0).
-                createPageMetadata(1).
+                createPageMetadata(1, 200).
                 createPage(List.of("manufacturer A"));
 
         Page<String> actual = repository.getManufacturers(

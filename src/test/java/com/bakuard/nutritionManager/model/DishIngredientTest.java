@@ -219,7 +219,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
-                                createPageMetadata(5).
+                                createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -280,7 +280,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
-                                createPageMetadata(5).
+                                createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -342,7 +342,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 16).
-                                createPageMetadata(20).
+                                createPageMetadata(20, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -476,7 +476,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
-                                createPageMetadata(5).
+                                createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -537,7 +537,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
-                                createPageMetadata(5).
+                                createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -599,7 +599,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 16).
-                                createPageMetadata(20).
+                                createPageMetadata(20, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -685,7 +685,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 4).
-                                createPageMetadata(5).
+                                createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -718,7 +718,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
-                                createPageMetadata(5).
+                                createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(
@@ -751,7 +751,7 @@ class DishIngredientTest {
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
-                                createPageMetadata(5).
+                                createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
         DishIngredient ingredient = new DishIngredient(

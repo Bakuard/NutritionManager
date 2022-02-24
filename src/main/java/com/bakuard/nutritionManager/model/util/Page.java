@@ -15,18 +15,18 @@ import java.util.function.Function;
 public final class Page<T> {
 
     private final ImmutableList<T> content;
-    private final Info info;
+    private final Metadata metadata;
 
-    private Page(List<T> content, Info info) {
-        if(content.size() != info.getActualSize()) {
+    private Page(List<T> content, Metadata metadata) {
+        if(content.size() != metadata.getActualSize()) {
             throw new IllegalStateException(
                     "content size must be equal page actual size. contentSize=" + content.size() +
-                            ", actualSize=" + info.getActualSize()
+                            ", actualSize=" + metadata.getActualSize()
             );
         }
 
         this.content = ImmutableList.copyOf(Objects.requireNonNull(content, "content can't be null"));
-        this.info = info;
+        this.metadata = metadata;
     }
 
     /**
@@ -38,11 +38,11 @@ public final class Page<T> {
     }
 
     /**
-     * Возвращает метаданные страницы (подробнее см. {@link Info}).
+     * Возвращает метаданные страницы (подробнее см. {@link Metadata}).
      * @return метаданные страницы.
      */
-    public Info getInfo() {
-        return info;
+    public Metadata getMetadata() {
+        return metadata;
     }
 
     /**
@@ -69,8 +69,8 @@ public final class Page<T> {
         if(globalIndex.signum() < 0)
             throw new IndexOutOfBoundsException("globalIndex can't be less then zero. Actual value = " + globalIndex);
 
-        BigInteger offset = info.getOffset();
-        BigInteger topLine = offset.add(BigInteger.valueOf(info.getActualSize()));
+        BigInteger offset = metadata.getOffset();
+        BigInteger topLine = offset.add(BigInteger.valueOf(metadata.getActualSize()));
 
         T result = null;
 
@@ -92,7 +92,7 @@ public final class Page<T> {
     public <U>Page<U> map(Function<T, U> converter) {
         return new Page<>(
                 content.stream().map(converter).toList(),
-                info
+                metadata
         );
     }
 
@@ -101,19 +101,20 @@ public final class Page<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Page<?> page = (Page<?>) o;
-        return content.equals(page.content) && info.equals(page.info);
+        return content.equals(page.content) &&
+                metadata.equals(page.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(content, info);
+        return Objects.hash(content, metadata);
     }
 
     @Override
     public String toString() {
         return "Page{" +
                 "content=" + content +
-                ", info=" + info +
+                ", info=" + metadata +
                 '}';
     }
 
@@ -122,10 +123,9 @@ public final class Page<T> {
      * Объекты данного класса содержат метаданные о всей исходной выборке и конкретной странице определяемой
      * {@link Pageable}.
      */
-    public static class Info {
+    public static class Metadata {
 
         private static final int minPageSize = 1;
-        private static final int maxPageSize = 200;
 
 
         private final Pageable pageable;
@@ -135,7 +135,10 @@ public final class Page<T> {
         private final int actualSize;
         private final BigInteger actualNumber;
 
-        Info(Pageable pageable, BigInteger totalItems) {
+        Metadata(Pageable pageable, BigInteger totalItems, int maxPageSize) {
+            if(maxPageSize < 1)
+                throw new IllegalArgumentException("maxPageSize must be greater or equal 1");
+
             this.pageable = pageable;
 
             this.totalItems = Objects.requireNonNull(totalItems, "totalItems can't be null");
@@ -143,7 +146,7 @@ public final class Page<T> {
                 throw new IllegalArgumentException("totalItems can't be negative. totalItems = " + totalItems);
 
             commonPageSize = BigInteger.valueOf(
-                    Math.min(Math.max(pageable.getExpectedMaxPageSize(), minPageSize), maxPageSize)
+                    Math.min(Math.max(pageable.getExpectedPageSize(), minPageSize), maxPageSize)
             );
 
             maxPageNumber = totalItems.
@@ -265,10 +268,10 @@ public final class Page<T> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Info info = (Info) o;
-            return actualSize == info.actualSize &&
-                    totalItems.equals(info.totalItems) &&
-                    actualNumber.equals(info.actualNumber);
+            Metadata metadata = (Metadata) o;
+            return actualSize == metadata.actualSize &&
+                    totalItems.equals(metadata.totalItems) &&
+                    actualNumber.equals(metadata.actualNumber);
         }
 
         @Override
