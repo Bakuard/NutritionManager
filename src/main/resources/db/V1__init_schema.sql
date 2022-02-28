@@ -98,6 +98,7 @@ CREATE TABLE DishIngredients (
     name VARCHAR(256) NOT NULL,
     quantity NUMERIC(16, 6) NOT NULL,
     filter JSONB NOT NULL,
+    filterQuery VARCHAR(2096) NOT NULL,
     index INT NOT NULL,
     FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(dishId, name)
@@ -108,3 +109,22 @@ CREATE TABLE JwsBlackList (
     expiration TIMESTAMP NOT NULL,
     PRIMARY KEY(tokenId)
 );
+
+CREATE FUNCTION existProductsForFilter(productCategories VARCHAR(256)[], filterQuery VARCHAR(2048))
+    RETURNS BOOLEAN
+	LANGUAGE plpgsql
+    AS $BODY$
+DECLARE
+	res BOOLEAN;
+BEGIN
+	EXECUTE format(
+		'SELECT EXISTS (
+        	SELECT * FROM (%s) AS P
+            	WHERE P.category = ANY(''%s'')
+     	);',
+		filterQuery,
+		productCategories
+	) INTO res;
+	RETURN res;
+END;
+$BODY$;

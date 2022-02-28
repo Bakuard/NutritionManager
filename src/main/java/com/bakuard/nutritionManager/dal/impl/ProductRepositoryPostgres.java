@@ -113,7 +113,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 checkWithServiceException("Fail to get product by criteria");
 
         Page.Metadata metadata = criteria.getPageable().
-                createPageMetadata(getProductsNumber(criteria.getNumberCriteria()), 40);
+                createPageMetadata(getProductsNumber(criteria.getNumberCriteria()), 30);
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.isOnlyFridge())
@@ -402,7 +402,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
         if(criteria.getFilter().isPresent())
             condition = condition.and(switchFilter(criteria.getFilter().get()));
 
-        String query = selectCount().from("Products").
+        String query = selectCount().
+                from("Products").
                 where(condition).
                 getSQL();
 
@@ -746,7 +747,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
 
-    private List<Condition> splitFilter(Filter filter) {
+    List<Condition> splitFilter(Filter filter) {
         switch(filter.getType()) {
             case AND -> {
                 return List.of(andFilter((AndFilter) filter));
@@ -777,7 +778,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         }
     }
 
-    private Condition switchFilter(Filter filter) {
+    Condition switchFilter(Filter filter) {
         switch(filter.getType()) {
             case AND -> {
                 return andFilter((AndFilter) filter);

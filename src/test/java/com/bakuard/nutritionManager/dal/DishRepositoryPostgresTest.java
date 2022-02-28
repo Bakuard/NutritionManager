@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 class DishRepositoryPostgresTest {
 
     private static HikariDataSource dataSource;
-    private static ProductRepository productRepository;
+    private static ProductRepositoryPostgres productRepository;
     private static DishRepository dishRepository;
     private static UserRepository userRepository;
     private static DataSourceTransactionManager transactionManager;
@@ -466,7 +466,7 @@ class DishRepositoryPostgresTest {
         AssertUtil.assertServiceException(
                 () -> dishRepository.getDishesNumber(null),
                 DishRepositoryPostgres.class,
-                "getNumberDishes",
+                "getDishesNumber",
                 ConstraintType.MISSING_VALUE
         );
     }
@@ -539,7 +539,7 @@ class DishRepositoryPostgresTest {
                         setFilter(Filter.minTags(new Tag("common tag"), new Tag("tag A")))
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertEquals(2, actual);
     }
 
     @Test
@@ -601,12 +601,12 @@ class DishRepositoryPostgresTest {
                         setFilter(
                             Filter.and(
                                 Filter.minTags(new Tag("common tag"), new Tag("tag B")),
-                                Filter.anyIngredient("name A", "name Z")
+                                Filter.anyIngredient("name B", "name Z")
                             )
                         )
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertEquals(2, actual);
     }
 
     @Test
@@ -776,7 +776,7 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
-                createPage(dishes.subList(0, 2));
+                createPage(dishes.subList(2, 4));
         Assertions.assertEquals(expected, actual);
     }
 
@@ -796,14 +796,14 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 DishCriteria.of(
-                        Pageable.of(0, 4),
+                        Pageable.of(4, 0),
                         user
                 ).setFilter(
                         Filter.anyIngredient("name A", "name C", "name D")
                 )
         );
 
-        Page<Dish> expected = Pageable.of(0, 4).
+        Page<Dish> expected = Pageable.of(4, 0).
                 createPageMetadata(3, 200).
                 createPage(dishes.subList(0, 3));
         Assertions.assertEquals(expected, actual);
@@ -854,20 +854,20 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 DishCriteria.of(
-                                Pageable.of(0, 4),
+                                Pageable.of(4, 0),
                                 user
                         ).
                         setFilter(
                                 Filter.and(
-                                        Filter.minTags(new Tag("common tag"), new Tag("tag B")),
+                                        Filter.minTags(new Tag("common tag"), new Tag("tag A")),
                                         Filter.anyIngredient("name A", "name Z")
                                 )
                         )
         );
 
-        Page<Dish> expected = Pageable.of(0, 4).
-                createPageMetadata(3, 200).
-                createPage(dishes.subList(0, 3));
+        Page<Dish> expected = Pageable.of(4, 0).
+                createPageMetadata(2, 200).
+                createPage(dishes.subList(0, 2));
         Assertions.assertEquals(expected, actual);
     }
 
