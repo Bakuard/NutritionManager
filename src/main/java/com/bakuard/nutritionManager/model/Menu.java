@@ -7,6 +7,7 @@ import com.bakuard.nutritionManager.model.exceptions.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -18,7 +19,7 @@ public class Menu {
     private final UUID userId;
     private String name;
     private String description;
-    private String imagePath;
+    private URL imagePath;
     private Map<UUID, BigDecimal> dishes;
 
     Menu(UUID id, UUID userId) {
@@ -56,7 +57,7 @@ public class Menu {
      * @param imagePath путь к изображению данного меню.
      */
     public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+
     }
 
     /**
@@ -117,7 +118,7 @@ public class Menu {
      * Возвращает путь к изображению данного меню.
      * @return путь к изображению данного меню.
      */
-    public String getImagePath() {
+    public URL getImagePath() {
         return imagePath;
     }
 

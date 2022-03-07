@@ -7,7 +7,7 @@ import java.util.function.Consumer;
  * Обобщенный тип исключений, все наследники которого указывают, что было нарушенно один или несколько
  * инвариантов при констрировании бизнес сущности.
  */
-public class ValidateException extends AbstractDomainException implements Iterable<Constraint> {
+public class ValidateException extends RuntimeException implements Iterable<Constraint> {
 
     private Class<?> checkedType;
     private final String operationName;
@@ -99,6 +99,11 @@ public class ValidateException extends AbstractDomainException implements Iterab
         if(constraints != null && constraints.size() > 0) {
             this.constraints.addAll(constraints);
         }
+        return this;
+    }
+
+    public ValidateException addReason(String fieldName, ConstraintType type) {
+        constraints.add(new Constraint(checkedType, fieldName, type));
         return this;
     }
 

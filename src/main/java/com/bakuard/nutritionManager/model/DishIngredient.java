@@ -69,16 +69,16 @@ public class DishIngredient {
                           ProductRepository repository,
                           User user,
                           AppConfigData config) {
-        Checker.of(getClass(), "constructor").
-                nullValue("name", name).
-                nullValue("filter", filter).
-                nullValue("quantity", quantity).
-                nullValue("repository", repository).
-                nullValue("user", user).
-                nullValue("config", config).
-                notPositiveValue("quantity", quantity).
-                blankValue("name", name).
-                checkWithValidateException("Fail to create dish ingredient");
+        Checker.of().
+                notNull("name", name).
+                notNull("filter", filter).
+                notNull("quantity", quantity).
+                notNull("repository", repository).
+                notNull("user", user).
+                notNull("config", config).
+                positiveValue("quantity", quantity).
+                notBlank("name", name).
+                validate("Fail to create dish ingredient");
 
         this.name = name;
         this.filter = filter;
@@ -121,10 +121,10 @@ public class DishIngredient {
      * @throws ValidateException если указанное значение null или не является положительным.
      */
     public BigDecimal getNecessaryQuantity(BigDecimal servingNumber) {
-        Checker.of(getClass(), "getNecessaryQuantity").
-                nullValue("servingNumber", servingNumber).
-                notPositiveValue("servingNumber", servingNumber).
-                checkWithValidateException("Fail to get necessary ingredient quantity.");
+        Checker.of().
+                notNull("servingNumber", servingNumber).
+                positiveValue("servingNumber", servingNumber).
+                validate("Fail to get necessary ingredient quantity.");
 
         return quantity.multiply(servingNumber);
     }
@@ -146,10 +146,10 @@ public class DishIngredient {
      *              3. servingNumber <= 0
      */
     public Optional<BigDecimal> getLackQuantity(int productIndex, BigDecimal servingNumber) {
-        Checker.of(getClass(), "getLackQuantity").
-                nullValue("servingNumber", servingNumber).
-                notPositiveValue("servingNumber", servingNumber).
-                checkWithValidateException("Fail to get product lack quantity");
+        Checker.of().
+                notNull("servingNumber", servingNumber).
+                positiveValue("servingNumber", servingNumber).
+                validate("Fail to get product lack quantity");
 
         return getProductByIndex(productIndex).
                 map(product -> {
@@ -180,10 +180,10 @@ public class DishIngredient {
      *              3. servingNumber <= 0
      */
     public Optional<BigDecimal> getLackQuantityPrice(int productIndex, BigDecimal servingNumber) {
-        Checker.of(getClass(), "getLackQuantityPrice").
-                nullValue("servingNumber", servingNumber).
-                notPositiveValue("servingNumber", servingNumber).
-                checkWithValidateException("Fail to get price of product lack quantity");
+        Checker.of().
+                notNull("servingNumber", servingNumber).
+                positiveValue("servingNumber", servingNumber).
+                validate("Fail to get price of product lack quantity");
 
         return getProductByIndex(productIndex).
                 map(product ->
@@ -205,9 +205,9 @@ public class DishIngredient {
      * @throws ValidateException если productIndex < 0
      */
     public Optional<Product> getProductByIndex(int productIndex) {
-        Checker.of(getClass(), "getProductByIndex").
-                negativeValue("productIndex", productIndex).
-                checkWithValidateException("Fail to get product bu index");
+        Checker.of().
+                notNegativeValue("productIndex", productIndex).
+                validate("Fail to get product bu index");
 
         Page<Product> page = repository.getProducts(
                 ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).

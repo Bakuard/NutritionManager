@@ -7,6 +7,7 @@ public enum ConstraintType {
     NOT_ENOUGH_ITEMS,
     NEGATIVE_VALUE,
     MISSING_VALUE,
+    MUST_BE_NULL,
     BLANK_VALUE,
     NOT_POSITIVE_VALUE,
     OUT_OF_RANGE,
@@ -18,6 +19,7 @@ public enum ConstraintType {
     UNKNOWN_PARAMETER,
     UNKNOWN_ITEM,
     INCORRECT_JWS,
-    NOT_EQUALS
+    NOT_EQUALS,
+    MALFORMED_URL
 
 }

@@ -27,17 +27,17 @@ public class User {
     }
 
     public User(UUID id, String name, String password, String email) {
-        Checker.of(getClass(), "constructor").
-                nullValue("id", id).
-                nullValue("name", name).
-                blankValue("name", name).
-                incorrectStringLength("name", name, 1, 40).
-                nullValue("password", password).
-                blankValue("password", password).
-                incorrectStringLength("password", password, 8, 100).
-                nullValue("email", email).
-                blankValue("email", email).
-                checkWithValidateException("Fail to create user");
+        Checker.of().
+                notNull("id", id).
+                notNull("name", name).
+                notBlank("name", name).
+                stringLength("name", name, 1, 40).
+                notNull("password", password).
+                notBlank("password", password).
+                stringLength("password", password, 8, 100).
+                notNull("email", email).
+                notBlank("email", email).
+                validate("Fail to create user");
 
         this.id = id;
         this.name = name;
@@ -63,11 +63,11 @@ public class User {
     }
 
     public void setName(String name) {
-        Checker.of(getClass(), "setName").
-                nullValue("name", name).
-                blankValue("name", name).
-                incorrectStringLength("name", name, 1, 40).
-                checkWithValidateException("Fail to set user name");
+        Checker.of().
+                notNull("name", name).
+                notBlank("name", name).
+                stringLength("name", name, 1, 40).
+                validate("Fail to set user name");
         this.name = name;
     }
 
@@ -76,11 +76,11 @@ public class User {
     }
 
     public void setPassword(String password) {
-        Checker.of(getClass(), "setPassword").
-                nullValue("password", password).
-                blankValue("password", password).
-                incorrectStringLength("password", password, 8, 100).
-                checkWithValidateException("Fail to set user password");
+        Checker.of().
+                notNull("password", password).
+                notBlank("password", password).
+                stringLength("password", password, 8, 100).
+                validate("Fail to set user password");
         this.passwordHash = calculatePasswordHash(password, salt);
     }
 
@@ -89,10 +89,10 @@ public class User {
     }
 
     public void setEmail(String email) {
-        Checker.of(getClass(), "setEmail").
-                nullValue("email", email).
-                blankValue("email", email).
-                checkWithValidateException("Fail to set user email");
+        Checker.of().
+                notNull("email", email).
+                notBlank("email", email).
+                validate("Fail to set user email");
         this.email = email;
     }
 
@@ -101,9 +101,9 @@ public class User {
     }
 
     public boolean isCorrectPassword(String password) {
-        Checker.of(getClass(), "isCorrectPassword").
-                nullValue("password", password).
-                checkWithValidateException();
+        Checker.of().
+                notNull("password", password).
+                validate();
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 

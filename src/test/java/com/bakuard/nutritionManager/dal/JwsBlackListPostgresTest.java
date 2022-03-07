@@ -1,12 +1,12 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.Action;
+import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.JwsBlackListPostgres;
 
 import com.bakuard.nutritionManager.model.exceptions.Constraint;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -100,7 +100,7 @@ class JwsBlackListPostgresTest {
     @Test
     @DisplayName("addToBlackList(tokenId, expired): tokenId is null => exception")
     public void addToBlackList1() {
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.addToBlackList(null, LocalDateTime.now().plusDays(2))),
                 JwsBlackListPostgres.class,
                 "addToBlackList",
@@ -111,7 +111,7 @@ class JwsBlackListPostgresTest {
     @Test
     @DisplayName("addToBlackList(tokenId, expired): expired is null => exception")
     public void addToBlackList2() {
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.addToBlackList(toUUID(1), null)),
                 JwsBlackListPostgres.class,
                 "addToBlackList",
@@ -222,7 +222,7 @@ class JwsBlackListPostgresTest {
              => exception
             """)
     public void removeAllExpired2() {
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.removeAllExpired(null)),
                 JwsBlackListPostgres.class,
                 "removeAllExpired",
@@ -351,40 +351,6 @@ class JwsBlackListPostgresTest {
 
     private UUID toUUID(int number) {
         return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
-    }
-
-    private void assertServiceException(Action action,
-                                        Class<?> checkedType,
-                                        String operationName,
-                                        ConstraintType... expectedTypes) {
-        try {
-            action.act();
-            Assertions.fail("Expected exception, but nothing be thrown");
-        } catch(Exception e) {
-            if(!(e instanceof ServiceException)) {
-                Assertions.fail("Unexpected exception type " + e.getClass().getName());
-            }
-
-            ServiceException ex = (ServiceException) e;
-
-            for(ConstraintType type : expectedTypes) {
-                if(ex.getConstraints().stream().map(Constraint::getType).noneMatch(t -> t == type)) {
-                    Assertions.fail("Expected constraint type " + type + " is missing");
-                }
-            }
-
-            for(Constraint constraint : ex.getConstraints()) {
-                if(Arrays.stream(expectedTypes).noneMatch(t -> t == constraint.getType())) {
-                    Assertions.fail("Unexpected constraint type " + constraint.getType());
-                }
-            }
-
-            if(!ex.isOriginate(checkedType, operationName)) {
-                Assertions.fail("Unexpected checkedType or operationName. Expected: " +
-                        ex.getCheckedType().getName() + ", " + ex.getOperationName() + ". Actual: " +
-                        checkedType.getName() + ", " + operationName);
-            }
-        }
     }
 
 }

@@ -1,12 +1,8 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,11 +11,11 @@ public class OrElseFilter implements Filter {
     private final ImmutableList<Filter> operands;
 
     OrElseFilter(List<Filter> operands) {
-        Checker.of(getClass(), "operands").
-                nullValue("operands", operands).
-                containsNull("operands", operands).
-                notEnoughItems("operands", operands, 2).
-                checkWithServiceException();
+        Checker.of().
+                notNull("operands", operands).
+                notContainsNull("operands", operands).
+                containsAtLeast("operands", operands, 2).
+                validate();
 
         this.operands = ImmutableList.copyOf(operands);
     }

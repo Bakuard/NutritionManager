@@ -20,18 +20,26 @@ public class AuthService {
     }
 
     public Pair<String, User> enter(String name, String password) {
+        User user = null;
         try {
-            User user = userRepository.getByName(name);
-            if(!user.isCorrectPassword(password)) {
-                throw Checker.of(getClass(), "enter").
-                        createServiceException("Incorrect credentials");
-            }
+            user = userRepository.getByName(name);
+        } catch(ValidateException e) {
+            throw new ValidateException(
+                    "Incorrect credentials",
+                    getClass(),
+                    "enter"
+            ).addReasons(e.getConstraints());
+        }
+
+        if(user.isCorrectPassword(password)) {
             String jws = jwsService.generateAccessJws(user);
             return new Pair<>(jws, user);
-        } catch(ServiceException e) {
-            throw Checker.of(getClass(), "enter").
-                    createServiceException("Incorrect credentials").
-                    addReasons(e.getConstraints());
+        } else {
+            throw new ValidateException(
+                    "Incorrect credentials",
+                    getClass(),
+                    "enter"
+            );
         }
     }
 
@@ -60,13 +68,11 @@ public class AuthService {
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
         } catch(ValidateException e) {
-            throw Checker.of(getClass(), "registration").
-                    createServiceException("Fail to register new user=" + name).
-                    addReasons(e.getConstraints());
-        } catch(ServiceException e) {
-            throw Checker.of(getClass(), "registration").
-                    createServiceException("Fail to register new user=" + name).
-                    addReasons(e.getConstraints());
+            throw new ValidateException(
+                    "Fail to register new user=" + name,
+                    getClass(),
+                    "registration"
+            ).addReasons(e.getConstraints());
         }
     }
 
@@ -82,13 +88,11 @@ public class AuthService {
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
         } catch(ValidateException e) {
-            throw Checker.of(getClass(), "changeCredential").
-                    createServiceException("Fail to change credential for user=" + name).
-                    addReasons(e.getConstraints());
-        } catch(ServiceException e) {
-            throw Checker.of(getClass(), "changeCredential").
-                    createServiceException("Fail to change credential for user=" + name).
-                    addReasons(e.getConstraints());
+            throw new ValidateException(
+                    "Fail to change credential for user=" + name,
+                    getClass(),
+                    "changeCredential"
+            ).addReasons(e.getConstraints());
         }
     }
 
@@ -98,8 +102,11 @@ public class AuthService {
 
             User user = userRepository.getById(userId);
             if(!user.isCorrectPassword(currentPassword)) {
-                throw Checker.of(getClass(), "changeLoginAndEmail").
-                        createServiceException("Incorrect password");
+                throw new ValidateException(
+                        "Incorrect password",
+                        getClass(),
+                        "changeLoginAndEmail"
+                );
             }
             user.setName(newName);
             user.setEmail(newEmail);
@@ -108,13 +115,11 @@ public class AuthService {
 
             return user;
         } catch(ValidateException e) {
-            throw Checker.of(getClass(), "changeLoginAndEmail").
-                    createServiceException("Fail to change login and email for user").
-                    addReasons(e.getConstraints());
-        } catch(ServiceException e) {
-            throw Checker.of(getClass(), "changeLoginAndEmail").
-                    createServiceException("Fail to change login and email for user").
-                    addReasons(e.getConstraints());
+            throw new ValidateException(
+                    "Fail to change login and email for user",
+                    getClass(),
+                    "changeLoginAndEmail"
+            ).addReasons(e.getConstraints());
         }
     }
 
@@ -124,8 +129,11 @@ public class AuthService {
 
             User user = userRepository.getById(userId);
             if(!user.isCorrectPassword(currentPassword)) {
-                throw Checker.of(getClass(), "changePassword").
-                        createServiceException("Incorrect password");
+                throw new ValidateException(
+                        "Incorrect password",
+                        getClass(),
+                        "changePassword"
+                );
             }
             user.setPassword(newPassword);
 
@@ -133,13 +141,11 @@ public class AuthService {
 
             return user;
         } catch(ValidateException e) {
-            throw Checker.of(getClass(), "changePassword").
-                    createServiceException("Fail to change password for user").
-                    addReasons(e.getConstraints());
-        } catch(ServiceException e) {
-            throw Checker.of(getClass(), "changePassword").
-                    createServiceException("Fail to change password for user").
-                    addReasons(e.getConstraints());
+            throw new ValidateException(
+                    "Incorrect password",
+                    getClass(),
+                    "changePassword"
+            ).addReasons(e.getConstraints());
         }
     }
 

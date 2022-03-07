@@ -63,21 +63,26 @@ public class JwsService {
                 compact();
     }
 
-    public UUID parseAccessJws(String jws) throws ServiceException {
+    public UUID parseAccessJws(String jws) throws ValidateException {
         Claims claims = null;
         try {
             claims = parseJws(jws, accessKeyPair);
         } catch(JwtException e) {
-            throw Checker.of(getClass(), "parseAccessJws").
-                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
-                    createServiceException("Incorrect access jws", e);
+            throw new ValidateException(
+                    "Incorrect access jws",
+                    e,
+                    getClass(),
+                    "parseAccessJws"
+            ).addReason("jws", ConstraintType.INCORRECT_JWS);
         }
 
         UUID accessJwsId = UUID.fromString(claims.getId());
         if(blackList.inBlackList(accessJwsId)) {
-            throw Checker.of(getClass(), "parseAccessJws").
-                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
-                    createServiceException("Incorrect access jws");
+            throw new ValidateException(
+                    "Incorrect access jws",
+                    getClass(),
+                    "parseAccessJws"
+            ).addReason("jws", ConstraintType.INCORRECT_JWS);
         }
 
         return UUID.fromString(claims.getSubject());
@@ -94,15 +99,17 @@ public class JwsService {
                 compact();
     }
 
-    public String parseRegistrationJws(String jws) throws ServiceException {
+    public String parseRegistrationJws(String jws) throws ValidateException {
         try {
             Claims claims = parseJws(jws, registrationKeyPair);
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw Checker.of(getClass(), "parseRegistrationJws").
-                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
-                    createServiceException("Incorrect registration jws", e);
+            throw new ValidateException(
+                    "Incorrect registration jws",
+                    getClass(),
+                    "parseRegistrationJws"
+            ).addReason("jws", ConstraintType.INCORRECT_JWS);
         }
     }
 
@@ -117,15 +124,17 @@ public class JwsService {
                 compact();
     }
 
-    public String parseChangeCredentialsJws(String jws) throws ServiceException {
+    public String parseChangeCredentialsJws(String jws) throws ValidateException {
         try {
             Claims claims = parseJws(jws, changeCredentialsKeyPair);
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw Checker.of(getClass(), "parseChangeCredentialsJws").
-                    addConstraint("jws", ConstraintType.INCORRECT_JWS).
-                    createServiceException("Incorrect change credential jws", e);
+            throw new ValidateException(
+                    "Incorrect change credential jws",
+                    getClass(),
+                    "parseChangeCredentialsJws"
+            ).addReason("jws", ConstraintType.INCORRECT_JWS);
         }
     }
 

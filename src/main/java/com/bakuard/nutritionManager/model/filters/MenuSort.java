@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 /**
  * Задает правило сортировки меню. Объекты данного класса неизменяемы.
@@ -21,7 +21,7 @@ public final class MenuSort {
      * Создает объект представляющий правило сортировки меню по параметру parameter.
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание ил убывание).
-     * @throws ServiceException если parameter или direction является null.
+     * @throws ValidateException если parameter или direction является null.
      */
     public MenuSort(Parameter parameter, SortDirection direction) {
 
@@ -35,7 +35,7 @@ public final class MenuSort {
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание ил убывание).
      * @return новый объект сортировки.
-     * @throws ServiceException если parameter или direction является null.
+     * @throws ValidateException если parameter или direction является null.
      */
     public ProductSort byParameter(Parameter parameter, SortDirection direction) {
         return null;
@@ -55,7 +55,7 @@ public final class MenuSort {
      * Чем выше индекс, тем ниже приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return параметр сортировки.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *                          1. если parameterIndex < 0.<br/>
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
@@ -69,7 +69,7 @@ public final class MenuSort {
      * приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return направление сортировки.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *                          1. если parameterIndex < 0.<br/>
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */

@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.JwsBlackListRepository;
-
 import com.bakuard.nutritionManager.model.exceptions.Checker;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -22,10 +22,10 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public boolean addToBlackList(UUID tokenId, LocalDateTime expired) {
-        Checker.of(getClass(), "addToBlackList").
-                nullValue("tokenId", tokenId).
-                nullValue("expired", expired).
-                checkWithServiceException("Fail to add token to black list");
+        Checker.of().
+                notNull("tokenId", tokenId).
+                notNull("expired", expired).
+                validate("Fail to add token to black list");
 
         boolean isCorrect = LocalDateTime.now().compareTo(expired) < 0 && !inBlackList(tokenId);
 
@@ -47,9 +47,9 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public boolean inBlackList(UUID tokenId) {
-        Checker.of(getClass(), "inBlackList").
-                nullValue("tokenId", tokenId).
-                checkWithServiceException("Fail check - is there tokenId in black list");
+        Checker.of().
+                notNull("tokenId", tokenId).
+                validate("Fail check - is there tokenId in black list");
 
         return statement.query(
                 """
@@ -62,9 +62,9 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public int removeAllExpired(LocalDateTime deadline) {
-        Checker.of(getClass(), "removeAllExpired").
-                nullValue("deadline", deadline).
-                checkWithServiceException("Fail to remove all expired tokens");
+        Checker.of().
+                notNull("deadline", deadline).
+                validate("Fail to remove all expired tokens");
 
         return statement.update(
                 """

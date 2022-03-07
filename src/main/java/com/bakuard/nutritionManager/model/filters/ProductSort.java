@@ -1,13 +1,10 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.util.Pair;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Objects;
 
 /**
  * Задает правило сортировки продуктов. Объекты данного класса неизменяемы.
@@ -63,13 +60,13 @@ public final class ProductSort {
      * Создает объект представляющий правило сортировки продуктов по параметру parameter.
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание или убывание).
-     * @throws ServiceException если parameter или direction являются null.
+     * @throws ValidateException если parameter или direction являются null.
      */
     public ProductSort(Parameter parameter, SortDirection direction) {
-        Checker.of(getClass(), "constructor").
-                nullValue("parameter", parameter).
-                nullValue("direction", direction).
-                checkWithServiceException();
+        Checker.of().
+                notNull("parameter", parameter).
+                notNull("direction", direction).
+                validate();
 
         params = new ArrayList<>();
         params.add(new Pair<>(parameter, direction));
@@ -79,7 +76,7 @@ public final class ProductSort {
      * Создает объект представляющий правило сортировки продуктов по параметру parameter.
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание или убывание).
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *                          1. если parameter или direction являются null.<br/>
      *                          2. если строка параметра или направления сортировки не соответсуют
      *                             ни одному известному значению.
@@ -101,13 +98,13 @@ public final class ProductSort {
      * @param parameter параметр сортировки.
      * @param direction направление сортировки (возрастание или убывание).
      * @return новый объект сортировки.
-     * @throws ServiceException если parameter или direction является null.
+     * @throws ValidateException если parameter или direction является null.
      */
     public ProductSort byParameter(Parameter parameter, SortDirection direction) {
-        Checker.of(getClass(), "byParameter").
-                nullValue("parameter", parameter).
-                nullValue("direction", direction).
-                checkWithServiceException();
+        Checker.of().
+                notNull("parameter", parameter).
+                notNull("direction", direction).
+                validate();
 
         Pair<Parameter, SortDirection> pair = new Pair<>(parameter, direction);
         ArrayList<Pair<Parameter, SortDirection>> newParams = new ArrayList<>(params);
@@ -133,14 +130,14 @@ public final class ProductSort {
      * Чем выше индекс, тем ниже приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return параметр сортировки.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *                          1. если parameterIndex < 0.<br/>
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public Parameter getParameterType(int parameterIndex) {
-        Checker.of(getClass(), "getParameterType").
-                outOfRange("parameterIndex", parameterIndex, 0, params.size() - 1).
-                checkWithServiceException("Fail to get parameter type from ProductSort. Index must belong " +
+        Checker.of().
+                range("parameterIndex", parameterIndex, 0, params.size() - 1).
+                validate("Fail to get parameter type from ProductSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
         return params.get(parameterIndex).getFirst();
@@ -152,14 +149,14 @@ public final class ProductSort {
      * приоритет параметра в сортировке.
      * @param parameterIndex индекс искомого параметра.
      * @return направление сортировки.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *                          1. если parameterIndex < 0.<br/>
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public SortDirection getDirection(int parameterIndex) {
-        Checker.of(getClass(), "getParameterType").
-                outOfRange("parameterIndex", parameterIndex, 0, params.size() - 1).
-                checkWithServiceException("Fail to get direction sort from ProductSort. Index must belong " +
+        Checker.of().
+                range("parameterIndex", parameterIndex, 0, params.size() - 1).
+                validate("Fail to get direction sort from ProductSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
         return params.get(parameterIndex).getSecond();
@@ -180,10 +177,10 @@ public final class ProductSort {
 
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        Checker checker = Checker.of(getClass(), "byParameter").
-                nullValue("parameter", parameter).
-                nullValue("direction", direction).
-                checkWithServiceException();
+        Checker checker = Checker.of().
+                notNull("parameter", parameter).
+                notNull("direction", direction).
+                validate();
 
         Parameter p = null;
         SortDirection d = null;
@@ -195,17 +192,17 @@ public final class ProductSort {
             case "shop" -> p = Parameter.SHOP;
             case "manufacturer" -> p = Parameter.MANUFACTURER;
             default -> checker.
-                    addConstraint("parameter", ConstraintType.UNKNOWN_PARAMETER);
+                    failure("parameter", ConstraintType.UNKNOWN_PARAMETER);
         }
 
         switch(direction) {
             case "asc" -> d = SortDirection.ASCENDING;
             case "desc" -> d = SortDirection.DESCENDING;
             default -> checker.
-                    addConstraint("direction", ConstraintType.UNKNOWN_PARAMETER);
+                    failure("direction", ConstraintType.UNKNOWN_PARAMETER);
         }
 
-        checker.checkWithServiceException();
+        checker.validate();
 
         return new Pair<>(p, d);
     }

@@ -20,21 +20,27 @@ public class EmailService {
         this.appConfigData = appConfigData;
     }
 
-    public void confirmEmailForRegistration(String jws, String email) throws ServiceException {
+    public void confirmEmailForRegistration(String jws, String email) throws ValidateException {
         try {
             sendEmail("/mail/registration.html", jws, email);
         } catch(MessagingException e) {
-            throw Checker.of(getClass(), "confirmEmailForRegistration").
-                    createServiceException("Fail to confirm email for registration.", e);
+            throw new ValidateException(
+                    "Fail to confirm email for registration.",
+                    getClass(),
+                    "confirmEmailForRegistration"
+            );
         }
     }
 
-    public void confirmEmailForChangeCredentials(String jws, String email) throws ServiceException {
+    public void confirmEmailForChangeCredentials(String jws, String email) throws ValidateException {
         try {
             sendEmail("/mail/changeCredentials.html", jws, email);
         } catch(MessagingException e) {
-            throw Checker.of(getClass(), "confirmEmailForChangeCredentials").
-                    createServiceException("Fail to confirm email for change credentials.", e);
+            throw new ValidateException(
+                    "Fail to confirm email for change credentials.",
+                    getClass(),
+                    "confirmEmailForChangeCredentials"
+            );
         }
     }
 

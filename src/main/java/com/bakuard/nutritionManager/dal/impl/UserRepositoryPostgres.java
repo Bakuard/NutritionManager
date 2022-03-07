@@ -3,9 +3,9 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 
+import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -25,9 +25,9 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public boolean save(User user) {
-        Checker checker = Checker.of(getClass(), "save").
-                nullValue("user", user).
-                checkWithServiceException("Fail to save user");
+        Checker.of().
+                notNull("user", user).
+                validate("Fail to save user");
 
         User oldUser = getByIdOrReturnNull(user.getId());
 
@@ -41,8 +41,11 @@ public class UserRepositoryPostgres implements UserRepository {
                 wasSaved = true;
             }
         } catch(DuplicateKeyException e) {
-            throw checker.addConstraint("user", ConstraintType.ALREADY_EXISTS_IN_DB).
-                    createServiceException("Fail to save user", e);
+            throw new ValidateException(
+                    "Fail to save user",
+                    getClass(),
+                    "save"
+            ).addReason("user", ConstraintType.ALREADY_EXISTS_IN_DB);
         }
 
         return wasSaved;
@@ -50,24 +53,27 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getById(UUID userId) {
-        Checker checker = Checker.of(getClass(), "getById").
-                nullValue("userId", userId).
-                checkWithServiceException("Fail to get user by id");
+        Checker checker = Checker.of().
+                notNull("userId", userId).
+                validate("Fail to get user by id");
 
         User user = getByIdOrReturnNull(userId);
 
         if(user == null) {
-            throw checker.addConstraint("userId", ConstraintType.UNKNOWN_ENTITY).
-                    createServiceException("Fail to get user by id");
+            throw new ValidateException(
+                    "Fail to get user by i",
+                    getClass(),
+                    "getById"
+            ).addReason("userId", ConstraintType.UNKNOWN_ENTITY);
         }
         return user;
     }
 
     @Override
     public User getByName(String name) {
-        Checker checker = Checker.of(getClass(), "getByName").
-                nullValue("name", name).
-                checkWithServiceException("Fail to get user by name");
+        Checker.of().
+                notNull("name", name).
+                validate("Fail to get user by name");
 
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
@@ -86,17 +92,20 @@ public class UserRepositoryPostgres implements UserRepository {
                                 rs.getString("salt")
                         );
                     }
-                    throw checker.addConstraint("name", ConstraintType.UNKNOWN_ENTITY).
-                            createServiceException("Fail to get user by name=" + name);
+                    throw new ValidateException(
+                            "Fail to get user by name=" + name,
+                            getClass(),
+                            "getByName"
+                    ).addReason("name", ConstraintType.UNKNOWN_ENTITY);
                 }
         );
     }
 
     @Override
     public User getByEmail(String email) {
-        Checker checker = Checker.of(getClass(), "getByEmail").
-                nullValue("email", email).
-                checkWithServiceException("Fail to get user by email");
+        Checker.of().
+                notNull("email", email).
+                validate("Fail to get user by email");
 
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
@@ -115,8 +124,11 @@ public class UserRepositoryPostgres implements UserRepository {
                                 rs.getString("salt")
                         );
                     }
-                    throw checker.addConstraint("email", ConstraintType.UNKNOWN_ENTITY).
-                            createServiceException("Fail to get user by email=" + email);
+                    throw new ValidateException(
+                            "Fail to get user by email=" + email,
+                            getClass(),
+                            "getByEmail"
+                    ).addReason("email", ConstraintType.UNKNOWN_ENTITY);
                 }
         );
     }

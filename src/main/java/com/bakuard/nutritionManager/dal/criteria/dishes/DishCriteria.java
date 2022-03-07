@@ -1,11 +1,9 @@
 package com.bakuard.nutritionManager.dal.criteria.dishes;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.DishSort;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.MinTagsFilter;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import java.util.Objects;
@@ -25,7 +23,7 @@ public class DishCriteria {
      * @param pageable параметры страницы исползующиеся для пагинации.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый объект DishCriteria.
-     * @throws ServiceException если хотя бы один из параметров имеет значение null.
+     * @throws ValidateException если хотя бы один из параметров имеет значение null.
      */
     public static DishCriteria of(Pageable pageable, User user) {
         return new DishCriteria(pageable, user);
@@ -38,10 +36,10 @@ public class DishCriteria {
     private DishSort order;
 
     private DishCriteria(Pageable pageable, User user) {
-        Checker.of(getClass(), "constructor").
-                nullValue("pageable", pageable).
-                nullValue("user", user).
-                checkWithServiceException();
+        Checker.of().
+                notNull("pageable", pageable).
+                notNull("user", user).
+                validate();
 
         this.pageable = pageable;
         this.user = user;

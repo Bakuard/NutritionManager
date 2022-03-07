@@ -109,7 +109,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("save(product): product is null => exception")
     void save1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(null),
                 ProductRepositoryPostgres.class,
                 "save",
@@ -186,7 +186,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() ->repository.save(addedProduct)),
                 ProductRepositoryPostgres.class,
                 "save",
@@ -263,7 +263,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.save(updatedProduct)),
                 ProductRepositoryPostgres.class,
                 "save",
@@ -318,7 +318,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("remove(productId): productId is null => exception")
     void remove1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.remove(null)),
                 ProductRepositoryPostgres.class,
                 "remove",
@@ -329,7 +329,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("remove(productId): product with such id not exists in DB => exception")
     void remove2() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.remove(toUUID(10))),
                 ProductRepositoryPostgres.class,
                 "remove",
@@ -346,7 +346,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product));
         commit(() -> repository.remove(toUUID(1)));
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(toUUID(1))),
                 ProductRepositoryPostgres.class,
                 "getById",
@@ -369,7 +369,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("getById(productId): productId is null => exception")
     void getById1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(null)),
                 ProductRepositoryPostgres.class,
                 "getById",
@@ -380,7 +380,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("getById(productId): not exists product with such id => exception")
     void getById2() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(toUUID(256))),
                 ProductRepositoryPostgres.class,
                 "getById",
@@ -407,7 +407,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getProductsNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getProductsNumber(null),
                 ProductRepositoryPostgres.class,
                 "getProductsNumber",
@@ -1009,7 +1009,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getProducts1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getProducts(null),
                 ProductRepositoryPostgres.class,
                 "getProducts",
@@ -1833,7 +1833,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getTagsNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getTagsNumber(null),
                 ProductRepositoryPostgres.class,
                 "getTagsNumber",
@@ -1899,7 +1899,7 @@ class ProductRepositoryTest {
     void getTags1() {
         User user = createAndSaveUser(1);
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getTags(null),
                 ProductRepositoryPostgres.class,
                 "getTags",
@@ -2041,7 +2041,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getShopsNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getShopsNumber(null),
                 ProductRepositoryPostgres.class,
                 "getShopsNumber",
@@ -2108,7 +2108,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getShops1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getShops(null),
                 ProductRepositoryPostgres.class,
                 "getShops",
@@ -2226,7 +2226,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getVarietiesNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getVarietiesNumber(null),
                 ProductRepositoryPostgres.class,
                 "getVarietiesNumber",
@@ -2293,7 +2293,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getVarieties1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getVarieties(null),
                 ProductRepositoryPostgres.class,
                 "getVarieties",
@@ -2411,7 +2411,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getCategoriesNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getCategoriesNumber(null),
                 ProductRepositoryPostgres.class,
                 "getCategoriesNumber",
@@ -2459,7 +2459,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getCategories1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getCategories(null),
                 ProductRepositoryPostgres.class,
                 "getCategories",
@@ -2539,7 +2539,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getManufacturersNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getManufacturersNumber(null),
                 ProductRepositoryPostgres.class,
                 "getManufacturersNumber",
@@ -2606,7 +2606,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getManufacturers1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getManufacturers(null),
                 ProductRepositoryPostgres.class,
                 "getManufacturers",
@@ -2724,7 +2724,7 @@ class ProductRepositoryTest {
              => exception
             """)
     void getProductsSum1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getProductsSum(null),
                 ProductRepositoryPostgres.class,
                 "getProductsSum",

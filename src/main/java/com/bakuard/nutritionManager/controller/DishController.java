@@ -33,7 +33,6 @@ public class DishController {
 
     private static final Logger logger = LoggerFactory.getLogger(DishController.class.getName());
 
-
     private DtoMapper mapper;
     private DishRepository repository;
 

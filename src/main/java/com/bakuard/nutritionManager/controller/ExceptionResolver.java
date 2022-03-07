@@ -50,15 +50,4 @@ public class ExceptionResolver {
                 body(response);
     }
 
-    @ExceptionHandler(value = ServiceException.class)
-    public ResponseEntity<ExceptionResponse> handle(ServiceException e) {
-        logger.error(e.getMessage(), e);
-
-        ExceptionResponse response = mapper.toExceptionResponse(e);
-
-        return ResponseEntity.
-                status(HttpStatus.resolve(response.getHttpErrorCode())).
-                body(response);
-    }
-
 }

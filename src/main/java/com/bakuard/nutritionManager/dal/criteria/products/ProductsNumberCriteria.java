@@ -21,7 +21,7 @@ public class ProductsNumberCriteria {
      * Создает и возвращает новый объект ProductsNumberCriteria.
      * @param user пользователь для продуктов которого ведется подсчет.
      * @return новый объект ProductsNumberCriteria.
-     * @throws ServiceException если user имеет значение null.
+     * @throws ValidateException если user имеет значение null.
      */
     public static ProductsNumberCriteria of(User user) {
         return new ProductsNumberCriteria(user);
@@ -33,9 +33,9 @@ public class ProductsNumberCriteria {
     private Filter filter;
 
     private ProductsNumberCriteria(User user) {
-        Checker.of(getClass(), "constructor").
-                nullValue("user", user).
-                checkWithServiceException();
+        Checker.of().
+                notNull("user", user).
+                validate();
 
         this.user = user;
     }

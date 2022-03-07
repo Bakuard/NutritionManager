@@ -4,20 +4,24 @@ import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.net.URL;
+import java.util.*;
 import java.util.function.Function;
 
 public class Checker {
+
+    private static final StackWalker walker = StackWalker.getInstance(
+            Set.of(StackWalker.Option.RETAIN_CLASS_REFERENCE),
+            2
+    );
 
     public static <T>Container<T> container() {
         return new Container<>();
     }
 
-    public static Checker of(Class<?> checkedType, String operationName) {
-        return new Checker(checkedType, operationName);
+    public static Checker of() {
+        StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
+        return new Checker(frame.getDeclaringClass(), frame.getMethodName());
     }
 
 
@@ -34,14 +38,14 @@ public class Checker {
     }
 
 
-    public Checker addConstraint(String fieldName, ConstraintType type) {
+    public Checker failure(String fieldName, ConstraintType type) {
         constraints.add(new Constraint(checkedType, fieldName, type));
         return this;
     }
 
 
-    public <T> Checker nullValue(String fieldName, T checkedValue) {
-        if(checkedValue == null) {
+    public <T> Checker notNull(String fieldName, T checkedValue) {
+        if(canCheck(fieldName) && checkedValue == null) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.MISSING_VALUE,
                             fieldName + " can't be null")
@@ -50,16 +54,26 @@ public class Checker {
         return this;
     }
 
-    public Checker blankValue(String fieldName, String checkedValue) {
-        if(isValid(fieldName) && checkedValue.isBlank()) {
+    public <T> Checker isNull(String fieldName, T checkedValue) {
+        if(canCheck(fieldName) && checkedValue != null) {
+            constraints.add(
+                    new Constraint(checkedType, fieldName, ConstraintType.MUST_BE_NULL,
+                            fieldName + " must be be null")
+            );
+        }
+        return this;
+    }
+
+    public Checker notBlank(String fieldName, String checkedValue) {
+        if(canCheck(fieldName) && checkedValue.isBlank()) {
             constraints.add(new Constraint(checkedType, fieldName, ConstraintType.BLANK_VALUE,
                     fieldName + " can't be blank"));
         }
         return this;
     }
 
-    public Checker containsBlankValue(String fieldName, Collection<String> checkedValue) {
-        if(isValid(fieldName) && checkedValue.stream().anyMatch(String::isBlank)) {
+    public Checker notContainsBlankValue(String fieldName, Collection<String> checkedValue) {
+        if(canCheck(fieldName) && checkedValue.stream().anyMatch(String::isBlank)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_BLANK,
                             fieldName + " can't contains blank item.")
@@ -68,8 +82,8 @@ public class Checker {
         return this;
     }
 
-    public Checker incorrectStringLength(String fieldName, String checkedValue, int minLength, int maxLength) {
-        if(isValid(fieldName) && (checkedValue.length() < minLength || checkedValue.length() > maxLength)) {
+    public Checker stringLength(String fieldName, String checkedValue, int minLength, int maxLength) {
+        if(canCheck(fieldName) && (checkedValue.length() < minLength || checkedValue.length() > maxLength)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.INCORRECT_STRING_LENGTH,
                     "Incorrect value length for " +  fieldName +
@@ -81,8 +95,8 @@ public class Checker {
         return this;
     }
 
-    public Checker negativeValue(String fieldName, BigDecimal checkedValue) {
-        if(isValid(fieldName) && checkedValue.signum() < 0) {
+    public Checker notNegativeValue(String fieldName, BigDecimal checkedValue) {
+        if(canCheck(fieldName) && checkedValue.signum() < 0) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.NEGATIVE_VALUE,
                              fieldName + " can't be negative. Actual = " + checkedValue)
@@ -91,8 +105,8 @@ public class Checker {
         return this;
     }
 
-    public Checker negativeValue(String fieldName, long checkedValue) {
-        if(isValid(fieldName) && checkedValue < 0) {
+    public Checker notNegativeValue(String fieldName, long checkedValue) {
+        if(canCheck(fieldName) && checkedValue < 0) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.NEGATIVE_VALUE,
                             fieldName + " can't be negative. Actual = " + checkedValue)
@@ -101,8 +115,8 @@ public class Checker {
         return this;
     }
 
-    public Checker notPositiveValue(String fieldName, BigDecimal checkedValue) {
-        if(isValid(fieldName) && checkedValue.signum() <= 0) {
+    public Checker positiveValue(String fieldName, BigDecimal checkedValue) {
+        if(canCheck(fieldName) && checkedValue.signum() <= 0) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.NOT_POSITIVE_VALUE,
                             fieldName + " mus be positive. Actual = " + checkedValue)
@@ -111,8 +125,8 @@ public class Checker {
         return this;
     }
 
-    public Checker containsNull(String fieldName, Collection<?> checkedValue) {
-        if(isValid(fieldName) && checkedValue.stream().anyMatch(Objects::isNull)) {
+    public Checker notContainsNull(String fieldName, Collection<?> checkedValue) {
+        if(canCheck(fieldName) && checkedValue.stream().anyMatch(Objects::isNull)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_NULL,
                             fieldName + " can't contains null item")
@@ -121,8 +135,8 @@ public class Checker {
         return this;
     }
 
-    public Checker containsNegative(String fieldName, Collection<Integer> checkedValue) {
-        if(isValid(fieldName) && checkedValue.stream().anyMatch(i -> i < 0)) {
+    public Checker notContainsNegative(String fieldName, Collection<Integer> checkedValue) {
+        if(canCheck(fieldName) && checkedValue.stream().anyMatch(i -> i < 0)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.CONTAINS_NEGATIVE,
                             fieldName + " can't contains negative value")
@@ -131,7 +145,7 @@ public class Checker {
         return this;
     }
 
-    public Checker duplicateTag(String fieldName, Container<List<Tag>> checkedValue) {
+    public Checker notContainsDuplicateTag(String fieldName, Container<List<Tag>> checkedValue) {
         if(checkedValue.isOpen) {
             List<Tag> tags = checkedValue.get();
 
@@ -151,8 +165,8 @@ public class Checker {
         return this;
     }
 
-    public Checker duplicateTag(String fieldName, Collection<Tag> checkedValue, Tag tag) {
-        if(isValid(fieldName) && checkedValue.contains(tag)) {
+    public Checker notContainsDuplicateTag(String fieldName, Collection<Tag> checkedValue, Tag tag) {
+        if(canCheck(fieldName) && checkedValue.contains(tag)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.DUPLICATE_TAG,
                     "Tag " + tag + " already contains in " + fieldName)
@@ -161,8 +175,8 @@ public class Checker {
         return this;
     }
 
-    public Checker notEnoughItems(String fieldName, Collection<?> checkedValue, int minItems) {
-        if(isValid(fieldName) && checkedValue.size() < minItems) {
+    public Checker containsAtLeast(String fieldName, Collection<?> checkedValue, int minItems) {
+        if(canCheck(fieldName) && checkedValue.size() < minItems) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.NOT_ENOUGH_ITEMS,
                     fieldName + " must contains at least " +
@@ -172,8 +186,8 @@ public class Checker {
         return this;
     }
 
-    public Checker outOfRange(String fieldName, int checkedValue, int min, int max) {
-        if(isValid(fieldName) && (checkedValue < min || checkedValue > max)) {
+    public Checker range(String fieldName, int checkedValue, int min, int max) {
+        if(canCheck(fieldName) && (checkedValue < min || checkedValue > max)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.OUT_OF_RANGE,
                             fieldName + " must belong [" + min + ", " + max + "]. Actual = " + checkedValue)
@@ -182,13 +196,30 @@ public class Checker {
         return this;
     }
 
-    public <T> Checker notEquals(String fieldName, T checkedValue, T expected) {
-        if(isValid(fieldName) && !checkedValue.equals(expected)) {
+    public <T> Checker equal(String fieldName, T checkedValue, T expected) {
+        if(canCheck(fieldName) && !checkedValue.equals(expected)) {
             constraints.add(
                     new Constraint(checkedType, fieldName, ConstraintType.NOT_EQUALS,
                             fieldName + " has value " + checkedValue + ", but expected " + expected)
             );
         }
+        return this;
+    }
+
+    public Checker correctUrl(String fieldName, String checkedValue, Container<URL> container) {
+        if(canCheck(fieldName)) {
+            try {
+                URL url = new URL(checkedValue);
+                container.set(url);
+            } catch (Exception e) {
+                container.close();
+                constraints.add(
+                        new Constraint(checkedType, fieldName, ConstraintType.MALFORMED_URL,
+                                "Malformed URL = " + checkedValue)
+                );
+            }
+        }
+
         return this;
     }
 
@@ -240,23 +271,7 @@ public class Checker {
     }
 
 
-    public Checker checkWithServiceException() {
-        if(!constraints.isEmpty()) {
-            throw new ServiceException(checkedType, operationName).
-                    addReasons(constraints);
-        }
-        return this;
-    }
-
-    public Checker checkWithServiceException(String message) {
-        if(!constraints.isEmpty()) {
-            throw new ServiceException(message, checkedType, operationName).
-                    addReasons(constraints);
-        }
-        return this;
-    }
-
-    public Checker checkWithValidateException() {
+    public Checker validate() {
         if(!validateExceptions.isEmpty() || !constraints.isEmpty()) {
             throw new ValidateException(checkedType, operationName).
                     addExcReasons(validateExceptions).
@@ -265,7 +280,7 @@ public class Checker {
         return this;
     }
 
-    public Checker checkWithValidateException(String message) {
+    public Checker validate(String message) {
         if(!validateExceptions.isEmpty() || !constraints.isEmpty()) {
             throw new ValidateException(message, checkedType, operationName).
                     addExcReasons(validateExceptions).
@@ -274,39 +289,11 @@ public class Checker {
         return this;
     }
 
-    public ServiceException createServiceException(String message) {
-        return new ServiceException(message, checkedType, operationName).
-                addReasons(constraints);
+
+    private boolean canCheck(String fieldName) {
+        return constraints.stream().noneMatch(c -> c.getFieldName().equals(fieldName));
     }
 
-    public ServiceException createServiceException(String message, Throwable cause) {
-        return new ServiceException(message, cause, checkedType, operationName).
-                addReasons(constraints);
-    }
-
-
-    private boolean isValid(String fieldName) {
-        boolean isValid  = true;
-        for(int i = 0; i < constraints.size() && isValid; i++) {
-            isValid = !constraints.get(i).getFieldName().equals(fieldName);
-        }
-        return isValid;
-    }
-
-
-    @FunctionalInterface
-    public static interface ServiceExceptionBuilder {
-
-        public AbstractDomainException build(String operationName, Constraint[] constraints);
-
-    }
-
-    @FunctionalInterface
-    public static interface ValidateExceptionBuilder {
-
-        public AbstractDomainException build(List<ValidateException> exceptions, Constraint[] constraints);
-
-    }
 
     public static class Container<T> {
 

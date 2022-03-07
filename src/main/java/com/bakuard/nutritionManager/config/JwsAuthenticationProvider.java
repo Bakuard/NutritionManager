@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.config;
 
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import com.bakuard.nutritionManager.services.JwsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class JwsAuthenticationProvider implements AuthenticationProvider {
             JwsAuthentication response = new JwsAuthentication(jws);
             response.setAuthenticated(true);
             return response;
-        } catch(ServiceException e) {
+        } catch(ValidateException e) {
             throw new BadCredentialsException("Incorrect jws", e);
         }
     }

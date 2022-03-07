@@ -1,8 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 
 import java.util.Objects;
@@ -21,7 +20,7 @@ public class ProductSumCriteria {
      * @param filter фильтр определющий какие продукты должны участвовать в запросе.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый объект ProductCriteria.
-     * @throws ServiceException если хотя бы один из параметров имеет значение null.
+     * @throws ValidateException если хотя бы один из параметров имеет значение null.
      */
     public static ProductSumCriteria of(User user, Filter filter) {
         return new ProductSumCriteria(user, filter);
@@ -32,10 +31,10 @@ public class ProductSumCriteria {
     private Filter filter;
 
     private ProductSumCriteria(User user, Filter filter) {
-        Checker.of(getClass(), "constructor").
-                nullValue("user", user).
-                nullValue("filter", filter).
-                checkWithServiceException("Fail to create ProductSumCriteria");
+        Checker.of().
+                notNull("user", user).
+                notNull("filter", filter).
+                validate("Fail to create ProductSumCriteria");
 
         this.user = user;
         this.filter = filter;
