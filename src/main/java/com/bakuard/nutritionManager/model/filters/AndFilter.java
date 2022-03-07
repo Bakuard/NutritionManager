@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.Validator;
 
 import com.google.common.collect.ImmutableList;
 
@@ -12,7 +12,7 @@ public class AndFilter implements Filter {
     private final ImmutableList<Filter> operands;
 
     AndFilter(List<Filter> operands) {
-        Checker.of().
+        Validator.create().
                 notNull("operands", operands).
                 notContainsNull("operands", operands).
                 containsAtLeast("operands", operands, 2).

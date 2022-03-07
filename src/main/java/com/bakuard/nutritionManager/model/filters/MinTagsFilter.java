@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.Tag;
 
-import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.Validator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 
@@ -14,7 +14,7 @@ public class MinTagsFilter implements Filter {
     private final ImmutableSortedSet<Tag> tags;
 
     MinTagsFilter(List<Tag> tags) {
-        Checker.of().
+        Validator.create().
                 notNull("tags", tags).
                 notContainsNull("tags", tags).
                 containsAtLeast("tags", tags, 1).

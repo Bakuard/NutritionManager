@@ -31,7 +31,7 @@ public class DishesNumberCriteria {
     private Filter filter;
 
     private DishesNumberCriteria(User user) {
-        Checker.of().
+        Validator.create().
                 notNull("user", user).
                 validate();
 

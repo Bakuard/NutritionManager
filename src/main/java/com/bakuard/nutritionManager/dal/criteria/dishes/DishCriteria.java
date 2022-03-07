@@ -36,7 +36,7 @@ public class DishCriteria {
     private DishSort order;
 
     private DishCriteria(Pageable pageable, User user) {
-        Checker.of().
+        Validator.create().
                 notNull("pageable", pageable).
                 notNull("user", user).
                 validate();

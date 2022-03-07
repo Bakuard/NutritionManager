@@ -49,7 +49,7 @@ public final class DishSort {
      * @throws ValidateException если parameter или direction является null.
      */
     public DishSort(Parameter parameter, SortDirection direction) {
-        Checker.of().
+        Validator.create().
                 notNull("parameter", parameter).
                 notNull("direction", direction).
                 validate();
@@ -87,7 +87,7 @@ public final class DishSort {
      * @throws ValidateException если parameter или direction является null.
      */
     public DishSort byParameter(Parameter parameter, SortDirection direction) {
-        Checker.of().
+        Validator.create().
                 notNull("parameter", parameter).
                 notNull("direction", direction).
                 validate();
@@ -121,7 +121,7 @@ public final class DishSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public Parameter getParameterType(int parameterIndex) {
-        Checker.of().
+        Validator.create().
                 range("parameterIndex", parameterIndex, 0, params.size() - 1).
                 validate("Fail to get parameter type from DishSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
@@ -140,7 +140,7 @@ public final class DishSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public SortDirection getDirection(int parameterIndex) {
-        Checker.of().
+        Validator.create().
                 range("parameterIndex", parameterIndex, 0, params.size() - 1).
                 validate("Fail to get direction sort from DishSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
@@ -163,7 +163,7 @@ public final class DishSort {
 
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        Checker checker = Checker.of().
+        Validator validator = Validator.create().
                 notNull("parameter", parameter).
                 notNull("direction", direction).
                 validate();
@@ -174,18 +174,18 @@ public final class DishSort {
         switch(parameter) {
             case "name" -> p = Parameter.NAME;
             case "unit" -> p = Parameter.UNIT;
-            default -> checker.
+            default -> validator.
                     failure("parameter", ConstraintType.UNKNOWN_PARAMETER);
         }
 
         switch(direction) {
             case "asc" -> d = SortDirection.ASCENDING;
             case "desc" -> d = SortDirection.DESCENDING;
-            default -> checker.
+            default -> validator.
                     failure("direction", ConstraintType.UNKNOWN_PARAMETER);
         }
 
-        checker.validate();
+        validator.validate();
 
         return new Pair<>(p, d);
     }

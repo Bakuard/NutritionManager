@@ -10,7 +10,7 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.Validator;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
@@ -57,7 +57,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public boolean save(Dish dish) {
-        Checker.of().
+        Validator.create().
                 notNull("dish", dish).
                 validate("Fail to save dish");
 
@@ -85,7 +85,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish remove(UUID dishId) {
-        Checker.of().
+        Validator.create().
                 notNull("dishId", dishId).
                 validate("Fail to remove dish. Unknown dish with id=null");
 
@@ -109,7 +109,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish getById(UUID dishId) {
-        Checker.of().
+        Validator.create().
                 notNull("dishId", dishId).
                 validate("Fail to get dish by id");
 
@@ -127,7 +127,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Page<Dish> getDishes(DishCriteria criteria) {
-        Checker.of().
+        Validator.create().
                 notNull("criteria", criteria).
                 validate("Fail to get dishes by criteria");
 
@@ -209,7 +209,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Page<Tag> getTags(DishFieldCriteria criteria) {
-        Checker.of().
+        Validator.create().
                 notNull("criteria", criteria).
                 validate("Fail to get dishes tags by criteria");
 
@@ -248,7 +248,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Page<String> getUnits(DishFieldCriteria criteria) {
-        Checker.of().
+        Validator.create().
                 notNull("criteria", criteria).
                 validate("Fail to get dishes shops by criteria");
 
@@ -285,7 +285,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getDishesNumber(DishesNumberCriteria criteria) {
-        Checker.of().
+        Validator.create().
                 notNull("criteria", criteria).
                 validate("Fail to get dishes number by criteria");
 
@@ -303,7 +303,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getTagsNumber(DishFieldNumberCriteria criteria) {
-        Checker.of().
+        Validator.create().
                 notNull("criteria", criteria).
                 validate("Fail to get dishes tags number by criteria");
 
@@ -327,7 +327,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getUnitsNumber(DishFieldNumberCriteria criteria) {
-        Checker.of().
+        Validator.create().
                 notNull("criteria", criteria).
                 validate("Fail to get dishes units number by criteria");
 

@@ -8,7 +8,6 @@ import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -58,10 +57,10 @@ public class Dish {
                  List<String> tags,
                  AppConfigData config,
                  ProductRepository productRepository) {
-        Checker.Container<List<Tag>> tagContainer = Checker.container();
-        Checker.Container<List<DishIngredient>> ingredientContainer = Checker.container();
+        Container<List<Tag>> tagContainer = Validator.container();
+        Container<List<DishIngredient>> ingredientContainer = Validator.container();
 
-        Checker.of().
+        Validator.create().
                 notNull("id", id).
                 notNull("user", user).
                 notNull("name", name).
@@ -95,7 +94,7 @@ public class Dish {
      *         2. если name не содержит ни одного отображаемого символа.
      */
     public void setName(String name) {
-        Checker.of().
+        Validator.create().
                 notNull("name", name).
                 notBlank("name", name).
                 validate("Fail to set dish name");
@@ -112,7 +111,7 @@ public class Dish {
      *         2. если unit не содержит ни одного отображаемого символа.
      */
     public void setUnit(String unit) {
-        Checker.of().
+        Validator.create().
                 notNull("unit", unit).
                 notBlank("unit", unit).
                 validate("Fail to set dish unit");
@@ -188,7 +187,7 @@ public class Dish {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public void addTag(Tag tag) {
-        Checker.of().
+        Validator.create().
                 notNull("tag", tag).
                 notContainsDuplicateTag("tags", tags, tag).
                 validate("Fail to add tag to dish");
@@ -329,7 +328,7 @@ public class Dish {
      */
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
                                          Map<String, Integer> productsIndex) {
-        Checker checker = Checker.of().
+        Validator validator = Validator.create().
                 notNull("servingNumber", servingNumber).
                 notNull("productsIndex", productsIndex).
                 positiveValue("servingNumber", servingNumber).
@@ -340,7 +339,7 @@ public class Dish {
                 ingredients.stream().
                 map(DishIngredient::getName).
                 anyMatch(i -> !productsIndex.containsKey(i))) {
-            checker.failure("productsIndex", ConstraintType.UNKNOWN_ITEM).
+            validator.failure("productsIndex", ConstraintType.UNKNOWN_ITEM).
                     validate("Fail to get dish price");
         }
 

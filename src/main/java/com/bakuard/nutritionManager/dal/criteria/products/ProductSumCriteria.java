@@ -31,7 +31,7 @@ public class ProductSumCriteria {
     private Filter filter;
 
     private ProductSumCriteria(User user, Filter filter) {
-        Checker.of().
+        Validator.create().
                 notNull("user", user).
                 notNull("filter", filter).
                 validate("Fail to create ProductSumCriteria");

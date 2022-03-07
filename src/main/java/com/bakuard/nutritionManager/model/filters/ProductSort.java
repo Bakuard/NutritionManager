@@ -63,7 +63,7 @@ public final class ProductSort {
      * @throws ValidateException если parameter или direction являются null.
      */
     public ProductSort(Parameter parameter, SortDirection direction) {
-        Checker.of().
+        Validator.create().
                 notNull("parameter", parameter).
                 notNull("direction", direction).
                 validate();
@@ -101,7 +101,7 @@ public final class ProductSort {
      * @throws ValidateException если parameter или direction является null.
      */
     public ProductSort byParameter(Parameter parameter, SortDirection direction) {
-        Checker.of().
+        Validator.create().
                 notNull("parameter", parameter).
                 notNull("direction", direction).
                 validate();
@@ -135,7 +135,7 @@ public final class ProductSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public Parameter getParameterType(int parameterIndex) {
-        Checker.of().
+        Validator.create().
                 range("parameterIndex", parameterIndex, 0, params.size() - 1).
                 validate("Fail to get parameter type from ProductSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
@@ -154,7 +154,7 @@ public final class ProductSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public SortDirection getDirection(int parameterIndex) {
-        Checker.of().
+        Validator.create().
                 range("parameterIndex", parameterIndex, 0, params.size() - 1).
                 validate("Fail to get direction sort from ProductSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
@@ -177,7 +177,7 @@ public final class ProductSort {
 
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        Checker checker = Checker.of().
+        Validator validator = Validator.create().
                 notNull("parameter", parameter).
                 notNull("direction", direction).
                 validate();
@@ -191,18 +191,18 @@ public final class ProductSort {
             case "variety" -> p = Parameter.VARIETY;
             case "shop" -> p = Parameter.SHOP;
             case "manufacturer" -> p = Parameter.MANUFACTURER;
-            default -> checker.
+            default -> validator.
                     failure("parameter", ConstraintType.UNKNOWN_PARAMETER);
         }
 
         switch(direction) {
             case "asc" -> d = SortDirection.ASCENDING;
             case "desc" -> d = SortDirection.DESCENDING;
-            default -> checker.
+            default -> validator.
                     failure("direction", ConstraintType.UNKNOWN_PARAMETER);
         }
 
-        checker.validate();
+        validator.validate();
 
         return new Pair<>(p, d);
     }

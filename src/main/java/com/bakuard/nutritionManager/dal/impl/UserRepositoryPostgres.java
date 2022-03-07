@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
+import com.bakuard.nutritionManager.model.exceptions.Validator;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 
 import com.bakuard.nutritionManager.model.exceptions.ValidateException;
@@ -25,7 +25,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public boolean save(User user) {
-        Checker.of().
+        Validator.create().
                 notNull("user", user).
                 validate("Fail to save user");
 
@@ -53,7 +53,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getById(UUID userId) {
-        Checker checker = Checker.of().
+        Validator validator = Validator.create().
                 notNull("userId", userId).
                 validate("Fail to get user by id");
 
@@ -71,7 +71,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getByName(String name) {
-        Checker.of().
+        Validator.create().
                 notNull("name", name).
                 validate("Fail to get user by name");
 
@@ -103,7 +103,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getByEmail(String email) {
-        Checker.of().
+        Validator.create().
                 notNull("email", email).
                 validate("Fail to get user by email");
 

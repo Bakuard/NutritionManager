@@ -38,7 +38,7 @@ public class ProductCriteria {
     private ProductSort order;
 
     private ProductCriteria(Pageable pageable, User user) {
-        Checker.of().
+        Validator.create().
                 notNull("pageable", pageable).
                 notNull("user", user).
                 validate();

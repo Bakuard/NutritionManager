@@ -63,9 +63,9 @@ public class ProductContext {
                            BigDecimal packingSize,
                            List<String> tags,
                            AppConfigData config) {
-        Checker.Container<List<Tag>> container = Checker.container();
+        Container<List<Tag>> container = Validator.container();
 
-        Checker.of().
+        Validator.create().
                 notNull("category", category).
                 notBlank("category", category).
                 notNull("shop", shop).
@@ -107,7 +107,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setCategory(String category) {
-        Checker.of().
+        Validator.create().
                 notNull("category", category).
                 notBlank("category", category).
                 validate("Fail to set product context category");
@@ -138,7 +138,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setShop(String shop) {
-        Checker.of().
+        Validator.create().
                 notNull("shop", shop).
                 notBlank("shop", shop).
                 validate("Fail to set product context shop");
@@ -169,7 +169,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setVariety(String variety) {
-        Checker.of().
+        Validator.create().
                 notNull("variety", variety).
                 notBlank("variety", variety).
                 validate("Fail to set product context variety");
@@ -200,7 +200,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setManufacturer(String manufacturer) {
-        Checker.of().
+        Validator.create().
                 notNull("manufacturer", manufacturer).
                 notBlank("manufacturer", manufacturer).
                 validate("Fail to set product context manufacturer");
@@ -231,7 +231,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setUnit(String unit) {
-        Checker.of().
+        Validator.create().
                 notNull("unit", unit).
                 notBlank("unit", unit).
                 validate("Fail to set product context unit");
@@ -262,7 +262,7 @@ public class ProductContext {
      *         2. если указанное значение цены меньше нуля.
      */
     public ProductContext setPrice(BigDecimal price) {
-        Checker.of().
+        Validator.create().
                 notNull("price", price).
                 notNegativeValue("price", price).
                 validate("Fail to set product context price");
@@ -291,7 +291,7 @@ public class ProductContext {
      *         2. если packingSize меньше или равен нулю.
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
-        Checker.of().
+        Validator.create().
                 notNull("packingSize", packingSize).
                 positiveValue("packingSize", packingSize).
                 validate("Fail to set product context packing size");
@@ -322,7 +322,7 @@ public class ProductContext {
         List<Tag> tags = new ArrayList<>();
         tags.add(tag);
 
-        Checker.of().
+        Validator.create().
                 notNull("tag", tag).
                 notContainsDuplicateTag("tags", tags, tag).
                 validate("Fail to add tag to product context");

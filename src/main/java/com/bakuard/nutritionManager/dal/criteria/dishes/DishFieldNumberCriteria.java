@@ -28,7 +28,7 @@ public class DishFieldNumberCriteria {
     private User user;
 
     private DishFieldNumberCriteria(User user) {
-        Checker.of().
+        Validator.create().
                 notNull("user", user).
                 validate();
 

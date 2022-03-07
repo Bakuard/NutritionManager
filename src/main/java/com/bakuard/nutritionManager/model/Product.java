@@ -5,7 +5,6 @@ import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -40,9 +39,9 @@ public class Product {
                     String imagePath,
                     ProductContext.Builder contextBuilder,
                     AppConfigData config) {
-        Checker.Container<ProductContext> context = Checker.container();
+        Container<ProductContext> context = Validator.container();
 
-        Checker.of().
+        Validator.create().
                 notNull("id", id).
                 notNull("user", user).
                 notNull("quantity", quantity).
@@ -66,7 +65,7 @@ public class Product {
      * @throws ValidateException если указанное значение равняется null
      */
     public void setContext(ProductContext context) {
-        Checker.of().
+        Validator.create().
                 notNull("context", context).
                 validate("Fail to set product context");
 
@@ -82,7 +81,7 @@ public class Product {
      *         2. если указанное значение меньше нуля.
      */
     public void addQuantity(BigDecimal quantity) {
-        Checker.of().
+        Validator.create().
                 notNull("quantity", quantity).
                 notNegativeValue("quantity", quantity).
                 validate("Fail to add product quantity");
@@ -103,7 +102,7 @@ public class Product {
      *         2. если указанное значение меньше нуля.
      */
     public BigDecimal take(BigDecimal quantity) {
-        Checker.of().
+        Validator.create().
                 notNull("quantity", quantity).
                 notNegativeValue("quantity", quantity).
                 validate("Fail to take product quantity");
