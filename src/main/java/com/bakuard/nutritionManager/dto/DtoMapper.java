@@ -212,11 +212,11 @@ public class DtoMapper {
     }
 
 
-    private ConstraintResponse toConstraintResponse(Constraint constraint) {
+    private ConstraintResponse toConstraintResponse(Result result) {
         ConstraintResponse dto = new ConstraintResponse();
-        dto.setField(constraint.getFieldName());
+        dto.setField(result.getFieldName());
         dto.setTitle(getMessage("constraintTitle", "Reason"));
-        dto.setMessage(getMessage(constraint.getMessageKey(), constraint.getDetail()));
+        dto.setMessage(getMessage(result.getMessageKey(), result.getDetail()));
         return dto;
     }
 

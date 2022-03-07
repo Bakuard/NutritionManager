@@ -7,17 +7,17 @@ import java.util.function.Consumer;
  * Обобщенный тип исключений, все наследники которого указывают, что было нарушенно один или несколько
  * инвариантов при констрировании бизнес сущности.
  */
-public class ValidateException extends RuntimeException implements Iterable<Constraint> {
+public class ValidateException extends RuntimeException implements Iterable<Result> {
 
     private Class<?> checkedType;
     private final String operationName;
-    private List<Constraint> constraints;
+    private List<Result> results;
     private List<ValidateException> validateExceptions;
 
     public ValidateException(Class<?> checkedType, String operationName) {
         this.checkedType = checkedType;
         this.operationName = operationName;
-        constraints = new ArrayList<>();
+        results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
@@ -25,7 +25,7 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
         super(message);
         this.checkedType = checkedType;
         this.operationName = operationName;
-        constraints = new ArrayList<>();
+        results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
@@ -33,7 +33,7 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
         super(message, cause);
         this.checkedType = checkedType;
         this.operationName = operationName;
-        constraints = new ArrayList<>();
+        results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
@@ -41,7 +41,7 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
         super(cause);
         this.checkedType = checkedType;
         this.operationName = operationName;
-        constraints = new ArrayList<>();
+        results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
@@ -62,7 +62,7 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
     }
 
     public boolean containsConstraint(ConstraintType type) {
-        return constraints.stream().map(Constraint::getType).anyMatch(c -> c == type);
+        return results.stream().map(Result::getType).anyMatch(c -> c == type);
     }
 
     public ValidateException addExcReason(ValidateException e) {
@@ -81,34 +81,34 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
         return this;
     }
 
-    public ValidateException addReason(Constraint e) {
+    public ValidateException addReason(Result e) {
         if(e != null) {
-            constraints.add(e);
+            results.add(e);
         }
         return this;
     }
 
-    public ValidateException addReasons(Constraint... constraints) {
-        if(constraints != null && constraints.length > 0) {
-            Collections.addAll(this.constraints, constraints);
+    public ValidateException addReasons(Result... results) {
+        if(results != null && results.length > 0) {
+            Collections.addAll(this.results, results);
         }
         return this;
     }
 
-    public ValidateException addReasons(List<Constraint> constraints) {
-        if(constraints != null && constraints.size() > 0) {
-            this.constraints.addAll(constraints);
+    public ValidateException addReasons(List<Result> results) {
+        if(results != null && results.size() > 0) {
+            this.results.addAll(results);
         }
         return this;
     }
 
     public ValidateException addReason(String fieldName, ConstraintType type) {
-        constraints.add(new Constraint(checkedType, fieldName, type));
+        results.add(new Result(checkedType, fieldName, type));
         return this;
     }
 
-    public List<Constraint> getConstraints() {
-        return constraints;
+    public List<Result> getConstraints() {
+        return results;
     }
 
     public List<ValidateException> getValidateExceptions() {
@@ -116,19 +116,19 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
     }
 
     @Override
-    public Iterator<Constraint> iterator() {
+    public Iterator<Result> iterator() {
         return new Iterator<>() {
 
-            private final Iterator<Constraint> inner;
+            private final Iterator<Result> inner;
 
             {
                 Deque<ValidateException> stack = new ArrayDeque<>();
-                List<Constraint> all = new ArrayList<>();
+                List<Result> all = new ArrayList<>();
 
                 stack.addFirst(ValidateException.this);
                 while(!stack.isEmpty()) {
                     ValidateException current = stack.removeFirst();
-                    all.addAll(current.constraints);
+                    all.addAll(current.results);
                     for(int i = current.validateExceptions.size() - 1; i >= 0; --i)
                         stack.addFirst(current.validateExceptions.get(i));
                 }
@@ -142,7 +142,7 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
             }
 
             @Override
-            public Constraint next() {
+            public Result next() {
                 return inner.next();
             }
 
@@ -150,13 +150,13 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
     }
 
     @Override
-    public void forEach(Consumer<? super Constraint> action) {
+    public void forEach(Consumer<? super Result> action) {
         Deque<ValidateException> stack = new ArrayDeque<>();
 
         stack.addFirst(this);
         while(!stack.isEmpty()) {
             ValidateException current = stack.removeFirst();
-            for(Constraint e : current.constraints) {
+            for(Result e : current.results) {
                 action.accept(e);
             }
             for(int i = current.validateExceptions.size() - 1; i >= 0; --i)
@@ -174,7 +174,7 @@ public class ValidateException extends RuntimeException implements Iterable<Cons
                 append(super.getMessage()).
                 append(". Reasons:");
 
-        constraints.forEach(
+        results.forEach(
                 c -> result.append('\n').
                         append(c.getMessageKey()).
                         append(". Detail: ").

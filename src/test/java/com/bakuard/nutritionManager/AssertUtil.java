@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager;
 
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
+import com.bakuard.nutritionManager.model.exceptions.Result;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import org.junit.jupiter.api.Assertions;
@@ -25,14 +25,14 @@ public class AssertUtil {
             ValidateException ex = (ValidateException) e;
 
             for(ConstraintType type : expectedTypes) {
-                if(ex.getConstraints().stream().map(Constraint::getType).noneMatch(t -> t == type)) {
+                if(ex.getConstraints().stream().map(Result::getType).noneMatch(t -> t == type)) {
                     Assertions.fail("Expected constraint type " + type + " is missing");
                 }
             }
 
-            for(Constraint constraint : ex.getConstraints()) {
-                if(Arrays.stream(expectedTypes).noneMatch(t -> t == constraint.getType())) {
-                    Assertions.fail("Unexpected constraint type " + constraint.getType());
+            for(Result result : ex.getConstraints()) {
+                if(Arrays.stream(expectedTypes).noneMatch(t -> t == result.getType())) {
+                    Assertions.fail("Unexpected constraint type " + result.getType());
                 }
             }
 

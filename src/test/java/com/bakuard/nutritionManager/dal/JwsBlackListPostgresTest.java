@@ -5,7 +5,6 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.JwsBlackListPostgres;
 
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -22,7 +21,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.Supplier;
 

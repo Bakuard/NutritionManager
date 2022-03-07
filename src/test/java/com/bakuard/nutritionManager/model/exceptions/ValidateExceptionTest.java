@@ -18,7 +18,7 @@ class ValidateExceptionTest {
     public void iterator1() {
         ValidateException validateException = new ValidateException(getClass(), "someMethod");
 
-        Iterator<Constraint> iterator = validateException.iterator();
+        Iterator<Result> iterator = validateException.iterator();
 
         Assertions.assertFalse(iterator.hasNext());
     }
@@ -37,7 +37,7 @@ class ValidateExceptionTest {
         validateException.addExcReason(new ValidateException(getClass(), "someMethod"));
         validateException.addExcReason(new ValidateException(getClass(), "someMethod"));
 
-        Iterator<Constraint> iterator = validateException.iterator();
+        Iterator<Result> iterator = validateException.iterator();
 
         Assertions.assertFalse(iterator.hasNext());
     }
@@ -53,19 +53,19 @@ class ValidateExceptionTest {
     public void iterator3() {
         ValidateException validateException = new ValidateException(getClass(), "someMethod");
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
-        nestedValidateException.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
-        nestedValidateException.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
-        nestedValidateException.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException.addReason(new Result(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException.addReason(new Result(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException.addReason(new Result(getClass(), "some field", ConstraintType.BLANK_VALUE));
         validateException.addExcReason(nestedValidateException);
         ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
         ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
-        nestedValidateException3.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
-        nestedValidateException3.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
-        nestedValidateException3.addReason(new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException3.addReason(new Result(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException3.addReason(new Result(getClass(), "some field", ConstraintType.BLANK_VALUE));
+        nestedValidateException3.addReason(new Result(getClass(), "some field", ConstraintType.BLANK_VALUE));
         nestedValidateException2.addExcReason(nestedValidateException3);
         validateException.addExcReason(nestedValidateException2);
 
-        Iterator<Constraint> iterator = validateException.iterator();
+        Iterator<Result> iterator = validateException.iterator();
 
         Assertions.assertTrue(iterator.hasNext());
     }
@@ -79,13 +79,13 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator4() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -114,13 +114,13 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator5() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -144,13 +144,13 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator6() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -179,13 +179,13 @@ class ValidateExceptionTest {
              => number iteration = number of all field exceptions
             """)
     public void iterator7() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -202,7 +202,7 @@ class ValidateExceptionTest {
         validateException.addExcReason(nestedValidateException);
         validateException.addExcReason(nestedValidateException2);
 
-        Iterator<Constraint> iterator = validateException.iterator();
+        Iterator<Result> iterator = validateException.iterator();
         int number = 0;
         while(iterator.hasNext()) {
             iterator.next();
@@ -222,7 +222,7 @@ class ValidateExceptionTest {
     public void forEach1() {
         ValidateException validateException = new ValidateException(getClass(), "someMethod");
 
-        List<Constraint> actual = new ArrayList<>();
+        List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertEquals(0, actual.size());
@@ -242,7 +242,7 @@ class ValidateExceptionTest {
         validateException.addExcReason(new ValidateException(getClass(), "someMethod"));
         validateException.addExcReason(new ValidateException(getClass(), "someMethod"));
 
-        List<Constraint> actual = new ArrayList<>();
+        List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertEquals(0, actual.size());
@@ -257,13 +257,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach3() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -280,7 +280,7 @@ class ValidateExceptionTest {
         validateException.addExcReason(nestedValidateException);
         validateException.addExcReason(nestedValidateException2);
 
-        List<Constraint> actual = new ArrayList<>();
+        List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -295,13 +295,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach4() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -313,7 +313,7 @@ class ValidateExceptionTest {
         validateException.addExcReason(nestedValidateException2);
         expected.forEach(validateException::addReason);
 
-        List<Constraint> actual = new ArrayList<>();
+        List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -328,13 +328,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach5() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -351,7 +351,7 @@ class ValidateExceptionTest {
         validateException.addExcReason(nestedValidateException);
         validateException.addExcReason(nestedValidateException2);
 
-        List<Constraint> actual = new ArrayList<>();
+        List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -366,13 +366,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach6() {
-        List<Constraint> expected = List.of(
-                new Constraint(getClass(), "some field", ConstraintType.BLANK_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.MISSING_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
-                new Constraint(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
-                new Constraint(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
-                new Constraint(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
+        List<Result> expected = List.of(
+                new Result(getClass(), "some field", ConstraintType.BLANK_VALUE),
+                new Result(getClass(), "some field", ConstraintType.MISSING_VALUE),
+                new Result(getClass(), "some field", ConstraintType.OUT_OF_RANGE),
+                new Result(getClass(), "some field", ConstraintType.DUPLICATE_TAG),
+                new Result(getClass(), "some field", ConstraintType.NEGATIVE_VALUE),
+                new Result(getClass(), "some field", ConstraintType.NOT_POSITIVE_VALUE)
         );
 
         ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
@@ -389,7 +389,7 @@ class ValidateExceptionTest {
         validateException.addExcReason(nestedValidateException);
         validateException.addExcReason(nestedValidateException2);
 
-        List<Constraint> actual = new ArrayList<>();
+        List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
