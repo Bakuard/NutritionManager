@@ -22,7 +22,7 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public boolean addToBlackList(UUID tokenId, LocalDateTime expired) {
-        Checker.of(getClass(), "addToBlackList").
+        Checker.of().
                 notNull("tokenId", tokenId).
                 notNull("expired", expired).
                 validate("Fail to add token to black list");
@@ -47,7 +47,7 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public boolean inBlackList(UUID tokenId) {
-        Checker.of(getClass(), "inBlackList").
+        Checker.of().
                 notNull("tokenId", tokenId).
                 validate("Fail check - is there tokenId in black list");
 
@@ -62,7 +62,7 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public int removeAllExpired(LocalDateTime deadline) {
-        Checker.of(getClass(), "removeAllExpired").
+        Checker.of().
                 notNull("deadline", deadline).
                 validate("Fail to remove all expired tokens");
 

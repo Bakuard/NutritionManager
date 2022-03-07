@@ -19,7 +19,7 @@ public class AnyFilter implements Filter {
     private final Type type;
 
     AnyFilter(List<String> values, int minItems, Type type) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("values", values).
                 notContainsNull("values", values).
                 containsAtLeast("values", values, minItems).

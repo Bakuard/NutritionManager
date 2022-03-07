@@ -12,7 +12,7 @@ public class AndFilter implements Filter {
     private final ImmutableList<Filter> operands;
 
     AndFilter(List<Filter> operands) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("operands", operands).
                 notContainsNull("operands", operands).
                 containsAtLeast("operands", operands, 2).

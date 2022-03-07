@@ -11,7 +11,7 @@ public class OrElseFilter implements Filter {
     private final ImmutableList<Filter> operands;
 
     OrElseFilter(List<Filter> operands) {
-        Checker.of(getClass(), "operands").
+        Checker.of().
                 notNull("operands", operands).
                 notContainsNull("operands", operands).
                 containsAtLeast("operands", operands, 2).

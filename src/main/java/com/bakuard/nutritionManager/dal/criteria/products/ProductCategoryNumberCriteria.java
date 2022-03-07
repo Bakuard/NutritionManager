@@ -15,7 +15,7 @@ public class ProductCategoryNumberCriteria {
     private User user;
 
     private ProductCategoryNumberCriteria(User user) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("user", user).
                 validate();
 

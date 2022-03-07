@@ -42,7 +42,7 @@ public class Product {
                     AppConfigData config) {
         Checker.Container<ProductContext> context = Checker.container();
 
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("id", id).
                 notNull("user", user).
                 notNull("quantity", quantity).
@@ -66,7 +66,7 @@ public class Product {
      * @throws ValidateException если указанное значение равняется null
      */
     public void setContext(ProductContext context) {
-        Checker.of(getClass(), "setContext").
+        Checker.of().
                 notNull("context", context).
                 validate("Fail to set product context");
 
@@ -82,7 +82,7 @@ public class Product {
      *         2. если указанное значение меньше нуля.
      */
     public void addQuantity(BigDecimal quantity) {
-        Checker.of(getClass(), "addQuantity").
+        Checker.of().
                 notNull("quantity", quantity).
                 notNegativeValue("quantity", quantity).
                 validate("Fail to add product quantity");
@@ -103,7 +103,7 @@ public class Product {
      *         2. если указанное значение меньше нуля.
      */
     public BigDecimal take(BigDecimal quantity) {
-        Checker.of(getClass(), "take").
+        Checker.of().
                 notNull("quantity", quantity).
                 notNegativeValue("quantity", quantity).
                 validate("Fail to take product quantity");

@@ -14,7 +14,7 @@ public class MinTagsFilter implements Filter {
     private final ImmutableSortedSet<Tag> tags;
 
     MinTagsFilter(List<Tag> tags) {
-        Checker.of(getClass(), "tags").
+        Checker.of().
                 notNull("tags", tags).
                 notContainsNull("tags", tags).
                 containsAtLeast("tags", tags, 1).

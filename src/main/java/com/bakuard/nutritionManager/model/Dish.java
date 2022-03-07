@@ -61,7 +61,7 @@ public class Dish {
         Checker.Container<List<Tag>> tagContainer = Checker.container();
         Checker.Container<List<DishIngredient>> ingredientContainer = Checker.container();
 
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("id", id).
                 notNull("user", user).
                 notNull("name", name).
@@ -95,7 +95,7 @@ public class Dish {
      *         2. если name не содержит ни одного отображаемого символа.
      */
     public void setName(String name) {
-        Checker.of(getClass(), "setName").
+        Checker.of().
                 notNull("name", name).
                 notBlank("name", name).
                 validate("Fail to set dish name");
@@ -112,7 +112,7 @@ public class Dish {
      *         2. если unit не содержит ни одного отображаемого символа.
      */
     public void setUnit(String unit) {
-        Checker.of(getClass(), "setUnit").
+        Checker.of().
                 notNull("unit", unit).
                 notBlank("unit", unit).
                 validate("Fail to set dish unit");
@@ -188,7 +188,7 @@ public class Dish {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public void addTag(Tag tag) {
-        Checker.of(getClass(), "addTag").
+        Checker.of().
                 notNull("tag", tag).
                 notContainsDuplicateTag("tags", tags, tag).
                 validate("Fail to add tag to dish");
@@ -329,7 +329,7 @@ public class Dish {
      */
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
                                          Map<String, Integer> productsIndex) {
-        Checker checker = Checker.of(getClass(), "getPrice").
+        Checker checker = Checker.of().
                 notNull("servingNumber", servingNumber).
                 notNull("productsIndex", productsIndex).
                 positiveValue("servingNumber", servingNumber).

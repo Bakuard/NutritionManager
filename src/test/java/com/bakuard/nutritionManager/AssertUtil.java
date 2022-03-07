@@ -38,8 +38,9 @@ public class AssertUtil {
 
             if(!ex.isOriginate(checkedType, operationName)) {
                 Assertions.fail("Unexpected checkedType or operationName. Expected: " +
-                        ex.getCheckedType().getName() + ", " + ex.getOperationName() + ". Actual: " +
-                        checkedType.getName() + ", " + operationName);
+                        checkedType.getName() + ", " + operationName +
+                        ". Actual: " + ex.getCheckedType().getName() + ", " + ex.getOperationName()
+                );
             }
         }
     }

@@ -25,7 +25,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public boolean save(User user) {
-        Checker.of(getClass(), "save").
+        Checker.of().
                 notNull("user", user).
                 validate("Fail to save user");
 
@@ -53,7 +53,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getById(UUID userId) {
-        Checker checker = Checker.of(getClass(), "getById").
+        Checker checker = Checker.of().
                 notNull("userId", userId).
                 validate("Fail to get user by id");
 
@@ -71,7 +71,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getByName(String name) {
-        Checker.of(getClass(), "getByName").
+        Checker.of().
                 notNull("name", name).
                 validate("Fail to get user by name");
 
@@ -103,7 +103,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getByEmail(String email) {
-        Checker.of(getClass(), "getByEmail").
+        Checker.of().
                 notNull("email", email).
                 validate("Fail to get user by email");
 

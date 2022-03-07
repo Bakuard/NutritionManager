@@ -33,7 +33,7 @@ public class ProductsNumberCriteria {
     private Filter filter;
 
     private ProductsNumberCriteria(User user) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("user", user).
                 validate();
 

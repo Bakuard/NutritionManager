@@ -31,7 +31,7 @@ public class DishFieldCriteria {
     private Pageable pageable;
 
     private DishFieldCriteria(User user, Pageable pageable) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("pageable", pageable).
                 notNull("user", user).
                 validate();

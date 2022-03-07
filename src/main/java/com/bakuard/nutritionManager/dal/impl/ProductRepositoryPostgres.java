@@ -47,7 +47,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public boolean save(Product product) {
-        Checker.of(getClass(), "save").
+        Checker.of().
                 notNull("product", product).
                 validate("Fail to save product");
 
@@ -75,7 +75,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product remove(UUID productId) {
-        Checker.of(getClass(), "remove").
+        Checker.of().
                 notNull("productId", productId).
                 validate("Fail to remove product. Unknown product with id=null");
 
@@ -99,7 +99,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product getById(UUID productId) {
-        Checker.of(getClass(), "getById").
+        Checker.of().
                 notNull("productId", productId).
                 validate("Fail to get product by id");
 
@@ -117,7 +117,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Page<Product> getProducts(ProductCriteria criteria) {
-        Checker.of(getClass(), "getProducts").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get product by criteria");
 
@@ -206,7 +206,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Page<Tag> getTags(ProductFieldCriteria criteria) {
-        Checker.of(getClass(), "getTags").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get products tags by criteria");
 
@@ -247,7 +247,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Page<String> getShops(ProductFieldCriteria criteria) {
-        Checker.of(getClass(), "getShops").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get shops by criteria");
 
@@ -286,7 +286,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Page<String> getVarieties(ProductFieldCriteria criteria) {
-        Checker.of(getClass(), "getVarieties").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get varieties by criteria");
 
@@ -325,7 +325,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Page<String> getCategories(ProductCategoryCriteria criteria) {
-        Checker.of(getClass(), "getCategories").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get categories by criteria");
 
@@ -362,7 +362,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Page<String> getManufacturers(ProductFieldCriteria criteria) {
-        Checker.of(getClass(), "getManufacturers").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get manufacturers by criteria");
 
@@ -401,7 +401,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getProductsNumber(ProductsNumberCriteria criteria) {
-        Checker.of(getClass(), "getProductsNumber").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get products number by criteria");
 
@@ -421,7 +421,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getTagsNumber(ProductFieldNumberCriteria criteria) {
-        Checker.of(getClass(), "getTagsNumber").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get products tags number by criteria");
 
@@ -447,7 +447,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getShopsNumber(ProductFieldNumberCriteria criteria) {
-        Checker.of(getClass(), "getShopsNumber").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get shops number by criteria");
 
@@ -471,7 +471,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getVarietiesNumber(ProductFieldNumberCriteria criteria) {
-        Checker.of(getClass(), "getVarietiesNumber").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get varieties number by criteria");
 
@@ -495,7 +495,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getCategoriesNumber(ProductCategoryNumberCriteria criteria) {
-        Checker.of(getClass(), "getCategoriesNumber").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get categories number by criteria");
 
@@ -517,7 +517,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getManufacturersNumber(ProductFieldNumberCriteria criteria) {
-        Checker.of(getClass(), "getManufacturersNumber").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get manufacturers number by criteria");
 
@@ -541,7 +541,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria) {
-        Checker.of(getClass(), "getProductsSum").
+        Checker.of().
                 notNull("criteria", criteria).
                 validate("Fail to get products number by criteria");
 

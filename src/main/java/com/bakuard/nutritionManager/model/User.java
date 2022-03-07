@@ -27,7 +27,7 @@ public class User {
     }
 
     public User(UUID id, String name, String password, String email) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("id", id).
                 notNull("name", name).
                 notBlank("name", name).
@@ -63,7 +63,7 @@ public class User {
     }
 
     public void setName(String name) {
-        Checker.of(getClass(), "setName").
+        Checker.of().
                 notNull("name", name).
                 notBlank("name", name).
                 stringLength("name", name, 1, 40).
@@ -76,7 +76,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        Checker.of(getClass(), "setPassword").
+        Checker.of().
                 notNull("password", password).
                 notBlank("password", password).
                 stringLength("password", password, 8, 100).
@@ -89,7 +89,7 @@ public class User {
     }
 
     public void setEmail(String email) {
-        Checker.of(getClass(), "setEmail").
+        Checker.of().
                 notNull("email", email).
                 notBlank("email", email).
                 validate("Fail to set user email");
@@ -101,7 +101,7 @@ public class User {
     }
 
     public boolean isCorrectPassword(String password) {
-        Checker.of(getClass(), "isCorrectPassword").
+        Checker.of().
                 notNull("password", password).
                 validate();
         return passwordHash.equals(calculatePasswordHash(password, salt));

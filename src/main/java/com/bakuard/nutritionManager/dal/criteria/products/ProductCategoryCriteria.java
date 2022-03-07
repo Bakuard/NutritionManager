@@ -17,7 +17,7 @@ public class ProductCategoryCriteria {
     private User user;
 
     private ProductCategoryCriteria(Pageable pageable, User user) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("pageable", pageable).
                 notNull("user", user).
                 validate();

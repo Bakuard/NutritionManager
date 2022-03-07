@@ -69,7 +69,7 @@ public class DishIngredient {
                           ProductRepository repository,
                           User user,
                           AppConfigData config) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("name", name).
                 notNull("filter", filter).
                 notNull("quantity", quantity).
@@ -121,7 +121,7 @@ public class DishIngredient {
      * @throws ValidateException если указанное значение null или не является положительным.
      */
     public BigDecimal getNecessaryQuantity(BigDecimal servingNumber) {
-        Checker.of(getClass(), "getNecessaryQuantity").
+        Checker.of().
                 notNull("servingNumber", servingNumber).
                 positiveValue("servingNumber", servingNumber).
                 validate("Fail to get necessary ingredient quantity.");
@@ -146,7 +146,7 @@ public class DishIngredient {
      *              3. servingNumber <= 0
      */
     public Optional<BigDecimal> getLackQuantity(int productIndex, BigDecimal servingNumber) {
-        Checker.of(getClass(), "getLackQuantity").
+        Checker.of().
                 notNull("servingNumber", servingNumber).
                 positiveValue("servingNumber", servingNumber).
                 validate("Fail to get product lack quantity");
@@ -180,7 +180,7 @@ public class DishIngredient {
      *              3. servingNumber <= 0
      */
     public Optional<BigDecimal> getLackQuantityPrice(int productIndex, BigDecimal servingNumber) {
-        Checker.of(getClass(), "getLackQuantityPrice").
+        Checker.of().
                 notNull("servingNumber", servingNumber).
                 positiveValue("servingNumber", servingNumber).
                 validate("Fail to get price of product lack quantity");
@@ -205,7 +205,7 @@ public class DishIngredient {
      * @throws ValidateException если productIndex < 0
      */
     public Optional<Product> getProductByIndex(int productIndex) {
-        Checker.of(getClass(), "getProductByIndex").
+        Checker.of().
                 notNegativeValue("productIndex", productIndex).
                 validate("Fail to get product bu index");
 

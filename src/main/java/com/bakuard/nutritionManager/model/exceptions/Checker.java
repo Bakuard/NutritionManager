@@ -10,12 +10,18 @@ import java.util.function.Function;
 
 public class Checker {
 
+    private static final StackWalker walker = StackWalker.getInstance(
+            Set.of(StackWalker.Option.RETAIN_CLASS_REFERENCE),
+            2
+    );
+
     public static <T>Container<T> container() {
         return new Container<>();
     }
 
-    public static Checker of(Class<?> checkedType, String operationName) {
-        return new Checker(checkedType, operationName);
+    public static Checker of() {
+        StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
+        return new Checker(frame.getDeclaringClass(), frame.getMethodName());
     }
 
 

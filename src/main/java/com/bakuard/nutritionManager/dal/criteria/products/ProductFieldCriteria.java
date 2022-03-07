@@ -35,7 +35,7 @@ public class ProductFieldCriteria {
     private AnyFilter productCategory;
 
     private ProductFieldCriteria(Pageable pageable, User user) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("pageable", pageable).
                 notNull("user", user).
                 validate();

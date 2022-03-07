@@ -32,7 +32,7 @@ public class ProductFieldNumberCriteria {
     private AnyFilter productCategory;
 
     private ProductFieldNumberCriteria(User user) {
-        Checker.of(getClass(), "constructor").
+        Checker.of().
                 notNull("user", user).
                 validate();
 
