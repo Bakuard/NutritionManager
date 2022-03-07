@@ -122,7 +122,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void save1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.save(null),
                 DishRepositoryPostgres.class,
                 "save",
@@ -212,7 +212,7 @@ class DishRepositoryPostgresTest {
         Dish dish = createDish(7, user);
         dish.setName("dish 1");
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> commit(() -> dishRepository.save(dish)),
                 DishRepositoryPostgres.class,
                 "save",
@@ -290,7 +290,7 @@ class DishRepositoryPostgresTest {
         Dish updatedDish = new Dish(dish);
         updatedDish.setName("dish 1");
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.save(updatedDish),
                 DishRepositoryPostgres.class,
                 "save",
@@ -345,7 +345,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void remove1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.remove(null),
                 DishRepositoryPostgres.class,
                 "remove",
@@ -363,7 +363,7 @@ class DishRepositoryPostgresTest {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.remove(toUUID(100)),
                 DishRepositoryPostgres.class,
                 "remove",
@@ -384,7 +384,7 @@ class DishRepositoryPostgresTest {
 
         commit(() -> dishRepository.remove(toUUID(100)));
 
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getById(toUUID(100)),
                 DishRepositoryPostgres.class,
                 "getById",
@@ -415,7 +415,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getById1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getById(null),
                 DishRepositoryPostgres.class,
                 "getById",
@@ -430,7 +430,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getById2() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getById(toUUID(100)),
                 DishRepositoryPostgres.class,
                 "getById",
@@ -463,7 +463,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getDishesNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getDishesNumber(null),
                 DishRepositoryPostgres.class,
                 "getDishesNumber",
@@ -643,7 +643,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getDishes1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getDishes(null),
                 DishRepositoryPostgres.class,
                 "getDishes",
@@ -911,7 +911,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getTagsNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getTagsNumber(null),
                 DishRepositoryPostgres.class,
                 "getTagsNumber",
@@ -963,7 +963,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getTags1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getTags(null),
                 DishRepositoryPostgres.class,
                 "getTags",
@@ -1019,7 +1019,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getUnitsNumber1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getUnitsNumber(null),
                 DishRepositoryPostgres.class,
                 "getUnitsNumber",
@@ -1071,7 +1071,7 @@ class DishRepositoryPostgresTest {
              => exception
             """)
     public void getUnits1() {
-        AssertUtil.assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> dishRepository.getUnits(null),
                 DishRepositoryPostgres.class,
                 "getUnits",

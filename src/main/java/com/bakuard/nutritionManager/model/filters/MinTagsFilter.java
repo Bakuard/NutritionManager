@@ -3,12 +3,9 @@ package com.bakuard.nutritionManager.model.filters;
 import com.bakuard.nutritionManager.model.Tag;
 
 import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.Constraint;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,10 +15,10 @@ public class MinTagsFilter implements Filter {
 
     MinTagsFilter(List<Tag> tags) {
         Checker.of(getClass(), "tags").
-                nullValue("tags", tags).
-                containsNull("tags", tags).
-                notEnoughItems("tags", tags, 1).
-                checkWithServiceException();
+                notNull("tags", tags).
+                notContainsNull("tags", tags).
+                containsAtLeast("tags", tags, 1).
+                validate();
 
         this.tags = ImmutableSortedSet.copyOf(tags);
     }

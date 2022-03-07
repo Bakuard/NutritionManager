@@ -197,20 +197,6 @@ public class DtoMapper {
         );
     }
 
-    public ExceptionResponse toExceptionResponse(ServiceException e) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        if(e.getCheckedType() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
-        else if(e.containsConstraint(ConstraintType.UNKNOWN_ENTITY)) httpStatus = HttpStatus.NOT_FOUND;
-
-        ExceptionResponse response = new ExceptionResponse(
-                httpStatus,
-                getMessage(e.getMessageKey(), e.getMessage()),
-                getMessage("errorTitle", "Error")
-        );
-        e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
-        return response;
-    }
-
     public ExceptionResponse toExceptionResponse(ValidateException e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         if(e.getCheckedType() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;

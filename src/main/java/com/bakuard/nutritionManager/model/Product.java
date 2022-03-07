@@ -5,6 +5,7 @@ import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -39,21 +40,21 @@ public class Product {
                     String imagePath,
                     ProductContext.Builder contextBuilder,
                     AppConfigData config) {
-        Checker.Container<ProductContext> container = Checker.container();
+        Checker.Container<ProductContext> context = Checker.container();
 
         Checker.of(getClass(), "constructor").
-                nullValue("id", id).
-                nullValue("user", user).
-                nullValue("quantity", quantity).
-                negativeValue("quantity", quantity).
-                nullValue("config", config).
-                nullValue("context", contextBuilder).
-                tryBuild(contextBuilder, container).
-                checkWithValidateException("Fail to create product");
+                notNull("id", id).
+                notNull("user", user).
+                notNull("quantity", quantity).
+                notNegativeValue("quantity", quantity).
+                notNull("config", config).
+                notNull("context", contextBuilder).
+                tryBuild(contextBuilder, context).
+                validate("Fail to create product");
 
         this.id = id;
         this.user = user;
-        this.context = container.get();
+        this.context = context.get();
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.description = description;
         this.imagePath = imagePath;
@@ -66,8 +67,8 @@ public class Product {
      */
     public void setContext(ProductContext context) {
         Checker.of(getClass(), "setContext").
-                nullValue("context", context).
-                checkWithValidateException("Fail to set product context");
+                notNull("context", context).
+                validate("Fail to set product context");
 
         this.context = context;
     }
@@ -82,9 +83,9 @@ public class Product {
      */
     public void addQuantity(BigDecimal quantity) {
         Checker.of(getClass(), "addQuantity").
-                nullValue("quantity", quantity).
-                negativeValue("quantity", quantity).
-                checkWithValidateException("Fail to add product quantity");
+                notNull("quantity", quantity).
+                notNegativeValue("quantity", quantity).
+                validate("Fail to add product quantity");
 
         this.quantity = this.quantity.add(quantity);
     }
@@ -103,9 +104,9 @@ public class Product {
      */
     public BigDecimal take(BigDecimal quantity) {
         Checker.of(getClass(), "take").
-                nullValue("quantity", quantity).
-                negativeValue("quantity", quantity).
-                checkWithValidateException("Fail to take product quantity");
+                notNull("quantity", quantity).
+                notNegativeValue("quantity", quantity).
+                validate("Fail to take product quantity");
 
         BigDecimal remain = this.quantity.min(quantity);
         this.quantity = this.quantity.subtract(remain);

@@ -1,11 +1,8 @@
 package com.bakuard.nutritionManager.dal.criteria.dishes;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
-import com.bakuard.nutritionManager.model.filters.DishSort;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.MinTagsFilter;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -23,7 +20,7 @@ public class DishesNumberCriteria {
      * Создает и возвращает новый объект DishesNumberCriteria.
      * @param user пользователь для блюд которого ведется подсчет.
      * @return новый объект DishesNumberCriteria.
-     * @throws ServiceException если user имеет значение null.
+     * @throws ValidateException если user имеет значение null.
      */
     public static DishesNumberCriteria of(User user) {
         return new DishesNumberCriteria(user);
@@ -35,8 +32,8 @@ public class DishesNumberCriteria {
 
     private DishesNumberCriteria(User user) {
         Checker.of(getClass(), "constructor").
-                nullValue("user", user).
-                checkWithServiceException();
+                notNull("user", user).
+                validate();
 
         this.user = user;
     }

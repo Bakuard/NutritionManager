@@ -1,8 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.dishes;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 import java.util.Objects;
 
@@ -19,7 +18,7 @@ public class DishFieldNumberCriteria {
      * Создает и возвращает новый обеъект DishFieldNumberCriteria.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый объект DishFieldNumberCriteria.
-     * @throws ServiceException если user имеет значение null.
+     * @throws ValidateException если user имеет значение null.
      */
     public static DishFieldNumberCriteria of(User user) {
         return new DishFieldNumberCriteria(user);
@@ -30,8 +29,8 @@ public class DishFieldNumberCriteria {
 
     private DishFieldNumberCriteria(User user) {
         Checker.of(getClass(), "constructor").
-                nullValue("user", user).
-                checkWithServiceException();
+                notNull("user", user).
+                validate();
 
         this.user = user;
     }

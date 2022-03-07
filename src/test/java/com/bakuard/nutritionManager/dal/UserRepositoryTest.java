@@ -1,13 +1,13 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.Action;
+import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.User;
 
 import com.bakuard.nutritionManager.model.exceptions.Constraint;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -105,7 +105,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): user is null => exception")
     public void save1() {
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(null),
                 UserRepositoryPostgres.class,
                 "save",
@@ -168,7 +168,7 @@ class UserRepositoryTest {
         User addedUser = createDefaultUser(2);
         addedUser.setName("User1");
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
@@ -190,7 +190,7 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
@@ -212,7 +212,7 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
@@ -273,7 +273,7 @@ class UserRepositoryTest {
         User expected = new User(user1);
         expected.setName("User2");
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
@@ -303,7 +303,7 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
@@ -333,7 +333,7 @@ class UserRepositoryTest {
                 user1.getSalt()
         );
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
@@ -376,7 +376,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("getById(userId): userId is null => exception")
     public void getById1() {
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getById(null),
                 UserRepositoryPostgres.class,
                 "getById",
@@ -390,7 +390,7 @@ class UserRepositoryTest {
         User user = createDefaultUser(1);
         repository.save(user);
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getById(toUUID(2)),
                 UserRepositoryPostgres.class,
                 "getById",
@@ -417,7 +417,7 @@ class UserRepositoryTest {
              => exception
             """)
     public void getByName1() {
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getByName(null),
                 UserRepositoryPostgres.class,
                 "getByName",
@@ -435,7 +435,7 @@ class UserRepositoryTest {
         User user = createDefaultUser(1);
         commit(() -> repository.save(user));
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getByName("some user"),
                 UserRepositoryPostgres.class,
                 "getByName",
@@ -465,7 +465,7 @@ class UserRepositoryTest {
              => exception
             """)
     public void getByEmail1() {
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getByEmail(null),
                 UserRepositoryPostgres.class,
                 "getByEmail",
@@ -483,7 +483,7 @@ class UserRepositoryTest {
         User user = createDefaultUser(1);
         commit(() -> repository.save(user));
 
-        assertServiceException(
+        AssertUtil.assertValidateException(
                 () -> repository.getByEmail("newEmail@mail.com"),
                 UserRepositoryPostgres.class,
                 "getByEmail",
@@ -529,40 +529,6 @@ class UserRepositoryTest {
 
     private UUID toUUID(int number) {
         return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
-    }
-
-    private void assertServiceException(Action action,
-                                        Class<?> checkedType,
-                                        String operationName,
-                                        ConstraintType... expectedTypes) {
-        try {
-            action.act();
-            Assertions.fail("Expected exception, but nothing be thrown");
-        } catch(Exception e) {
-            if(!(e instanceof ServiceException)) {
-                Assertions.fail("Unexpected exception type " + e.getClass().getName());
-            }
-
-            ServiceException ex = (ServiceException) e;
-
-            for(ConstraintType type : expectedTypes) {
-                if(ex.getConstraints().stream().map(Constraint::getType).noneMatch(t -> t == type)) {
-                    Assertions.fail("Expected constraint type " + type + " is missing");
-                }
-            }
-
-            for(Constraint constraint : ex.getConstraints()) {
-                if(Arrays.stream(expectedTypes).noneMatch(t -> t == constraint.getType())) {
-                    Assertions.fail("Unexpected constraint type " + constraint.getType());
-                }
-            }
-
-            if(!ex.isOriginate(checkedType, operationName)) {
-                Assertions.fail("Unexpected checkedType or operationName. Expected: " +
-                        ex.getCheckedType().getName() + ", " + ex.getOperationName() + ". Actual: " +
-                        checkedType.getName() + ", " + operationName);
-            }
-        }
     }
 
 }

@@ -8,6 +8,7 @@ import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -61,17 +62,17 @@ public class Dish {
         Checker.Container<List<DishIngredient>> ingredientContainer = Checker.container();
 
         Checker.of(getClass(), "constructor").
-                nullValue("id", id).
-                nullValue("user", user).
-                nullValue("name", name).
-                blankValue("name", name).
-                nullValue("unit", unit).
-                blankValue("unit", unit).
+                notNull("id", id).
+                notNull("user", user).
+                notNull("name", name).
+                notBlank("name", name).
+                notNull("unit", unit).
+                notBlank("unit", unit).
                 tryBuildForEach(ingredients, ingredientContainer).
                 tryBuildForEach(tags, Tag::new, tagContainer).
-                nullValue("config", config).
-                nullValue("repository", productRepository).
-                checkWithValidateException("Fail to create dish");
+                notNull("config", config).
+                notNull("repository", productRepository).
+                validate("Fail to create dish");
 
         this.id = id;
         this.user = user;
@@ -95,9 +96,9 @@ public class Dish {
      */
     public void setName(String name) {
         Checker.of(getClass(), "setName").
-                nullValue("name", name).
-                blankValue("name", name).
-                checkWithValidateException("Fail to set dish name");
+                notNull("name", name).
+                notBlank("name", name).
+                validate("Fail to set dish name");
 
         this.name = name.trim();
     }
@@ -112,9 +113,9 @@ public class Dish {
      */
     public void setUnit(String unit) {
         Checker.of(getClass(), "setUnit").
-                nullValue("unit", unit).
-                blankValue("unit", unit).
-                checkWithValidateException("Fail to set dish unit");
+                notNull("unit", unit).
+                notBlank("unit", unit).
+                validate("Fail to set dish unit");
 
         this.unit = unit.trim();
     }
@@ -188,9 +189,9 @@ public class Dish {
      */
     public void addTag(Tag tag) {
         Checker.of(getClass(), "addTag").
-                nullValue("tag", tag).
-                duplicateTag("tags", tags, tag).
-                checkWithValidateException("Fail to add tag to dish");
+                notNull("tag", tag).
+                notContainsDuplicateTag("tags", tags, tag).
+                validate("Fail to add tag to dish");
 
         tags.add(tag);
     }
@@ -329,18 +330,18 @@ public class Dish {
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
                                          Map<String, Integer> productsIndex) {
         Checker checker = Checker.of(getClass(), "getPrice").
-                nullValue("servingNumber", servingNumber).
-                nullValue("productsIndex", productsIndex).
-                notPositiveValue("servingNumber", servingNumber).
-                containsNegative("productsIndex", productsIndex.values()).
-                checkWithValidateException("Fail to get dish price");
+                notNull("servingNumber", servingNumber).
+                notNull("productsIndex", productsIndex).
+                positiveValue("servingNumber", servingNumber).
+                notContainsNegative("productsIndex", productsIndex.values()).
+                validate("Fail to get dish price");
 
         if(ingredients.size() != productsIndex.size() ||
                 ingredients.stream().
                 map(DishIngredient::getName).
                 anyMatch(i -> !productsIndex.containsKey(i))) {
-            checker.addConstraint("productsIndex", ConstraintType.UNKNOWN_ITEM).
-                    checkWithValidateException("Fail to get dish price");
+            checker.failure("productsIndex", ConstraintType.UNKNOWN_ITEM).
+                    validate("Fail to get dish price");
         }
 
         return ingredients.stream().

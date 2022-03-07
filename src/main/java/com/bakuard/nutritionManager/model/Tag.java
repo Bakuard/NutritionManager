@@ -20,9 +20,9 @@ public final class Tag implements Comparable<Tag> {
      */
     public Tag(String value) {
         Checker.of(getClass(), "constructor").
-                nullValue("value", value).
-                blankValue("value", value).
-                checkWithValidateException("Fail to create tag");
+                notNull("value", value).
+                notBlank("value", value).
+                validate("Fail to create tag");
 
         this.value = value.trim();
     }

@@ -12,6 +12,7 @@ import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -56,9 +57,9 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public boolean save(Dish dish) {
-        Checker checker = Checker.of(getClass(), "save").
-                nullValue("dish", dish).
-                checkWithServiceException("Fail to save dish");
+        Checker.of(getClass(), "save").
+                notNull("dish", dish).
+                validate("Fail to save dish");
 
         Dish oldDish = getByIdOrReturnNull(dish.getId());
 
@@ -72,8 +73,11 @@ public class DishRepositoryPostgres implements DishRepository {
                 newData = true;
             }
         } catch(DuplicateKeyException e) {
-            throw checker.addConstraint("dish", ConstraintType.ALREADY_EXISTS_IN_DB).
-                    createServiceException("Fail to save dish", e);
+            throw new ValidateException(
+                    "Fail to save dish",
+                    getClass(),
+                    "save"
+            ).addReason("dish", ConstraintType.ALREADY_EXISTS_IN_DB);
         }
 
         return newData;
@@ -81,16 +85,18 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish remove(UUID dishId) {
-        Checker checker = Checker.of(getClass(), "remove").
-                nullValue("dishId", dishId).
-                checkWithServiceException("Fail to remove dish. Unknown dish with id=null");
+        Checker.of(getClass(), "remove").
+                notNull("dishId", dishId).
+                validate("Fail to remove dish. Unknown dish with id=null");
 
         Dish dish = getByIdOrReturnNull(dishId);
 
         if(dish == null) {
-            throw checker.
-                    addConstraint("dishId", ConstraintType.UNKNOWN_ENTITY).
-                    createServiceException("Fail to remove dish. Unknown dish with id=" + dishId);
+            throw new ValidateException(
+                    "Fail to remove dish. Unknown dish with id=" + dishId,
+                    getClass(),
+                    "remove"
+            ).addReason("dishId", ConstraintType.UNKNOWN_ENTITY);
         }
 
         statement.update(
@@ -103,14 +109,17 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish getById(UUID dishId) {
-        Checker checker = Checker.of(getClass(), "getById").
-                nullValue("dishId", dishId).
-                checkWithServiceException("Fail to get dish by id");
+        Checker.of(getClass(), "getById").
+                notNull("dishId", dishId).
+                validate("Fail to get dish by id");
 
         Dish dish = getByIdOrReturnNull(dishId);
         if(dish == null) {
-            throw checker.addConstraint("dishId", ConstraintType.UNKNOWN_ENTITY).
-                    createServiceException("Fail to get dish by id=" + dishId);
+            throw new ValidateException(
+                    "Fail to get dish by id=" + dishId,
+                    getClass(),
+                    "getById"
+            ).addReason("dishId", ConstraintType.UNKNOWN_ENTITY);
         }
 
         return dish;
@@ -119,8 +128,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<Dish> getDishes(DishCriteria criteria) {
         Checker.of(getClass(), "getDishes").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get dishes by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get dishes by criteria");
 
         Page.Metadata metadata = criteria.getPageable().
                 createPageMetadata(getDishesNumber(criteria.getNumberCriteria()), 30);
@@ -201,8 +210,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<Tag> getTags(DishFieldCriteria criteria) {
         Checker.of(getClass(), "getTags").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get dishes tags by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get dishes tags by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
                 getTagsNumber(criteria.getNumberCriteria()), 200
@@ -240,8 +249,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<String> getUnits(DishFieldCriteria criteria) {
         Checker.of(getClass(), "getUnits").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get dishes shops by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get dishes shops by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
                 getUnitsNumber(criteria.getNumberCriteria()), 200
@@ -277,8 +286,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getDishesNumber(DishesNumberCriteria criteria) {
         Checker.of(getClass(), "getDishesNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get dishes number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get dishes number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getFilter().isPresent())
@@ -295,8 +304,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getTagsNumber(DishFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getTagsNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get dishes tags number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get dishes tags number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
 
@@ -319,8 +328,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getUnitsNumber(DishFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getUnitsNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get dishes units number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get dishes units number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
 
@@ -357,7 +366,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     ps.setString(3, dish.getName());
                     ps.setString(4, dish.getUnit());
                     ps.setString(5, dish.getDescription());
-                    ps.setString(6, dish.getImagePath());
+                    ps.setString(6, dish.getImagePath().toString());
                 }
         );
 
@@ -430,7 +439,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     ps.setString(1, newVersion.getName());
                     ps.setString(2, newVersion.getUnit());
                     ps.setString(3, newVersion.getDescription());
-                    ps.setString(4, newVersion.getImagePath());
+                    ps.setString(4, newVersion.getImagePath().toString());
                     ps.setObject(5, newVersion.getUser().getId());
                     ps.setObject(6, newVersion.getId());
                 }

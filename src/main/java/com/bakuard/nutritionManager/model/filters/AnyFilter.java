@@ -20,11 +20,11 @@ public class AnyFilter implements Filter {
 
     AnyFilter(List<String> values, int minItems, Type type) {
         Checker.of(getClass(), "constructor").
-                nullValue("values", values).
-                containsNull("values", values).
-                notEnoughItems("values", values, minItems).
-                containsBlankValue("values", values).
-                checkWithServiceException();
+                notNull("values", values).
+                notContainsNull("values", values).
+                containsAtLeast("values", values, minItems).
+                notContainsBlankValue("values", values).
+                validate();
 
         this.values = ImmutableList.copyOf(values);
         this.type = type;

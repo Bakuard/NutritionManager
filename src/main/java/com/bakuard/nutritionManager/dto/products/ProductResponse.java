@@ -1,9 +1,11 @@
 package com.bakuard.nutritionManager.dto.products;
 
 import com.bakuard.nutritionManager.dto.users.UserResponse;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;

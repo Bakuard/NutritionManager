@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -28,7 +28,7 @@ public interface Filter {
      * @param b второй обязательный операнд ограничения AndFilter.
      * @param other другие не обязательные операнды ограничения AndFilter.
      * @return новый объект ограничения AndFilter.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *          1. если хотябы один из операндов имеет значение null.<br/>
      *          2. если передаваемый массив операндов имеет значение null.
      */
@@ -40,7 +40,7 @@ public interface Filter {
      * Создает и возвращает новый объект ограничения AndFilter.
      * @param filters список ограничений выступающих как операнды данного ограничения.
      * @return новый объект ограничения AndFilter.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *          1. если кол-во ограничений в списке filters меньше двух.<br/>
      *          2. если хотябы один из операндов имеет значение null.<br/>
      *          3. если передаваемый список операндов имеет значение null.
@@ -55,7 +55,7 @@ public interface Filter {
      * @param b второй обязательный операнд ограничения OrElseFilter.
      * @param other необязательные операнды ограничения OrElseFilter.
      * @return возвращает новый объект OrElseFilter для указываемых ограничений.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *          1. если кол-во ограничений в списке filters меньше двух.<br/>
      *          2. если хотябы один из операндов имеет значение null.<br/>
      *          3. если передаваемый список операндов имеет значение null.
@@ -68,7 +68,7 @@ public interface Filter {
      * Создает и возвращает новый объект OrElseFilter для указываемых ограничений.
      * @param filters список ограничений выступающих как операнды данного ограничения.
      * @return возвращает новый объект OrElseFilter для указываемых ограничений.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *          1. если хотябы один из операндов имеет значение null.<br/>
      *          2. если передаваемый массив операндов имеет значение null.
      */
@@ -124,7 +124,7 @@ public interface Filter {
      * Создает и возвращает новый объект MinTagsFilter содержащий указанные теги.
      * @param values теги для которых определяется создаваемое ограничение MinTagsFilter.
      * @return новый объект MinTagsFilter.
-     * @throws ServiceException если выполняется одно из следующих условий:<br/>
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *          1. если хотябы один из элементов имеет значение null.<br/>
      *          2. если передаваемый список имеет значение null.<br/>
      *          3. если передаваемый список пустой.

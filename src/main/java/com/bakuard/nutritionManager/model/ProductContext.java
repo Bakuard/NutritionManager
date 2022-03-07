@@ -66,24 +66,24 @@ public class ProductContext {
         Checker.Container<List<Tag>> container = Checker.container();
 
         Checker.of(getClass(), "constructor").
-                nullValue("category", category).
-                blankValue("category", category).
-                nullValue("shop", shop).
-                blankValue("shop", shop).
-                nullValue("variety", variety).
-                blankValue("variety", variety).
-                nullValue("manufacturer", manufacturer).
-                blankValue("manufacturer", manufacturer).
-                nullValue("unit", unit).
-                blankValue("unit", unit).
-                nullValue("price", price).
-                negativeValue("price", price).
-                nullValue("packingSize", packingSize).
-                notPositiveValue("packingSize", packingSize).
-                nullValue("config", config).
+                notNull("category", category).
+                notBlank("category", category).
+                notNull("shop", shop).
+                notBlank("shop", shop).
+                notNull("variety", variety).
+                notBlank("variety", variety).
+                notNull("manufacturer", manufacturer).
+                notBlank("manufacturer", manufacturer).
+                notNull("unit", unit).
+                notBlank("unit", unit).
+                notNull("price", price).
+                notNegativeValue("price", price).
+                notNull("packingSize", packingSize).
+                positiveValue("packingSize", packingSize).
+                notNull("config", config).
                 tryBuildForEach(tags, Tag::new, container).
-                duplicateTag("tags", container).
-                checkWithValidateException("Fail to create product context");
+                notContainsDuplicateTag("tags", container).
+                validate("Fail to create product context");
 
         this.category = category;
         this.shop = shop;
@@ -108,9 +108,9 @@ public class ProductContext {
      */
     public ProductContext setCategory(String category) {
         Checker.of(getClass(), "setCategory").
-                nullValue("category", category).
-                blankValue("category", category).
-                checkWithValidateException("Fail to set product context category");
+                notNull("category", category).
+                notBlank("category", category).
+                validate("Fail to set product context category");
 
         category = category.trim();
 
@@ -139,9 +139,9 @@ public class ProductContext {
      */
     public ProductContext setShop(String shop) {
         Checker.of(getClass(), "setShop").
-                nullValue("shop", shop).
-                blankValue("shop", shop).
-                checkWithValidateException("Fail to set product context shop");
+                notNull("shop", shop).
+                notBlank("shop", shop).
+                validate("Fail to set product context shop");
 
         shop = shop.trim();
 
@@ -170,9 +170,9 @@ public class ProductContext {
      */
     public ProductContext setVariety(String variety) {
         Checker.of(getClass(), "setVariety").
-                nullValue("variety", variety).
-                blankValue("variety", variety).
-                checkWithValidateException("Fail to set product context variety");
+                notNull("variety", variety).
+                notBlank("variety", variety).
+                validate("Fail to set product context variety");
 
         variety = variety.trim();
 
@@ -201,9 +201,9 @@ public class ProductContext {
      */
     public ProductContext setManufacturer(String manufacturer) {
         Checker.of(getClass(), "setManufacturer").
-                nullValue("manufacturer", manufacturer).
-                blankValue("manufacturer", manufacturer).
-                checkWithValidateException("Fail to set product context manufacturer");
+                notNull("manufacturer", manufacturer).
+                notBlank("manufacturer", manufacturer).
+                validate("Fail to set product context manufacturer");
 
         manufacturer = manufacturer.trim();
 
@@ -232,9 +232,9 @@ public class ProductContext {
      */
     public ProductContext setUnit(String unit) {
         Checker.of(getClass(), "setUnit").
-                nullValue("unit", unit).
-                blankValue("unit", unit).
-                checkWithValidateException("Fail to set product context unit");
+                notNull("unit", unit).
+                notBlank("unit", unit).
+                validate("Fail to set product context unit");
 
         unit = unit.trim();
 
@@ -263,9 +263,9 @@ public class ProductContext {
      */
     public ProductContext setPrice(BigDecimal price) {
         Checker.of(getClass(), "setPrice").
-                nullValue("price", price).
-                negativeValue("price", price).
-                checkWithValidateException("Fail to set product context price");
+                notNull("price", price).
+                notNegativeValue("price", price).
+                validate("Fail to set product context price");
 
         if(this.price.equals(price)) return this;
 
@@ -292,9 +292,9 @@ public class ProductContext {
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
         Checker.of(getClass(), "setPackingSize").
-                nullValue("packingSize", packingSize).
-                notPositiveValue("packingSize", packingSize).
-                checkWithValidateException("Fail to set product context packing size");
+                notNull("packingSize", packingSize).
+                positiveValue("packingSize", packingSize).
+                validate("Fail to set product context packing size");
 
         if(this.packingSize.equals(packingSize)) return this;
 
@@ -323,9 +323,9 @@ public class ProductContext {
         tags.add(tag);
 
         Checker.of(getClass(), "addTag").
-                nullValue("tag", tag).
-                duplicateTag("tags", tags, tag).
-                checkWithValidateException("Fail to add tag to product context");
+                notNull("tag", tag).
+                notContainsDuplicateTag("tags", tags, tag).
+                validate("Fail to add tag to product context");
 
         return new ProductContext(
                 category,

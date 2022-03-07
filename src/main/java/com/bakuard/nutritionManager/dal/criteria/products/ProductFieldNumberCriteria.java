@@ -1,8 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.AnyFilter;
 import com.bakuard.nutritionManager.model.filters.Filter;
 
@@ -22,7 +21,7 @@ public class ProductFieldNumberCriteria {
      * Создает и возвращает новый обеъект ProductFieldNumberCriteria.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый объект ProductFieldNumberCriteria.
-     * @throws ServiceException если user имеет значение null.
+     * @throws ValidateException если user имеет значение null.
      */
     public static ProductFieldNumberCriteria of(User user) {
         return new ProductFieldNumberCriteria(user);
@@ -34,8 +33,8 @@ public class ProductFieldNumberCriteria {
 
     private ProductFieldNumberCriteria(User user) {
         Checker.of(getClass(), "constructor").
-                nullValue("user", user).
-                checkWithServiceException();
+                notNull("user", user).
+                validate();
 
         this.user = user;
     }
@@ -53,7 +52,7 @@ public class ProductFieldNumberCriteria {
      * Значение по умолчанию пустой Optional (т.е. в выборку попадут продукты любой категории).
      * @param productCategory категории продуктов.
      * @return этот же объект.
-     * @throws ServiceException
+     * @throws IllegalArgumentException если productCategory.getType() имеет значение отличное от Filter.Type.CATEGOR
      */
     public ProductFieldNumberCriteria setProductCategory(AnyFilter productCategory) {
         if(productCategory != null && productCategory.getType() != Filter.Type.CATEGORY) {

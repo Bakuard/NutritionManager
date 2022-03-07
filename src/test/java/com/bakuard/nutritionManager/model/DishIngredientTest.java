@@ -56,7 +56,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(new BigDecimal("-1.7")),
                 DishIngredient.class,
                 "getNecessaryQuantity",
@@ -80,7 +80,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(BigDecimal.ZERO),
                 DishIngredient.class,
                 "getNecessaryQuantity",
@@ -126,7 +126,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(null),
                 DishIngredient.class,
                 "getNecessaryQuantity",
@@ -150,7 +150,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getLackQuantity(-1, new BigDecimal("1.5")),
                 DishIngredient.class,
                 "getProductByIndex",
@@ -174,7 +174,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getLackQuantity(0, BigDecimal.ZERO),
                 DishIngredient.class,
                 "getLackQuantity",
@@ -198,7 +198,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getLackQuantity(0, null),
                 DishIngredient.class,
                 "getLackQuantity",
@@ -407,7 +407,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getLackQuantityPrice(-1, new BigDecimal("1.5")),
                 DishIngredient.class,
                 "getProductByIndex",
@@ -431,7 +431,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getLackQuantityPrice(0, BigDecimal.ZERO),
                 DishIngredient.class,
                 "getLackQuantityPrice",
@@ -455,7 +455,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getLackQuantityPrice(0, null),
                 DishIngredient.class,
                 "getLackQuantityPrice",
@@ -787,7 +787,7 @@ class DishIngredientTest {
                 conf
         );
 
-        AssertUtil.assertValidateExcThrows(
+        AssertUtil.assertValidateException(
                 () -> ingredient.getProductByIndex(-1),
                 DishIngredient.class,
                 "getProductByIndex",

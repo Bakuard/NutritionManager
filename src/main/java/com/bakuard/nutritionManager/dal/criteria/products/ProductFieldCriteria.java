@@ -1,8 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Checker;
-import com.bakuard.nutritionManager.model.exceptions.ServiceException;
+import com.bakuard.nutritionManager.model.exceptions.*;
 import com.bakuard.nutritionManager.model.filters.AnyFilter;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -24,7 +23,7 @@ public class ProductFieldCriteria {
      * @param pageable параметры страницы использующиеся для пагинации.
      * @param user пользователь из данных которого будет формироваться выборка.
      * @return новый обеъект ProductFieldCriteria.
-     * @throws ServiceException если хотя бы один из параметров имеет значение null.
+     * @throws ValidateException если хотя бы один из параметров имеет значение null.
      */
     public static ProductFieldCriteria of(Pageable pageable, User user) {
         return new ProductFieldCriteria(pageable, user);
@@ -37,9 +36,9 @@ public class ProductFieldCriteria {
 
     private ProductFieldCriteria(Pageable pageable, User user) {
         Checker.of(getClass(), "constructor").
-                nullValue("pageable", pageable).
-                nullValue("user", user).
-                checkWithServiceException();
+                notNull("pageable", pageable).
+                notNull("user", user).
+                validate();
 
         this.pageable = pageable;
         this.user = user;

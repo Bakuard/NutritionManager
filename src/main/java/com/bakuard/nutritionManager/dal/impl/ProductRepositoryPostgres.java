@@ -8,6 +8,7 @@ import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.exceptions.Checker;
 import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 
@@ -46,9 +47,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public boolean save(Product product) {
-        Checker checker = Checker.of(getClass(), "save").
-                nullValue("product", product).
-                checkWithServiceException("Fail to save product");
+        Checker.of(getClass(), "save").
+                notNull("product", product).
+                validate("Fail to save product");
 
         Product oldProduct = getByIdOrReturnNull(product.getId());
 
@@ -62,8 +63,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 newData = true;
             }
         } catch(DuplicateKeyException e) {
-            throw checker.addConstraint("product", ConstraintType.ALREADY_EXISTS_IN_DB).
-                    createServiceException("Fail to save product", e);
+            throw new ValidateException(
+                    "Fail to save product",
+                    getClass(),
+                    "save"
+            ).addReason("product", ConstraintType.ALREADY_EXISTS_IN_DB);
         }
 
         return newData;
@@ -71,16 +75,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product remove(UUID productId) {
-        Checker checker = Checker.of(getClass(), "remove").
-                nullValue("productId", productId).
-                checkWithServiceException("Fail to remove product. Unknown product with id=null");
+        Checker.of(getClass(), "remove").
+                notNull("productId", productId).
+                validate("Fail to remove product. Unknown product with id=null");
 
         Product product = getByIdOrReturnNull(productId);
 
         if(product == null) {
-             throw checker.
-                    addConstraint("productId", ConstraintType.UNKNOWN_ENTITY).
-                    createServiceException("Fail to remove product. Unknown product with id=" + productId);
+            throw new ValidateException(
+                    "Fail to remove product. Unknown product with id=" + productId,
+                    getClass(),
+                    "remove"
+            ).addReason("productId", ConstraintType.UNKNOWN_ENTITY);
         }
 
         statement.update(
@@ -93,14 +99,17 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product getById(UUID productId) {
-        Checker checker = Checker.of(getClass(), "getById").
-                nullValue("productId", productId).
-                checkWithServiceException("Fail to get product by id");
+        Checker.of(getClass(), "getById").
+                notNull("productId", productId).
+                validate("Fail to get product by id");
 
         Product product = getByIdOrReturnNull(productId);
         if(product == null) {
-            throw checker.addConstraint("productId", ConstraintType.UNKNOWN_ENTITY).
-                    createServiceException("Fail to get product by id");
+            throw new ValidateException(
+                    "Fail to get product by id",
+                    getClass(),
+                    "getById"
+            ).addReason("productId", ConstraintType.UNKNOWN_ENTITY);
         }
 
         return product;
@@ -109,8 +118,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<Product> getProducts(ProductCriteria criteria) {
         Checker.of(getClass(), "getProducts").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get product by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get product by criteria");
 
         Page.Metadata metadata = criteria.getPageable().
                 createPageMetadata(getProductsNumber(criteria.getNumberCriteria()), 30);
@@ -198,8 +207,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<Tag> getTags(ProductFieldCriteria criteria) {
         Checker.of(getClass(), "getTags").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get products tags by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get products tags by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
                 getTagsNumber(criteria.getNumberCriteria()), 1000
@@ -239,8 +248,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getShops(ProductFieldCriteria criteria) {
         Checker.of(getClass(), "getShops").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get shops by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get shops by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
                 getShopsNumber(criteria.getNumberCriteria()), 1000
@@ -278,8 +287,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getVarieties(ProductFieldCriteria criteria) {
         Checker.of(getClass(), "getVarieties").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get varieties by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get varieties by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
                 getVarietiesNumber(criteria.getNumberCriteria()), 1000
@@ -317,8 +326,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getCategories(ProductCategoryCriteria criteria) {
         Checker.of(getClass(), "getCategories").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get categories by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get categories by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
                 getCategoriesNumber(criteria.getNumberCriteria()), 1000
@@ -354,8 +363,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getManufacturers(ProductFieldCriteria criteria) {
         Checker.of(getClass(), "getManufacturers").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get manufacturers by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get manufacturers by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
                 getManufacturersNumber(criteria.getNumberCriteria()), 1000
@@ -393,8 +402,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getProductsNumber(ProductsNumberCriteria criteria) {
         Checker.of(getClass(), "getProductsNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get products number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get products number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.isOnlyFridge())
@@ -413,8 +422,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getTagsNumber(ProductFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getTagsNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get products tags number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get products tags number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -439,8 +448,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getShopsNumber(ProductFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getShopsNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get shops number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get shops number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -463,8 +472,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getVarietiesNumber(ProductFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getVarietiesNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get varieties number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get varieties number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -487,8 +496,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getCategoriesNumber(ProductCategoryNumberCriteria criteria) {
         Checker.of(getClass(), "getCategoriesNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get categories number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get categories number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
 
@@ -509,8 +518,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getManufacturersNumber(ProductFieldNumberCriteria criteria) {
         Checker.of(getClass(), "getManufacturersNumber").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get manufacturers number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get manufacturers number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
         if(criteria.getProductCategory().isPresent())
@@ -533,8 +542,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria) {
         Checker.of(getClass(), "getProductsSum").
-                nullValue("criteria", criteria).
-                checkWithServiceException("Fail to get products number by criteria");
+                notNull("criteria", criteria).
+                validate("Fail to get products number by criteria");
 
         Condition condition = userFilter(criteria.getUser()).
                 and(switchFilter(criteria.getFilter()));
@@ -578,7 +587,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     ps.setString(6, product.getContext().getManufacturer());
                     ps.setString(7, product.getContext().hashKey());
                     ps.setString(8, product.getDescription());
-                    ps.setString(9, product.getImagePath());
+                    ps.setString(9, product.getImagePath().toString());
                     ps.setBigDecimal(10, product.getQuantity());
                     ps.setString(11, product.getContext().getUnit());
                     ps.setBigDecimal(12, product.getContext().getPrice());
@@ -634,7 +643,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     ps.setString(4, newVersion.getContext().getManufacturer());
                     ps.setString(5, newVersion.getContext().hashKey());
                     ps.setString(6, newVersion.getDescription());
-                    ps.setString(7, newVersion.getImagePath());
+                    ps.setString(7, newVersion.getImagePath().toString());
                     ps.setBigDecimal(8, newVersion.getQuantity());
                     ps.setString(9, newVersion.getContext().getUnit());
                     ps.setBigDecimal(10, newVersion.getContext().getPrice());
