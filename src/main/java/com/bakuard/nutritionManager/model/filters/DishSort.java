@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.util.Pair;
 
 import java.util.ArrayList;
@@ -50,8 +50,8 @@ public final class DishSort {
      */
     public DishSort(Parameter parameter, SortDirection direction) {
         Validator.create().
-                notNull("parameter", parameter).
-                notNull("direction", direction).
+                field("parameter").notNull(parameter).end().
+                field("direction").notNull(direction).end().
                 validate();
 
         params = new ArrayList<>();
@@ -88,8 +88,8 @@ public final class DishSort {
      */
     public DishSort byParameter(Parameter parameter, SortDirection direction) {
         Validator.create().
-                notNull("parameter", parameter).
-                notNull("direction", direction).
+                field("parameter").notNull(parameter).end().
+                field("direction").notNull(direction).end().
                 validate();
 
         Pair<Parameter, SortDirection> pair = new Pair<>(parameter, direction);
@@ -122,7 +122,7 @@ public final class DishSort {
      */
     public Parameter getParameterType(int parameterIndex) {
         Validator.create().
-                range("parameterIndex", parameterIndex, 0, params.size() - 1).
+                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
                 validate("Fail to get parameter type from DishSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
@@ -141,7 +141,7 @@ public final class DishSort {
      */
     public SortDirection getDirection(int parameterIndex) {
         Validator.create().
-                range("parameterIndex", parameterIndex, 0, params.size() - 1).
+                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
                 validate("Fail to get direction sort from DishSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
@@ -164,9 +164,9 @@ public final class DishSort {
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
         Validator validator = Validator.create().
-                notNull("parameter", parameter).
-                notNull("direction", direction).
-                validate();
+                field("parameter").notNull(parameter).end().
+                field("direction").notNull(direction).end();
+        validator.validate();
 
         Parameter p = null;
         SortDirection d = null;
@@ -174,15 +174,13 @@ public final class DishSort {
         switch(parameter) {
             case "name" -> p = Parameter.NAME;
             case "unit" -> p = Parameter.UNIT;
-            default -> validator.
-                    failure("parameter", ConstraintType.UNKNOWN_PARAMETER);
+            default -> validator.field("parameter").failure(Constraint.PERMISSIBLE_VALUE);
         }
 
         switch(direction) {
             case "asc" -> d = SortDirection.ASCENDING;
             case "desc" -> d = SortDirection.DESCENDING;
-            default -> validator.
-                    failure("direction", ConstraintType.UNKNOWN_PARAMETER);
+            default -> validator.field("direction").failure(Constraint.PERMISSIBLE_VALUE);
         }
 
         validator.validate();

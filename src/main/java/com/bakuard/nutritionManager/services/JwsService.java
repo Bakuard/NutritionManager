@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.services;
 
 import com.bakuard.nutritionManager.dal.JwsBlackListRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -73,7 +73,7 @@ public class JwsService {
                     e,
                     getClass(),
                     "parseAccessJws"
-            ).addReason("jws", ConstraintType.INCORRECT_JWS);
+            ).addReason("jws", Constraint.CORRECT_JWS);
         }
 
         UUID accessJwsId = UUID.fromString(claims.getId());
@@ -82,7 +82,7 @@ public class JwsService {
                     "Incorrect access jws",
                     getClass(),
                     "parseAccessJws"
-            ).addReason("jws", ConstraintType.INCORRECT_JWS);
+            ).addReason("jws", Constraint.CORRECT_JWS);
         }
 
         return UUID.fromString(claims.getSubject());
@@ -109,7 +109,7 @@ public class JwsService {
                     "Incorrect registration jws",
                     getClass(),
                     "parseRegistrationJws"
-            ).addReason("jws", ConstraintType.INCORRECT_JWS);
+            ).addReason("jws", Constraint.CORRECT_JWS);
         }
     }
 
@@ -134,7 +134,7 @@ public class JwsService {
                     "Incorrect change credential jws",
                     getClass(),
                     "parseChangeCredentialsJws"
-            ).addReason("jws", ConstraintType.INCORRECT_JWS);
+            ).addReason("jws", Constraint.CORRECT_JWS);
         }
     }
 

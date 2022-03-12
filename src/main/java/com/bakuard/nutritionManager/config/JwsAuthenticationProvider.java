@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.config;
 
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.services.JwsService;
 
 import org.springframework.beans.factory.annotation.Autowired;

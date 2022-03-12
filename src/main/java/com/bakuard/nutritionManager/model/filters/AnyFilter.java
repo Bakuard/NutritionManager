@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.Validator;
+import com.bakuard.nutritionManager.validation.Validator;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
@@ -20,10 +20,10 @@ public class AnyFilter implements Filter {
 
     AnyFilter(List<String> values, int minItems, Type type) {
         Validator.create().
-                notNull("values", values).
-                notContainsNull("values", values).
-                containsAtLeast("values", values, minItems).
-                notContainsBlankValue("values", values).
+                field("values").notNull(values).
+                    and(v -> v.notContainsNull(values)).
+                    and(v -> v.containsAtLeast(values, minItems)).
+                    and(v -> v.notContainsBlank(values)).end().
                 validate();
 
         this.values = ImmutableList.copyOf(values);

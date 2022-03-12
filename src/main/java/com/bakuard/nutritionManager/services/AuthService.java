@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.services;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.util.Pair;
 
 import java.util.UUID;
@@ -28,7 +28,7 @@ public class AuthService {
                     "Incorrect credentials",
                     getClass(),
                     "enter"
-            ).addReasons(e.getConstraints());
+            ).addReason(e);
         }
 
         if(user.isCorrectPassword(password)) {
@@ -72,7 +72,7 @@ public class AuthService {
                     "Fail to register new user=" + name,
                     getClass(),
                     "registration"
-            ).addReasons(e.getConstraints());
+            ).addReason(e);
         }
     }
 
@@ -92,7 +92,7 @@ public class AuthService {
                     "Fail to change credential for user=" + name,
                     getClass(),
                     "changeCredential"
-            ).addReasons(e.getConstraints());
+            ).addReason(e);
         }
     }
 
@@ -119,7 +119,7 @@ public class AuthService {
                     "Fail to change login and email for user",
                     getClass(),
                     "changeLoginAndEmail"
-            ).addReasons(e.getConstraints());
+            ).addReason(e);
         }
     }
 
@@ -145,7 +145,7 @@ public class AuthService {
                     "Incorrect password",
                     getClass(),
                     "changePassword"
-            ).addReasons(e.getConstraints());
+            ).addReason(e);
         }
     }
 

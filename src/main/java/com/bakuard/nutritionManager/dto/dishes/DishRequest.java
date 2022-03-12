@@ -1,6 +1,7 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -13,7 +14,7 @@ public class DishRequest {
     private BigDecimal servingSize;
     private String unit;
     private String description;
-    private String imagePath;
+    private String imageUrl;
     private List<DishIngredientRequestAndResponse> ingredients;
     private List<String> tags;
 
@@ -69,12 +70,12 @@ public class DishRequest {
         this.description = description;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<DishIngredientRequestAndResponse> getIngredients() {
@@ -104,7 +105,7 @@ public class DishRequest {
                 Objects.equals(servingSize, that.servingSize) &&
                 Objects.equals(unit, that.unit) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(imagePath, that.imagePath) &&
+                Objects.equals(imageUrl, that.imageUrl) &&
                 Objects.equals(ingredients, that.ingredients) &&
                 Objects.equals(tags, that.tags);
     }
@@ -112,7 +113,7 @@ public class DishRequest {
     @Override
     public int hashCode() {
         return Objects.hash(id, userId, name, servingSize, unit,
-                description, imagePath, ingredients, tags);
+                description, imageUrl, ingredients, tags);
     }
 
     @Override
@@ -124,7 +125,7 @@ public class DishRequest {
                 ", servingSize=" + servingSize +
                 ", unit='" + unit + '\'' +
                 ", description='" + description + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", ingredients=" + ingredients +
                 ", tags=" + tags +
                 '}';

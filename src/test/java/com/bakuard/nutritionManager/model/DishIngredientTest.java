@@ -4,7 +4,7 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.ProductSort;
 import com.bakuard.nutritionManager.model.filters.SortDirection;
@@ -60,7 +60,7 @@ class DishIngredientTest {
                 () -> ingredient.getNecessaryQuantity(new BigDecimal("-1.7")),
                 DishIngredient.class,
                 "getNecessaryQuantity",
-                ConstraintType.NOT_POSITIVE_VALUE
+                Constraint.POSITIVE_VALUE
         );
     }
 
@@ -84,7 +84,7 @@ class DishIngredientTest {
                 () -> ingredient.getNecessaryQuantity(BigDecimal.ZERO),
                 DishIngredient.class,
                 "getNecessaryQuantity",
-                ConstraintType.NOT_POSITIVE_VALUE
+                Constraint.POSITIVE_VALUE
         );
     }
 
@@ -130,7 +130,7 @@ class DishIngredientTest {
                 () -> ingredient.getNecessaryQuantity(null),
                 DishIngredient.class,
                 "getNecessaryQuantity",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -154,7 +154,7 @@ class DishIngredientTest {
                 () -> ingredient.getLackQuantity(-1, new BigDecimal("1.5")),
                 DishIngredient.class,
                 "getProductByIndex",
-                ConstraintType.NEGATIVE_VALUE
+                Constraint.NOT_NEGATIVE_VALUE
         );
     }
 
@@ -178,7 +178,7 @@ class DishIngredientTest {
                 () -> ingredient.getLackQuantity(0, BigDecimal.ZERO),
                 DishIngredient.class,
                 "getLackQuantity",
-                ConstraintType.NOT_POSITIVE_VALUE
+                Constraint.POSITIVE_VALUE
         );
     }
 
@@ -202,7 +202,7 @@ class DishIngredientTest {
                 () -> ingredient.getLackQuantity(0, null),
                 DishIngredient.class,
                 "getLackQuantity",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -411,7 +411,7 @@ class DishIngredientTest {
                 () -> ingredient.getLackQuantityPrice(-1, new BigDecimal("1.5")),
                 DishIngredient.class,
                 "getProductByIndex",
-                ConstraintType.NEGATIVE_VALUE
+                Constraint.NOT_NEGATIVE_VALUE
         );
     }
 
@@ -435,7 +435,7 @@ class DishIngredientTest {
                 () -> ingredient.getLackQuantityPrice(0, BigDecimal.ZERO),
                 DishIngredient.class,
                 "getLackQuantityPrice",
-                ConstraintType.NOT_POSITIVE_VALUE
+                Constraint.POSITIVE_VALUE
         );
     }
 
@@ -459,7 +459,7 @@ class DishIngredientTest {
                 () -> ingredient.getLackQuantityPrice(0, null),
                 DishIngredient.class,
                 "getLackQuantityPrice",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -791,7 +791,7 @@ class DishIngredientTest {
                 () -> ingredient.getProductByIndex(-1),
                 DishIngredient.class,
                 "getProductByIndex",
-                ConstraintType.NEGATIVE_VALUE
+                Constraint.NOT_NEGATIVE_VALUE
         );
     }
 
@@ -838,7 +838,7 @@ class DishIngredientTest {
                 setPackingSize(new BigDecimal("0.5").multiply(BigDecimal.valueOf(id))).
                 setQuantity(BigDecimal.ZERO).
                 setDescription("some description " + id).
-                setImagePath("some image path " + id).
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=" + id).
                 addTag("tag " + id).
                 addTag("common tag");
     }

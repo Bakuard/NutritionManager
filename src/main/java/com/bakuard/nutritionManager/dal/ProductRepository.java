@@ -5,7 +5,7 @@ import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.ProductContext;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.validation.ValidateException;
 
 import java.math.BigDecimal;
 import java.util.Optional;

@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.dto.products;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -35,7 +36,7 @@ public class ProductRequest {
     @Schema(description = "Описание продукта")
     private String description;
     @Schema(description = "Путь к изображению данного продукта")
-    private String imagePath;
+    private String imageUrl;
     @Schema(description = "Теги указаныне для данного продукта")
     private List<String> tags;
 
@@ -131,12 +132,12 @@ public class ProductRequest {
         this.description = description;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<String> getTags() {
@@ -163,14 +164,14 @@ public class ProductRequest {
                 Objects.equals(unit, that.unit) &&
                 Objects.equals(quantity, that.quantity) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(imagePath, that.imagePath) &&
+                Objects.equals(imageUrl, that.imageUrl) &&
                 Objects.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, userId, category, shop, grade, manufacturer,
-                price, packingSize, unit, quantity, description, imagePath, tags);
+                price, packingSize, unit, quantity, description, imageUrl, tags);
     }
 
     @Override
@@ -187,7 +188,7 @@ public class ProductRequest {
                 ", unit='" + unit + '\'' +
                 ", quantity=" + quantity +
                 ", description='" + description + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", tags=" + tags +
                 '}';
     }

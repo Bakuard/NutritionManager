@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 /**
  * Теги используются для уточнения пользвателем данных о продуктах, блюдах и меню, а также для последующей
@@ -20,8 +20,8 @@ public final class Tag implements Comparable<Tag> {
      */
     public Tag(String value) {
         Validator.create().
-                notNull("value", value).
-                notBlank("value", value).
+                field("value").notNull(value).
+                    and(v -> v.notBlank(value)).end().
                 validate("Fail to create tag");
 
         this.value = value.trim();

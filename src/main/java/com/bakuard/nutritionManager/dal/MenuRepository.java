@@ -4,7 +4,6 @@ import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.MenuSort;
 import com.bakuard.nutritionManager.model.util.Pageable;
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
 
 import java.util.List;
 import java.util.UUID;

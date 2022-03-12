@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.model.exceptions;
+package com.bakuard.nutritionManager.validation;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -9,75 +9,70 @@ import java.util.function.Consumer;
  */
 public class ValidateException extends RuntimeException implements Iterable<Result> {
 
-    private Class<?> checkedType;
-    private final String operationName;
+    private Class<?> checkedClass;
+    private final String methodName;
     private List<Result> results;
     private List<ValidateException> validateExceptions;
 
-    public ValidateException(Class<?> checkedType, String operationName) {
-        this.checkedType = checkedType;
-        this.operationName = operationName;
+    public ValidateException(Class<?> checkedClass, String methodName) {
+        this.checkedClass = checkedClass;
+        this.methodName = methodName;
         results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(String message, Class<?> checkedType, String operationName) {
+    public ValidateException(String message, Class<?> checkedClass, String methodName) {
         super(message);
-        this.checkedType = checkedType;
-        this.operationName = operationName;
+        this.checkedClass = checkedClass;
+        this.methodName = methodName;
         results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(String message, Throwable cause, Class<?> checkedType, String operationName) {
+    public ValidateException(String message, Throwable cause, Class<?> checkedClass, String methodName) {
         super(message, cause);
-        this.checkedType = checkedType;
-        this.operationName = operationName;
+        this.checkedClass = checkedClass;
+        this.methodName = methodName;
         results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public ValidateException(Throwable cause, Class<?> checkedType, String operationName) {
+    public ValidateException(Throwable cause, Class<?> checkedClass, String methodName) {
         super(cause);
-        this.checkedType = checkedType;
-        this.operationName = operationName;
+        this.checkedClass = checkedClass;
+        this.methodName = methodName;
         results = new ArrayList<>();
         validateExceptions = new ArrayList<>();
     }
 
-    public boolean isOriginate(Class<?> checkedType, String operationName) {
-        return this.checkedType == checkedType && this.operationName.equals(operationName);
+    public boolean isOriginate(Class<?> checkedClass, String methodName) {
+        return this.checkedClass == checkedClass && this.methodName.equals(methodName);
     }
 
-    public Class<?> getCheckedType() {
-        return checkedType;
+    public Class<?> getCheckedClass() {
+        return checkedClass;
     }
 
-    public String getOperationName() {
-        return operationName;
+    public String getMethodName() {
+        return methodName;
     }
 
-    public String getMessageKey() {
-        return checkedType.getSimpleName() + "." + operationName;
+    public String getUserMessageKey() {
+        return checkedClass.getSimpleName() + "." + methodName;
     }
 
-    public boolean containsConstraint(ConstraintType type) {
-        return results.stream().map(Result::getType).anyMatch(c -> c == type);
+    public boolean containsConstraint(Constraint constraint) {
+        return results.stream().anyMatch(r -> r.contains(constraint));
     }
 
-    public ValidateException addExcReason(ValidateException e) {
-        if(e != null) {
-            validateExceptions.add(e);
+    public ValidateException addReason(Exception e) {
+        if(e instanceof ValidateException validateException) {
+            validateExceptions.add(validateException);
+            addSuppressed(validateException);
+        } else if(e != null) {
             addSuppressed(e);
         }
-        return this;
-    }
 
-    public ValidateException addExcReasons(List<ValidateException> exceptions) {
-        if(exceptions != null) {
-            validateExceptions.addAll(exceptions);
-            exceptions.forEach(this::addSuppressed);
-        }
         return this;
     }
 
@@ -88,22 +83,35 @@ public class ValidateException extends RuntimeException implements Iterable<Resu
         return this;
     }
 
-    public ValidateException addReasons(Result... results) {
-        if(results != null && results.length > 0) {
-            Collections.addAll(this.results, results);
-        }
+    public ValidateException addReason(String fieldName, Constraint constraint) {
+        Result result = new Result(
+                checkedClass,
+                methodName,
+                fieldName,
+                constraint,
+                Result.State.FAIL,
+                null,
+                null,
+                null
+        );
+
+        results.add(result);
         return this;
     }
 
-    public ValidateException addReasons(List<Result> results) {
-        if(results != null && results.size() > 0) {
-            this.results.addAll(results);
-        }
-        return this;
-    }
+    public ValidateException addReason(String fieldName, Constraint constraint, String logMessage) {
+        Result result = new Result(
+                checkedClass,
+                methodName,
+                fieldName,
+                constraint,
+                Result.State.FAIL,
+                null,
+                logMessage,
+                null
+        );
 
-    public ValidateException addReason(String fieldName, ConstraintType type) {
-        results.add(new Result(checkedType, fieldName, type));
+        results.add(result);
         return this;
     }
 
@@ -111,7 +119,7 @@ public class ValidateException extends RuntimeException implements Iterable<Resu
         return results;
     }
 
-    public List<ValidateException> getValidateExceptions() {
+    public List<ValidateException> getSuppressedValidateExceptions() {
         return validateExceptions;
     }
 
@@ -167,19 +175,16 @@ public class ValidateException extends RuntimeException implements Iterable<Resu
     @Override
     public String getMessage() {
         StringBuilder result = new StringBuilder("Fail to ").
-                append(checkedType.getSimpleName()).
+                append(checkedClass.getSimpleName()).
                 append('.').
-                append(operationName).
-                append(" - ").
-                append(super.getMessage()).
-                append(". Reasons:");
+                append(methodName).append("()");
 
-        results.forEach(
-                c -> result.append('\n').
-                        append(c.getMessageKey()).
-                        append(". Detail: ").
-                        append(c.getDetail())
-        );
+        if(super.getMessage() != null) result.append(": ").append(super.getMessage());
+
+        if(!results.isEmpty()) {
+            result.append(". Reasons:");
+            results.forEach(c -> result.append("\n -> ").append(c.getLogMessage()));
+        }
 
         return result.toString();
     }

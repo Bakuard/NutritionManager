@@ -6,9 +6,9 @@ import com.bakuard.nutritionManager.dal.criteria.products.*;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Validator;
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
+import com.bakuard.nutritionManager.validation.Constraint;
+import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 
@@ -48,7 +48,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public boolean save(Product product) {
         Validator.create().
-                notNull("product", product).
+                field("product").notNull(product).end().
                 validate("Fail to save product");
 
         Product oldProduct = getByIdOrReturnNull(product.getId());
@@ -67,7 +67,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     "Fail to save product",
                     getClass(),
                     "save"
-            ).addReason("product", ConstraintType.ALREADY_EXISTS_IN_DB);
+            ).addReason("product", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
         }
 
         return newData;
@@ -76,7 +76,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Product remove(UUID productId) {
         Validator.create().
-                notNull("productId", productId).
+                field("productId").notNull(productId).end().
                 validate("Fail to remove product. Unknown product with id=null");
 
         Product product = getByIdOrReturnNull(productId);
@@ -86,7 +86,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     "Fail to remove product. Unknown product with id=" + productId,
                     getClass(),
                     "remove"
-            ).addReason("productId", ConstraintType.UNKNOWN_ENTITY);
+            ).addReason("productId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         statement.update(
@@ -100,7 +100,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Product getById(UUID productId) {
         Validator.create().
-                notNull("productId", productId).
+                field("productId").notNull(productId).end().
                 validate("Fail to get product by id");
 
         Product product = getByIdOrReturnNull(productId);
@@ -109,7 +109,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     "Fail to get product by id",
                     getClass(),
                     "getById"
-            ).addReason("productId", ConstraintType.UNKNOWN_ENTITY);
+            ).addReason("productId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         return product;
@@ -118,7 +118,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<Product> getProducts(ProductCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get product by criteria");
 
         Page.Metadata metadata = criteria.getPageable().
@@ -187,7 +187,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                                     setPackingSize(rs.getBigDecimal("packingSize")).
                                     setQuantity(rs.getBigDecimal("quantity")).
                                     setDescription(rs.getString("description")).
-                                    setImagePath(rs.getString("imagePath"));
+                                    setImageUrl(rs.getString("imagePath"));
                             lastProductId = productId;
                         }
 
@@ -207,7 +207,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<Tag> getTags(ProductFieldCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get products tags by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
@@ -248,7 +248,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getShops(ProductFieldCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get shops by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
@@ -287,7 +287,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getVarieties(ProductFieldCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get varieties by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
@@ -326,7 +326,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getCategories(ProductCategoryCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get categories by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
@@ -363,7 +363,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getManufacturers(ProductFieldCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get manufacturers by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
@@ -402,7 +402,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getProductsNumber(ProductsNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get products number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -422,7 +422,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getTagsNumber(ProductFieldNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get products tags number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -448,7 +448,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getShopsNumber(ProductFieldNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get shops number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -472,7 +472,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getVarietiesNumber(ProductFieldNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get varieties number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -496,7 +496,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getCategoriesNumber(ProductCategoryNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get categories number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -518,7 +518,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getManufacturersNumber(ProductFieldNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get manufacturers number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -542,7 +542,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get products number by criteria");
 
         Condition condition = userFilter(criteria.getUser()).
@@ -587,7 +587,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     ps.setString(6, product.getContext().getManufacturer());
                     ps.setString(7, product.getContext().hashKey());
                     ps.setString(8, product.getDescription());
-                    ps.setString(9, product.getImagePath().toString());
+                    ps.setString(9, product.getImageUrl().toString());
                     ps.setBigDecimal(10, product.getQuantity());
                     ps.setString(11, product.getContext().getUnit());
                     ps.setBigDecimal(12, product.getContext().getPrice());
@@ -643,7 +643,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     ps.setString(4, newVersion.getContext().getManufacturer());
                     ps.setString(5, newVersion.getContext().hashKey());
                     ps.setString(6, newVersion.getDescription());
-                    ps.setString(7, newVersion.getImagePath().toString());
+                    ps.setString(7, newVersion.getImageUrl().toString());
                     ps.setBigDecimal(8, newVersion.getQuantity());
                     ps.setString(9, newVersion.getContext().getUnit());
                     ps.setBigDecimal(10, newVersion.getContext().getPrice());
@@ -743,7 +743,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                                     setPackingSize(rs.getBigDecimal("packingSize")).
                                     setQuantity(rs.getBigDecimal("quantity")).
                                     setDescription(rs.getString("description")).
-                                    setImagePath(rs.getString("imagePath"));
+                                    setImageUrl(rs.getString("imagePath"));
                         }
 
                         String tagValue = rs.getString("tagValue");

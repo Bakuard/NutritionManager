@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import com.google.common.hash.Hashing;
 
@@ -28,17 +28,17 @@ public class User {
 
     public User(UUID id, String name, String password, String email) {
         Validator.create().
-                notNull("id", id).
-                notNull("name", name).
-                notBlank("name", name).
-                stringLength("name", name, 1, 40).
-                notNull("password", password).
-                notBlank("password", password).
-                stringLength("password", password, 8, 100).
-                notNull("email", email).
-                notBlank("email", email).
+                field("id").notNull(id).end().
+                field("name").notNull(name).
+                    and(v -> v.notBlank(name)).
+                    and(v -> v.stringLength(name, 1, 40)).end().
+                field("password").notNull(password).
+                    and(v -> v.notBlank(password)).
+                    and(v -> v.stringLength(password, 8, 100)).end().
+                field("email").notNull(email).
+                    and(v -> v.notBlank(email)).end().
                 validate("Fail to create user");
-
+ 
         this.id = id;
         this.name = name;
         this.salt = Base64.getEncoder().encodeToString(SecureRandom.getSeed(255));
@@ -64,9 +64,9 @@ public class User {
 
     public void setName(String name) {
         Validator.create().
-                notNull("name", name).
-                notBlank("name", name).
-                stringLength("name", name, 1, 40).
+                field("name").notNull(name).
+                    and(v -> v.notBlank(name)).
+                    and(v -> v.stringLength(name, 1, 40)).end().
                 validate("Fail to set user name");
         this.name = name;
     }
@@ -77,9 +77,9 @@ public class User {
 
     public void setPassword(String password) {
         Validator.create().
-                notNull("password", password).
-                notBlank("password", password).
-                stringLength("password", password, 8, 100).
+                field("password").notNull(password).
+                    and(v -> v.notBlank(password)).
+                    and(v -> v.stringLength(password, 8, 100)).end().
                 validate("Fail to set user password");
         this.passwordHash = calculatePasswordHash(password, salt);
     }
@@ -90,8 +90,7 @@ public class User {
 
     public void setEmail(String email) {
         Validator.create().
-                notNull("email", email).
-                notBlank("email", email).
+                field("email").notNull(email).and(v -> v.notBlank(email)).end().
                 validate("Fail to set user email");
         this.email = email;
     }
@@ -102,7 +101,7 @@ public class User {
 
     public boolean isCorrectPassword(String password) {
         Validator.create().
-                notNull("password", password).
+                field("password").notNull(password).end().
                 validate();
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }

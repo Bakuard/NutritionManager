@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.model.exceptions;
+package com.bakuard.nutritionManager.validation;
 
 public class Container<T> {
 
@@ -17,11 +17,21 @@ public class Container<T> {
         return isOpen;
     }
 
+    public boolean isClose() {
+        return !isOpen;
+    }
+
     public T get() {
+        if(isClose()) {
+            throw new IllegalStateException("Container is close");
+        }
         return value;
     }
 
     public void set(T value) {
+        if(isClose()) {
+            throw new IllegalStateException("Container is close");
+        }
         this.value = value;
     }
 

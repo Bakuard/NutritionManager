@@ -10,9 +10,9 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.Validator;
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
+import com.bakuard.nutritionManager.validation.Constraint;
+import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -58,7 +58,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public boolean save(Dish dish) {
         Validator.create().
-                notNull("dish", dish).
+                field("dish").notNull(dish).end().
                 validate("Fail to save dish");
 
         Dish oldDish = getByIdOrReturnNull(dish.getId());
@@ -77,7 +77,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     "Fail to save dish",
                     getClass(),
                     "save"
-            ).addReason("dish", ConstraintType.ALREADY_EXISTS_IN_DB);
+            ).addReason("dish", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
         }
 
         return newData;
@@ -86,7 +86,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Dish remove(UUID dishId) {
         Validator.create().
-                notNull("dishId", dishId).
+                field("dishId").notNull(dishId).end().
                 validate("Fail to remove dish. Unknown dish with id=null");
 
         Dish dish = getByIdOrReturnNull(dishId);
@@ -96,7 +96,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     "Fail to remove dish. Unknown dish with id=" + dishId,
                     getClass(),
                     "remove"
-            ).addReason("dishId", ConstraintType.UNKNOWN_ENTITY);
+            ).addReason("dishId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         statement.update(
@@ -110,7 +110,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Dish getById(UUID dishId) {
         Validator.create().
-                notNull("dishId", dishId).
+                field("dishId").notNull(dishId).end().
                 validate("Fail to get dish by id");
 
         Dish dish = getByIdOrReturnNull(dishId);
@@ -119,7 +119,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     "Fail to get dish by id=" + dishId,
                     getClass(),
                     "getById"
-            ).addReason("dishId", ConstraintType.UNKNOWN_ENTITY);
+            ).addReason("dishId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         return dish;
@@ -128,7 +128,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<Dish> getDishes(DishCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get dishes by criteria");
 
         Page.Metadata metadata = criteria.getPageable().
@@ -210,7 +210,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<Tag> getTags(DishFieldCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get dishes tags by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
@@ -249,7 +249,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<String> getUnits(DishFieldCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get dishes shops by criteria");
 
         Page.Metadata metadata = criteria.getPageable().createPageMetadata(
@@ -286,7 +286,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getDishesNumber(DishesNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get dishes number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -304,7 +304,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getTagsNumber(DishFieldNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get dishes tags number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -328,7 +328,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getUnitsNumber(DishFieldNumberCriteria criteria) {
         Validator.create().
-                notNull("criteria", criteria).
+                field("criteria").notNull(criteria).end().
                 validate("Fail to get dishes units number by criteria");
 
         Condition condition = userFilter(criteria.getUser());
@@ -366,7 +366,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     ps.setString(3, dish.getName());
                     ps.setString(4, dish.getUnit());
                     ps.setString(5, dish.getDescription());
-                    ps.setString(6, dish.getImagePath().toString());
+                    ps.setString(6, dish.getImageUrl().toString());
                 }
         );
 
@@ -439,7 +439,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     ps.setString(1, newVersion.getName());
                     ps.setString(2, newVersion.getUnit());
                     ps.setString(3, newVersion.getDescription());
-                    ps.setString(4, newVersion.getImagePath().toString());
+                    ps.setString(4, newVersion.getImageUrl().toString());
                     ps.setObject(5, newVersion.getUser().getId());
                     ps.setObject(6, newVersion.getId());
                 }

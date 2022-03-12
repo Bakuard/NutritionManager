@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.services;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;

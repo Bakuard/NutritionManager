@@ -11,7 +11,7 @@ import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.*;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -53,7 +53,7 @@ public class DtoMapper {
         response.setUnit(product.getContext().getUnit());
         response.setQuantity(product.getQuantity());
         response.setDescription(product.getDescription());
-        response.setImagePath(product.getImagePath());
+        response.setImageUrl(product.getImageUrl());
         response.setTags(toTagsResponse(product.getContext().getTags()));
         return response;
     }
@@ -72,7 +72,7 @@ public class DtoMapper {
                 setUnit(dto.getUnit()).
                 setQuantity(dto.getQuantity()).
                 setDescription(dto.getDescription()).
-                setImagePath(dto.getImagePath());
+                setImageUrl(dto.getImageUrl());
 
         dto.getTags().forEach(builder::addTag);
 
@@ -93,7 +93,7 @@ public class DtoMapper {
                 setUnit(dto.getUnit()).
                 setQuantity(dto.getQuantity()).
                 setDescription(dto.getDescription()).
-                setImagePath(dto.getImagePath());
+                setImageUrl(dto.getImageUrl());
 
         dto.getTags().forEach(builder::addTag);
 
@@ -199,12 +199,12 @@ public class DtoMapper {
 
     public ExceptionResponse toExceptionResponse(ValidateException e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        if(e.getCheckedType() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
-        else if(e.containsConstraint(ConstraintType.UNKNOWN_ENTITY)) httpStatus = HttpStatus.NOT_FOUND;
+        if(e.getCheckedClass() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
+        else if(e.containsConstraint(Constraint.ENTITY_MUST_EXISTS_IN_DB)) httpStatus = HttpStatus.NOT_FOUND;
 
         ExceptionResponse response = new ExceptionResponse(
                 httpStatus,
-                getMessage(e.getMessageKey(), e.getMessage()),
+                getMessage(e.getUserMessageKey(), e.getMessage()),
                 getMessage("errorTitle", "Error")
         );
         e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
@@ -216,7 +216,7 @@ public class DtoMapper {
         ConstraintResponse dto = new ConstraintResponse();
         dto.setField(result.getFieldName());
         dto.setTitle(getMessage("constraintTitle", "Reason"));
-        dto.setMessage(getMessage(result.getMessageKey(), result.getDetail()));
+        dto.setMessage(getMessage(result.getUserMessageKey(), result.getLogMessage()));
         return dto;
     }
 
