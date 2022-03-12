@@ -14,7 +14,7 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -126,7 +126,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.save(null),
                 DishRepositoryPostgres.class,
                 "save",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -216,7 +216,7 @@ class DishRepositoryPostgresTest {
                 () -> commit(() -> dishRepository.save(dish)),
                 DishRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -294,7 +294,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.save(updatedDish),
                 DishRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -349,7 +349,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.remove(null),
                 DishRepositoryPostgres.class,
                 "remove",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -367,7 +367,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.remove(toUUID(100)),
                 DishRepositoryPostgres.class,
                 "remove",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -388,7 +388,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getById(toUUID(100)),
                 DishRepositoryPostgres.class,
                 "getById",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -419,7 +419,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getById(null),
                 DishRepositoryPostgres.class,
                 "getById",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -434,7 +434,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getById(toUUID(100)),
                 DishRepositoryPostgres.class,
                 "getById",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -467,7 +467,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getDishesNumber(null),
                 DishRepositoryPostgres.class,
                 "getDishesNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -647,7 +647,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getDishes(null),
                 DishRepositoryPostgres.class,
                 "getDishes",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -915,7 +915,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getTagsNumber(null),
                 DishRepositoryPostgres.class,
                 "getTagsNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -967,7 +967,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getTags(null),
                 DishRepositoryPostgres.class,
                 "getTags",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -1023,7 +1023,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getUnitsNumber(null),
                 DishRepositoryPostgres.class,
                 "getUnitsNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -1075,7 +1075,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.getUnits(null),
                 DishRepositoryPostgres.class,
                 "getUnits",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -1178,7 +1178,7 @@ class DishRepositoryPostgresTest {
                         setPackingSize(new BigDecimal("0.5")).
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description A").
-                        setImagePath("some image path A").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
                         addTag("common tag").
                         addTag("tag A").
                         addTag("value 1").
@@ -1199,7 +1199,7 @@ class DishRepositoryPostgresTest {
                         setPackingSize(BigDecimal.ONE).
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description B").
-                        setImagePath("some image path B").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=2").
                         addTag("common tag").
                         addTag("tag A").
                         addTag("value 2").
@@ -1220,7 +1220,7 @@ class DishRepositoryPostgresTest {
                         setPackingSize(new BigDecimal("1.5")).
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description C").
-                        setImagePath("some image path C").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=3").
                         addTag("common tag").
                         addTag("tag A").
                         addTag("value 3").
@@ -1241,7 +1241,7 @@ class DishRepositoryPostgresTest {
                         setPackingSize(new BigDecimal(2)).
                         setQuantity(new BigDecimal("12.5")).
                         setDescription("some description D").
-                        setImagePath("some image path D").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=4").
                         addTag("common tag").
                         addTag("tag B").
                         addTag("value 4").
@@ -1262,7 +1262,7 @@ class DishRepositoryPostgresTest {
                         setPackingSize(new BigDecimal(5)).
                         setQuantity(new BigDecimal("6")).
                         setDescription("some description E").
-                        setImagePath("some image path E").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=5").
                         addTag("common tag").
                         addTag("tag B").
                         addTag("value 5").
@@ -1283,7 +1283,7 @@ class DishRepositoryPostgresTest {
                         setPackingSize(BigDecimal.TEN).
                         setQuantity(new BigDecimal("9.2")).
                         setDescription("some description F").
-                        setImagePath("some image path F").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=6").
                         addTag("common tag").
                         addTag("tag B").
                         addTag("value 6").
@@ -1300,7 +1300,7 @@ class DishRepositoryPostgresTest {
                 setName("dish A").
                 setUnit("unit A").
                 setDescription("description A").
-                setImagePath("image path A").
+                setImagePath("https://nutritionmanager.xyz/products/images?id=1").
                 setConfig(appConfiguration).
                 setRepository(productRepository).
                 addTag("tag A").
@@ -1349,7 +1349,7 @@ class DishRepositoryPostgresTest {
                         setName("dish 1").
                         setUnit("unit A").
                         setDescription("description 1").
-                        setImagePath("image path 1").
+                        setImagePath("https://nutritionmanager.xyz/products/images?id=1").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 1").
@@ -1396,7 +1396,7 @@ class DishRepositoryPostgresTest {
                         setName("dish 2").
                         setUnit("unit A").
                         setDescription("description 2").
-                        setImagePath("image path 2").
+                        setImagePath("https://nutritionmanager.xyz/products/images?id=2").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 2").
@@ -1424,7 +1424,7 @@ class DishRepositoryPostgresTest {
                         setName("dish 3").
                         setUnit("unit B").
                         setDescription("description 3").
-                        setImagePath("image path 3").
+                        setImagePath("https://nutritionmanager.xyz/products/images?id=3").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 3").
@@ -1466,7 +1466,7 @@ class DishRepositoryPostgresTest {
                         setName("dish 4").
                         setUnit("unit C").
                         setDescription("description 4").
-                        setImagePath("image path 4").
+                        setImagePath("https://nutritionmanager.xyz/products/images?id=4").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 4").

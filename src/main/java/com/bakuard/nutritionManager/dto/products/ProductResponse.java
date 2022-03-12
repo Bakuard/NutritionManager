@@ -40,7 +40,7 @@ public class ProductResponse {
     @Schema(description = "Описание продукта")
     private String description;
     @Schema(description = "Путь к изображению данного продукта")
-    private String imagePath;
+    private URL imageUrl;
     @Schema(description = "Теги указаныне для данного продукта")
     private List<String> tags;
 
@@ -140,12 +140,12 @@ public class ProductResponse {
         this.description = description;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public URL getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUrl(URL imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<String> getTags() {
@@ -173,14 +173,14 @@ public class ProductResponse {
                 Objects.equals(unit, response.unit) &&
                 Objects.equals(quantity, response.quantity) &&
                 Objects.equals(description, response.description) &&
-                Objects.equals(imagePath, response.imagePath) &&
+                Objects.equals(imageUrl, response.imageUrl) &&
                 Objects.equals(tags, response.tags);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(type, id, user, category, shop, grade, manufacturer,
-                price, packingSize, unit, quantity, description, imagePath, tags);
+                price, packingSize, unit, quantity, description, imageUrl, tags);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class ProductResponse {
                 ", unit='" + unit + '\'' +
                 ", quantity=" + quantity +
                 ", description='" + description + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", tags=" + tags +
                 '}';
     }

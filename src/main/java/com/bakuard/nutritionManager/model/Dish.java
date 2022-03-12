@@ -2,12 +2,13 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,7 +23,7 @@ public class Dish {
     private String name;
     private String unit;
     private String description;
-    private String imagePath;
+    private URL imageUrl;
     private final List<DishIngredient> ingredients;
     private final List<Tag> tags;
     private AppConfigData config;
@@ -38,7 +39,7 @@ public class Dish {
         this.name = other.name;
         this.unit = other.unit;
         this.description = other.description;
-        this.imagePath = other.imagePath;
+        this.imageUrl = other.imageUrl;
         this.config = other.config;
         this.productRepository = other.productRepository;
         this.ingredients = other.ingredients.stream().
@@ -52,25 +53,25 @@ public class Dish {
                  String name,
                  String unit,
                  String description,
-                 String imagePath,
+                 String imageUrl,
                  List<DishIngredient.Builder> ingredients,
                  List<String> tags,
                  AppConfigData config,
                  ProductRepository productRepository) {
         Container<List<Tag>> tagContainer = Validator.container();
         Container<List<DishIngredient>> ingredientContainer = Validator.container();
+        Container<URL> urlContainer = Validator.container();
 
         Validator.create().
-                notNull("id", id).
-                notNull("user", user).
-                notNull("name", name).
-                notBlank("name", name).
-                notNull("unit", unit).
-                notBlank("unit", unit).
-                tryBuildForEach(ingredients, ingredientContainer).
-                tryBuildForEach(tags, Tag::new, tagContainer).
-                notNull("config", config).
-                notNull("repository", productRepository).
+                field("id").notNull(id).end().
+                field("user").notNull(user).end().
+                field("name").notNull(name).and(v -> v.notBlank(name)).end().
+                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
+                field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, urlContainer)).end().
+                field("ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).end().
+                field("tags").doesNotThrow(tags, Tag::new, tagContainer).end().
+                field("config").notNull(config).end().
+                field("repository").notNull(productRepository).end().
                 validate("Fail to create dish");
 
         this.id = id;
@@ -78,7 +79,7 @@ public class Dish {
         this.name = name.trim();
         this.unit = unit.trim();
         this.description = description;
-        this.imagePath = imagePath;
+        this.imageUrl = urlContainer.get();
         this.ingredients = ingredientContainer.get();
         this.tags = new ArrayList<>(tagContainer.get());
         this.config = config;
@@ -95,8 +96,7 @@ public class Dish {
      */
     public void setName(String name) {
         Validator.create().
-                notNull("name", name).
-                notBlank("name", name).
+                field("name").notNull(name).and(v -> v.notBlank(name)).end().
                 validate("Fail to set dish name");
 
         this.name = name.trim();
@@ -112,8 +112,7 @@ public class Dish {
      */
     public void setUnit(String unit) {
         Validator.create().
-                notNull("unit", unit).
-                notBlank("unit", unit).
+                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
                 validate("Fail to set dish unit");
 
         this.unit = unit.trim();
@@ -130,10 +129,16 @@ public class Dish {
     /**
      * Задает путь изображения данного блюда. Путь не обязательно может быть путем в файловой системе.
      * Метод может принимать значение null.
-     * @param imagePath путь изображения данного блюда.
+     * @param imageUrl путь изображения данного блюда.
      */
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUrl(String imageUrl) {
+        Container<URL> urlContainer = Validator.container();
+
+        Validator.create().
+                field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, urlContainer)).end().
+                validate();
+
+        this.imageUrl = urlContainer.get();
     }
 
     /**
@@ -188,8 +193,8 @@ public class Dish {
      */
     public void addTag(Tag tag) {
         Validator.create().
-                notNull("tag", tag).
-                notContainsDuplicateTag("tags", tags, tag).
+                field("tag").notNull(tag).end().
+                field("tags").notContainsItem(tags, tag).end().
                 validate("Fail to add tag to dish");
 
         tags.add(tag);
@@ -248,8 +253,8 @@ public class Dish {
      * Возвращает путь изображения данного блюда. Путь не обязательно может быть путем в файловой системе.
      * @return путь изображения данного блюда.
      */
-    public String getImagePath() {
-        return imagePath;
+    public URL getImageUrl() {
+        return imageUrl;
     }
 
     /**
@@ -328,20 +333,13 @@ public class Dish {
      */
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
                                          Map<String, Integer> productsIndex) {
-        Validator validator = Validator.create().
-                notNull("servingNumber", servingNumber).
-                notNull("productsIndex", productsIndex).
-                positiveValue("servingNumber", servingNumber).
-                notContainsNegative("productsIndex", productsIndex.values()).
+        Validator.create().
+                field("servingNumber").notNull(servingNumber).
+                    and(v -> v.positiveValue(servingNumber)).end().
+                field("productsIndex").notNull(productsIndex).
+                    and(v -> v.notContainsNegative(productsIndex.values())).end().
+                field("productsIndex").containsTheSameItems(productsIndex.keySet(), ingredients, DishIngredient::getName).end().
                 validate("Fail to get dish price");
-
-        if(ingredients.size() != productsIndex.size() ||
-                ingredients.stream().
-                map(DishIngredient::getName).
-                anyMatch(i -> !productsIndex.containsKey(i))) {
-            validator.failure("productsIndex", ConstraintType.UNKNOWN_ITEM).
-                    validate("Fail to get dish price");
-        }
 
         return ingredients.stream().
                 map(i -> i.getLackQuantityPrice(productsIndex.get(i.getName()), servingNumber)).
@@ -385,7 +383,7 @@ public class Dish {
                 name.equals(other.name) &&
                 unit.equals(other.unit) &&
                 Objects.equals(description, other.description) &&
-                Objects.equals(imagePath, other.imagePath) &&
+                Objects.equals(imageUrl, other.imageUrl) &&
                 ingredients.equals(other.ingredients) &&
                 tags.equals(other.tags) &&
                 config == other.config &&
@@ -419,7 +417,7 @@ public class Dish {
                 ", name='" + name + '\'' +
                 ", unit='" + unit + '\'' +
                 ", description='" + description + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", tags=" + tags +
                 ", ingredients=" + ingredients +
                 '}';

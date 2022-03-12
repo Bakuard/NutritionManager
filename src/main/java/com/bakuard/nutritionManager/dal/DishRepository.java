@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.dal.criteria.dishes.*;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.util.Page;

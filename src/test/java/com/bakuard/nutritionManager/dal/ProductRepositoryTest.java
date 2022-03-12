@@ -9,7 +9,7 @@ import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -113,7 +113,7 @@ class ProductRepositoryTest {
                 () -> repository.save(null),
                 ProductRepositoryPostgres.class,
                 "save",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -190,7 +190,7 @@ class ProductRepositoryTest {
                 () -> commit(() ->repository.save(addedProduct)),
                 ProductRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -210,7 +210,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
 
         Product updatedProduct = new Product(product1);
-        updatedProduct.setImagePath("New image path");
+        updatedProduct.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
         boolean isSaved = commit(() -> repository.save(updatedProduct));
 
         Assertions.assertTrue(isSaved);
@@ -232,7 +232,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
 
         Product expected = new Product(product1);
-        expected.setImagePath("New image path");
+        expected.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
         commit(() -> repository.save(expected));
 
         Assertions.assertTrue(expected.equalsFullState(repository.getById(toUUID(1))));
@@ -253,7 +253,7 @@ class ProductRepositoryTest {
                 setPrice(new BigDecimal("115.12")).
                 tryBuild();
         Product product2 = createProduct(2, user).
-                setImagePath("unique image path").
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=unique").
                 setDescription("unique description").
                 setQuantity(BigDecimal.TEN).
                 tryBuild();
@@ -267,7 +267,7 @@ class ProductRepositoryTest {
                 () -> commit(() -> repository.save(updatedProduct)),
                 ProductRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -322,7 +322,7 @@ class ProductRepositoryTest {
                 () -> commit(() -> repository.remove(null)),
                 ProductRepositoryPostgres.class,
                 "remove",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -333,7 +333,7 @@ class ProductRepositoryTest {
                 () -> commit(() -> repository.remove(toUUID(10))),
                 ProductRepositoryPostgres.class,
                 "remove",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -350,7 +350,7 @@ class ProductRepositoryTest {
                 () -> commit(() -> repository.getById(toUUID(1))),
                 ProductRepositoryPostgres.class,
                 "getById",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -373,7 +373,7 @@ class ProductRepositoryTest {
                 () -> commit(() -> repository.getById(null)),
                 ProductRepositoryPostgres.class,
                 "getById",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -384,7 +384,7 @@ class ProductRepositoryTest {
                 () -> commit(() -> repository.getById(toUUID(256))),
                 ProductRepositoryPostgres.class,
                 "getById",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -411,7 +411,7 @@ class ProductRepositoryTest {
                 () -> repository.getProductsNumber(null),
                 ProductRepositoryPostgres.class,
                 "getProductsNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -1013,7 +1013,7 @@ class ProductRepositoryTest {
                 () -> repository.getProducts(null),
                 ProductRepositoryPostgres.class,
                 "getProducts",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -1837,7 +1837,7 @@ class ProductRepositoryTest {
                 () -> repository.getTagsNumber(null),
                 ProductRepositoryPostgres.class,
                 "getTagsNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -1903,7 +1903,7 @@ class ProductRepositoryTest {
                 () -> repository.getTags(null),
                 ProductRepositoryPostgres.class,
                 "getTags",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2045,7 +2045,7 @@ class ProductRepositoryTest {
                 () -> repository.getShopsNumber(null),
                 ProductRepositoryPostgres.class,
                 "getShopsNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2112,7 +2112,7 @@ class ProductRepositoryTest {
                 () -> repository.getShops(null),
                 ProductRepositoryPostgres.class,
                 "getShops",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2230,7 +2230,7 @@ class ProductRepositoryTest {
                 () -> repository.getVarietiesNumber(null),
                 ProductRepositoryPostgres.class,
                 "getVarietiesNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2297,7 +2297,7 @@ class ProductRepositoryTest {
                 () -> repository.getVarieties(null),
                 ProductRepositoryPostgres.class,
                 "getVarieties",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2415,7 +2415,7 @@ class ProductRepositoryTest {
                 () -> repository.getCategoriesNumber(null),
                 ProductRepositoryPostgres.class,
                 "getCategoriesNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2463,7 +2463,7 @@ class ProductRepositoryTest {
                 () -> repository.getCategories(null),
                 ProductRepositoryPostgres.class,
                 "getCategories",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2543,7 +2543,7 @@ class ProductRepositoryTest {
                 () -> repository.getManufacturersNumber(null),
                 ProductRepositoryPostgres.class,
                 "getManufacturersNumber",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2610,7 +2610,7 @@ class ProductRepositoryTest {
                 () -> repository.getManufacturers(null),
                 ProductRepositoryPostgres.class,
                 "getManufacturers",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -2728,7 +2728,7 @@ class ProductRepositoryTest {
                 () -> repository.getProductsSum(null),
                 ProductRepositoryPostgres.class,
                 "getProductsSum",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -3292,7 +3292,7 @@ class ProductRepositoryTest {
                 setPackingSize(BigDecimal.ONE).
                 setQuantity(BigDecimal.ZERO).
                 setDescription("some description A").
-                setImagePath("some image path A").
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
                 addTag("tag 1").
                 addTag("tag 2").
                 addTag("tag 3");
@@ -3319,7 +3319,7 @@ class ProductRepositoryTest {
                         setPackingSize(new BigDecimal("0.5")).
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description A").
-                        setImagePath("some image path A").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
                         addTag("common tag").
                         addTag("tag A").
                         addTag("value 1").
@@ -3340,7 +3340,7 @@ class ProductRepositoryTest {
                         setPackingSize(BigDecimal.ONE).
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description B").
-                        setImagePath("some image path B").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=2").
                         addTag("common tag").
                         addTag("tag A").
                         addTag("value 2").
@@ -3361,7 +3361,7 @@ class ProductRepositoryTest {
                         setPackingSize(new BigDecimal("1.5")).
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description C").
-                        setImagePath("some image path C").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=3").
                         addTag("common tag").
                         addTag("tag A").
                         addTag("value 3").
@@ -3382,7 +3382,7 @@ class ProductRepositoryTest {
                         setPackingSize(new BigDecimal(2)).
                         setQuantity(new BigDecimal("12.5")).
                         setDescription("some description D").
-                        setImagePath("some image path D").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=4").
                         addTag("common tag").
                         addTag("tag B").
                         addTag("value 4").
@@ -3403,7 +3403,7 @@ class ProductRepositoryTest {
                         setPackingSize(new BigDecimal(5)).
                         setQuantity(new BigDecimal("6")).
                         setDescription("some description E").
-                        setImagePath("some image path E").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=5").
                         addTag("common tag").
                         addTag("tag B").
                         addTag("value 5").
@@ -3424,7 +3424,7 @@ class ProductRepositoryTest {
                         setPackingSize(BigDecimal.TEN).
                         setQuantity(new BigDecimal("9.2")).
                         setDescription("some description F").
-                        setImagePath("some image path F").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=6").
                         addTag("common tag").
                         addTag("tag B").
                         addTag("value 6").

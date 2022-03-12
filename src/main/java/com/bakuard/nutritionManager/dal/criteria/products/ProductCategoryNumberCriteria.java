@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ public class ProductCategoryNumberCriteria {
 
     private ProductCategoryNumberCriteria(User user) {
         Validator.create().
-                notNull("user", user).
+                field("user").notNull(user).end().
                 validate();
 
         this.user = user;

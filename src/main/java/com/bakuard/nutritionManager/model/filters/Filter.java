@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;

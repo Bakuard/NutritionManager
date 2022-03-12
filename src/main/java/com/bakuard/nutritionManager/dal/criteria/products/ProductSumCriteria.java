@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 
 import java.util.Objects;
@@ -32,8 +32,8 @@ public class ProductSumCriteria {
 
     private ProductSumCriteria(User user, Filter filter) {
         Validator.create().
-                notNull("user", user).
-                notNull("filter", filter).
+                field("user").notNull(user).end().
+                field("filter").notNull(filter).end().
                 validate("Fail to create ProductSumCriteria");
 
         this.user = user;

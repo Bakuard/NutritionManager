@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -19,7 +19,7 @@ public class Menu {
     private final UUID userId;
     private String name;
     private String description;
-    private URL imagePath;
+    private URL imageUrl;
     private Map<UUID, BigDecimal> dishes;
 
     Menu(UUID id, UUID userId) {
@@ -54,9 +54,9 @@ public class Menu {
     /**
      * Задает путь к изображению данного меню. Задаваемый путь не обязательно должен быть путем в файловой
      * системе. Метод может принимать значение null.
-     * @param imagePath путь к изображению данного меню.
+     * @param imageUrl путь к изображению данного меню.
      */
-    public void setImagePath(String imagePath) {
+    public void setImageUrl(String imageUrl) {
 
     }
 
@@ -118,8 +118,8 @@ public class Menu {
      * Возвращает путь к изображению данного меню.
      * @return путь к изображению данного меню.
      */
-    public URL getImagePath() {
-        return imagePath;
+    public URL getImageUrl() {
+        return imageUrl;
     }
 
     /**
@@ -201,7 +201,7 @@ public class Menu {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", dishes=" + dishes +
                 '}';
     }

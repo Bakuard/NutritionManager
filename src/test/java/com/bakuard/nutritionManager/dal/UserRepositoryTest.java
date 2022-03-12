@@ -5,7 +5,7 @@ import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.User;
 
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.validation.Constraint;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -106,7 +106,7 @@ class UserRepositoryTest {
                 () -> repository.save(null),
                 UserRepositoryPostgres.class,
                 "save",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -169,7 +169,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -191,7 +191,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -213,7 +213,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -274,7 +274,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -304,7 +304,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -334,7 +334,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                ConstraintType.ALREADY_EXISTS_IN_DB
+                Constraint.ENTITY_MUST_UNIQUE_IN_DB
         );
     }
 
@@ -377,7 +377,7 @@ class UserRepositoryTest {
                 () -> repository.getById(null),
                 UserRepositoryPostgres.class,
                 "getById",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -391,7 +391,7 @@ class UserRepositoryTest {
                 () -> repository.getById(toUUID(2)),
                 UserRepositoryPostgres.class,
                 "getById",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -418,7 +418,7 @@ class UserRepositoryTest {
                 () -> repository.getByName(null),
                 UserRepositoryPostgres.class,
                 "getByName",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -436,7 +436,7 @@ class UserRepositoryTest {
                 () -> repository.getByName("some user"),
                 UserRepositoryPostgres.class,
                 "getByName",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -466,7 +466,7 @@ class UserRepositoryTest {
                 () -> repository.getByEmail(null),
                 UserRepositoryPostgres.class,
                 "getByEmail",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -484,7 +484,7 @@ class UserRepositoryTest {
                 () -> repository.getByEmail("newEmail@mail.com"),
                 UserRepositoryPostgres.class,
                 "getByEmail",
-                ConstraintType.UNKNOWN_ENTITY
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 

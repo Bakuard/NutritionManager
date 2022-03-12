@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 /**
  * Задает правило сортировки меню. Объекты данного класса неизменяемы.

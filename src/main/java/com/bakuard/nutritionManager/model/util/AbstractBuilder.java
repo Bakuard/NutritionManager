@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.util;
 
-import com.bakuard.nutritionManager.model.exceptions.ValidateException;
+import com.bakuard.nutritionManager.validation.ValidateException;
 
 /**
  * Интерфейс строителей (паттерн "Builder") для бизнес сущностей.

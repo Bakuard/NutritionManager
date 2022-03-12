@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.dishes;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import java.util.Objects;
 
@@ -29,7 +29,7 @@ public class DishFieldNumberCriteria {
 
     private DishFieldNumberCriteria(User user) {
         Validator.create().
-                notNull("user", user).
+                field("user").notNull(user).end().
                 validate();
 
         this.user = user;

@@ -5,7 +5,7 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.JwsBlackListPostgres;
 
-import com.bakuard.nutritionManager.model.exceptions.ConstraintType;
+import com.bakuard.nutritionManager.validation.Constraint;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -102,7 +102,7 @@ class JwsBlackListPostgresTest {
                 () -> commit(() -> repository.addToBlackList(null, LocalDateTime.now().plusDays(2))),
                 JwsBlackListPostgres.class,
                 "addToBlackList",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -113,7 +113,7 @@ class JwsBlackListPostgresTest {
                 () -> commit(() -> repository.addToBlackList(toUUID(1), null)),
                 JwsBlackListPostgres.class,
                 "addToBlackList",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 
@@ -224,7 +224,7 @@ class JwsBlackListPostgresTest {
                 () -> commit(() -> repository.removeAllExpired(null)),
                 JwsBlackListPostgres.class,
                 "removeAllExpired",
-                ConstraintType.MISSING_VALUE
+                Constraint.NOT_NULL
         );
     }
 

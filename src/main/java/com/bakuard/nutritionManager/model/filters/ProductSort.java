@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.util.Pair;
 
 import java.util.ArrayList;
@@ -64,8 +64,8 @@ public final class ProductSort {
      */
     public ProductSort(Parameter parameter, SortDirection direction) {
         Validator.create().
-                notNull("parameter", parameter).
-                notNull("direction", direction).
+                field("parameter").notNull(parameter).end().
+                field("direction").notNull(direction).end().
                 validate();
 
         params = new ArrayList<>();
@@ -102,8 +102,8 @@ public final class ProductSort {
      */
     public ProductSort byParameter(Parameter parameter, SortDirection direction) {
         Validator.create().
-                notNull("parameter", parameter).
-                notNull("direction", direction).
+                field("parameter").notNull(parameter).end().
+                field("direction").notNull(direction).end().
                 validate();
 
         Pair<Parameter, SortDirection> pair = new Pair<>(parameter, direction);
@@ -136,7 +136,7 @@ public final class ProductSort {
      */
     public Parameter getParameterType(int parameterIndex) {
         Validator.create().
-                range("parameterIndex", parameterIndex, 0, params.size() - 1).
+                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
                 validate("Fail to get parameter type from ProductSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
@@ -155,7 +155,7 @@ public final class ProductSort {
      */
     public SortDirection getDirection(int parameterIndex) {
         Validator.create().
-                range("parameterIndex", parameterIndex, 0, params.size() - 1).
+                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
                 validate("Fail to get direction sort from ProductSort. Index must belong " +
                         "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
 
@@ -178,9 +178,10 @@ public final class ProductSort {
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
         Validator validator = Validator.create().
-                notNull("parameter", parameter).
-                notNull("direction", direction).
-                validate();
+                field("parameter").notNull(parameter).end().
+                field("direction").notNull(direction).end();
+
+        validator.validate();
 
         Parameter p = null;
         SortDirection d = null;
@@ -191,15 +192,13 @@ public final class ProductSort {
             case "variety" -> p = Parameter.VARIETY;
             case "shop" -> p = Parameter.SHOP;
             case "manufacturer" -> p = Parameter.MANUFACTURER;
-            default -> validator.
-                    failure("parameter", ConstraintType.UNKNOWN_PARAMETER);
+            default -> validator.field("parameter").failure(Constraint.PERMISSIBLE_VALUE);
         }
 
         switch(direction) {
             case "asc" -> d = SortDirection.ASCENDING;
             case "desc" -> d = SortDirection.DESCENDING;
-            default -> validator.
-                    failure("direction", ConstraintType.UNKNOWN_PARAMETER);
+            default -> validator.field("direction").failure(Constraint.PERMISSIBLE_VALUE);
         }
 
         validator.validate();

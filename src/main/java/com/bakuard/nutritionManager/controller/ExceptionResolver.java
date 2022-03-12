@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

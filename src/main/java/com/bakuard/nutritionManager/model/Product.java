@@ -1,10 +1,11 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -17,7 +18,7 @@ public class Product {
     private ProductContext context;
     private BigDecimal quantity;
     private String description;
-    private String imagePath;
+    private URL imageUrl;
 
     /**
      * Конструктор копирования. Выполняет глубокое копирование.
@@ -29,26 +30,27 @@ public class Product {
         context = other.context;
         quantity = other.quantity;
         description = other.description;
-        imagePath = other.imagePath;
+        imageUrl = other.imageUrl;
     }
 
     private Product(UUID id,
                     User user,
                     String description,
                     BigDecimal quantity,
-                    String imagePath,
+                    String imageUrl,
                     ProductContext.Builder contextBuilder,
                     AppConfigData config) {
         Container<ProductContext> context = Validator.container();
+        Container<URL> url = Validator.container();
 
         Validator.create().
-                notNull("id", id).
-                notNull("user", user).
-                notNull("quantity", quantity).
-                notNegativeValue("quantity", quantity).
-                notNull("config", config).
-                notNull("context", contextBuilder).
-                tryBuild(contextBuilder, context).
+                field("id").notNull(id).end().
+                field("user").notNull(user).end().
+                field("quantity").notNull(quantity).and(v -> v.notNegative(quantity)).end().
+                field("config").notNull(config).end().
+                field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, url)).end().
+                field("context").notNull(contextBuilder).
+                    and(v -> v.doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context)).end().
                 validate("Fail to create product");
 
         this.id = id;
@@ -56,7 +58,7 @@ public class Product {
         this.context = context.get();
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.description = description;
-        this.imagePath = imagePath;
+        this.imageUrl = url.get();
     }
 
     /**
@@ -66,7 +68,7 @@ public class Product {
      */
     public void setContext(ProductContext context) {
         Validator.create().
-                notNull("context", context).
+                field("context").notNull(context).end().
                 validate("Fail to set product context");
 
         this.context = context;
@@ -82,8 +84,7 @@ public class Product {
      */
     public void addQuantity(BigDecimal quantity) {
         Validator.create().
-                notNull("quantity", quantity).
-                notNegativeValue("quantity", quantity).
+                field("quantity").notNull(quantity).and(v -> v.notNegative(quantity)).end().
                 validate("Fail to add product quantity");
 
         this.quantity = this.quantity.add(quantity);
@@ -103,8 +104,7 @@ public class Product {
      */
     public BigDecimal take(BigDecimal quantity) {
         Validator.create().
-                notNull("quantity", quantity).
-                notNegativeValue("quantity", quantity).
+                field("quantity").notNull(quantity).and(v -> v.notNegative(quantity)).end().
                 validate("Fail to take product quantity");
 
         BigDecimal remain = this.quantity.min(quantity);
@@ -123,10 +123,16 @@ public class Product {
     /**
      * Устанавливает значение пути к изображению данного продукта. Путь не обязательно может быть путем в
      * файловой системе. Метод может принимать значение null.
-     * @param imagePath путь изображения данного продукта.
+     * @param imageUrl путь изображения данного продукта.
      */
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUrl(String imageUrl) {
+        Container<URL> url = Validator.container();
+
+        Validator.create().
+            field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, url)).end().
+            validate();
+
+        this.imageUrl = url.get();
     }
 
     /**
@@ -173,8 +179,8 @@ public class Product {
      * Возвращает путь к избражению данного продукта.
      * @return путь к избражению данного продукта.
      */
-    public String getImagePath() {
-        return imagePath;
+    public URL getImageUrl() {
+        return imageUrl;
     }
 
     /**
@@ -190,7 +196,7 @@ public class Product {
                 quantity.equals(other.quantity) &&
                 context.equals(other.context) &&
                 Objects.equals(description, other.description) &&
-                Objects.equals(imagePath, other.imagePath);
+                Objects.equals(imageUrl, other.imageUrl);
     }
 
     @Override
@@ -214,7 +220,7 @@ public class Product {
                 ", context=" + context +
                 ", quantity=" + quantity +
                 ", description='" + description + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 '}';
     }
 
@@ -232,7 +238,7 @@ public class Product {
         private final ProductContext.Builder contextBuilder;
         private BigDecimal quantity;
         private String description;
-        private String imagePath;
+        private String imageUrl;
         private AppConfigData appConfigData;
 
         public Builder() {
@@ -299,8 +305,8 @@ public class Product {
             return this;
         }
 
-        public Builder setImagePath(String imagePath) {
-            this.imagePath = imagePath;
+        public Builder setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
             return this;
         }
 
@@ -321,7 +327,7 @@ public class Product {
                     user,
                     description,
                     quantity,
-                    imagePath,
+                    imageUrl,
                     contextBuilder,
                     appConfigData
             );

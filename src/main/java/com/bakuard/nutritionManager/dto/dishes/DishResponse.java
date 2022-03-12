@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.dto.dishes;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -15,7 +16,7 @@ public class DishResponse {
     private BigDecimal servingSize;
     private String unit;
     private String description;
-    private String imagePath;
+    private URL imageUrl;
     private List<DishIngredientRequestAndResponse> ingredients;
     private List<String> tags;
 
@@ -67,12 +68,12 @@ public class DishResponse {
         this.description = description;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public URL getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUrl(URL imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<DishIngredientRequestAndResponse> getIngredients() {
@@ -102,7 +103,7 @@ public class DishResponse {
                 Objects.equals(servingSize, that.servingSize) &&
                 Objects.equals(unit, that.unit) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(imagePath, that.imagePath) &&
+                Objects.equals(imageUrl, that.imageUrl) &&
                 Objects.equals(ingredients, that.ingredients) &&
                 Objects.equals(tags, that.tags);
     }
@@ -110,7 +111,7 @@ public class DishResponse {
     @Override
     public int hashCode() {
         return Objects.hash(id, user, name, servingSize, unit,
-                description, imagePath, ingredients, tags);
+                description, imageUrl, ingredients, tags);
     }
 
     @Override
@@ -122,7 +123,7 @@ public class DishResponse {
                 ", servingSize=" + servingSize +
                 ", unit='" + unit + '\'' +
                 ", description='" + description + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", ingredients=" + ingredients +
                 ", tags=" + tags +
                 '}';

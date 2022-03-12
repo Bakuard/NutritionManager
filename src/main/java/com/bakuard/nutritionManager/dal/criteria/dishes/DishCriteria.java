@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.dal.criteria.dishes;
 
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.exceptions.*;
+import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.DishSort;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -37,8 +37,8 @@ public class DishCriteria {
 
     private DishCriteria(Pageable pageable, User user) {
         Validator.create().
-                notNull("pageable", pageable).
-                notNull("user", user).
+                field("pageable").notNull(pageable).end().
+                field("user").notNull(user).end().
                 validate();
 
         this.pageable = pageable;
