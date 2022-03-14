@@ -155,11 +155,11 @@ public class DtoMapper {
         Page<Tag> tags = productRepository.getTags(criteria);
 
         ProductFieldsResponse response = new ProductFieldsResponse();
-        response.setTags(tags.getContent());
-        response.setVarieties(varieties.getContent());
-        response.setManufacturers(manufacturers.getContent());
-        response.setShops(shops.getContent());
-        response.setCategories(categories.getContent());
+        response.setTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
+        response.setVarieties(varieties.getContent().stream().map(FieldResponse::new).toList());
+        response.setManufacturers(manufacturers.getContent().stream().map(FieldResponse::new).toList());
+        response.setShops(shops.getContent().stream().map(FieldResponse::new).toList());
+        response.setCategories(categories.getContent().stream().map(FieldResponse::new).toList());
 
         return response;
     }

@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.dto.products;
 
+import com.bakuard.nutritionManager.dto.FieldResponse;
 import com.bakuard.nutritionManager.model.Tag;
 
 import java.util.List;
@@ -7,53 +8,53 @@ import java.util.Objects;
 
 public class ProductFieldsResponse {
 
-    private List<Tag> tags;
-    private List<String> categories;
-    private List<String> manufacturers;
-    private List<String> varieties;
-    private List<String> shops;
+    private List<FieldResponse> tags;
+    private List<FieldResponse> categories;
+    private List<FieldResponse> manufacturers;
+    private List<FieldResponse> varieties;
+    private List<FieldResponse> shops;
 
     public ProductFieldsResponse() {
 
     }
 
-    public List<Tag> getTags() {
+    public List<FieldResponse> getTags() {
         return tags;
     }
 
-    public void setTags(List<Tag> tags) {
+    public void setTags(List<FieldResponse> tags) {
         this.tags = tags;
     }
 
-    public List<String> getCategories() {
+    public List<FieldResponse> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<String> categories) {
+    public void setCategories(List<FieldResponse> categories) {
         this.categories = categories;
     }
 
-    public List<String> getManufacturers() {
+    public List<FieldResponse> getManufacturers() {
         return manufacturers;
     }
 
-    public void setManufacturers(List<String> manufacturers) {
+    public void setManufacturers(List<FieldResponse> manufacturers) {
         this.manufacturers = manufacturers;
     }
 
-    public List<String> getVarieties() {
+    public List<FieldResponse> getVarieties() {
         return varieties;
     }
 
-    public void setVarieties(List<String> varieties) {
+    public void setVarieties(List<FieldResponse> varieties) {
         this.varieties = varieties;
     }
 
-    public List<String> getShops() {
+    public List<FieldResponse> getShops() {
         return shops;
     }
 
-    public void setShops(List<String> shops) {
+    public void setShops(List<FieldResponse> shops) {
         this.shops = shops;
     }
 
