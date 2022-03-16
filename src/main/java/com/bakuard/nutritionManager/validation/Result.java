@@ -34,26 +34,9 @@ public final class Result {
         this.methodName = methodName;
         this.fieldName = fieldName;
         this.constraints = new Constraint[]{constraint};
-        this.userMessageKey = userMessageKey;
-        this.state = state;
-        this.nextResult = nextResult;
-        this.logMessage = logMessage;
-        this.validator = validator;
-    }
-
-    public Result(Class<?> checkedClass,
-                  String methodName,
-                  String fieldName,
-                  Constraint constraint,
-                  State state,
-                  Result nextResult,
-                  String logMessage,
-                  Validator validator) {
-        this.checkedClass = checkedClass;
-        this.methodName = methodName;
-        this.fieldName = fieldName;
-        this.constraints = new Constraint[]{constraint};
-        this.userMessageKey = userMessageKey();
+        this.userMessageKey = userMessageKey != null ?
+                        userMessageKey :
+                        userMessageKey(checkedClass, methodName, fieldName, constraints);
         this.state = state;
         this.nextResult = nextResult;
         this.logMessage = logMessage;
@@ -61,14 +44,14 @@ public final class Result {
     }
 
     private Result(Class<?> checkedClass,
-                  String methodName,
-                  String fieldName,
-                  Constraint[] constraints,
-                  State state,
-                  Result nextResult,
-                  String userMessageKey,
-                  String logMessage,
-                  Validator validator) {
+                   String methodName,
+                   String fieldName,
+                   Constraint[] constraints,
+                   State state,
+                   Result nextResult,
+                   String userMessageKey,
+                   String logMessage,
+                   Validator validator) {
         this.checkedClass = checkedClass;
         this.methodName = methodName;
         this.fieldName = fieldName;
@@ -117,8 +100,7 @@ public final class Result {
     }
 
     public String getLogMessage() {
-        String result = checkedClass.getName() + '.' + methodName + "(..., " + fieldName + ",...)" +
-                " -> " +
+        String result = checkedClass.getName() + '.' + methodName + "(..., " + fieldName + ",...): " +
                 (constraints.length > 1 ?
                         "constraints " + Arrays.toString(constraints) :
                         "constraint " + constraints[0]) +
@@ -140,11 +122,37 @@ public final class Result {
         Result result = other.apply(validator);
 
         if(result.state != State.SUCCESS) {
+            Constraint[] newConstraints = concat(constraints, result.constraints);
+
             result = new Result(
                     checkedClass,
                     methodName,
                     fieldName,
-                    concat(constraints, result.constraints),
+                    newConstraints,
+                    state,
+                    nextResult,
+                    userMessageKey(checkedClass, methodName, fieldName, newConstraints),
+                    String.join(", ", logMessage, result.logMessage),
+                    validator
+            );
+        }
+
+        return result;
+    }
+
+    public Result or(Function<Validator, Result> other, String userMessageKey) {
+        if(state == State.SUCCESS) return this;
+
+        Result result = other.apply(validator);
+
+        if(result.state != State.SUCCESS) {
+            Constraint[] newConstraints = concat(constraints, result.constraints);
+
+            result = new Result(
+                    checkedClass,
+                    methodName,
+                    fieldName,
+                    newConstraints,
                     state,
                     nextResult,
                     userMessageKey,
@@ -156,14 +164,14 @@ public final class Result {
         return result;
     }
 
-    public Result append(Result other) {
+    public Result append(Function<Validator, Result> other) {
         return new Result(
                 checkedClass,
                 methodName,
                 fieldName,
                 constraints,
                 state,
-                other,
+                other.apply(validator),
                 userMessageKey,
                 logMessage,
                 validator
@@ -180,54 +188,50 @@ public final class Result {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Result result = (Result) o;
-        return state == result.state &&
-                checkedClass.equals(result.checkedClass) &&
+        return checkedClass.equals(result.checkedClass) &&
                 methodName.equals(result.methodName) &&
                 fieldName.equals(result.fieldName) &&
                 Arrays.equals(constraints, result.constraints) &&
+                state == result.state &&
                 nextResult.equals(result.nextResult) &&
                 userMessageKey.equals(result.userMessageKey) &&
-                logMessage.equals(result.logMessage);
+                logMessage.equals(result.logMessage) &&
+                validator.equals(result.validator);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                checkedClass,
+        int result = Objects.hash(checkedClass,
                 methodName,
                 fieldName,
-                constraints,
                 state,
                 nextResult,
                 userMessageKey,
-                logMessage
-        );
-    }
-
-    @Override
-    public String toString() {
-        return "Result{" +
-                "checkedClass=" + checkedClass +
-                ", methodName='" + methodName + '\'' +
-                ", fieldName='" + fieldName + '\'' +
-                ", constraints=" + constraints +
-                ", state=" + state +
-                ", nextResult=" + nextResult +
-                ", userMessageKey='" + userMessageKey + '\'' +
-                ", logMessage='" + logMessage + '\'' +
-                '}';
+                logMessage,
+                validator);
+        result = 31 * result + Arrays.hashCode(constraints);
+        return result;
     }
 
 
-    private String userMessageKey() {
-        return checkedClass.getSimpleName() + '.' + methodName + '#' + fieldName;
+    private String userMessageKey(Class<?> checkedClass,
+                                  String methodName,
+                                  String fieldName,
+                                  Constraint[] constraints) {
+        return checkedClass.getSimpleName() + '.' + methodName + '(' + fieldName + ")[" + convertToString(constraints) + ']';
     }
 
-    private Constraint[] concat(Constraint[] array1, Constraint[] array2) {
-        Constraint[] result = new Constraint[array1.length + array2.length];
-        System.arraycopy(array1, 0, result, 0, array1.length);
+    private <T> T[] concat(T[] array1, T[] array2) {
+        T[] result = Arrays.copyOf(array1, array1.length + array2.length);
         System.arraycopy(array2, 0, result, array1.length, array2.length);
         return result;
+    }
+
+    private String convertToString(Constraint[] constraints) {
+        return Arrays.stream(constraints).
+                map(Constraint::name).
+                reduce((a, b) -> a + ',' + b).
+                orElseThrow();
     }
 
 }

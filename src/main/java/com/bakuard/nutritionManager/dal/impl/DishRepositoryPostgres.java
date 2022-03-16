@@ -73,11 +73,8 @@ public class DishRepositoryPostgres implements DishRepository {
                 newData = true;
             }
         } catch(DuplicateKeyException e) {
-            throw new ValidateException(
-                    "Fail to save dish",
-                    getClass(),
-                    "save"
-            ).addReason("dish", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
+            throw new ValidateException("Fail to save dish").
+                    addReason("dish", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
         }
 
         return newData;
@@ -92,11 +89,8 @@ public class DishRepositoryPostgres implements DishRepository {
         Dish dish = getByIdOrReturnNull(dishId);
 
         if(dish == null) {
-            throw new ValidateException(
-                    "Fail to remove dish. Unknown dish with id=" + dishId,
-                    getClass(),
-                    "remove"
-            ).addReason("dishId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+            throw new ValidateException("Fail to remove dish. Unknown dish with id=" + dishId).
+                    addReason("dishId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         statement.update(
@@ -115,11 +109,8 @@ public class DishRepositoryPostgres implements DishRepository {
 
         Dish dish = getByIdOrReturnNull(dishId);
         if(dish == null) {
-            throw new ValidateException(
-                    "Fail to get dish by id=" + dishId,
-                    getClass(),
-                    "getById"
-            ).addReason("dishId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+            throw new ValidateException("Fail to get dish by id=" + dishId).
+                    addReason("dishId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         return dish;
@@ -366,7 +357,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     ps.setString(3, dish.getName());
                     ps.setString(4, dish.getUnit());
                     ps.setString(5, dish.getDescription());
-                    ps.setString(6, dish.getImageUrl().toString());
+                    ps.setString(6, dish.getImageUrl() == null ? null : dish.getImageUrl().toString());
                 }
         );
 
@@ -439,7 +430,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     ps.setString(1, newVersion.getName());
                     ps.setString(2, newVersion.getUnit());
                     ps.setString(3, newVersion.getDescription());
-                    ps.setString(4, newVersion.getImageUrl().toString());
+                    ps.setString(4, newVersion.getImageUrl() == null ? null : newVersion.getImageUrl().toString());
                     ps.setObject(5, newVersion.getUser().getId());
                     ps.setObject(6, newVersion.getId());
                 }

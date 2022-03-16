@@ -163,29 +163,33 @@ public final class DishSort {
 
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        Validator validator = Validator.create().
-                field("parameter").notNull(parameter).end().
-                field("direction").notNull(direction).end();
-        validator.validate();
+        final Container<Parameter> p = Validator.container();
+        final Container<SortDirection> d = Validator.container();
 
-        Parameter p = null;
-        SortDirection d = null;
+        Validator.create().
+                field("parameter").notNull(parameter).and(v -> {
+                    switch(parameter) {
+                        case "name" -> p.set(Parameter.NAME);
+                        case "unit" -> p.set(Parameter.UNIT);
+                        default -> p.close();
+                    }
 
-        switch(parameter) {
-            case "name" -> p = Parameter.NAME;
-            case "unit" -> p = Parameter.UNIT;
-            default -> validator.field("parameter").failure(Constraint.PERMISSIBLE_VALUE);
-        }
+                    if(p.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
+                    else return v.success(Constraint.PERMISSIBLE_VALUE);
+                }).end().
+                field("direction").notNull(direction).and(v -> {
+                    switch(direction) {
+                        case "asc" -> d.set(SortDirection.ASCENDING);
+                        case "desc" -> d.set(SortDirection.DESCENDING);
+                        default -> d.close();
+                    }
 
-        switch(direction) {
-            case "asc" -> d = SortDirection.ASCENDING;
-            case "desc" -> d = SortDirection.DESCENDING;
-            default -> validator.field("direction").failure(Constraint.PERMISSIBLE_VALUE);
-        }
+                    if(d.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
+                    else return v.success(Constraint.PERMISSIBLE_VALUE);
+                }).end().
+                validate();
 
-        validator.validate();
-
-        return new Pair<>(p, d);
+        return new Pair<>(p.get(), d.get());
     }
 
 }

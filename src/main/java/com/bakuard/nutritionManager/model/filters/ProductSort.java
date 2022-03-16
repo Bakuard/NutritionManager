@@ -177,33 +177,36 @@ public final class ProductSort {
 
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        Validator validator = Validator.create().
-                field("parameter").notNull(parameter).end().
-                field("direction").notNull(direction).end();
+        final Container<Parameter> p = Validator.container();
+        final Container<SortDirection> d = Validator.container();
 
-        validator.validate();
+        Validator.create().
+                field("parameter").notNull(parameter).and(v -> {
+                    switch(parameter) {
+                        case "category" -> p.set(Parameter.CATEGORY);
+                        case "price" -> p.set(Parameter.PRICE);
+                        case "variety" -> p.set(Parameter.VARIETY);
+                        case "shop" -> p.set(Parameter.SHOP);
+                        case "manufacturer" -> p.set(Parameter.MANUFACTURER);
+                        default -> p.close();
+                    }
 
-        Parameter p = null;
-        SortDirection d = null;
+                    if(p.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
+                    else return v.success(Constraint.PERMISSIBLE_VALUE);
+                }).end().
+                field("direction").notNull(direction).and(v -> {
+                    switch(direction) {
+                        case "asc" -> d.set(SortDirection.ASCENDING);
+                        case "desc" -> d.set(SortDirection.DESCENDING);
+                        default -> d.close();
+                    }
 
-        switch(parameter) {
-            case "category" -> p = Parameter.CATEGORY;
-            case "price" -> p = Parameter.PRICE;
-            case "variety" -> p = Parameter.VARIETY;
-            case "shop" -> p = Parameter.SHOP;
-            case "manufacturer" -> p = Parameter.MANUFACTURER;
-            default -> validator.field("parameter").failure(Constraint.PERMISSIBLE_VALUE);
-        }
+                    if(d.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
+                    else return v.success(Constraint.PERMISSIBLE_VALUE);
+                }).end().
+                validate();
 
-        switch(direction) {
-            case "asc" -> d = SortDirection.ASCENDING;
-            case "desc" -> d = SortDirection.DESCENDING;
-            default -> validator.field("direction").failure(Constraint.PERMISSIBLE_VALUE);
-        }
-
-        validator.validate();
-
-        return new Pair<>(p, d);
+        return new Pair<>(p.get(), d.get());
     }
 
 }

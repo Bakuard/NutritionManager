@@ -68,21 +68,13 @@ public class JwsService {
         try {
             claims = parseJws(jws, accessKeyPair);
         } catch(JwtException e) {
-            throw new ValidateException(
-                    "Incorrect access jws",
-                    e,
-                    getClass(),
-                    "parseAccessJws"
-            ).addReason("jws", Constraint.CORRECT_JWS);
+            throw new ValidateException("Incorrect access jws", e);
         }
 
         UUID accessJwsId = UUID.fromString(claims.getId());
         if(blackList.inBlackList(accessJwsId)) {
-            throw new ValidateException(
-                    "Incorrect access jws",
-                    getClass(),
-                    "parseAccessJws"
-            ).addReason("jws", Constraint.CORRECT_JWS);
+            throw new ValidateException("Incorrect access jws").
+                    addReason("jws", Constraint.CORRECT_JWS);
         }
 
         return UUID.fromString(claims.getSubject());
@@ -105,11 +97,8 @@ public class JwsService {
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw new ValidateException(
-                    "Incorrect registration jws",
-                    getClass(),
-                    "parseRegistrationJws"
-            ).addReason("jws", Constraint.CORRECT_JWS);
+            throw new ValidateException("Incorrect registration jws").
+                    addReason("jws", Constraint.CORRECT_JWS);
         }
     }
 
@@ -130,11 +119,8 @@ public class JwsService {
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw new ValidateException(
-                    "Incorrect change credential jws",
-                    getClass(),
-                    "parseChangeCredentialsJws"
-            ).addReason("jws", Constraint.CORRECT_JWS);
+            throw new ValidateException("Incorrect change credential jws").
+                    addReason("jws", Constraint.CORRECT_JWS);
         }
     }
 

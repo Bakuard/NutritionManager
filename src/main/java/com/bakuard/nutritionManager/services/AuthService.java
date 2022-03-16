@@ -24,22 +24,14 @@ public class AuthService {
         try {
             user = userRepository.getByName(name);
         } catch(ValidateException e) {
-            throw new ValidateException(
-                    "Incorrect credentials",
-                    getClass(),
-                    "enter"
-            ).addReason(e);
+            throw new ValidateException("Incorrect credentials").addReason(e);
         }
 
         if(user.isCorrectPassword(password)) {
             String jws = jwsService.generateAccessJws(user);
             return new Pair<>(jws, user);
         } else {
-            throw new ValidateException(
-                    "Incorrect credentials",
-                    getClass(),
-                    "enter"
-            );
+            throw new ValidateException("Incorrect credentials");
         }
     }
 
@@ -68,11 +60,7 @@ public class AuthService {
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
         } catch(ValidateException e) {
-            throw new ValidateException(
-                    "Fail to register new user=" + name,
-                    getClass(),
-                    "registration"
-            ).addReason(e);
+            throw new ValidateException("Fail to register new user=" + name).addReason(e);
         }
     }
 
@@ -88,11 +76,7 @@ public class AuthService {
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
         } catch(ValidateException e) {
-            throw new ValidateException(
-                    "Fail to change credential for user=" + name,
-                    getClass(),
-                    "changeCredential"
-            ).addReason(e);
+            throw new ValidateException("Fail to change credential for user=" + name).addReason(e);
         }
     }
 
@@ -102,11 +86,7 @@ public class AuthService {
 
             User user = userRepository.getById(userId);
             if(!user.isCorrectPassword(currentPassword)) {
-                throw new ValidateException(
-                        "Incorrect password",
-                        getClass(),
-                        "changeLoginAndEmail"
-                );
+                throw new ValidateException("Incorrect password");
             }
             user.setName(newName);
             user.setEmail(newEmail);
@@ -115,11 +95,7 @@ public class AuthService {
 
             return user;
         } catch(ValidateException e) {
-            throw new ValidateException(
-                    "Fail to change login and email for user",
-                    getClass(),
-                    "changeLoginAndEmail"
-            ).addReason(e);
+            throw new ValidateException("Fail to change login and email for user").addReason(e);
         }
     }
 
@@ -129,11 +105,7 @@ public class AuthService {
 
             User user = userRepository.getById(userId);
             if(!user.isCorrectPassword(currentPassword)) {
-                throw new ValidateException(
-                        "Incorrect password",
-                        getClass(),
-                        "changePassword"
-                );
+                throw new ValidateException("Incorrect password");
             }
             user.setPassword(newPassword);
 
@@ -141,11 +113,7 @@ public class AuthService {
 
             return user;
         } catch(ValidateException e) {
-            throw new ValidateException(
-                    "Incorrect password",
-                    getClass(),
-                    "changePassword"
-            ).addReason(e);
+            throw new ValidateException("Incorrect password").addReason(e);
         }
     }
 

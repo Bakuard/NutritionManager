@@ -63,11 +63,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 newData = true;
             }
         } catch(DuplicateKeyException e) {
-            throw new ValidateException(
-                    "Fail to save product",
-                    getClass(),
-                    "save"
-            ).addReason("product", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
+            throw new ValidateException("Fail to save product").
+                    addReason("product", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
         }
 
         return newData;
@@ -82,11 +79,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Product product = getByIdOrReturnNull(productId);
 
         if(product == null) {
-            throw new ValidateException(
-                    "Fail to remove product. Unknown product with id=" + productId,
-                    getClass(),
-                    "remove"
-            ).addReason("productId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+            throw new ValidateException("Fail to remove product. Unknown product with id=" + productId).
+                    addReason("productId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         statement.update(
@@ -105,11 +99,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         Product product = getByIdOrReturnNull(productId);
         if(product == null) {
-            throw new ValidateException(
-                    "Fail to get product by id",
-                    getClass(),
-                    "getById"
-            ).addReason("productId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+            throw new ValidateException("Fail to get product by id").
+                    addReason("productId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
 
         return product;
@@ -587,7 +578,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     ps.setString(6, product.getContext().getManufacturer());
                     ps.setString(7, product.getContext().hashKey());
                     ps.setString(8, product.getDescription());
-                    ps.setString(9, product.getImageUrl().toString());
+                    ps.setString(9, product.getImageUrl() == null ? null : product.getImageUrl().toString());
                     ps.setBigDecimal(10, product.getQuantity());
                     ps.setString(11, product.getContext().getUnit());
                     ps.setBigDecimal(12, product.getContext().getPrice());
@@ -643,7 +634,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     ps.setString(4, newVersion.getContext().getManufacturer());
                     ps.setString(5, newVersion.getContext().hashKey());
                     ps.setString(6, newVersion.getDescription());
-                    ps.setString(7, newVersion.getImageUrl().toString());
+                    ps.setString(7, newVersion.getImageUrl() == null ? null : newVersion.getImageUrl().toString());
                     ps.setBigDecimal(8, newVersion.getQuantity());
                     ps.setString(9, newVersion.getContext().getUnit());
                     ps.setBigDecimal(10, newVersion.getContext().getPrice());

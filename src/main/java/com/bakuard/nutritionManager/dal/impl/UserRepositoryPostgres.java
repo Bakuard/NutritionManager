@@ -41,11 +41,8 @@ public class UserRepositoryPostgres implements UserRepository {
                 wasSaved = true;
             }
         } catch(DuplicateKeyException e) {
-            throw new ValidateException(
-                    "Fail to save user",
-                    getClass(),
-                    "save"
-            ).addReason("user", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
+            throw new ValidateException("Fail to save user").
+                    addReason("user", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
         }
 
         return wasSaved;
@@ -60,11 +57,8 @@ public class UserRepositoryPostgres implements UserRepository {
         User user = getByIdOrReturnNull(userId);
 
         if(user == null) {
-            throw new ValidateException(
-                    "Fail to get user by i",
-                    getClass(),
-                    "getById"
-            ).addReason("userId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+            throw new ValidateException("Fail to get user by i").
+                    addReason("userId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
         }
         return user;
     }
@@ -92,11 +86,8 @@ public class UserRepositoryPostgres implements UserRepository {
                                 rs.getString("salt")
                         );
                     }
-                    throw new ValidateException(
-                            "Fail to get user by name=" + name,
-                            getClass(),
-                            "getByName"
-                    ).addReason("name", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+                    throw new ValidateException("Fail to get user by name=" + name).
+                            addReason("name", Constraint.ENTITY_MUST_EXISTS_IN_DB);
                 }
         );
     }
@@ -124,11 +115,8 @@ public class UserRepositoryPostgres implements UserRepository {
                                 rs.getString("salt")
                         );
                     }
-                    throw new ValidateException(
-                            "Fail to get user by email=" + email,
-                            getClass(),
-                            "getByEmail"
-                    ).addReason("email", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+                    throw new ValidateException("Fail to get user by email=" + email).
+                            addReason("email", Constraint.ENTITY_MUST_EXISTS_IN_DB);
                 }
         );
     }
