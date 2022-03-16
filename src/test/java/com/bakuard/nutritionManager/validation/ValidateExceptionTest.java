@@ -16,7 +16,7 @@ class ValidateExceptionTest {
              => iterator#hasNext() return false
             """)
     public void iterator1() {
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
 
         Iterator<Result> iterator = validateException.iterator();
 
@@ -32,10 +32,10 @@ class ValidateExceptionTest {
              => iterator#hasNext() return false
             """)
     public void iterator2() {
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
-        validateException.addReason(new ValidateException(getClass(), "someMethod"));
-        validateException.addReason(new ValidateException(getClass(), "someMethod"));
-        validateException.addReason(new ValidateException(getClass(), "someMethod"));
+        ValidateException validateException = new ValidateException();
+        validateException.addReason(new ValidateException());
+        validateException.addReason(new ValidateException());
+        validateException.addReason(new ValidateException());
 
         Iterator<Result> iterator = validateException.iterator();
 
@@ -51,14 +51,14 @@ class ValidateExceptionTest {
              => iterator#hasNext() return true
             """)
     public void iterator3() {
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
+        ValidateException nestedValidateException = new ValidateException();
         nestedValidateException.addReason("some field", Constraint.NOT_BLANK);
         nestedValidateException.addReason("some field", Constraint.NOT_BLANK);
         nestedValidateException.addReason("some field", Constraint.NOT_BLANK);
         validateException.addReason(nestedValidateException);
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException2 = new ValidateException();
+        ValidateException nestedValidateException3 = new ValidateException();
         nestedValidateException3.addReason("some field", Constraint.NOT_BLANK);
         nestedValidateException3.addReason("some field", Constraint.NOT_BLANK);
         nestedValidateException3.addReason("some field", Constraint.NOT_BLANK);
@@ -100,17 +100,17 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
         nestedValidateException.addReason(expected.get(0));
         nestedValidateException.addReason(expected.get(1));
         nestedValidateException.addReason(expected.get(2));
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException3 = new ValidateException();
         nestedValidateException3.addReason(expected.get(3));
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
 
@@ -147,11 +147,11 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
+        ValidateException nestedValidateException3 = new ValidateException();
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
         expected.forEach(validateException::addReason);
@@ -189,15 +189,15 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException3 = new ValidateException();
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
         validateException.addReason(nestedValidateException);
@@ -236,15 +236,15 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException3 = new ValidateException();
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
         validateException.addReason(nestedValidateException);
@@ -268,7 +268,7 @@ class ValidateExceptionTest {
              => number iterations = 0
             """)
     public void forEach1() {
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
 
         List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
@@ -285,10 +285,10 @@ class ValidateExceptionTest {
              => number iterations = 0
             """)
     public void forEach2() {
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
-        validateException.addReason(new ValidateException(getClass(), "someMethod"));
-        validateException.addReason(new ValidateException(getClass(), "someMethod"));
-        validateException.addReason(new ValidateException(getClass(), "someMethod"));
+        ValidateException validateException = new ValidateException();
+        validateException.addReason(new ValidateException());
+        validateException.addReason(new ValidateException());
+        validateException.addReason(new ValidateException());
 
         List<Result> actual = new ArrayList<>();
         validateException.forEach(actual::add);
@@ -326,17 +326,17 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
         nestedValidateException.addReason(expected.get(0));
         nestedValidateException.addReason(expected.get(1));
         nestedValidateException.addReason(expected.get(2));
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException3 = new ValidateException();
         nestedValidateException3.addReason(expected.get(3));
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
 
@@ -376,11 +376,11 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
+        ValidateException nestedValidateException3 = new ValidateException();
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
         expected.forEach(validateException::addReason);
@@ -421,15 +421,15 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException3 = new ValidateException();
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
         validateException.addReason(nestedValidateException);
@@ -471,15 +471,15 @@ class ValidateExceptionTest {
                         "key", null, null)
         );
 
-        ValidateException nestedValidateException = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException = new ValidateException();
         nestedValidateException.addReason(expected.get(2));
         nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException3 = new ValidateException();
         nestedValidateException3.addReason(expected.get(4));
         nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException(getClass(), "someMethod");
+        ValidateException nestedValidateException2 = new ValidateException();
         nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException(getClass(), "someMethod");
+        ValidateException validateException = new ValidateException();
         validateException.addReason(expected.get(0));
         validateException.addReason(expected.get(1));
         validateException.addReason(nestedValidateException);

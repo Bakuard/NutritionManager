@@ -46,7 +46,7 @@ public class Validator {
 
 
     public Result failure(Constraint constraint) {
-        return createResult(constraint, (String) null, false);
+        return createResult(constraint, (String) null, true);
     }
 
     public Result failure(Constraint constraint, String messageKey) {
@@ -55,6 +55,18 @@ public class Validator {
                 messageKey,
                 null,
                 true);
+    }
+
+    public Result success(Constraint constraint) {
+        return createResult(constraint, (String) null, false);
+    }
+
+    public Result success(Constraint constraint, String messageKey) {
+        return createResult(
+                constraint,
+                messageKey,
+                null,
+                false);
     }
 
 
@@ -518,9 +530,9 @@ public class Validator {
         }
     }
 
-    public void validate(String message) {
+    public void validate(String logMessage) {
         if(!exceptions.isEmpty() || !results.isEmpty()) {
-            ValidateException validateException = new ValidateException(message, checkedClass, methodName);
+            ValidateException validateException = new ValidateException(checkedClass, methodName, logMessage);
             exceptions.forEach(validateException::addReason);
             results.forEach(validateException::addReason);
             throw validateException;
@@ -568,6 +580,7 @@ public class Validator {
                 currentField,
                 constraint,
                 state,
+                null,
                 null,
                 logMessage,
                 this
