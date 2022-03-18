@@ -3,20 +3,15 @@ package com.bakuard.nutritionManager.dto.products;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
-import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 @Schema(description = """
-        Данные о продукте используемые в запросах.
+        Данные используемые в запросе на добавление продукта.
         """)
-public class ProductRequest {
+public class AddedProductRequest {
 
-    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
-    private UUID id;
-    @Schema(description = "Уникальный идентификатор пользователя в формате UUID")
-    private UUID userId;
     @Schema(description = "Категория к которой относится продукт", example = "Помидор")
     private String category;
     @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
@@ -40,24 +35,8 @@ public class ProductRequest {
     @Schema(description = "Теги указаныне для данного продукта")
     private List<String> tags;
 
-    public ProductRequest() {
+    public AddedProductRequest() {
 
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
     }
 
     public String getCategory() {
@@ -152,10 +131,8 @@ public class ProductRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProductRequest that = (ProductRequest) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(userId, that.userId) &&
-                Objects.equals(category, that.category) &&
+        AddedProductRequest that = (AddedProductRequest) o;
+        return Objects.equals(category, that.category) &&
                 Objects.equals(shop, that.shop) &&
                 Objects.equals(grade, that.grade) &&
                 Objects.equals(manufacturer, that.manufacturer) &&
@@ -170,15 +147,13 @@ public class ProductRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, category, shop, grade, manufacturer,
+        return Objects.hash(category, shop, grade, manufacturer,
                 price, packingSize, unit, quantity, description, imageUrl, tags);
     }
 
     @Override
     public String toString() {
         return "ProductRequest{" +
-                "id=" + id +
-                ", userId=" + userId +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
                 ", grade='" + grade + '\'' +

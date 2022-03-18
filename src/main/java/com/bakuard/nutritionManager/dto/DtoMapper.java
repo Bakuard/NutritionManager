@@ -22,7 +22,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class DtoMapper {
 
@@ -59,11 +58,11 @@ public class DtoMapper {
         return response;
     }
 
-    public Product toProductForUpdate(ProductRequest dto) {
+    public Product toProductForUpdate(UUID userId, UpdatedProductRequest dto) {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 setId(dto.getId()).
-                setUser(userRepository.getById(dto.getUserId())).
+                setUser(userRepository.getById(userId)).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
                 setVariety(dto.getGrade()).
@@ -80,11 +79,11 @@ public class DtoMapper {
         return builder.tryBuild();
     }
 
-    public Product toProductForAdd(ProductRequest dto) {
+    public Product toProductForAdd(UUID userId, AddedProductRequest dto) {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 generateId().
-                setUser(userRepository.getById(dto.getUserId())).
+                setUser(userRepository.getById(userId)).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
                 setVariety(dto.getGrade()).
@@ -130,7 +129,7 @@ public class DtoMapper {
         else if(filters.size() > 1) filter = Filter.and(filters);
 
         return ProductCriteria.of(
-                Pageable.of(page, size),
+                Pageable.of(size, page),
                 user).
                 setOnlyFridge(onlyFridge).
                 setProductSort(toProductSort(sortRule)).
@@ -140,12 +139,12 @@ public class DtoMapper {
 
     public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
         ProductFieldCriteria criteria = ProductFieldCriteria.of(
-                Pageable.of(0, 200),
+                Pageable.of(1000, 0),
                 userRepository.getById(userId)
         );
 
         ProductCategoryCriteria categoryCriteria = ProductCategoryCriteria.of(
-                Pageable.of(0, 200),
+                Pageable.of(1000, 0),
                 userRepository.getById(userId)
         );
 

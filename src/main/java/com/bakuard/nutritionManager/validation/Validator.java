@@ -436,10 +436,10 @@ public class Validator {
 
         return createResult(
                 Constraint.DOES_NOT_THROW,
-                "Unexpected exceptions throw: " +
-                        unexpectedExceptions.stream().
-                                map(e -> e.getClass().getName()).
-                                reduce((e1, e2) -> e1 + ", " + e2),
+                unexpectedExceptions.stream().
+                        map(e -> e.getClass().getName()).
+                        reduce((e1, e2) -> e1 + ", " + e2).
+                        orElse(""),
                 !unexpectedExceptions.isEmpty()
         );
     }
@@ -466,10 +466,10 @@ public class Validator {
         return createResult(
                 Constraint.DOES_NOT_THROW,
                 messageKey,
-                "Unexpected exceptions throw: " +
                         unexpectedExceptions.stream().
                                 map(e -> e.getClass().getName()).
-                                reduce((e1, e2) -> e1 + ", " + e2),
+                                reduce((e1, e2) -> e1 + ", " + e2).
+                                orElse(""),
                 !unexpectedExceptions.isEmpty()
         );
     }
@@ -484,7 +484,7 @@ public class Validator {
             container.set(factory.apply(source));
         } catch(Exception e) {
             isFail = true;
-            logMessage = "Unexpected exception throw: " + e.getClass().getName();
+            logMessage = e.getClass().getName();
             exceptions.add(e);
             container.close();
         }
@@ -507,7 +507,7 @@ public class Validator {
             container.set(factory.apply(source));
         } catch(Exception e) {
             isFail = true;
-            logMessage = "Unexpected exception throw: " + e.getClass().getName();
+            logMessage = e.getClass().getName();
             exceptions.add(e);
             container.close();
         }
