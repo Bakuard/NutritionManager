@@ -150,11 +150,8 @@ public class DishController {
     public ResponseEntity<DishResponse> getByName(
             @RequestParam("name")
             @Parameter(description = "Наименование блюда", required = true)
-            String name,
-            @RequestParam("userId")
-            @Parameter(description = "Уникальный идентификатор пользователя в формате UUID", required = true)
-            UUID userId) {
-        logger.info("Get dish by name={} and userId={}", name, userId);
+            String name) {
+        logger.info("Get dish by name={}", name);
 
         return ResponseEntity.ok(new DishResponse());
     }
@@ -197,12 +194,6 @@ public class DishController {
                     }
             ))
             String sortRule,
-            @RequestParam("userId")
-            @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-            UUID userId,
             @RequestParam(value = "tags", required = false)
             @Parameter(description = """
                      Массив тегов блюд. В выборку попадут только те блюда,
@@ -214,8 +205,8 @@ public class DishController {
                      """,
                     schema = @Schema(defaultValue = "null"))
             List<String> tags) {
-        logger.info("Get dishes for list by filter: page={}, size={}, sortRule={}, userId={}, tags={}",
-                page, size, sortRule, userId, tags);
+        logger.info("Get dishes for list by filter: page={}, size={}, sortRule={}, tags={}",
+                page, size, sortRule, tags);
 
         return ResponseEntity.ok(Pageable.firstEmptyPage());
     }
@@ -245,14 +236,8 @@ public class DishController {
             int page,
             @RequestParam("size")
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-            int size,
-            @RequestParam("userId")
-            @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-            UUID userId) {
-        logger.info("Get dish units by userId={}", userId);
+            int size) {
+        logger.info("Get dish units by userId");
         List<DishUnitResponse> response = List.of();
         return ResponseEntity.ok(response);
     }
@@ -282,14 +267,8 @@ public class DishController {
             int page,
             @RequestParam("size")
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-            int size,
-            @RequestParam("userId")
-            @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-            UUID userId) {
-        logger.info("Get dishes tags by userId. page={}, size={}, userId={}", page, size, userId);
+            int size) {
+        logger.info("Get dishes tags by userId. page={}, size={}, userId", page, size);
 
         return ResponseEntity.ok(Pageable.firstEmptyPage());
     }

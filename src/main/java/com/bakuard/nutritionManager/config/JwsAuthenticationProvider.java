@@ -9,9 +9,20 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
+import java.util.UUID;
+
 public class JwsAuthenticationProvider implements AuthenticationProvider {
 
-    private JwsService jwsService;
+    private static final ThreadLocal<UUID> usersId = new ThreadLocal<>();
+
+    public static UUID getAndClearUserId() {
+        UUID userId = usersId.get();
+        usersId.remove();
+        return userId;
+    }
+
+
+    private final JwsService jwsService;
 
     @Autowired
     public JwsAuthenticationProvider(JwsService jwsService) {
@@ -25,7 +36,8 @@ public class JwsAuthenticationProvider implements AuthenticationProvider {
         String jws = request.getJws();
 
         try {
-            jwsService.parseAccessJws(jws);
+            UUID userId = jwsService.parseAccessJws(jws);
+            usersId.set(userId);
 
             JwsAuthentication response = new JwsAuthentication(jws);
             response.setAuthenticated(true);

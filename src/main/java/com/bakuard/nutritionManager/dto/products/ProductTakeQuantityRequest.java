@@ -14,8 +14,6 @@ public class ProductTakeQuantityRequest {
 
     @Schema(description = "Уникальный идентификатор продукта в формате UUID")
     private UUID productId;
-    @Schema(description = "Уникальный идентификатор пользователя в формате UUID")
-    private UUID userId;
     @Schema(description = "Отнимаемое кол-во продукта")
     private BigDecimal takeQuantity;
 
@@ -29,14 +27,6 @@ public class ProductTakeQuantityRequest {
 
     public void setProductId(UUID productId) {
         this.productId = productId;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
     }
 
     public BigDecimal getTakeQuantity() {
@@ -53,20 +43,18 @@ public class ProductTakeQuantityRequest {
         if (o == null || getClass() != o.getClass()) return false;
         ProductTakeQuantityRequest that = (ProductTakeQuantityRequest) o;
         return Objects.equals(productId, that.productId) &&
-                Objects.equals(userId, that.userId) &&
                 Objects.equals(takeQuantity, that.takeQuantity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(productId, userId, takeQuantity);
+        return Objects.hash(productId, takeQuantity);
     }
 
     @Override
     public String toString() {
         return "ProductTakeQuantityRequest{" +
                 "id=" + productId +
-                ", userId=" + userId +
                 ", takeQuantity=" + takeQuantity +
                 '}';
     }

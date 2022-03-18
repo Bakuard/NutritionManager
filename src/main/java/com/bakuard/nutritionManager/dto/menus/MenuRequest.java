@@ -7,7 +7,6 @@ import java.util.UUID;
 public class MenuRequest {
 
     private UUID id;
-    private UUID userId;
     private String imagePath;
     private String name;
     private String description;
@@ -23,14 +22,6 @@ public class MenuRequest {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
     }
 
     public String getImagePath() {
@@ -71,7 +62,6 @@ public class MenuRequest {
         if (o == null || getClass() != o.getClass()) return false;
         MenuRequest that = (MenuRequest) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(userId, that.userId) &&
                 Objects.equals(imagePath, that.imagePath) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(description, that.description) &&
@@ -80,14 +70,13 @@ public class MenuRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, imagePath, name, description, ingredients);
+        return Objects.hash(id, imagePath, name, description, ingredients);
     }
 
     @Override
     public String toString() {
         return "MenuRequest{" +
                 "id=" + id +
-                ", userId=" + userId +
                 ", imagePath='" + imagePath + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

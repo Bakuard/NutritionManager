@@ -1,9 +1,8 @@
 package com.bakuard.nutritionManager.controller;
 
+import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductCategoryCriteria;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.products.*;
@@ -65,10 +64,10 @@ public class ProductController {
     )
     @Transactional
     @PostMapping("/add")
-    public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody ProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody AddedProductRequest dto) {
         logger.info("Add new product. dto={}", dto);
 
-        Product product = mapper.toProductForAdd(dto);
+        Product product = mapper.toProductForAdd(JwsAuthenticationProvider.getAndClearUserId(), dto);
         productRepository.save(product);
 
         ProductResponse response = mapper.toProductResponse(product);
@@ -90,10 +89,10 @@ public class ProductController {
     )
     @Transactional
     @PutMapping("/update")
-    public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody ProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody UpdatedProductRequest dto) {
         logger.info("Update product. dto={}", dto);
 
-        Product product = mapper.toProductForUpdate(dto);
+        Product product = mapper.toProductForUpdate(JwsAuthenticationProvider.getAndClearUserId(), dto);
         productRepository.save(product);
 
         ProductResponse response = mapper.toProductResponse(product);
@@ -237,12 +236,6 @@ public class ProductController {
             @RequestParam("size")
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
             int size,
-            @RequestParam("userId")
-            @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-            UUID userId,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
                      schema = @Schema(
@@ -318,12 +311,26 @@ public class ProductController {
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> tags) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+
         logger.info("Get products by filter: page={}, size={}, userId={}, sortRule={}, onlyFridge={}, " +
                         "category={}, shops={}, varieties={}, manufacturers={}, tags={}",
-                page, size, userId, sortRule, onlyFridge, category, shops, varieties, manufacturers, tags);
-
-        ProductCriteria criteria = mapper.toProductCriteria(page, size, userId, sortRule, onlyFridge,
+                page, size, userId, sortRule, onlyFridge,
                 category, shops, varieties, manufacturers, tags);
+
+        ProductCriteria criteria = mapper.toProductCriteria(
+                page,
+                size,
+                userId,
+                sortRule,
+                onlyFridge,
+                category,
+                shops,
+                varieties,
+                manufacturers,
+                tags
+        );
+
         Page<ProductResponse> response = mapper.toProductsResponse(productRepository.getProducts(criteria));
         return ResponseEntity.ok(response);
     }
@@ -346,16 +353,12 @@ public class ProductController {
     )
     @Transactional
     @GetMapping("/getAllProductsFields")
-    public ResponseEntity<ProductFieldsResponse> getAllProductsFields(
-            @RequestParam("userId")
-            @Parameter(description = """
-                    Уникальный идентификатор пользователя в формате UUID.
-                     Пользователь с таким ID должен существовать в БД.
-                    """, required = true)
-            UUID userId) {
-        logger.info("Get products categories, sorts, tags, manufacturers, shops for user={}", userId);
+    public ResponseEntity<ProductFieldsResponse> getAllProductsFields() {
+        logger.info("Get products categories, sorts, tags, manufacturers, shops for user");
 
-        ProductFieldsResponse response = mapper.toProductFieldsResponse(userId);
+        ProductFieldsResponse response = mapper.toProductFieldsResponse(
+                JwsAuthenticationProvider.getAndClearUserId()
+        );
 
         return ResponseEntity.ok(response);
     }

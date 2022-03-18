@@ -71,9 +71,8 @@ public class MenuController {
     @GetMapping("/getByName")
     public ResponseEntity<Page<MenuResponse>> getByName(@RequestParam("page") int page,
                                                         @RequestParam("size") int size,
-                                                        @RequestParam("name") String name,
-                                                        @RequestParam("userId") UUID userId) {
-        logger.info("Get menu by name={} and userId={}", name, userId);
+                                                        @RequestParam("name") String name) {
+        logger.info("Get menu by name={}", name);
 
         return ResponseEntity.status(HttpStatus.OK).body(Pageable.firstEmptyPage());
     }
@@ -82,10 +81,9 @@ public class MenuController {
     @GetMapping("/getByFilter")
     public ResponseEntity<Page<MenuForListResponse>> getByFilter(@RequestParam("page") int page,
                                                                  @RequestParam("size") int size,
-                                                                 @RequestParam("sort") String sortRule,
-                                                                 @RequestParam("userId") UUID userId) {
-        logger.info("Get menus for list by filter: page={}, size={}, sortRule={}, userId={}",
-                page, size, sortRule, userId);
+                                                                 @RequestParam("sort") String sortRule) {
+        logger.info("Get menus for list by filter: page={}, size={}, sortRule={}",
+                page, size, sortRule);
 
         return ResponseEntity.status(HttpStatus.OK).body(Pageable.firstEmptyPage());
     }

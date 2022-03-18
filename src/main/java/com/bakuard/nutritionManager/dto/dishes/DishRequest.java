@@ -9,7 +9,6 @@ import java.util.UUID;
 public class DishRequest {
 
     private UUID id;
-    private UUID userId;
     private String name;
     private BigDecimal servingSize;
     private String unit;
@@ -28,14 +27,6 @@ public class DishRequest {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
     }
 
     public String getName() {
@@ -100,7 +91,6 @@ public class DishRequest {
         if (o == null || getClass() != o.getClass()) return false;
         DishRequest that = (DishRequest) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(userId, that.userId) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(servingSize, that.servingSize) &&
                 Objects.equals(unit, that.unit) &&
@@ -112,7 +102,7 @@ public class DishRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, name, servingSize, unit,
+        return Objects.hash(id, name, servingSize, unit,
                 description, imageUrl, ingredients, tags);
     }
 
@@ -120,7 +110,6 @@ public class DishRequest {
     public String toString() {
         return "DishRequest{" +
                 "id=" + id +
-                ", userId=" + userId +
                 ", name='" + name + '\'' +
                 ", servingSize=" + servingSize +
                 ", unit='" + unit + '\'' +

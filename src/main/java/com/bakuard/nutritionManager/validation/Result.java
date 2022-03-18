@@ -100,14 +100,16 @@ public final class Result {
     }
 
     public String getLogMessage() {
-        String result = checkedClass.getName() + '.' + methodName + "(..., " + fieldName + ",...): " +
+        String result = '(' +
                 (constraints.length > 1 ?
                         "constraints " + Arrays.toString(constraints) :
                         "constraint " + constraints[0]) +
                 " is " + state +
-                " for variable '" + fieldName + "'.";
+                " for variable '" + fieldName + "'. ";
 
-        if(logMessage != null) result += " Detail: " + logMessage;
+        if(logMessage != null) result += logMessage;
+
+        result += ')';
 
         return result;
     }
