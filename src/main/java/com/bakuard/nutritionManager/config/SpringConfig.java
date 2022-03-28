@@ -114,7 +114,7 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
     public ImageRepository imageRepository(DataSource dataSource) {
-        return new ImageRepositoryImpl(dataSource);
+        return new ImageRepositoryPostgres(dataSource);
     }
 
     @Bean

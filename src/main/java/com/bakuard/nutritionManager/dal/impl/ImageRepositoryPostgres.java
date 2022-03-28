@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ImageRepositoryImpl implements ImageRepository {
+public class ImageRepositoryPostgres implements ImageRepository {
 
     private JdbcTemplate statement;
 
-    public ImageRepositoryImpl(DataSource dataSource) {
+    public ImageRepositoryPostgres(DataSource dataSource) {
         statement = new JdbcTemplate(dataSource);
     }
 
