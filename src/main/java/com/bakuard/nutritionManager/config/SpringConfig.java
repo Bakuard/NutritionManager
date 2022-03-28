@@ -11,10 +11,12 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+
 import org.flywaydb.core.Flyway;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -22,6 +24,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -29,6 +32,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
+import javax.servlet.MultipartConfigElement;
 import javax.sql.DataSource;
 import java.io.IOException;
 
@@ -109,6 +113,11 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public ImageRepository imageRepository(DataSource dataSource) {
+        return new ImageRepositoryPostgres(dataSource);
+    }
+
+    @Bean
     public JwsService jwsService(JwsBlackListRepository jwsBlackListRepository) {
         return new JwsService(jwsBlackListRepository);
     }
@@ -121,6 +130,19 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public AuthService authService(JwsService jwsService, EmailService emailService, UserRepository userRepository) {
         return new AuthService(jwsService, emailService, userRepository);
+    }
+
+    @Bean
+    public ImageUploaderService imageUploaderService(AppConfigData appConfigData, ImageRepository imageRepository) {
+        return new ImageUploaderService(appConfigData, imageRepository);
+    }
+
+    @Bean
+    MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxFileSize(DataSize.ofKilobytes(250));
+        factory.setMaxRequestSize(DataSize.ofKilobytes(250));
+        return factory.createMultipartConfig();
     }
 
     @Bean

@@ -1,5 +1,8 @@
 package com.bakuard.nutritionManager.config;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+
 import java.io.IOException;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -10,8 +13,12 @@ public class AppConfigData {
     private final MathContext mathContext;
     private final int numberScale;
     private final Properties security;
+    private final AWSStaticCredentialsProvider credentialsProvider;
 
     public AppConfigData(String configPath, String securityPath) throws IOException {
+        //Because AWS resources use DNS name entries that occasionally change
+        java.security.Security.setProperty("networkaddress.cache.ttl", "60");
+
         Properties config = new Properties();
         config.load(getClass().getResourceAsStream(configPath));
         this.mathContext = new MathContext(
@@ -22,6 +29,13 @@ public class AppConfigData {
 
         security = new Properties();
         security.load(getClass().getResourceAsStream(securityPath));
+
+        credentialsProvider = new AWSStaticCredentialsProvider(
+                new BasicAWSCredentials(
+                        security.getProperty("AWS.accessKeyId"),
+                        security.getProperty("AWS.secretKey")
+                )
+        );
     }
 
     public MathContext getMathContext() {
@@ -54,6 +68,14 @@ public class AppConfigData {
 
     public String getDatabasePassword() {
         return security.getProperty("db.password");
+    }
+
+    public AWSStaticCredentialsProvider getAwsCredentialsProvider() {
+        return credentialsProvider;
+    }
+
+    public String getAwsUserId() {
+        return security.getProperty("AWS.userId");
     }
 
     @Override

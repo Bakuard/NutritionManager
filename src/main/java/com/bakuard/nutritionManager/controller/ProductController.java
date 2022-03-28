@@ -10,6 +10,7 @@ import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 
+import com.bakuard.nutritionManager.services.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,12 +44,40 @@ public class ProductController {
 
     private DtoMapper mapper;
     private ProductRepository productRepository;
+    private ImageUploaderService imageUploaderService;
 
     @Autowired
     public ProductController(DtoMapper mapper,
-                             ProductRepository productRepository) {
+                             ProductRepository productRepository,
+                             ImageUploaderService imageUploaderService) {
         this.mapper = mapper;
         this.productRepository = productRepository;
+        this.imageUploaderService = imageUploaderService;
+    }
+
+    @Operation(summary = "Загружает изображение продукта и возвращает его URL",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = """
+                                    Если размер файла превышает 250 Кб.
+                                    """,
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PostMapping("/uploadImage")
+    public ResponseEntity<SuccessResponse<URL>> uploadImage(@RequestParam("image") MultipartFile image) {
+        logger.info("Upload product image.");
+
+        URL imageUrl = imageUploaderService.uploadProductImage(JwsAuthenticationProvider.getAndClearUserId(), image);
+
+        return ResponseEntity.ok(mapper.toSuccessResponse("product.uploadImage", imageUrl));
     }
 
     @Operation(summary = "Добавление нового продукта",

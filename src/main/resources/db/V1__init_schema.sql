@@ -110,6 +110,14 @@ CREATE TABLE JwsBlackList (
     PRIMARY KEY(tokenId)
 );
 
+CREATE TABLE UsedImages (
+    userId UUID NOT NULL,
+    imageHash VARCHAR(512) NOT NULL,
+    imageUrl VARCHAR(512) NOT NULL,
+    FOREIGN KEY(userId) REFERENCES Users(userId) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY(userId, imageHash)
+);
+
 CREATE FUNCTION existProductsForFilter(productCategories VARCHAR(256)[], filterQuery VARCHAR(2048))
     RETURNS BOOLEAN
 	LANGUAGE plpgsql

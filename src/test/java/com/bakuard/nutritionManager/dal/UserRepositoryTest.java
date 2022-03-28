@@ -113,7 +113,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): no user in DB => return true")
     public void save2() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
 
         Assertions.assertTrue(repository.save(user));
     }
@@ -121,7 +121,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): no user in DB => add user")
     public void save3() {
-        User expected = createDefaultUser(1);
+        User expected = createUser(1);
 
         commit(() -> repository.save(expected));
 
@@ -132,9 +132,9 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): there are users in DB, user id not exists => return true")
     public void save4() {
-        User user1 = createDefaultUser(1);
-        User user2 = createDefaultUser(2);
-        User addedUser = createDefaultUser(3);
+        User user1 = createUser(1);
+        User user2 = createUser(2);
+        User addedUser = createUser(3);
         repository.save(user1);
         repository.save(user2);
 
@@ -144,9 +144,9 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): there are users in DB, user id not exists => add user")
     public void save5() {
-        User user1 = createDefaultUser(1);
-        User user2 = createDefaultUser(2);
-        User addedUser = createDefaultUser(3);
+        User user1 = createUser(1);
+        User user2 = createUser(2);
+        User addedUser = createUser(3);
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
@@ -159,10 +159,10 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): there is user with same name => exception")
     public void save6() {
-        User user1 = createDefaultUser(1);
+        User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
-        User addedUser = createDefaultUser(2);
+        User addedUser = createUser(2);
         addedUser.setName("User1");
 
         AssertUtil.assertValidateException(
@@ -176,7 +176,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): there is user with same password => exception")
     public void save7() {
-        User user1 = createDefaultUser(1);
+        User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
         User addedUser = new User(
@@ -198,7 +198,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("save(user): there is user with same email => exception")
     public void save8() {
-        User user1 = createDefaultUser(1);
+        User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
         User addedUser = new User(
@@ -225,7 +225,7 @@ class UserRepositoryTest {
              => return true
             """)
     public void save9() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         repository.save(user);
 
         User updatedUser = new User(user);
@@ -243,7 +243,7 @@ class UserRepositoryTest {
              => update user
             """)
     public void save10() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         commit(() -> repository.save(user));
 
         User expected = new User(user);
@@ -262,8 +262,8 @@ class UserRepositoryTest {
              => exception
             """)
     public void save11() {
-        User user1 = createDefaultUser(1);
-        User user2 = createDefaultUser(2);
+        User user1 = createUser(1);
+        User user2 = createUser(2);
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
@@ -287,8 +287,8 @@ class UserRepositoryTest {
              => exception
             """)
     public void save12() {
-        User user1 = createDefaultUser(1);
-        User user2 = createDefaultUser(2);
+        User user1 = createUser(1);
+        User user2 = createUser(2);
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
@@ -317,8 +317,8 @@ class UserRepositoryTest {
              => exception
             """)
     public void save13() {
-        User user1 = createDefaultUser(1);
-        User user2 = createDefaultUser(2);
+        User user1 = createUser(1);
+        User user2 = createUser(2);
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
@@ -346,7 +346,7 @@ class UserRepositoryTest {
              => return false
             """)
     public void save14() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         commit(() -> repository.save(user));
 
         Assertions.assertFalse(repository.save(user));
@@ -360,7 +360,7 @@ class UserRepositoryTest {
              => don't update user
             """)
     public void save15() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         User expected = new User(user);
         commit(() -> repository.save(user));
 
@@ -384,7 +384,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("getById(userId): not exists user with such id => exception")
     public void getById2() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         repository.save(user);
 
         AssertUtil.assertValidateException(
@@ -398,7 +398,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("getById(userId): exists user with such id => return user")
     public void getById3() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         User expected = new User(user);
         commit(() -> repository.save(user));
 
@@ -429,7 +429,7 @@ class UserRepositoryTest {
              => exception
             """)
     public void getByName2() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         commit(() -> repository.save(user));
 
         AssertUtil.assertValidateException(
@@ -447,7 +447,7 @@ class UserRepositoryTest {
              => return user
             """)
     public void getByName3() {
-        User expected = createDefaultUser(1);
+        User expected = createUser(1);
         commit(() -> repository.save(expected));
 
         User actual = repository.getByName("User1");
@@ -477,7 +477,7 @@ class UserRepositoryTest {
              => exception
             """)
     public void getByEmail2() {
-        User user = createDefaultUser(1);
+        User user = createUser(1);
         commit(() -> repository.save(user));
 
         AssertUtil.assertValidateException(
@@ -495,7 +495,7 @@ class UserRepositoryTest {
              => return user
             """)
     public void getByEmail3() {
-        User expected = createDefaultUser(1);
+        User expected = createUser(1);
         commit(() -> repository.save(expected));
 
         User actual = repository.getByEmail("user1@mail.com");
@@ -517,7 +517,7 @@ class UserRepositoryTest {
         }
     }
 
-    private User createDefaultUser(int id) {
+    private User createUser(int id) {
         return new User(toUUID(id),
                 "User" + id,
                 "password" + id,
