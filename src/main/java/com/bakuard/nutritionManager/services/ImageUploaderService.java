@@ -1,6 +1,11 @@
 package com.bakuard.nutritionManager.services;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.actions.S3Actions;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -41,7 +46,7 @@ public class ImageUploaderService implements DisposableBean {
                 withRegion(Regions.US_EAST_1).
                 build();
 
-        /*Policy policy = new Policy()
+        Policy policy = new Policy()
                 .withStatements(
                         new Statement(Statement.Effect.Allow)
                                 .withPrincipals(Principal.AllUsers)
@@ -53,7 +58,7 @@ public class ImageUploaderService implements DisposableBean {
                                 .withResources(new Resource("arn:aws:s3:::nutritionmanagerimages/*"))
                 );
 
-        s3.setBucketPolicy("nutritionmanagerimages", policy.toJson());*/
+        s3.setBucketPolicy("nutritionmanagerimages", policy.toJson());
     }
 
     public URL uploadProductImage(UUID userId, MultipartFile image) throws AmazonServiceException {

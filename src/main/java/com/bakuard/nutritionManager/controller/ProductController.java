@@ -52,6 +52,7 @@ public class ProductController {
                              ImageUploaderService imageUploaderService) {
         this.mapper = mapper;
         this.productRepository = productRepository;
+        this.imageUploaderService = imageUploaderService;
     }
 
     @Operation(summary = "Загружает изображение продукта и возвращает его URL",
