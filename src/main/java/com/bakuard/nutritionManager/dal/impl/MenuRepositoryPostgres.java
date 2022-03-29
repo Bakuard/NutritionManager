@@ -3,7 +3,7 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.MenuSort;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,7 +36,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public List<Menu> getMenus(Pageable pageable, User user, MenuSort order) {
+    public List<Menu> getMenus(Pageable pageable, User user, Sort order) {
         return null;
     }
 

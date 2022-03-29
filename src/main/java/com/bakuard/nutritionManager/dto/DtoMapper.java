@@ -230,10 +230,10 @@ public class DtoMapper {
         return tags.stream().map(Tag::getValue).toList();
     }
 
-    private ProductSort toProductSort(String sortRuleAsString) {
+    private Sort toProductSort(String sortRuleAsString) {
         if(sortRuleAsString == null) return null;
         String[] parameters = sortRuleAsString.split("_");
-        return new ProductSort(parameters[0], parameters[1]);
+        return Sort.products().put(parameters[0], parameters[1]);
     }
 
     private List<Tag> toTags(List<String> tags) {

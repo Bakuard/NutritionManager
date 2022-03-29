@@ -5,10 +5,9 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductSumCriteria;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductsNumberCriteria;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.ProductSort;
-import com.bakuard.nutritionManager.model.filters.SortDirection;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
@@ -33,7 +32,7 @@ public class DishIngredient {
     private final ProductRepository repository;
     private final User user;
     private final AppConfigData config;
-    private final ProductSort sort;
+    private final Sort sort;
 
     /**
      * Конструктор копирования. Выполняет глубокое копирование.
@@ -85,7 +84,7 @@ public class DishIngredient {
         this.user = user;
         this.config = config;
 
-        sort = new ProductSort(ProductSort.Parameter.PRICE, SortDirection.ASCENDING);
+        sort = Sort.products().asc("price");
     }
 
     /**

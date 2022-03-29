@@ -4,10 +4,9 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.ProductSort;
-import com.bakuard.nutritionManager.model.filters.SortDirection;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import org.junit.jupiter.api.Assertions;
@@ -811,7 +810,7 @@ class DishIngredientTest {
         return ProductCriteria.of(
                 Pageable.ofIndex(5, productIndex),
                 createUser(userId)
-        ).setProductSort(new ProductSort(ProductSort.Parameter.PRICE, SortDirection.ASCENDING));
+        ).setProductSort(Sort.products().asc("price"));
     }
 
     private List<Product> createProducts(int userId, int productNumber) {

@@ -868,43 +868,25 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
 
     private List<SortField<?>> getOrderFields(List<String> optionalFields,
-                                              ProductSort productSort,
+                                              Sort productSort,
                                               String tableName) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
 
         optionalFields.forEach(f -> fields.add(field(tableName + "." + f).desc()));
 
-        for(int i = 0; i < productSort.getCountParameters(); i++) {
-            switch(productSort.getParameterType(i)) {
-                case CATEGORY -> {
-                    if(productSort.getDirection(i) == SortDirection.ASCENDING)
+        for(int i = 0; i < productSort.getParametersNumber(); i++) {
+            switch(productSort.getParameter(i)) {
+                case "category" -> {
+                    if(productSort.isAscending(i))
                         fields.add(field(tableName + ".category").asc());
                     else
                         fields.add(field(tableName + ".category").desc());
                 }
-                case SHOP -> {
-                    if(productSort.getDirection(i) == SortDirection.ASCENDING)
-                        fields.add(field(tableName + ".shop").asc());
-                    else
-                        fields.add(field(tableName + ".shop").desc());
-                }
-                case PRICE -> {
-                    if(productSort.getDirection(i) == SortDirection.ASCENDING)
+                case "price" -> {
+                    if(productSort.isAscending(i))
                         fields.add(field(tableName + ".price").asc());
                     else
                         fields.add(field(tableName + ".price").desc());
-                }
-                case VARIETY -> {
-                    if(productSort.getDirection(i) == SortDirection.ASCENDING)
-                        fields.add(field(".variety").asc());
-                    else
-                        fields.add(field(".variety").desc());
-                }
-                case MANUFACTURER -> {
-                    if(productSort.getDirection(i) == SortDirection.ASCENDING)
-                        fields.add(field(".manufacturer").asc());
-                    else
-                        fields.add(field(".manufacturer").desc());
                 }
             }
         }

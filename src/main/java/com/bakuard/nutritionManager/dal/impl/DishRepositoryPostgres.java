@@ -833,24 +833,18 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
 
-    private List<SortField<?>> getOrderFields(DishSort dishSort,
+    private List<SortField<?>> getOrderFields(Sort dishSort,
                                               String tableName,
                                               boolean onlyDishTable) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
 
-        for(int i = 0; i < dishSort.getCountParameters(); i++) {
-            switch(dishSort.getParameterType(i)) {
-                case NAME -> {
-                    if(dishSort.getDirection(i) == SortDirection.ASCENDING)
+        for(int i = 0; i < dishSort.getParametersNumber(); i++) {
+            switch(dishSort.getParameter(i)) {
+                case "name" -> {
+                    if(dishSort.isAscending(i))
                         fields.add(field(tableName + ".name").asc());
                     else
                         fields.add(field(tableName + ".name").desc());
-                }
-                case UNIT -> {
-                    if(dishSort.getDirection(i) == SortDirection.ASCENDING)
-                        fields.add(field(tableName + ".unit").asc());
-                    else
-                        fields.add(field(tableName + ".unit").desc());
                 }
             }
         }

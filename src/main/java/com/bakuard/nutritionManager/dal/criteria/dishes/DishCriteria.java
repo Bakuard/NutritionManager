@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.dal.criteria.dishes;
 
 import com.bakuard.nutritionManager.model.User;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.*;
-import com.bakuard.nutritionManager.model.filters.DishSort;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
@@ -33,7 +33,7 @@ public class DishCriteria {
     private Pageable pageable;
     private User user;
     private Filter filter;
-    private DishSort order;
+    private Sort order;
 
     private DishCriteria(Pageable pageable, User user) {
         ValidateException.check(
@@ -43,7 +43,7 @@ public class DishCriteria {
 
         this.pageable = pageable;
         this.user = user;
-        order = DishSort.defaultSort();
+        order = Sort.dishDefaultSort();
     }
 
     /**
@@ -74,7 +74,7 @@ public class DishCriteria {
      * Возвращает правило сортировки по которой формируется и сортируется итоговая выборка.
      * @return правило сортировки по которой формируется и сортируется итоговая выборка.
      */
-    public DishSort getDishSort() {
+    public Sort getDishSort() {
         return order;
     }
 
@@ -101,12 +101,12 @@ public class DishCriteria {
 
     /**
      * Устанавливает правило сортировки по которой формируется и сортируется итоговая выборка. Значение по умолчанию
-     * {@link DishSort#defaultSort()}. Если два блюда одинаковы с точки зрения правила сортировки, то они
+     * {@link Sort#dishDefaultSort()} ()}. Если два блюда одинаковы с точки зрения правила сортировки, то они
      * сортируются по их ID.
      * @param order правило сортировки по которой формируется и сортируется итоговая выборка.
      * @return этот же объект.
      */
-    public DishCriteria setDishSort(DishSort order) {
+    public DishCriteria setDishSort(Sort order) {
         if(order != null) this.order = order;
         return this;
     }

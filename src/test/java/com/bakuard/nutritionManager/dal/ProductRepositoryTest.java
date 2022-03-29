@@ -1755,7 +1755,7 @@ class ProductRepositoryTest {
                                         )
                                 )
                         ).setProductSort(
-                                new ProductSort(ProductSort.Parameter.PRICE, SortDirection.DESCENDING)
+                                Sort.products().desc("price")
                         )
         );
 

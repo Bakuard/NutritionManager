@@ -2,9 +2,9 @@ package com.bakuard.nutritionManager.dal.criteria.products;
 
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.ProductSort;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import java.util.Objects;
@@ -35,7 +35,7 @@ public class ProductCriteria {
     private User user;
     private boolean onlyFridge;
     private Filter filter;
-    private ProductSort order;
+    private Sort order;
 
     private ProductCriteria(Pageable pageable, User user) {
         ValidateException.check(
@@ -45,7 +45,7 @@ public class ProductCriteria {
 
         this.pageable = pageable;
         this.user = user;
-        order = ProductSort.defaultSort();
+        order = Sort.productDefaultSort();
     }
 
     /**
@@ -107,12 +107,12 @@ public class ProductCriteria {
 
     /**
      * Устанавливает правило сортировки по которой формируется и сортируется итоговая выборка. Значение по умолчанию
-     * {@link ProductSort#defaultSort()}. Если два продукта одинаковы с точки зрения правила сортировки, то они
+     * {@link Sort#productDefaultSort()} ()}. Если два продукта одинаковы с точки зрения правила сортировки, то они
      * сортируются по их ID.
      * @param order правило сортировки по которой формируется и сортируется итоговая выборка.
      * @return этот же объект.
      */
-    public ProductCriteria setProductSort(ProductSort order) {
+    public ProductCriteria setProductSort(Sort order) {
         if(order != null) this.order = order;
         return this;
     }
@@ -121,7 +121,7 @@ public class ProductCriteria {
      * Возвращает правило сортировки по которой формируется и сортируется итоговая выборка.
      * @return правило сортировки по которой формируется и сортируется итоговая выборка.
      */
-    public ProductSort getProductSort() {
+    public Sort getProductSort() {
         return order;
     }
 
