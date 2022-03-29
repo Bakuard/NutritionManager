@@ -190,7 +190,7 @@ class ProductRepositoryTest {
                 () -> commit(() ->repository.save(addedProduct)),
                 ProductRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -267,7 +267,7 @@ class ProductRepositoryTest {
                 () -> commit(() -> repository.save(updatedProduct)),
                 ProductRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 

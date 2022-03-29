@@ -58,21 +58,21 @@ public class Dish {
                  List<String> tags,
                  AppConfigData config,
                  ProductRepository productRepository) {
-        Container<List<Tag>> tagContainer = Validator.container();
-        Container<List<DishIngredient>> ingredientContainer = Validator.container();
-        Container<URL> urlContainer = Validator.container();
+        Container<List<Tag>> tagContainer = new Container<>();
+        Container<List<DishIngredient>> ingredientContainer = new Container<>();
+        Container<URL> urlContainer = new Container<>();
 
-        Validator.create().
-                field("id").notNull(id).end().
-                field("user").notNull(user).end().
-                field("name").notNull(name).and(v -> v.notBlank(name)).end().
-                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
-                field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, urlContainer)).end().
-                field("ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).end().
-                field("tags").doesNotThrow(tags, Tag::new, tagContainer).end().
-                field("config").notNull(config).end().
-                field("repository").notNull(productRepository).end().
-                validate("Fail to create dish");
+        ValidateException.check(
+                Rule.of("Dish.id").notNull(id),
+                Rule.of("Dish.user").notNull(user),
+                Rule.of("Dish.name").notNull(name).and(v -> v.notBlank(name)),
+                Rule.of("Dish.unit").notNull(unit).and(v -> v.notBlank(unit)),
+                Rule.of("Dish.imageUrl").isNull(imageUrl).or(v -> v.isUrl(imageUrl, urlContainer)),
+                Rule.of("Dish.ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer),
+                Rule.of("Dish.tags").doesNotThrow(tags, Tag::new, tagContainer),
+                Rule.of("Dish.config").notNull(config),
+                Rule.of("Dish.repository").notNull(productRepository)
+        );
 
         this.id = id;
         this.user = user;
@@ -95,9 +95,9 @@ public class Dish {
      *         2. если name не содержит ни одного отображаемого символа.
      */
     public void setName(String name) {
-        Validator.create().
-                field("name").notNull(name).and(v -> v.notBlank(name)).end().
-                validate("Fail to set dish name");
+        ValidateException.check(
+                Rule.of("Dish.name").notNull(name).and(v -> v.notBlank(name))
+        );
 
         this.name = name.trim();
     }
@@ -111,9 +111,9 @@ public class Dish {
      *         2. если unit не содержит ни одного отображаемого символа.
      */
     public void setUnit(String unit) {
-        Validator.create().
-                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
-                validate("Fail to set dish unit");
+        ValidateException.check(
+                Rule.of("Dish.unit").notNull(unit).and(v -> v.notBlank(unit))
+        );
 
         this.unit = unit.trim();
     }
@@ -132,11 +132,11 @@ public class Dish {
      * @param imageUrl путь изображения данного блюда.
      */
     public void setImageUrl(String imageUrl) {
-        Container<URL> urlContainer = Validator.container();
+        Container<URL> urlContainer = new Container<>();
 
-        Validator.create().
-                field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, urlContainer)).end().
-                validate();
+        ValidateException.check(
+                Rule.of("Dish.imageUrl").isNull(imageUrl).or(v -> v.isUrl(imageUrl, urlContainer))
+        );
 
         this.imageUrl = urlContainer.get();
     }
@@ -192,10 +192,10 @@ public class Dish {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public void addTag(Tag tag) {
-        Validator.create().
-                field("tag").notNull(tag).end().
-                field("tags").notContainsItem(tags, tag).end().
-                validate("Fail to add tag to dish");
+        ValidateException.check(
+                Rule.of("Dish.tag").notNull(tag),
+                Rule.of("Dish.tags").notContainsItem(tags, tag)
+        );
 
         tags.add(tag);
     }
@@ -333,13 +333,16 @@ public class Dish {
      */
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
                                          Map<String, Integer> productsIndex) {
-        Validator.create().
-                field("servingNumber").notNull(servingNumber).
-                    and(v -> v.positiveValue(servingNumber)).end().
-                field("productsIndex").notNull(productsIndex).
-                    and(v -> v.notContainsNegative(productsIndex.values())).end().
-                field("productsIndex").containsTheSameItems(productsIndex.keySet(), ingredients, DishIngredient::getName).end().
-                validate("Fail to get dish price");
+        ValidateException.check(
+                Rule.of("Dish.servingNumber").notNull(servingNumber).
+                        and(v -> v.positiveValue(servingNumber)),
+                Rule.of("Dish.productsIndex").notNull(productsIndex).
+                        and(v -> v.notContains(productsIndex.values(), (i -> Result.State.of(i != null && i >= 0)))).
+                        and(v -> v.containsTheSameItems(
+                                productsIndex.keySet(),
+                                ingredients.stream().map(DishIngredient::getName).toList()
+                        ))
+        );
 
         return ingredients.stream().
                 map(i -> i.getLackQuantityPrice(productsIndex.get(i.getName()), servingNumber)).

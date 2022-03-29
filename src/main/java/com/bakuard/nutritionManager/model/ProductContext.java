@@ -63,19 +63,19 @@ public class ProductContext {
                            BigDecimal packingSize,
                            List<String> tags,
                            AppConfigData config) {
-        Container<List<Tag>> container = Validator.container();
+        Container<List<Tag>> container = new Container<>();
 
-        Validator.create().
-                field("category").notNull(category).and(v -> v.notBlank(category)).end().
-                field("shop").notNull(shop).and(v -> v.notBlank(shop)).end().
-                field("variety").notNull(variety).and(v -> v.notBlank(variety)).end().
-                field("manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)).end().
-                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
-                field("price").notNull(price).and(v -> v.notNegative(price)).end().
-                field("packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)).end().
-                field("config").notNull(config).end().
-                field("tags").doesNotThrow(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container)).end().
-                validate("Fail to create product context");
+        ValidateException.check(
+                Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category)),
+                Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop)),
+                Rule.of("Product.variety").notNull(variety).and(v -> v.notBlank(variety)),
+                Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)),
+                Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit)),
+                Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price)),
+                Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)),
+                Rule.of("Product.config").notNull(config),
+                Rule.of("Product.tags").doesNotThrow(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container.get()))
+        );
 
         this.category = category;
         this.shop = shop;
@@ -99,9 +99,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setCategory(String category) {
-        Validator.create().
-                field("category").notNull(category).and(v -> v.notBlank(category)).end().
-                validate("Fail to set product context category");
+        ValidateException.check(
+                Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category))
+        );
 
         String resultCategory = category.trim();
 
@@ -129,9 +129,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setShop(String shop) {
-        Validator.create().
-                field("shop").notNull(shop).and(v -> v.notBlank(shop)).end().
-                validate("Fail to set product context shop");
+        ValidateException.check(
+                Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop))
+        );
 
         String resultShop = shop.trim();
 
@@ -159,9 +159,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setVariety(String variety) {
-        Validator.create().
-                field("variety").notNull(variety).and(v -> v.notBlank(variety)).end().
-                validate("Fail to set product context variety");
+        ValidateException.check(
+                Rule.of("Product.variety").notNull(variety).and(v -> v.notBlank(variety))
+        );
 
         String resultVariety = variety.trim();
 
@@ -189,9 +189,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setManufacturer(String manufacturer) {
-        Validator.create().
-                field("manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)).end().
-                validate("Fail to set product context manufacturer");
+        ValidateException.check(
+                Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer))
+        );
 
         String resultManufacturer = manufacturer.trim();
 
@@ -219,9 +219,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setUnit(String unit) {
-        Validator.create().
-                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
-                validate("Fail to set product context unit");
+        ValidateException.check(
+                Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit))
+        );
 
         String resultUnit = unit.trim();
 
@@ -249,9 +249,9 @@ public class ProductContext {
      *         2. если указанное значение цены меньше нуля.
      */
     public ProductContext setPrice(BigDecimal price) {
-        Validator.create().
-                field("price").notNull(price).and(v -> v.notNegative(price)).end().
-                validate("Fail to set product context price");
+        ValidateException.check(
+                Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price))
+        );
 
         if(this.price.equals(price)) return this;
 
@@ -277,9 +277,9 @@ public class ProductContext {
      *         2. если packingSize меньше или равен нулю.
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
-        Validator.create().
-                field("packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)).end().
-                validate("Fail to set product context packing size");
+        ValidateException.check(
+                Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize))
+        );
 
         if(this.packingSize.equals(packingSize)) return this;
 
@@ -307,10 +307,10 @@ public class ProductContext {
         List<Tag> tags = new ArrayList<>();
         tags.add(tag);
 
-        Validator.create().
-                field("tag").notNull(tag).end().
-                field("tags").notContainsItem(tags, tag).end().
-                validate("Fail to add tag to product context");
+        ValidateException.check(
+                Rule.of("Product.tag").notNull(tag),
+                Rule.of("Product.tags").notContainsItem(tags, tag)
+        );
 
         return new ProductContext(
                 category,

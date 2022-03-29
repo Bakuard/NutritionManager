@@ -31,10 +31,10 @@ public class DishFieldCriteria {
     private Pageable pageable;
 
     private DishFieldCriteria(User user, Pageable pageable) {
-        Validator.create().
-                field("pageable").notNull(pageable).end().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("DishFieldCriteria.pageable").notNull(pageable),
+                Rule.of("DishFieldCriteria.user").notNull(user)
+        );
 
         this.user = user;
         this.pageable = pageable;

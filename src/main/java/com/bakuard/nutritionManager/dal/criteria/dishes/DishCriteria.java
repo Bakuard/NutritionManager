@@ -36,10 +36,10 @@ public class DishCriteria {
     private DishSort order;
 
     private DishCriteria(Pageable pageable, User user) {
-        Validator.create().
-                field("pageable").notNull(pageable).end().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("DishCriteria.pageable").notNull(pageable),
+                Rule.of("DishCriteria.user").notNull(user)
+        );
 
         this.pageable = pageable;
         this.user = user;

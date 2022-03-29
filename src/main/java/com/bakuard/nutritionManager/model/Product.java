@@ -40,18 +40,18 @@ public class Product {
                     String imageUrl,
                     ProductContext.Builder contextBuilder,
                     AppConfigData config) {
-        Container<ProductContext> context = Validator.container();
-        Container<URL> url = Validator.container();
+        Container<ProductContext> context = new Container<>();
+        Container<URL> url = new Container<>();
 
-        Validator.create().
-                field("id").notNull(id).end().
-                field("user").notNull(user).end().
-                field("quantity").notNull(quantity).and(v -> v.notNegative(quantity)).end().
-                field("config").notNull(config).end().
-                field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, url)).end().
-                field("context").notNull(contextBuilder).
-                    and(v -> v.doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context)).end().
-                validate("Fail to create product");
+        ValidateException.check(
+                Rule.of("Product.id").notNull(id),
+                Rule.of("Product.user").notNull(user),
+                Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity)),
+                Rule.of("Product.config").notNull(config),
+                Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url)),
+                Rule.of("Product.context").notNull(contextBuilder).
+                        and(v -> v.doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context))
+        );
 
         this.id = id;
         this.user = user;
@@ -67,9 +67,9 @@ public class Product {
      * @throws ValidateException если указанное значение равняется null
      */
     public void setContext(ProductContext context) {
-        Validator.create().
-                field("context").notNull(context).end().
-                validate("Fail to set product context");
+        ValidateException.check(
+                Rule.of("Product.context").notNull(context)
+        );
 
         this.context = context;
     }
@@ -83,9 +83,9 @@ public class Product {
      *         2. если указанное значение меньше нуля.
      */
     public void addQuantity(BigDecimal quantity) {
-        Validator.create().
-                field("quantity").notNull(quantity).and(v -> v.notNegative(quantity)).end().
-                validate("Fail to add product quantity");
+        ValidateException.check(
+                Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity))
+        );
 
         this.quantity = this.quantity.add(quantity);
     }
@@ -103,9 +103,9 @@ public class Product {
      *         2. если указанное значение меньше нуля.
      */
     public BigDecimal take(BigDecimal quantity) {
-        Validator.create().
-                field("quantity").notNull(quantity).and(v -> v.notNegative(quantity)).end().
-                validate("Fail to take product quantity");
+        ValidateException.check(
+                Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity))
+        );
 
         BigDecimal remain = this.quantity.min(quantity);
         this.quantity = this.quantity.subtract(remain);
@@ -126,11 +126,11 @@ public class Product {
      * @param imageUrl путь изображения данного продукта.
      */
     public void setImageUrl(String imageUrl) {
-        Container<URL> url = Validator.container();
+        Container<URL> url = new Container<>();
 
-        Validator.create().
-            field("imageUrl").isNull(imageUrl).or(v -> v.correctUrl(imageUrl, url)).end().
-            validate();
+        ValidateException.check(
+                Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url))
+        );
 
         this.imageUrl = url.get();
     }

@@ -49,10 +49,10 @@ public final class DishSort {
      * @throws ValidateException если parameter или direction является null.
      */
     public DishSort(Parameter parameter, SortDirection direction) {
-        Validator.create().
-                field("parameter").notNull(parameter).end().
-                field("direction").notNull(direction).end().
-                validate();
+        ValidateException.check(
+                Rule.of("DishSort.parameter").notNull(parameter),
+                Rule.of("DishSort.direction").notNull(direction)
+        );
 
         params = new ArrayList<>();
         params.add(new Pair<>(parameter, direction));
@@ -87,10 +87,10 @@ public final class DishSort {
      * @throws ValidateException если parameter или direction является null.
      */
     public DishSort byParameter(Parameter parameter, SortDirection direction) {
-        Validator.create().
-                field("parameter").notNull(parameter).end().
-                field("direction").notNull(direction).end().
-                validate();
+        ValidateException.check(
+                Rule.of("DishSort.parameter").notNull(parameter),
+                Rule.of("DishSort.direction").notNull(direction)
+        );
 
         Pair<Parameter, SortDirection> pair = new Pair<>(parameter, direction);
         ArrayList<Pair<Parameter, SortDirection>> newParams = new ArrayList<>(params);
@@ -121,10 +121,12 @@ public final class DishSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public Parameter getParameterType(int parameterIndex) {
-        Validator.create().
-                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
-                validate("Fail to get parameter type from DishSort. Index must belong " +
-                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
+        ValidateException.check(
+                "DishSort.getParameterType",
+                "Fail to get parameter type from DishSort. Index must belong " +
+                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex,
+                Rule.of("DishSort.parameterIndex").range(parameterIndex, 0, params.size() - 1)
+        );
 
         return params.get(parameterIndex).getFirst();
     }
@@ -140,10 +142,12 @@ public final class DishSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public SortDirection getDirection(int parameterIndex) {
-        Validator.create().
-                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
-                validate("Fail to get direction sort from DishSort. Index must belong " +
-                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
+        ValidateException.check(
+                "DishSort.getParameterType",
+                "Fail to get parameter type from DishSort. Index must belong " +
+                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex,
+                Rule.of("DishSort.parameterIndex").range(parameterIndex, 0, params.size() - 1)
+        );
 
         return params.get(parameterIndex).getSecond();
     }
@@ -163,33 +167,24 @@ public final class DishSort {
 
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        final Container<Parameter> p = Validator.container();
-        final Container<SortDirection> d = Validator.container();
+        Container<SortDirection> c = new Container<>();
 
-        Validator.create().
-                field("parameter").notNull(parameter).and(v -> {
-                    switch(parameter) {
-                        case "name" -> p.set(Parameter.NAME);
-                        case "unit" -> p.set(Parameter.UNIT);
-                        default -> p.close();
-                    }
+        ValidateException.check(
+                Rule.of("DishSort.parameter").notNull(parameter),
+                Rule.of("DishSort.existing_parameter").notNull(Parameter.valueOf(parameter)),
+                Rule.of("DishSort.direction").notNull(direction).
+                        and(r -> {
+                            switch(direction) {
+                                case "asc": c.set(SortDirection.ASCENDING);
+                                case "desc": c.set(SortDirection.DESCENDING);
+                            }
 
-                    if(p.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
-                    else return v.success(Constraint.PERMISSIBLE_VALUE);
-                }).end().
-                field("direction").notNull(direction).and(v -> {
-                    switch(direction) {
-                        case "asc" -> d.set(SortDirection.ASCENDING);
-                        case "desc" -> d.set(SortDirection.DESCENDING);
-                        default -> d.close();
-                    }
+                            if(c.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
+                            else return r.success(Constraint.CONTAINS_ITEM);
+                        })
+        );
 
-                    if(d.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
-                    else return v.success(Constraint.PERMISSIBLE_VALUE);
-                }).end().
-                validate();
-
-        return new Pair<>(p.get(), d.get());
+        return new Pair<>(Parameter.valueOf(parameter), c.get());
     }
 
 }

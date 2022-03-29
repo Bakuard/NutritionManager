@@ -17,10 +17,10 @@ public class ProductCategoryCriteria {
     private User user;
 
     private ProductCategoryCriteria(Pageable pageable, User user) {
-        Validator.create().
-                field("pageable").notNull(pageable).end().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductCategoryCriteria.pageable").notNull(pageable),
+                Rule.of("ProductCategoryCriteria.user").notNull(user)
+        );
 
         this.pageable = pageable;
         this.user = user;

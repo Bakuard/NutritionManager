@@ -32,9 +32,9 @@ public class ProductFieldNumberCriteria {
     private AnyFilter productCategory;
 
     private ProductFieldNumberCriteria(User user) {
-        Validator.create().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductFieldNumberCriteria.user").notNull(user)
+        );
 
         this.user = user;
     }

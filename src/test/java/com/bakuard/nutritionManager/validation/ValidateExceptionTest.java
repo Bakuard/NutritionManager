@@ -18,7 +18,7 @@ class ValidateExceptionTest {
     public void iterator1() {
         ValidateException validateException = new ValidateException();
 
-        Iterator<Result> iterator = validateException.iterator();
+        Iterator<RuleException> iterator = validateException.iterator();
 
         Assertions.assertFalse(iterator.hasNext());
     }
@@ -37,7 +37,7 @@ class ValidateExceptionTest {
         validateException.addReason(new ValidateException());
         validateException.addReason(new ValidateException());
 
-        Iterator<Result> iterator = validateException.iterator();
+        Iterator<RuleException> iterator = validateException.iterator();
 
         Assertions.assertFalse(iterator.hasNext());
     }
@@ -53,19 +53,19 @@ class ValidateExceptionTest {
     public void iterator3() {
         ValidateException validateException = new ValidateException();
         ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason("some field", Constraint.NOT_BLANK);
-        nestedValidateException.addReason("some field", Constraint.NOT_BLANK);
-        nestedValidateException.addReason("some field", Constraint.NOT_BLANK);
+        nestedValidateException.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
+        nestedValidateException.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
+        nestedValidateException.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
         validateException.addReason(nestedValidateException);
         ValidateException nestedValidateException2 = new ValidateException();
         ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason("some field", Constraint.NOT_BLANK);
-        nestedValidateException3.addReason("some field", Constraint.NOT_BLANK);
-        nestedValidateException3.addReason("some field", Constraint.NOT_BLANK);
+        nestedValidateException3.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
+        nestedValidateException3.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
+        nestedValidateException3.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
         nestedValidateException2.addReason(nestedValidateException3);
         validateException.addReason(nestedValidateException2);
 
-        Iterator<Result> iterator = validateException.iterator();
+        Iterator<RuleException> iterator = validateException.iterator();
 
         Assertions.assertTrue(iterator.hasNext());
     }
@@ -79,25 +79,13 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator4() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -126,25 +114,13 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator5() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -168,25 +144,13 @@ class ValidateExceptionTest {
              => iterator#next() return all field exceptions
             """)
     public void iterator6() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -215,25 +179,13 @@ class ValidateExceptionTest {
              => number iteration = number of all field exceptions
             """)
     public void iterator7() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -250,7 +202,7 @@ class ValidateExceptionTest {
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
 
-        Iterator<Result> iterator = validateException.iterator();
+        Iterator<RuleException> iterator = validateException.iterator();
         int number = 0;
         while(iterator.hasNext()) {
             iterator.next();
@@ -270,7 +222,7 @@ class ValidateExceptionTest {
     public void forEach1() {
         ValidateException validateException = new ValidateException();
 
-        List<Result> actual = new ArrayList<>();
+        List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertEquals(0, actual.size());
@@ -290,7 +242,7 @@ class ValidateExceptionTest {
         validateException.addReason(new ValidateException());
         validateException.addReason(new ValidateException());
 
-        List<Result> actual = new ArrayList<>();
+        List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertEquals(0, actual.size());
@@ -305,25 +257,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach3() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -340,7 +280,7 @@ class ValidateExceptionTest {
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
 
-        List<Result> actual = new ArrayList<>();
+        List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -355,25 +295,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach4() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -385,7 +313,7 @@ class ValidateExceptionTest {
         validateException.addReason(nestedValidateException2);
         expected.forEach(validateException::addReason);
 
-        List<Result> actual = new ArrayList<>();
+        List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -400,25 +328,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach5() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -435,7 +351,7 @@ class ValidateExceptionTest {
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
 
-        List<Result> actual = new ArrayList<>();
+        List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
@@ -450,25 +366,13 @@ class ValidateExceptionTest {
              => iterate all fields
             """)
     public void forEach6() {
-        List<Result> expected = List.of(
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_BLANK, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NULL, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.RANGE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_CONTAINS_DUPLICATE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.NOT_NEGATIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null),
-                new Result(getClass(), "someMethod", "some field",
-                        Constraint.POSITIVE_VALUE, Result.State.FAIL, null,
-                        "key", null, null)
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
         ValidateException nestedValidateException = new ValidateException();
@@ -485,7 +389,7 @@ class ValidateExceptionTest {
         validateException.addReason(nestedValidateException);
         validateException.addReason(nestedValidateException2);
 
-        List<Result> actual = new ArrayList<>();
+        List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
         Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));

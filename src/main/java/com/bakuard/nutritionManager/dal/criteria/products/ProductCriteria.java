@@ -38,10 +38,10 @@ public class ProductCriteria {
     private ProductSort order;
 
     private ProductCriteria(Pageable pageable, User user) {
-        Validator.create().
-                field("pageable").notNull(pageable).end().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductCriteria.pageable").notNull(pageable),
+                Rule.of("ProductCriteria.user").notNull(user)
+        );
 
         this.pageable = pageable;
         this.user = user;

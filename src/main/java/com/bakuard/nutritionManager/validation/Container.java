@@ -1,38 +1,43 @@
 package com.bakuard.nutritionManager.validation;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 public class Container<T> {
 
     private T value;
-    private boolean isOpen;
 
-    Container() {
-        isOpen = true;
-    }
+    public Container() {
 
-    public void close() {
-        this.isOpen = false;
-    }
-
-    public boolean isOpen() {
-        return isOpen;
-    }
-
-    public boolean isClose() {
-        return !isOpen;
     }
 
     public T get() {
-        if(isClose()) {
-            throw new IllegalStateException("Container is close");
-        }
         return value;
     }
 
-    public void set(T value) {
-        if(isClose()) {
-            throw new IllegalStateException("Container is close");
+    public Optional<T> getIfAllPresent(Container<?>... containers) {
+        boolean allPresent = value != null;
+        for(int i = 0; i < containers.length && allPresent; i++) {
+            allPresent = containers[i].value != null;
         }
+        if(allPresent) return Optional.of(value);
+        else return Optional.empty();
+    }
+
+    public <U> Optional<U> map(Function<? super T, ? extends U> mapper) {
+        return Optional.ofNullable(value).map(mapper);
+    }
+
+    public boolean isEmpty() {
+        return value == null;
+    }
+
+    public void set(T value) {
         this.value = value;
+    }
+
+    public void clear() {
+        value = null;
     }
 
 }

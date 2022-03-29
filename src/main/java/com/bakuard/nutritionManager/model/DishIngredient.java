@@ -69,14 +69,14 @@ public class DishIngredient {
                           ProductRepository repository,
                           User user,
                           AppConfigData config) {
-        Validator.create().
-                field("name").notNull(name).and(v -> v.notBlank(name)).end().
-                field("filter").notNull(filter).end().
-                field("quantity").notNull(quantity).and(v -> v.positiveValue(quantity)).end().
-                field("repository").notNull(repository).end().
-                field("user").notNull(user).end().
-                field("config").notNull(config).end().
-                validate("Fail to create dish ingredient");
+        ValidateException.check(
+                Rule.of("DishIngredient.name").notNull(name).and(v -> v.notBlank(name)),
+                Rule.of("DishIngredient.filter").notNull(filter),
+                Rule.of("DishIngredient.quantity").notNull(quantity).and(v -> v.positiveValue(quantity)),
+                Rule.of("DishIngredient.repository").notNull(repository),
+                Rule.of("DishIngredient.user").notNull(user),
+                Rule.of("DishIngredient.config").notNull(config)
+        );
 
         this.name = name;
         this.filter = filter;
@@ -119,9 +119,9 @@ public class DishIngredient {
      * @throws ValidateException если указанное значение null или не является положительным.
      */
     public BigDecimal getNecessaryQuantity(BigDecimal servingNumber) {
-        Validator.create().
-                field("servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber)).end().
-                validate("Fail to get necessary ingredient quantity.");
+        ValidateException.check(
+                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber))
+        );
 
         return quantity.multiply(servingNumber);
     }
@@ -143,9 +143,9 @@ public class DishIngredient {
      *              3. servingNumber <= 0
      */
     public Optional<BigDecimal> getLackQuantity(int productIndex, BigDecimal servingNumber) {
-        Validator.create().
-                field("servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber)).end().
-                validate("Fail to get product lack quantity");
+        ValidateException.check(
+                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber))
+        );
 
         return getProductByIndex(productIndex).
                 map(product -> {
@@ -176,9 +176,9 @@ public class DishIngredient {
      *              3. servingNumber <= 0
      */
     public Optional<BigDecimal> getLackQuantityPrice(int productIndex, BigDecimal servingNumber) {
-        Validator.create().
-                field("servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber)).end().
-                validate("Fail to get price of product lack quantity");
+        ValidateException.check(
+                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber))
+        );
 
         return getProductByIndex(productIndex).
                 map(product ->
@@ -200,9 +200,9 @@ public class DishIngredient {
      * @throws ValidateException если productIndex < 0
      */
     public Optional<Product> getProductByIndex(int productIndex) {
-        Validator.create().
-                field("productIndex").notNegative(productIndex).end().
-                validate("Fail to get product bu index");
+        ValidateException.check(
+                Rule.of("DishIngredient.productIndex").notNegative(productIndex)
+        );
 
         Page<Product> page = repository.getProducts(
                 ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).

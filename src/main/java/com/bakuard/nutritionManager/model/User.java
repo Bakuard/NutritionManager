@@ -27,17 +27,17 @@ public class User {
     }
 
     public User(UUID id, String name, String password, String email) {
-        Validator.create().
-                field("id").notNull(id).end().
-                field("name").notNull(name).
-                    and(v -> v.notBlank(name)).
-                    and(v -> v.stringLength(name, 1, 40)).end().
-                field("password").notNull(password).
-                    and(v -> v.notBlank(password)).
-                    and(v -> v.stringLength(password, 8, 100)).end().
-                field("email").notNull(email).
-                    and(v -> v.notBlank(email)).end().
-                validate("Fail to create user");
+        ValidateException.check(
+                Rule.of("User.id").notNull(id),
+                Rule.of("User.name").notNull(name).
+                        and(v -> v.notBlank(name)).
+                        and(v -> v.stringLength(name, 1, 40)),
+                Rule.of("User.password").notNull(password).
+                        and(v -> v.notBlank(password)).
+                        and(v -> v.stringLength(password, 8, 100)),
+                Rule.of("User.email").notNull(email).
+                        and(v -> v.notBlank(email))
+        );
  
         this.id = id;
         this.name = name;
@@ -63,11 +63,11 @@ public class User {
     }
 
     public void setName(String name) {
-        Validator.create().
-                field("name").notNull(name).
-                    and(v -> v.notBlank(name)).
-                    and(v -> v.stringLength(name, 1, 40)).end().
-                validate("Fail to set user name");
+        ValidateException.check(
+                Rule.of("User.name").notNull(name).
+                        and(v -> v.notBlank(name)).
+                        and(v -> v.stringLength(name, 1, 40))
+        );
         this.name = name;
     }
 
@@ -76,11 +76,11 @@ public class User {
     }
 
     public void setPassword(String password) {
-        Validator.create().
-                field("password").notNull(password).
-                    and(v -> v.notBlank(password)).
-                    and(v -> v.stringLength(password, 8, 100)).end().
-                validate("Fail to set user password");
+        ValidateException.check(
+                Rule.of("User.password").notNull(password).
+                        and(v -> v.notBlank(password)).
+                        and(v -> v.stringLength(password, 8, 100))
+        );
         this.passwordHash = calculatePasswordHash(password, salt);
     }
 
@@ -89,9 +89,10 @@ public class User {
     }
 
     public void setEmail(String email) {
-        Validator.create().
-                field("email").notNull(email).and(v -> v.notBlank(email)).end().
-                validate("Fail to set user email");
+        ValidateException.check(
+                Rule.of("User.email").notNull(email).
+                        and(v -> v.notBlank(email))
+        );
         this.email = email;
     }
 
@@ -100,9 +101,9 @@ public class User {
     }
 
     public boolean isCorrectPassword(String password) {
-        Validator.create().
-                field("password").notNull(password).end().
-                validate();
+        ValidateException.check(
+                Rule.of("User.password").notNull(password)
+        );
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 

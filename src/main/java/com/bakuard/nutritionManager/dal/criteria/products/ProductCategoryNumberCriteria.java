@@ -15,9 +15,9 @@ public class ProductCategoryNumberCriteria {
     private User user;
 
     private ProductCategoryNumberCriteria(User user) {
-        Validator.create().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductCategoryNumberCriteria.user").notNull(user)
+        );
 
         this.user = user;
     }

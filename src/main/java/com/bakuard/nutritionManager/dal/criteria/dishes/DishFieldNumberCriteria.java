@@ -28,9 +28,9 @@ public class DishFieldNumberCriteria {
     private User user;
 
     private DishFieldNumberCriteria(User user) {
-        Validator.create().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("DishFieldNumberCriteria.user").notNull(user)
+        );
 
         this.user = user;
     }

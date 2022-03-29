@@ -169,7 +169,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -191,7 +191,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -213,7 +213,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -274,7 +274,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -304,7 +304,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -334,7 +334,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 

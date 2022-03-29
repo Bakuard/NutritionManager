@@ -35,10 +35,10 @@ public class ProductFieldCriteria {
     private AnyFilter productCategory;
 
     private ProductFieldCriteria(Pageable pageable, User user) {
-        Validator.create().
-                field("pageable").notNull(pageable).end().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductFieldCriteria.pageable").notNull(pageable),
+                Rule.of("ProductFieldCriteria.user").notNull(user)
+        );
 
         this.pageable = pageable;
         this.user = user;

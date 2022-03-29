@@ -31,10 +31,10 @@ public class ProductSumCriteria {
     private Filter filter;
 
     private ProductSumCriteria(User user, Filter filter) {
-        Validator.create().
-                field("user").notNull(user).end().
-                field("filter").notNull(filter).end().
-                validate("Fail to create ProductSumCriteria");
+        ValidateException.check(
+                Rule.of("ProductSumCriteria.user").notNull(user),
+                Rule.of("ProductSumCriteria.filter").notNull(filter)
+        );
 
         this.user = user;
         this.filter = filter;

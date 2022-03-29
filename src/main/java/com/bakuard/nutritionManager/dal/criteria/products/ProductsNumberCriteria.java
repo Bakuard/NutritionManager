@@ -33,9 +33,9 @@ public class ProductsNumberCriteria {
     private Filter filter;
 
     private ProductsNumberCriteria(User user) {
-        Validator.create().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductsNumberCriteria.user").notNull(user)
+        );
 
         this.user = user;
     }

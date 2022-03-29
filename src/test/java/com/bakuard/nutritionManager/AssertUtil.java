@@ -25,14 +25,14 @@ public class AssertUtil {
             ValidateException ex = (ValidateException) e;
 
             for(Constraint constraint : expectedConstraints) {
-                if(ex.getConstraints().stream().noneMatch(r -> r.contains(constraint))) {
+                if(!ex.containsConstraint(constraint)) {
                     Assertions.fail("Expected constraint " + constraint + " is missing");
                 }
             }
 
             for(Constraint constraint : Constraint.values()) {
                 if(Arrays.stream(expectedConstraints).noneMatch(c -> c == constraint) &&
-                        ex.getConstraints().stream().anyMatch(r -> r.contains(constraint))) {
+                        ex.containsConstraint(constraint)) {
                     Assertions.fail("Unexpected constraint " + constraint);
                 }
             }

@@ -216,7 +216,7 @@ class DishRepositoryPostgresTest {
                 () -> commit(() -> dishRepository.save(dish)),
                 DishRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -294,7 +294,7 @@ class DishRepositoryPostgresTest {
                 () -> dishRepository.save(updatedDish),
                 DishRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 

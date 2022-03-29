@@ -19,10 +19,9 @@ public final class Tag implements Comparable<Tag> {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public Tag(String value) {
-        Validator.create().
-                field("value").notNull(value).
-                    and(v -> v.notBlank(value)).end().
-                validate("Fail to create tag");
+        ValidateException.check(
+                Rule.of("Tag.value").notNull(value).and(r -> r.notBlank(value))
+        );
 
         this.value = value.trim();
     }

@@ -31,9 +31,9 @@ public class DishesNumberCriteria {
     private Filter filter;
 
     private DishesNumberCriteria(User user) {
-        Validator.create().
-                field("user").notNull(user).end().
-                validate();
+        ValidateException.check(
+                Rule.of("DishesNumberCriteria.user").notNull(user)
+        );
 
         this.user = user;
     }

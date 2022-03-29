@@ -5,6 +5,7 @@ import com.bakuard.nutritionManager.model.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Задает правило сортировки продуктов. Объекты данного класса неизменяемы.
@@ -63,10 +64,10 @@ public final class ProductSort {
      * @throws ValidateException если parameter или direction являются null.
      */
     public ProductSort(Parameter parameter, SortDirection direction) {
-        Validator.create().
-                field("parameter").notNull(parameter).end().
-                field("direction").notNull(direction).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductSort.parameter").notNull(parameter),
+                Rule.of("ProductSort.direction").notNull(direction)
+        );
 
         params = new ArrayList<>();
         params.add(new Pair<>(parameter, direction));
@@ -101,10 +102,10 @@ public final class ProductSort {
      * @throws ValidateException если parameter или direction является null.
      */
     public ProductSort byParameter(Parameter parameter, SortDirection direction) {
-        Validator.create().
-                field("parameter").notNull(parameter).end().
-                field("direction").notNull(direction).end().
-                validate();
+        ValidateException.check(
+                Rule.of("ProductSort.parameter").notNull(parameter),
+                Rule.of("ProductSort.direction").notNull(direction)
+        );
 
         Pair<Parameter, SortDirection> pair = new Pair<>(parameter, direction);
         ArrayList<Pair<Parameter, SortDirection>> newParams = new ArrayList<>(params);
@@ -135,10 +136,12 @@ public final class ProductSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public Parameter getParameterType(int parameterIndex) {
-        Validator.create().
-                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
-                validate("Fail to get parameter type from ProductSort. Index must belong " +
-                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
+        ValidateException.check(
+                "ProductSort.getParameterType",
+                "Fail to get parameter type from ProductSort. Index must belong " +
+                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex,
+                Rule.of("ProductSort.parameterIndex").range(parameterIndex, 0, params.size() - 1)
+        );
 
         return params.get(parameterIndex).getFirst();
     }
@@ -154,10 +157,12 @@ public final class ProductSort {
      *                          2. parameterIndex >= {@link #getCountParameters()}.
      */
     public SortDirection getDirection(int parameterIndex) {
-        Validator.create().
-                field("parameterIndex").range(parameterIndex, 0, params.size() - 1).end().
-                validate("Fail to get direction sort from ProductSort. Index must belong " +
-                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex);
+        ValidateException.check(
+                "ProductSort.getDirection",
+                "Fail to get direction sort from ProductSort. Index must belong " +
+                        "[0, " + (params.size() - 1) + "], actual = " + parameterIndex,
+                Rule.of("ProductSort.parameterIndex").range(parameterIndex, 0, params.size() - 1)
+        );
 
         return params.get(parameterIndex).getSecond();
     }
@@ -177,36 +182,24 @@ public final class ProductSort {
 
 
     private Pair<Parameter, SortDirection> from(String parameter, String direction) {
-        final Container<Parameter> p = Validator.container();
-        final Container<SortDirection> d = Validator.container();
+        Container<SortDirection> c = new Container<>();
 
-        Validator.create().
-                field("parameter").notNull(parameter).and(v -> {
-                    switch(parameter) {
-                        case "category" -> p.set(Parameter.CATEGORY);
-                        case "price" -> p.set(Parameter.PRICE);
-                        case "variety" -> p.set(Parameter.VARIETY);
-                        case "shop" -> p.set(Parameter.SHOP);
-                        case "manufacturer" -> p.set(Parameter.MANUFACTURER);
-                        default -> p.close();
-                    }
+        ValidateException.check(
+                Rule.of("ProductSort.parameter").notNull(parameter),
+                Rule.of("ProductSort.existing_parameter").notNull(Parameter.valueOf(parameter)),
+                Rule.of("ProductSort.direction").notNull(direction).
+                        and(r -> {
+                            switch(direction) {
+                                case "asc": c.set(SortDirection.ASCENDING);
+                                case "desc": c.set(SortDirection.DESCENDING);
+                            }
 
-                    if(p.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
-                    else return v.success(Constraint.PERMISSIBLE_VALUE);
-                }).end().
-                field("direction").notNull(direction).and(v -> {
-                    switch(direction) {
-                        case "asc" -> d.set(SortDirection.ASCENDING);
-                        case "desc" -> d.set(SortDirection.DESCENDING);
-                        default -> d.close();
-                    }
+                            if(c.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
+                            else return r.success(Constraint.CONTAINS_ITEM);
+                        })
+        );
 
-                    if(d.isClose()) return v.failure(Constraint.PERMISSIBLE_VALUE);
-                    else return v.success(Constraint.PERMISSIBLE_VALUE);
-                }).end().
-                validate();
-
-        return new Pair<>(p.get(), d.get());
+        return new Pair<>(Parameter.valueOf(parameter), c.get());
     }
 
 }
