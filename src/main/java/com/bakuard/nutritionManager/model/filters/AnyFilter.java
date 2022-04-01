@@ -16,7 +16,7 @@ import java.util.function.Function;
  * Определить фильтруемое поле можно по возвращаемому значению метода {@link #getType()}<br/><br/>
  * Объекты данного класса не изменяемы.
  */
-public class AnyFilter implements Filter {
+public class AnyFilter extends AbstractFilter {
 
     private final ImmutableList<String> values;
     private final Type type;

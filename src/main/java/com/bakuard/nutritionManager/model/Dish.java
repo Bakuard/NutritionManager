@@ -2,6 +2,7 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ProductRepository;
+import com.bakuard.nutritionManager.model.filters.UserFilter;
 import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
@@ -65,10 +66,18 @@ public class Dish {
         ValidateException.check(
                 Rule.of("Dish.id").notNull(id),
                 Rule.of("Dish.user").notNull(user),
-                Rule.of("Dish.name").notNull(name).and(v -> v.notBlank(name)),
-                Rule.of("Dish.unit").notNull(unit).and(v -> v.notBlank(unit)),
-                Rule.of("Dish.imageUrl").isNull(imageUrl).or(v -> v.isUrl(imageUrl, urlContainer)),
-                Rule.of("Dish.ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer),
+                Rule.of("Dish.name").notNull(name).and(r -> r.notBlank(name)),
+                Rule.of("Dish.unit").notNull(unit).and(r -> r.notBlank(unit)),
+                Rule.of("Dish.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, urlContainer)),
+                Rule.of("Dish.ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).
+                        and(r -> {
+                            boolean b = ingredientContainer.get().stream().
+                                    map(i -> i.getFilter().<UserFilter>findAny(Filter.Type.USER)).
+                                    allMatch(u -> u != null && user.equals(u.getUser()));
+                            if(b) return r.success(Constraint.IS_TRUE);
+                            else return r.failure(Constraint.IS_TRUE,
+                                    "All ingredients must have UserFilter and UserFilter.getUser() must be equal Dish.getUser()");
+                        }),
                 Rule.of("Dish.tags").doesNotThrow(tags, Tag::new, tagContainer),
                 Rule.of("Dish.config").notNull(config),
                 Rule.of("Dish.repository").notNull(productRepository)
@@ -156,7 +165,7 @@ public class Dish {
      *         3. если name не содержит ни одного отображаемого символа.
      */
     public void putIngredient(String name, Filter filter, BigDecimal quantity) {
-        DishIngredient ingredient = new DishIngredient(name, filter, quantity, productRepository, user, config);
+        DishIngredient ingredient = new DishIngredient(name, filter, quantity, productRepository, config);
 
         int index = IntStream.range(0, ingredients.size()).
                 filter(i -> ingredients.get(i).getName().equals(name)).
@@ -460,9 +469,6 @@ public class Dish {
 
         public Builder setUser(User user) {
             this.user = user;
-
-            ingredients.forEach(b -> b.setUser(user));
-
             return this;
         }
 
@@ -506,8 +512,7 @@ public class Dish {
                             setFilter(filter).
                             setQuantity(quantity).
                             setConfig(config).
-                            setRepository(repository).
-                            setUser(user)
+                            setRepository(repository)
             );
             return this;
         }

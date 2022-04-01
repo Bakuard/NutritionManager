@@ -1,11 +1,9 @@
 package com.bakuard.nutritionManager.dto;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.UserRepository;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductCategoryCriteria;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductFieldCriteria;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
@@ -21,6 +19,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class DtoMapper {
@@ -105,19 +104,21 @@ public class DtoMapper {
     }
 
 
-    public ProductCriteria toProductCriteria(int page,
-                                             int size,
-                                             UUID userId,
-                                             String sortRule,
-                                             Boolean onlyFridge,
-                                             String category,
-                                             List<String> shops,
-                                             List<String> varieties,
-                                             List<String> manufacturers,
-                                             List<String> tags) {
+    public Criteria toProductCriteria(int page,
+                                      int size,
+                                      UUID userId,
+                                      String sortRule,
+                                      Boolean onlyFridge,
+                                      String category,
+                                      List<String> shops,
+                                      List<String> varieties,
+                                      List<String> manufacturers,
+                                      List<String> tags) {
         User user = userRepository.getById(userId);
 
         List<Filter> filters = new ArrayList<>();
+        filters.add(Filter.user(user));
+        if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
         if(category != null) filters.add(Filter.anyCategory(category));
         if(shops != null) filters.add(Filter.anyShop(shops));
         if(varieties != null) filters.add(Filter.anyVariety(varieties));
@@ -128,30 +129,22 @@ public class DtoMapper {
         if(filters.size() == 1) filter = filters.get(0);
         else if(filters.size() > 1) filter = Filter.and(filters);
 
-        return ProductCriteria.of(
-                Pageable.of(size, page),
-                user).
-                setOnlyFridge(onlyFridge).
-                setProductSort(toProductSort(sortRule)).
+        return new Criteria().
+                setPageable(Pageable.of(size, page)).
+                setSort(toProductSort(sortRule)).
                 setFilter(filter);
     }
 
 
     public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
-        ProductFieldCriteria criteria = ProductFieldCriteria.of(
-                Pageable.of(1000, 0),
-                userRepository.getById(userId)
-        );
-
-        ProductCategoryCriteria categoryCriteria = ProductCategoryCriteria.of(
-                Pageable.of(1000, 0),
-                userRepository.getById(userId)
-        );
+        Criteria criteria = new Criteria().
+                setPageable(Pageable.of(1000, 0)).
+                setFilter(Filter.user(userRepository.getById(userId)));
 
         Page<String> manufacturers = productRepository.getManufacturers(criteria);
         Page<String> varieties = productRepository.getVarieties(criteria);
         Page<String> shops = productRepository.getShops(criteria);
-        Page<String> categories = productRepository.getCategories(categoryCriteria);
+        Page<String> categories = productRepository.getCategories(criteria);
         Page<Tag> tags = productRepository.getTags(criteria);
 
         ProductFieldsResponse response = new ProductFieldsResponse();

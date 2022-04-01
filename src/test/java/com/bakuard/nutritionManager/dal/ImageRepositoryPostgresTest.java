@@ -454,13 +454,17 @@ class ImageRepositoryPostgresTest {
                             addIngredient("ingredient 1",
                                     Filter.orElse(
                                             Filter.and(
+                                                    Filter.user(user),
                                                     Filter.minTags(new Tag("common tag")),
                                                     Filter.anyCategory("name A"),
                                                     Filter.anyShop("shop A"),
                                                     Filter.anyVariety("variety A"),
                                                     Filter.anyManufacturer("manufacturer A")
                                             ),
-                                            Filter.minTags(new Tag("tag B"))
+                                            Filter.and(
+                                                    Filter.user(user),
+                                                    Filter.minTags(new Tag("tag B"))
+                                            )
                                     ),
                                     BigDecimal.TEN).
                             tryBuild()

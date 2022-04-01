@@ -2,8 +2,8 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -48,10 +48,12 @@ class DishIngredientTest {
     public void getNecessaryQuantity1() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -72,10 +74,12 @@ class DishIngredientTest {
     public void getNecessaryQuantity2() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -96,10 +100,12 @@ class DishIngredientTest {
     public void getNecessaryQuantity3() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -118,10 +124,12 @@ class DishIngredientTest {
     public void getNecessaryQuantity4() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -142,10 +150,12 @@ class DishIngredientTest {
     public void getLackQuantity1() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -166,10 +176,12 @@ class DishIngredientTest {
     public void getLackQuantity2() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -190,10 +202,12 @@ class DishIngredientTest {
     public void getLackQuantity3() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -214,7 +228,7 @@ class DishIngredientTest {
     public void getLackQuantity4() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
@@ -223,10 +237,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -247,17 +263,19 @@ class DishIngredientTest {
     public void getLackQuantity5() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5)))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -275,7 +293,7 @@ class DishIngredientTest {
     public void getLackQuantity6() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
@@ -284,10 +302,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -308,17 +328,19 @@ class DishIngredientTest {
     public void getLackQuantity7() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6)))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -337,7 +359,7 @@ class DishIngredientTest {
     public void getLackQuantity8() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 16).
@@ -346,10 +368,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -371,17 +395,19 @@ class DishIngredientTest {
     public void getLackQuantity9() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16)))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -399,10 +425,12 @@ class DishIngredientTest {
     public void getLackQuantityPrice1() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -423,10 +451,12 @@ class DishIngredientTest {
     public void getLackQuantityPrice2() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -447,10 +477,12 @@ class DishIngredientTest {
     public void getLackQuantityPrice3() {
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 Mockito.mock(ProductRepository.class),
-                createUser(1),
                 conf
         );
 
@@ -471,7 +503,7 @@ class DishIngredientTest {
     public void getLackQuantityPrice4() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
@@ -480,10 +512,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -504,17 +538,19 @@ class DishIngredientTest {
     public void getLackQuantityPrice5() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5)))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -532,7 +568,7 @@ class DishIngredientTest {
     public void getLackQuantityPrice6() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
@@ -541,10 +577,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -565,17 +603,19 @@ class DishIngredientTest {
     public void getLackQuantityPrice7() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6)))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -594,7 +634,7 @@ class DishIngredientTest {
     public void getLackQuantityPrice8() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 16).
@@ -603,10 +643,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -628,17 +670,19 @@ class DishIngredientTest {
     public void getLackQuantityPrice9() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16)))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -658,10 +702,12 @@ class DishIngredientTest {
         Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Pageable.firstEmptyPage());
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -680,7 +726,7 @@ class DishIngredientTest {
     public void getProductByIndex2() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                    repository.getProducts(Mockito.eq(createCriteria(1, 4)))
+                    repository.getProducts(Mockito.eq(createCriteria(4)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 4).
@@ -689,10 +735,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -713,7 +761,7 @@ class DishIngredientTest {
     public void getProductByIndex3() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
@@ -722,10 +770,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -746,7 +796,7 @@ class DishIngredientTest {
     public void getProductByIndex4() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(1, 6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6)))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
@@ -755,10 +805,12 @@ class DishIngredientTest {
                 );
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -779,10 +831,12 @@ class DishIngredientTest {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         DishIngredient ingredient = new DishIngredient(
                 "some ingredient",
-                Filter.anyCategory("categoryA"),
+                Filter.and(
+                        Filter.anyCategory("categoryA"),
+                        Filter.user(createUser(1))
+                ),
                 BigDecimal.TEN,
                 repository,
-                createUser(1),
                 conf
         );
 
@@ -806,13 +860,6 @@ class DishIngredientTest {
         return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
     }
 
-    private ProductCriteria createCriteria(int userId, int productIndex) {
-        return ProductCriteria.of(
-                Pageable.ofIndex(5, productIndex),
-                createUser(userId)
-        ).setProductSort(Sort.products().asc("price"));
-    }
-
     private List<Product> createProducts(int userId, int productNumber) {
         ArrayList<Product> products = new ArrayList<>();
 
@@ -823,7 +870,7 @@ class DishIngredientTest {
         return products;
     }
 
-    public Product.Builder createProduct(int userId, int id) {
+    private Product.Builder createProduct(int userId, int id) {
         return new Product.Builder().
                 setAppConfiguration(conf).
                 setId(toUUID(id)).
@@ -840,6 +887,18 @@ class DishIngredientTest {
                 setImageUrl("https://nutritionmanager.xyz/products/images?id=" + id).
                 addTag("tag " + id).
                 addTag("common tag");
+    }
+
+    private Criteria createCriteria(int expectedPageNumber) {
+        return new Criteria().
+                setPageable(Pageable.ofIndex(5, expectedPageNumber)).
+                setFilter(
+                        Filter.and(
+                                Filter.anyCategory("categoryA"),
+                                Filter.user(createUser(1))
+                        )
+                ).
+                setSort(Sort.products().asc("price"));
     }
 
 }

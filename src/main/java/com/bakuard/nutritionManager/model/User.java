@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
+import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 import com.bakuard.nutritionManager.validation.*;
 
 import com.google.common.hash.Hashing;
@@ -136,6 +137,51 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+
+    public static class Builder implements AbstractBuilder<User> {
+
+        private UUID id;
+        private String name;
+        private String passwordHash;
+        private String email;
+        private String salt;
+
+        public Builder() {
+
+        }
+
+        public Builder setId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setPasswordHash(String passwordHash) {
+            this.passwordHash = passwordHash;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder setSalt(String salt) {
+            this.salt = salt;
+            return this;
+        }
+
+        @Override
+        public User tryBuild() throws ValidateException {
+            return new User(id, name, passwordHash, email, salt);
+        }
+
     }
 
 

@@ -1,10 +1,8 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductSumCriteria;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductsNumberCriteria;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -30,7 +28,6 @@ public class DishIngredient {
     private final BigDecimal quantity;
 
     private final ProductRepository repository;
-    private final User user;
     private final AppConfigData config;
     private final Sort sort;
 
@@ -43,7 +40,6 @@ public class DishIngredient {
         this.filter = other.filter;
         this.quantity = other.quantity;
         this.repository = other.repository;
-        this.user = new User(other.user);
         this.config = other.config;
         this.sort = other.sort;
     }
@@ -55,7 +51,6 @@ public class DishIngredient {
      *               выступать в качестве данного ингредиента.
      * @param quantity кол-во данного ингредиента необходимого для приготовления одной порции блюда.
      * @param repository репозиторий продуктов.
-     * @param user пользователь, которому принадлежит блюдо, для которого создается данный ингредиент.
      * @param config общие данные конфигурации приложения.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. Если хотя бы один из параметров имеет значение null.<br/>
@@ -66,14 +61,12 @@ public class DishIngredient {
                           Filter filter,
                           BigDecimal quantity,
                           ProductRepository repository,
-                          User user,
                           AppConfigData config) {
         ValidateException.check(
                 Rule.of("DishIngredient.name").notNull(name).and(v -> v.notBlank(name)),
                 Rule.of("DishIngredient.filter").notNull(filter),
                 Rule.of("DishIngredient.quantity").notNull(quantity).and(v -> v.positiveValue(quantity)),
                 Rule.of("DishIngredient.repository").notNull(repository),
-                Rule.of("DishIngredient.user").notNull(user),
                 Rule.of("DishIngredient.config").notNull(config)
         );
 
@@ -81,7 +74,6 @@ public class DishIngredient {
         this.filter = filter;
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.repository = repository;
-        this.user = user;
         this.config = config;
 
         sort = Sort.products().asc("price");
@@ -101,14 +93,6 @@ public class DishIngredient {
      */
     public Filter getFilter() {
         return filter;
-    }
-
-    /**
-     * Возвращает кол-во данного ингредиента необходимого для приготовления одной порции блюда.
-     * @return кол-во данного ингредиента необходимого для приготовления одной порции блюда.
-     */
-    public BigDecimal getNecessaryQuantity() {
-        return quantity;
     }
 
     /**
@@ -204,8 +188,10 @@ public class DishIngredient {
         );
 
         Page<Product> page = repository.getProducts(
-                ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).
-                        setProductSort(sort)
+                new Criteria().
+                        setPageable(Pageable.ofIndex(5, productIndex)).
+                        setSort(sort).
+                        setFilter(filter)
         );
 
         Product product = null;
@@ -227,9 +213,7 @@ public class DishIngredient {
      * @return кол-во всех продуктов которые могут использоваться в качестве данноо ингредиента.
      */
     public int getProductsNumber() {
-        return repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).setFilter(filter)
-        );
+        return repository.getProductsNumber(new Criteria().setFilter(filter));
     }
 
     /**
@@ -240,7 +224,7 @@ public class DishIngredient {
      * @return суммарную цену всех продуктов которые могут использоваться в качестве данноо ингредиента.
      */
     public Optional<BigDecimal> getProductsPriceSum() {
-        return repository.getProductsSum(ProductSumCriteria.of(user, filter));
+        return repository.getProductsSum(new Criteria().setFilter(filter));
     }
 
     @Override
@@ -277,7 +261,6 @@ public class DishIngredient {
         private Filter filter;
         private BigDecimal quantity;
         private ProductRepository repository;
-        private User user;
         private AppConfigData config;
 
         public Builder() {
@@ -326,16 +309,6 @@ public class DishIngredient {
         }
 
         /**
-         * Устаналвивает ссылку на пользователя - владельца блюда для котороо создается данный ингредиент.
-         * @param user владелец блюда для котороо создается данный ингредиент.
-         * @return этот же объект.
-         */
-        public Builder setUser(User user) {
-            this.user = user;
-            return this;
-        }
-
-        /**
          * Устанавливает конфигурациооные данные всего приложения.
          * @param config конфигурациооные данные всего приложения.
          * @return этот же объект.
@@ -365,7 +338,6 @@ public class DishIngredient {
                     filter,
                     quantity,
                     repository,
-                    user,
                     config
             );
         }

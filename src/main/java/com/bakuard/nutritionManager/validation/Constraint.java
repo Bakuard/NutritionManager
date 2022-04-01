@@ -24,6 +24,7 @@ public enum Constraint {
     IS_BIG_DECIMAL,
     IS_LONG,
     IS_INTEGER,
+    IS_TRUE,
     DOES_NOT_THROW,
     DIFFERENT_SIGNS,
     CORRECT_JWS,

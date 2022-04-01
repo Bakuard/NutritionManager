@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.products.*;
@@ -349,7 +349,7 @@ public class ProductController {
                 page, size, userId, sortRule, onlyFridge,
                 category, shops, varieties, manufacturers, tags);
 
-        ProductCriteria criteria = mapper.toProductCriteria(
+        Criteria criteria = mapper.toProductCriteria(
                 page,
                 size,
                 userId,

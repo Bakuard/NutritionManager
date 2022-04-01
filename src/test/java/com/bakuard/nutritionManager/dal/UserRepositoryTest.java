@@ -126,7 +126,7 @@ class UserRepositoryTest {
         commit(() -> repository.save(expected));
 
         User actual = repository.getById(toUUID(1));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -146,14 +146,14 @@ class UserRepositoryTest {
     public void save5() {
         User user1 = createUser(1);
         User user2 = createUser(2);
-        User addedUser = createUser(3);
+        User expected = createUser(3);
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
-        commit(() -> repository.save(addedUser));
+        commit(() -> repository.save(expected));
 
-        User actualUser = repository.getById(toUUID(3));
-        Assertions.assertEquals(addedUser, actualUser);
+        User actual = repository.getById(toUUID(3));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -250,7 +250,8 @@ class UserRepositoryTest {
         expected.setName("new name");
         commit(() -> repository.save(expected));
 
-        Assertions.assertEquals(expected, repository.getById(toUUID(1)));
+        User actual =  repository.getById(toUUID(1));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -404,7 +405,7 @@ class UserRepositoryTest {
 
         User actual = repository.getById(toUUID(1));
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -452,7 +453,7 @@ class UserRepositoryTest {
 
         User actual = repository.getByName("User1");
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -500,7 +501,7 @@ class UserRepositoryTest {
 
         User actual = repository.getByEmail("user1@mail.com");
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
 

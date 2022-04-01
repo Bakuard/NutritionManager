@@ -1,11 +1,8 @@
 package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
-import com.bakuard.nutritionManager.dal.criteria.dishes.DishCriteria;
-import com.bakuard.nutritionManager.dal.criteria.dishes.DishFieldCriteria;
-import com.bakuard.nutritionManager.dal.criteria.dishes.DishFieldNumberCriteria;
-import com.bakuard.nutritionManager.dal.criteria.dishes.DishesNumberCriteria;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
@@ -40,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
 import static org.jooq.impl.DSL.*;
 
 public class DishRepositoryPostgres implements DishRepository {
@@ -61,7 +59,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public boolean save(Dish dish) {
         ValidateException.check(
-                Rule.of("DishRepositoryPostgres.dish").notNull(dish)
+                Rule.of("DishRepository.dish").notNull(dish)
         );
 
         Dish oldDish = getByIdOrReturnNull(dish.getId());
@@ -77,7 +75,7 @@ public class DishRepositoryPostgres implements DishRepository {
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save dish").
-                    addReason(Rule.of("DishRepositoryPostgres.dish").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("DishRepository.dish").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
         }
 
         return newData;
@@ -86,16 +84,16 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Dish remove(UUID dishId) {
         ValidateException.check(
-                "DishRepositoryPostgres.remove",
+                "DishRepository.remove",
                 "Fail to remove dish. Unknown dish with id=null",
-                Rule.of("DishRepositoryPostgres.dishId").notNull(dishId)
+                Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
         Dish dish = getByIdOrReturnNull(dishId);
 
         if(dish == null) {
             throw new ValidateException("Fail to remove dish. Unknown dish with id=" + dishId).
-                    addReason(Rule.of("DishRepositoryPostgres.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                    addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
         }
 
         statement.update(
@@ -109,32 +107,25 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Dish getById(UUID dishId) {
         ValidateException.check(
-                Rule.of("DishRepositoryPostgres.dishId").notNull(dishId)
+                Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
         Dish dish = getByIdOrReturnNull(dishId);
         if(dish == null) {
             throw new ValidateException("Fail to get dish by id=" + dishId).
-                    addReason(Rule.of("DishRepositoryPostgres.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                    addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
         }
 
         return dish;
     }
 
     @Override
-    public Page<Dish> getDishes(DishCriteria criteria) {
-        ValidateException.check(
-                Rule.of("DishRepositoryPostgres.criteria").notNull(criteria)
-        );
-
+    public Page<Dish> getDishes(Criteria criteria) {
+        int dishesNumber = getDishesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable().
-                createPageMetadata(getDishesNumber(criteria.getNumberCriteria()), 30);
+                createPageMetadata(dishesNumber, 30);
 
         if(metadata.isEmpty()) return Pageable.firstEmptyPage();
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getFilter().isPresent())
-            condition = condition.and(switchFilter(criteria.getFilter().get()));
 
         String query =
                 select(field("D.*"),
@@ -145,8 +136,8 @@ public class DishRepositoryPostgres implements DishRepository {
                         from(
                             select(field("*")).
                                 from("Dishes").
-                                where(condition).
-                                orderBy(getOrderFields(criteria.getDishSort(), "Dishes", true)).
+                                where(switchFilter(criteria.getFilter())).
+                                orderBy(getOrderFields(criteria.getSort(), "Dishes", true)).
                                 limit(inline(metadata.getActualSize())).
                                 offset(inline(metadata.getOffset())).
                                 asTable("{D}")
@@ -155,7 +146,7 @@ public class DishRepositoryPostgres implements DishRepository {
                             on(field("D.dishId").eq(field("DishTags.dishId"))).
                         leftJoin("DishIngredients").
                             on(field("D.dishId").eq(field("DishIngredients.dishId"))).
-                        orderBy(getOrderFields(criteria.getDishSort(), "D", false)).
+                        orderBy(getOrderFields(criteria.getSort(), "D", false)).
                         getSQL().
                         replace("\"{D}\"", "as D");
 
@@ -172,7 +163,7 @@ public class DishRepositoryPostgres implements DishRepository {
                             if (builder != null) result.add(builder.tryBuild());
                             builder = new Dish.Builder().
                                     setId(dishId).
-                                    setUser(criteria.getUser()).
+                                    setUser(criteria.getFilter().<UserFilter>findAny(USER).getUser()).
                                     setName(rs.getString("name")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
@@ -204,23 +195,18 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Page<Tag> getTags(DishFieldCriteria criteria) {
-        ValidateException.check(
-                Rule.of("DishRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<Tag> getTags(Criteria criteria) {
+        int tagsNumber = getTagsNumber(criteria);
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(tagsNumber, 200);
 
-        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
-                getTagsNumber(criteria.getNumberCriteria()), 200
-        );
         if(metadata.isEmpty()) return metadata.createPage(List.of());
-
-        Condition condition = userFilter(criteria.getUser());
 
         String query = selectDistinct(field("DishTags.tagValue")).
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 orderBy(field("DishTags.tagValue").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -243,21 +229,16 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Page<String> getUnits(DishFieldCriteria criteria) {
-        ValidateException.check(
-                Rule.of("DishRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<String> getUnits(Criteria criteria) {
+        int unitsNumber = getUnitsNumber(criteria);
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(unitsNumber, 200);
 
-        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
-                getUnitsNumber(criteria.getNumberCriteria()), 200
-        );
         if(metadata.isEmpty()) return metadata.createPage(List.of());
-
-        Condition condition = userFilter(criteria.getUser());
 
         String query = selectDistinct(field("Dishes.unit")).
                 from("Dishes").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 orderBy(field("Dishes.unit").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -280,36 +261,34 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public int getDishesNumber(DishesNumberCriteria criteria) {
+    public int getDishesNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("DishRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("DishRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getFilter().isPresent())
-            condition = condition.and(switchFilter(criteria.getFilter().get()));
 
         String query = selectCount().
                 from("Dishes").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
     }
 
     @Override
-    public int getTagsNumber(DishFieldNumberCriteria criteria) {
+    public int getTagsNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("DishRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("DishRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
 
         String query = select(countDistinct(field("DishTags.tagValue"))).
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -322,16 +301,16 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public int getUnitsNumber(DishFieldNumberCriteria criteria) {
+    public int getUnitsNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("DishRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("DishRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
 
         String query = select(countDistinct(field("Dishes.unit"))).
                 from("Dishes").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -406,7 +385,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
                         ps.setObject(1, dish.getId());
                         ps.setString(2, ingredient.getName());
-                        ps.setBigDecimal(3, ingredient.getNecessaryQuantity());
+                        ps.setBigDecimal(3, ingredient.getNecessaryQuantity(BigDecimal.ONE));
                         ps.setString(4, toJson(ingredient.getFilter()));
                         ps.setString(5, filterQuery);
                         ps.setInt(6, i);
@@ -501,7 +480,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
                         ps.setObject(1, newVersion.getId());
                         ps.setString(2, ingredient.getName());
-                        ps.setBigDecimal(3, ingredient.getNecessaryQuantity());
+                        ps.setBigDecimal(3, ingredient.getNecessaryQuantity(BigDecimal.ONE));
                         ps.setString(4, toJson(ingredient.getFilter()));
                         ps.setString(5, filterQuery);
                         ps.setInt(6, i);
@@ -593,6 +572,9 @@ public class DishRepositoryPostgres implements DishRepository {
             case INGREDIENTS -> {
                 return ingredientsFilter((AnyFilter) filter);
             }
+            case USER -> {
+                return userFilter((UserFilter) filter);
+            }
             default -> throw new UnsupportedOperationException(
                     "Unsupported operation for " + filter.getType() + " constraint");
         }
@@ -606,8 +588,8 @@ public class DishRepositoryPostgres implements DishRepository {
         return condition;
     }
 
-    private Condition userFilter(User user) {
-        return field("userId").eq(inline(user.getId()));
+    private Condition userFilter(UserFilter filter) {
+        return field("userId").eq(inline(filter.getUser().getId()));
     }
 
     private Condition minTagsFilter(MinTagsFilter filter) {
@@ -670,6 +652,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     case SHOPS -> result = toShopsFilter(parser);
                     case VARIETIES -> result = toVarietiesFilter(parser);
                     case MANUFACTURER -> result = toManufacturerFilter(parser);
+                    case USER -> result = toUserFilter(parser);
                 }
             }
         }
@@ -754,6 +737,26 @@ public class DishRepositoryPostgres implements DishRepository {
         return Filter.minTags(tags);
     }
 
+    private UserFilter toUserFilter(JsonParser parser) throws IOException {
+        User.Builder builder = new User.Builder();
+
+        parser.nextToken(); //BEGIN_ARRAY
+        while(parser.nextToken() != JsonToken.END_ARRAY) {
+            if(parser.currentToken() == JsonToken.FIELD_NAME) {
+                String fieldName = parser.getCurrentName();
+                switch(fieldName) {
+                    case "id" -> builder.setId(UUID.fromString(parser.nextTextValue()));
+                    case "name" -> builder.setName(parser.nextTextValue());
+                    case "email" -> builder.setEmail(parser.nextTextValue());
+                    case "passwordHash" -> builder.setPasswordHash(parser.nextTextValue());
+                    case "salt" -> builder.setSalt(parser.nextTextValue());
+                }
+            }
+        }
+
+        return Filter.user(builder.tryBuild());
+    }
+
 
     private String toJson(Filter filter) {
         try {
@@ -777,6 +780,7 @@ public class DishRepositoryPostgres implements DishRepository {
             case AND -> toJson((AndFilter) filter, writer);
             case MIN_TAGS -> toJson((MinTagsFilter) filter, writer);
             case CATEGORY, SHOPS, VARIETIES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
+            case USER -> toJson((UserFilter) filter, writer);
         }
     }
 
@@ -827,6 +831,27 @@ public class DishRepositoryPostgres implements DishRepository {
         writer.writeFieldName("values");
         writer.writeStartArray();
         for(Tag tag : filter.getTags()) writer.writeString(tag.getValue());
+        writer.writeEndArray();
+
+        writer.writeEndObject();
+    }
+
+    private void toJson(UserFilter filter, JsonGenerator writer) throws IOException {
+        writer.writeStartObject();
+
+        writer.writeStringField("type", filter.getType().name());
+
+        writer.writeFieldName("values");
+        writer.writeStartArray();
+
+        writer.writeStartObject();
+        writer.writeStringField("id", filter.getUser().getId().toString());
+        writer.writeStringField("name", filter.getUser().getName());
+        writer.writeStringField("email", filter.getUser().getEmail());
+        writer.writeStringField("passwordHash", filter.getUser().getPasswordHash());
+        writer.writeStringField("salt", filter.getUser().getSalt());
+        writer.writeEndObject();
+
         writer.writeEndArray();
 
         writer.writeEndObject();

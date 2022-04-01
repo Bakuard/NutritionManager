@@ -3,7 +3,6 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.criteria.products.*;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.Product;
@@ -135,7 +134,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
         Product actual = repository.getById(expected.getId());
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -167,7 +166,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
 
         Product actual = repository.getById(toUUID(3));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -235,7 +234,8 @@ class ProductRepositoryTest {
         expected.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
         commit(() -> repository.save(expected));
 
-        Assertions.assertTrue(expected.equalsFullState(repository.getById(toUUID(1))));
+        Product actual = repository.getById(toUUID(1));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -304,15 +304,14 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user).setPrice(new BigDecimal("115.12")).tryBuild();
         Product product2 = createProduct(2, user).setUnit("unitB").tryBuild();
-        Product expectedProduct = new Product(product1);
+        Product expected = new Product(product1);
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
         commit(() -> repository.save(product1));
 
-        Assertions.assertTrue(
-                expectedProduct.equalsFullState(repository.getById(toUUID(1)))
-        );
+        Product actual = repository.getById(toUUID(1));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -363,7 +362,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
         Product actual = commit(() -> repository.remove(toUUID(1)));
 
-        Assertions.assertTrue(expected.equalsFullState(actual));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -397,7 +396,7 @@ class ProductRepositoryTest {
 
         Product actual = commit(() -> repository.getById(toUUID(1)));
 
-        Assertions.assertTrue(expected.equalsFullState(actual));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -425,7 +424,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(0, actual);
@@ -443,7 +442,13 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).setOnlyFridge(true)
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO)
+                                )
+                        )
         );
 
         Assertions.assertEquals(3, actual);
@@ -461,7 +466,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).setOnlyFridge(false)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(6, actual);
@@ -479,8 +484,13 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user1).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user2).
-                        setFilter(Filter.minTags(new Tag("common tag")))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user2),
+                                        Filter.minTags(new Tag("common tag"))
+                                )
+                        )
         );
 
         Assertions.assertEquals(0, actual);
@@ -503,10 +513,11 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(true).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -531,11 +542,12 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
-                        setFilter(
-                                Filter.minTags(new Tag("common tag"))
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.minTags(new Tag("common tag")),
+                                Filter.user(user)
                         )
+                )
         );
 
         Assertions.assertEquals(6, actual);
@@ -554,10 +566,13 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(true).
+                new Criteria().
                         setFilter(
-                                Filter.anyShop("shop C")
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO),
+                                        Filter.anyShop("shop C")
+                                )
                         )
         );
 
@@ -579,10 +594,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.anyCategory("name B"),
                                         Filter.anyVariety("variety C")
                                 )
@@ -609,10 +624,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(true).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("this tag not exists")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -641,10 +656,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("this name not exists"),
                                         Filter.anyShop("shop C"),
@@ -673,10 +688,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(true).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("this shop not exists"),
@@ -705,10 +720,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -737,10 +752,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -770,10 +785,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -804,10 +819,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -837,10 +852,10 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -878,11 +893,11 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -890,6 +905,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -928,11 +944,12 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(true).
+                new Criteria().
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
+                                                Filter.user(user),
+                                                Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -940,6 +957,8 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
+                                                Filter.user(user),
+                                                Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
@@ -977,11 +996,11 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).
-                        setOnlyFridge(false).
+                new Criteria().
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -989,6 +1008,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1011,8 +1031,6 @@ class ProductRepositoryTest {
     void getProducts1() {
         AssertUtil.assertValidateException(
                 () -> repository.getProducts(null),
-                ProductRepositoryPostgres.class,
-                "getProducts",
                 Constraint.NOT_NULL
         );
     }
@@ -1031,10 +1049,9 @@ class ProductRepositoryTest {
         Page<Product> expected = Pageable.firstEmptyPage();
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(6, 0),
-                        user2
-                )
+                new Criteria().
+                        setPageable(Pageable.of(6, 0)).
+                        setFilter(Filter.user(user2))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1057,10 +1074,10 @@ class ProductRepositoryTest {
                 createPage(products.subList(0, 5));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(5, 0),
-                        user
-                ).setOnlyFridge(false)
+                new Criteria().
+                        setPageable(Pageable.of(5, 0)).
+                        setFilter(Filter.user(user)).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1083,10 +1100,10 @@ class ProductRepositoryTest {
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(5, 1),
-                        user
-                ).setOnlyFridge(false)
+                new Criteria().
+                        setPageable(Pageable.of(5, 1)).
+                        setFilter(Filter.user(user)).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1109,10 +1126,15 @@ class ProductRepositoryTest {
                 createPage(products.subList(3, 5));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(2, 0),
-                        user
-                ).setOnlyFridge(true)
+                new Criteria().
+                        setPageable(Pageable.of(2, 0)).
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO)
+                                )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1135,10 +1157,15 @@ class ProductRepositoryTest {
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(2, 1),
-                        user
-                ).setOnlyFridge(true)
+                new Criteria().
+                        setPageable(Pageable.of(2, 1)).
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO)
+                                )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1155,11 +1182,14 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(6, 0),
-                        user).
-                        setOnlyFridge(false).
-                        setFilter(Filter.minTags(new Tag("common tag")))
+                new Criteria().
+                        setPageable(Pageable.of(6, 0)).
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("common tag"))
+                                )
+                        )
         );
 
         Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
@@ -1186,18 +1216,18 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(1, 0),
-                        user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(1, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("tag B"), new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
                                         Filter.anyVariety("variety D")
                                 )
-                        )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1218,12 +1248,17 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(6, 0),
-                        user).
-                        setOnlyFridge(true).
+                new Criteria().
+                        setPageable(Pageable.of(6, 0)).
                         setFilter(
-                                Filter.minTags(new Tag("tag A"), new Tag("common tag"))
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO),
+                                        Filter.minTags(new Tag("tag A"), new Tag("common tag")),
+                                        Filter.anyCategory("name B"),
+                                        Filter.anyShop("shop C"),
+                                        Filter.anyVariety("variety D")
+                                )
                         )
         );
 
@@ -1251,18 +1286,18 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(2, 0),
-                        user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("tag A"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyVariety("variety A")
                                 )
-                        )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1287,12 +1322,11 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(2, 0),
-                        user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("tag Z"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop Z"),
@@ -1323,16 +1357,17 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(3, 0),
-                        user).
-                        setOnlyFridge(true).
+                new Criteria().
+                        setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C")
                                 )
-                        )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1356,12 +1391,12 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(2, 0),
-                        user).
-                        setOnlyFridge(true).
+                new Criteria().
+                        setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop Z"),
                                         Filter.anyVariety("variety A")
@@ -1391,12 +1426,12 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(2, 0),
-                        user).
-                        setOnlyFridge(true).
+                new Criteria().
+                        setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
+                                        Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1428,17 +1463,17 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(3, 0),
-                        user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyShop("shop A"),
                                         Filter.anyVariety("variety A")
                                 )
-                        )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1463,12 +1498,11 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                        Pageable.of(3, 0),
-                        user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common Z")),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop A"),
@@ -1501,12 +1535,11 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                                Pageable.of(6, 0),
-                                user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(6, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -1542,19 +1575,19 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                                Pageable.of(2, 0),
-                                user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyVariety("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
-                        )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1580,12 +1613,11 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                                Pageable.of(2, 0),
-                                user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
+                                        Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1625,13 +1657,12 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                                Pageable.of(5, 0),
-                                user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown name"),
                                                 Filter.anyShop("unknown shop"),
@@ -1639,6 +1670,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1646,7 +1678,8 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
-                        )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Page<Product> expected = Pageable.of(5, 0).
@@ -1682,13 +1715,13 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                                Pageable.of(5, 0),
-                                user).
-                        setOnlyFridge(true).
+                new Criteria().
+                        setPageable(Pageable.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
+                                                Filter.user(user),
+                                                Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -1696,6 +1729,8 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
+                                                Filter.user(user),
+                                                Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
@@ -1703,7 +1738,8 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
-                        )
+                        ).
+                        setSort(Sort.productDefaultSort())
         );
 
         Page<Product> expected = Pageable.of(5, 0).
@@ -1736,17 +1772,17 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                                Pageable.of(5, 0),
-                                user).
-                        setOnlyFridge(false).
+                new Criteria().
+                        setPageable(Pageable.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyManufacturer("manufacturer B")
                                         ),
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1754,7 +1790,8 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
-                        ).setProductSort(
+                        ).
+                        setSort(
                                 Sort.products().desc("price")
                         )
         );
@@ -1798,13 +1835,12 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
-                ProductCriteria.of(
-                                Pageable.of(5, 0),
-                                user).
-                        setOnlyFridge(true).
+                new Criteria().
+                        setPageable(Pageable.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -1812,6 +1848,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
+                                                Filter.user(user),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
@@ -1850,7 +1887,9 @@ class ProductRepositoryTest {
     void getTagsNumber2() {
         User user = createAndSaveUser(1);
 
-        int actual = repository.getTagsNumber(ProductFieldNumberCriteria.of(user));
+        int actual = repository.getTagsNumber(
+                new Criteria().setFilter(Filter.user(user))
+        );
 
         Assertions.assertEquals(0, actual);
     }
@@ -1866,7 +1905,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
-        int actual = repository.getTagsNumber(ProductFieldNumberCriteria.of(user));
+        int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user)));
 
         Assertions.assertEquals(9, actual);
     }
@@ -1883,8 +1922,12 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getTagsNumber(
-                ProductFieldNumberCriteria.of(user).
-                        setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user),
+                                Filter.anyCategory("name A")
+                        )
+                )
         );
 
         Assertions.assertEquals(5, actual);
@@ -1901,8 +1944,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.getTags(null),
-                ProductRepositoryPostgres.class,
-                "getTags",
                 Constraint.NOT_NULL
         );
     }
@@ -1917,10 +1958,9 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         Page<Tag> actual = repository.getTags(
-                ProductFieldCriteria.of(
-                        Pageable.of(5, 0),
-                        user
-                )
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
@@ -1942,10 +1982,9 @@ class ProductRepositoryTest {
                 createPage(createTags().subList(0, 5));
 
         Page<Tag> actual = repository.getTags(
-                ProductFieldCriteria.of(
-                    Pageable.of(5, 0),
-                    user
-                )
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1967,10 +2006,9 @@ class ProductRepositoryTest {
                 createPage(createTags().subList(8, 9));
 
         Page<Tag> actual = repository.getTags(
-                ProductFieldCriteria.of(
-                    Pageable.of(4, 2),
-                    user
-                )
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(4, 2))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1998,10 +2036,14 @@ class ProductRepositoryTest {
                 ));
 
         Page<Tag> actual = repository.getTags(
-                ProductFieldCriteria.of(
-                        Pageable.of(5, 0),
-                        user
-                ).setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        ).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2025,10 +2067,14 @@ class ProductRepositoryTest {
                 ));
 
         Page<Tag> actual = repository.getTags(
-                ProductFieldCriteria.of(
-                        Pageable.of(4, 1),
-                        user
-                ).setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        ).
+                        setPageable(Pageable.of(4, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2059,7 +2105,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getShopsNumber(
-                ProductFieldNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2077,7 +2123,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getShopsNumber(
-                ProductFieldNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(3, actual);
@@ -2095,7 +2141,13 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getShopsNumber(
-                ProductFieldNumberCriteria.of(user).setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        )
         );
 
         Assertions.assertEquals(2, actual);
@@ -2110,8 +2162,6 @@ class ProductRepositoryTest {
     void getShops1() {
         AssertUtil.assertValidateException(
                 () -> repository.getShops(null),
-                ProductRepositoryPostgres.class,
-                "getShops",
                 Constraint.NOT_NULL
         );
     }
@@ -2127,7 +2177,9 @@ class ProductRepositoryTest {
         Page<String> expected = Pageable.firstEmptyPage();
 
         Page<String> actual = repository.getShops(
-                ProductFieldCriteria.of(Pageable.of(5, 0), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2148,7 +2200,9 @@ class ProductRepositoryTest {
                 createPage(List.of("shop A", "shop B", "shop C"));
 
         Page<String> actual = repository.getShops(
-                ProductFieldCriteria.of(Pageable.of(3, 0), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(3, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2169,7 +2223,9 @@ class ProductRepositoryTest {
                 createPage(List.of("shop C"));
 
         Page<String> actual = repository.getShops(
-                ProductFieldCriteria.of(Pageable.of(2, 1), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(2, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2190,8 +2246,14 @@ class ProductRepositoryTest {
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
-                ProductFieldCriteria.of(Pageable.of(2, 0), user).
-                        setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        ).
+                        setPageable(Pageable.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2212,8 +2274,14 @@ class ProductRepositoryTest {
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
-                ProductFieldCriteria.of(Pageable.of(5, 0), user).
-                        setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        ).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2244,7 +2312,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getVarietiesNumber(
-                ProductFieldNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2262,7 +2330,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getVarietiesNumber(
-                ProductFieldNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(4, actual);
@@ -2280,7 +2348,13 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getVarietiesNumber(
-                ProductFieldNumberCriteria.of(user).setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        )
         );
 
         Assertions.assertEquals(2, actual);
@@ -2295,8 +2369,6 @@ class ProductRepositoryTest {
     void getVarieties1() {
         AssertUtil.assertValidateException(
                 () -> repository.getVarieties(null),
-                ProductRepositoryPostgres.class,
-                "getVarieties",
                 Constraint.NOT_NULL
         );
     }
@@ -2312,7 +2384,9 @@ class ProductRepositoryTest {
         Page<String> expected = Pageable.firstEmptyPage();
 
         Page<String> actual = repository.getVarieties(
-                ProductFieldCriteria.of(Pageable.of(5, 0), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2333,7 +2407,9 @@ class ProductRepositoryTest {
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
 
         Page<String> actual = repository.getVarieties(
-                ProductFieldCriteria.of(Pageable.of(4, 0), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(4, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2354,7 +2430,9 @@ class ProductRepositoryTest {
                 createPage(List.of("variety D"));
 
         Page<String> actual = repository.getVarieties(
-                ProductFieldCriteria.of(Pageable.of(3, 1), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(3, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2375,8 +2453,14 @@ class ProductRepositoryTest {
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getVarieties(
-                ProductFieldCriteria.of(Pageable.of(2, 0), user).
-                        setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        ).
+                        setPageable(Pageable.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2397,8 +2481,14 @@ class ProductRepositoryTest {
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getVarieties(
-                ProductFieldCriteria.of(Pageable.of(4, 0), user).
-                        setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        ).
+                        setPageable(Pageable.of(4, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2429,7 +2519,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getCategoriesNumber(
-                ProductCategoryNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2446,7 +2536,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getCategoriesNumber(
-                ProductCategoryNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2461,8 +2551,6 @@ class ProductRepositoryTest {
     void getCategories1() {
         AssertUtil.assertValidateException(
                 () -> repository.getCategories(null),
-                ProductRepositoryPostgres.class,
-                "getCategories",
                 Constraint.NOT_NULL
         );
     }
@@ -2478,9 +2566,9 @@ class ProductRepositoryTest {
         Page<String> expected = Pageable.firstEmptyPage();
 
         Page<String> actual = repository.getCategories(
-                ProductCategoryCriteria.of(
-                        Pageable.of(2, 0), user
-                )
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2501,9 +2589,9 @@ class ProductRepositoryTest {
                 createPage(List.of("name A", "name B"));
 
         Page<String> actual = repository.getCategories(
-                ProductCategoryCriteria.of(
-                        Pageable.of(5, 0), user
-                )
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2524,9 +2612,9 @@ class ProductRepositoryTest {
                 createPage(List.of("name B"));
 
         Page<String> actual = repository.getCategories(
-                ProductCategoryCriteria.of(
-                        Pageable.of(1, 1), user
-                )
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(1, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2557,7 +2645,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getManufacturersNumber(
-                ProductFieldNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2575,7 +2663,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getManufacturersNumber(
-                ProductFieldNumberCriteria.of(user)
+                new Criteria().setFilter(Filter.user(user))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2593,7 +2681,13 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getManufacturersNumber(
-                ProductFieldNumberCriteria.of(user).setProductCategory(Filter.anyCategory("name B"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name B")
+                                )
+                        )
         );
 
         Assertions.assertEquals(2, actual);
@@ -2608,8 +2702,6 @@ class ProductRepositoryTest {
     void getManufacturers1() {
         AssertUtil.assertValidateException(
                 () -> repository.getManufacturers(null),
-                ProductRepositoryPostgres.class,
-                "getManufacturers",
                 Constraint.NOT_NULL
         );
     }
@@ -2625,7 +2717,9 @@ class ProductRepositoryTest {
         Page<String> expected = Pageable.firstEmptyPage();
 
         Page<String> actual = repository.getManufacturers(
-                ProductFieldCriteria.of(Pageable.of(5, 0), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2646,7 +2740,9 @@ class ProductRepositoryTest {
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
-                ProductFieldCriteria.of(Pageable.of(2, 0), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2667,7 +2763,9 @@ class ProductRepositoryTest {
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
-                ProductFieldCriteria.of(Pageable.of(5, 0), user)
+                new Criteria().
+                        setFilter(Filter.user(user)).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2688,8 +2786,14 @@ class ProductRepositoryTest {
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
-                ProductFieldCriteria.of(Pageable.of(2, 0), user).
-                        setProductCategory(Filter.anyCategory("name B"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name B")
+                                )
+                        ).
+                        setPageable(Pageable.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2710,8 +2814,14 @@ class ProductRepositoryTest {
                 createPage(List.of("manufacturer A"));
 
         Page<String> actual = repository.getManufacturers(
-                ProductFieldCriteria.of(Pageable.of(5, 0), user).
-                        setProductCategory(Filter.anyCategory("name A"))
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A")
+                                )
+                        ).
+                        setPageable(Pageable.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2746,14 +2856,15 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("unknown tag")),
-                                Filter.anyShop("unknown shop"),
-                                Filter.anyManufacturer("manufacturer A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("unknown tag")),
+                                        Filter.anyShop("unknown shop"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2774,15 +2885,16 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.anyCategory("unknown name"),
-                                Filter.anyShop("shop A"),
-                                Filter.anyVariety("variety A"),
-                                Filter.anyManufacturer("manufacturer A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("unknown name"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2802,14 +2914,15 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("unknown tag")),
-                                Filter.anyCategory("name A"),
-                                Filter.anyVariety("variety A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("unknown tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyVariety("variety A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2831,16 +2944,17 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("tag A")),
-                                Filter.anyCategory("name A"),
-                                Filter.anyShop("unknown shop"),
-                                Filter.anyVariety("unknown variety"),
-                                Filter.anyManufacturer("unknown manufacturer")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("unknown shop"),
+                                        Filter.anyVariety("unknown variety"),
+                                        Filter.anyManufacturer("unknown manufacturer")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2860,14 +2974,15 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("tag A")),
-                                Filter.anyShop("shop A"),
-                                Filter.anyVariety("unknown variety")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("unknown variety")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2886,13 +3001,14 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("tag A")),
-                                Filter.anyCategory("unknown name")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("unknown name")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2912,14 +3028,15 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("unknown tag")),
-                                Filter.anyVariety("variety A"),
-                                Filter.anyManufacturer("unknown manufacturer")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("unknown tag")),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("unknown manufacturer")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2939,14 +3056,15 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.anyCategory("name A"),
-                                Filter.anyShop("shop A"),
-                                Filter.anyVariety("variety A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("variety A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isPresent());
@@ -2968,15 +3086,16 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("tag A")),
-                                Filter.anyCategory("unknown name"),
-                                Filter.anyShop("unknown shop"),
-                                Filter.anyVariety("variety A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("unknown name"),
+                                        Filter.anyShop("unknown shop"),
+                                        Filter.anyVariety("variety A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -2998,16 +3117,17 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("unknown tag")),
-                                Filter.anyCategory("unknown name"),
-                                Filter.anyShop("shop A"),
-                                Filter.anyVariety("unknown variety"),
-                                Filter.anyManufacturer("manufacturer A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("unknown tag")),
+                                        Filter.anyCategory("unknown name"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyVariety("unknown variety"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -3027,14 +3147,15 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("tag A")),
-                                Filter.anyCategory("name A"),
-                                Filter.anyManufacturer("manufacturer A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("tag A")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isPresent());
@@ -3054,13 +3175,14 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.anyVariety("variety A"),
-                                Filter.anyManufacturer("manufacturer A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyVariety("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isPresent());
@@ -3082,15 +3204,16 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.anyCategory("name A"),
-                                Filter.anyShop("unknown shop"),
-                                Filter.anyVariety("unknown variety"),
-                                Filter.anyManufacturer("manufacturer A")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("unknown shop"),
+                                        Filter.anyVariety("unknown variety"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -3107,10 +3230,13 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.anyShop("shop A")
-                )
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.anyShop("shop A")
+                                )
+                        )
         );
 
         Assertions.assertTrue(actual.isPresent());
@@ -3132,15 +3258,16 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.and(
-                                Filter.minTags(new Tag("unknown tag")),
-                                Filter.anyCategory("unknown name"),
-                                Filter.anyShop("unknown shop"),
-                                Filter.anyManufacturer("unknown manufacturer")
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user),
+                                        Filter.minTags(new Tag("unknown tag")),
+                                        Filter.anyCategory("unknown name"),
+                                        Filter.anyShop("unknown shop"),
+                                        Filter.anyManufacturer("unknown manufacturer")
+                                )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());
@@ -3169,25 +3296,27 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.minTags(new Tag("unknown tag")),
-                                        Filter.anyCategory("unknown category"),
-                                        Filter.anyShop("unknown shops"),
-                                        Filter.anyVariety("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
-                                ),
-                                Filter.and(
-                                        Filter.minTags(new Tag("tag A")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
+                new Criteria().
+                        setFilter(
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.user(user),
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown category"),
+                                                Filter.anyShop("unknown shops"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
+                                        ),
+                                        Filter.and(
+                                                Filter.user(user),
+                                                Filter.minTags(new Tag("tag A")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
+                                        )
                                 )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isPresent());
@@ -3217,25 +3346,27 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         Optional<BigDecimal> actual = repository.getProductsSum(
-                ProductSumCriteria.of(
-                        user,
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.minTags(new Tag("unknown tag")),
-                                        Filter.anyCategory("unknown category"),
-                                        Filter.anyShop("unknown shops"),
-                                        Filter.anyVariety("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
-                                ),
-                                Filter.and(
-                                        Filter.minTags(new Tag("tag A")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyVariety("unknown variety"),
-                                        Filter.anyManufacturer("unknown manufacturer")
+                new Criteria().
+                        setFilter(
+                                Filter.orElse(
+                                        Filter.and(
+                                                Filter.user(user),
+                                                Filter.minTags(new Tag("unknown tag")),
+                                                Filter.anyCategory("unknown category"),
+                                                Filter.anyShop("unknown shops"),
+                                                Filter.anyVariety("variety A"),
+                                                Filter.anyManufacturer("manufacturer A")
+                                        ),
+                                        Filter.and(
+                                                Filter.user(user),
+                                                Filter.minTags(new Tag("tag A")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop A"),
+                                                Filter.anyVariety("unknown variety"),
+                                                Filter.anyManufacturer("unknown manufacturer")
+                                        )
                                 )
                         )
-                )
         );
 
         Assertions.assertTrue(actual.isEmpty());

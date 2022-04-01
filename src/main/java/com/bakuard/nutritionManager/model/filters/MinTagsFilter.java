@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import java.util.List;
 import java.util.Objects;
 
-public class MinTagsFilter implements Filter {
+public class MinTagsFilter extends AbstractFilter {
 
     private final ImmutableSortedSet<Tag> tags;
 

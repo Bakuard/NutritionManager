@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
-public class OrElseFilter implements Filter {
+public class OrElseFilter extends AbstractFilter {
 
     private final ImmutableList<Filter> operands;
 

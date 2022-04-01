@@ -2,15 +2,15 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.products.*;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.Constraint;
-import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
+import com.bakuard.nutritionManager.validation.Constraint;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
 
 import com.google.common.collect.Sets;
 
@@ -18,6 +18,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.jooq.impl.DSL.*;
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
 
 public class ProductRepositoryPostgres implements ProductRepository {
 
@@ -48,7 +50,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public boolean save(Product product) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.product").notNull(product)
+                Rule.of("ProductRepository.product").notNull(product)
         );
 
         Product oldProduct = getByIdOrReturnNull(product.getId());
@@ -64,7 +66,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save product").
-                    addReason(Rule.of("ProductRepositoryPostgres.product").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("ProductRepository.product").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
         }
 
         return newData;
@@ -73,14 +75,14 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Product remove(UUID productId) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.productId").notNull(productId)
+                Rule.of("ProductRepository.productId").notNull(productId)
         );
 
         Product product = getByIdOrReturnNull(productId);
 
         if(product == null) {
             throw new ValidateException("Fail to remove product. Unknown product with id=" + productId).
-                    addReason(Rule.of("ProductRepositoryPostgres.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                    addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
         }
 
         statement.update(
@@ -94,43 +96,43 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Product getById(UUID productId) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.productId").notNull(productId)
+                Rule.of("ProductRepository.productId").notNull(productId)
         );
 
         Product product = getByIdOrReturnNull(productId);
         if(product == null) {
             throw new ValidateException("Fail to get product by id").
-                    addReason(Rule.of("ProductRepositoryPostgres.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                    addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
         }
 
         return product;
     }
 
     @Override
-    public Page<Product> getProducts(ProductCriteria criteria) {
-        ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<Product> getProducts(Criteria criteria) {
+        int productsNumber = getProductsNumber(criteria);
+        Page.Metadata metadata = criteria.tryGetPageable().
+                createPageMetadata(productsNumber, 30);
 
-        Page.Metadata metadata = criteria.getPageable().
-                createPageMetadata(getProductsNumber(criteria.getNumberCriteria()), 30);
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.isOnlyFridge())
-            condition = condition.and(onlyFridgeFilter());
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         List<Condition> conditions = List.of();
         List<String> fieldsName = new ArrayList<>();
         List<Field<?>> fields = new ArrayList<>();
         fields.add(field("*"));
-        if(criteria.getFilter().isPresent()) {
-            conditions = splitFilter(criteria.getFilter().get());
+        if(criteria.getFilter() != null) {
+            conditions = splitFilter(criteria.getFilter());
             for(int i = 0; i < conditions.size(); i++) {
                 String fieldName = "condition" + i;
                 fieldsName.add(fieldName);
                 fields.add(field("(" + conditions.get(i) + ") as " + fieldName));
             }
         }
+
+        Condition condition = fieldsName.stream().
+                map(field -> field(field).isTrue()).
+                reduce(Condition::or).
+                orElseThrow();
 
         String query =
             select(field("*")).
@@ -142,14 +144,14 @@ public class ProductRepositoryPostgres implements ProductRepository {
                                 asTable("{LabeledProducts}")
                         ).
                         where(condition).
-                        orderBy(getOrderFields(fieldsName, criteria.getProductSort(), "LabeledProducts")).
+                        orderBy(getOrderFields(fieldsName, criteria.tryGetSort(), "LabeledProducts")).
                         limit(inline(metadata.getActualSize())).
                         offset(inline(metadata.getOffset())).
                         asTable("{P}")
                 ).
                 leftJoin("ProductTags").
                     on(field("P.productId").eq(field("ProductTags.productId"))).
-                orderBy(getOrderFields(fieldsName, criteria.getProductSort(), "P")).
+                orderBy(getOrderFields(fieldsName, criteria.tryGetSort(), "P")).
                 getSQL().
                 replace("\"{P}\"", "as P").//Этот костыль исправляет странное поведение JOOQ в конструкциях asTable()
                 replace("\"{LabeledProducts}\"", "as LabeledProducts");
@@ -168,7 +170,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                             builder = new Product.Builder().
                                     setAppConfiguration(appConfig).
                                     setId(productId).
-                                    setUser(criteria.getUser()).
+                                    setUser(criteria.getFilter().<UserFilter>findAny(USER).getUser()).
                                     setCategory(rs.getString("category")).
                                     setShop(rs.getString("shop")).
                                     setVariety(rs.getString("variety")).
@@ -196,25 +198,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Page<Tag> getTags(ProductFieldCriteria criteria) {
-        ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<Tag> getTags(Criteria criteria) {
+        int tagsNumber = getTagsNumber(criteria);
+        Page.Metadata metadata = criteria.tryGetPageable().
+                createPageMetadata(tagsNumber, 1000);
 
-        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
-                getTagsNumber(criteria.getNumberCriteria()), 1000
-        );
         if(metadata.isEmpty()) return metadata.createPage(List.of());
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("ProductTags.tagValue")).
                 from("ProductTags").
                 join("Products").
                     on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 orderBy(field("ProductTags.tagValue").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -237,23 +232,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Page<String> getShops(ProductFieldCriteria criteria) {
-        ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<String> getShops(Criteria criteria) {
+        int shopsNumber = getShopsNumber(criteria);
+        Page.Metadata metadata = criteria.tryGetPageable().
+                createPageMetadata(shopsNumber, 1000);
 
-        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
-                getShopsNumber(criteria.getNumberCriteria()), 1000
-        );
         if(metadata.isEmpty()) return metadata.createPage(List.of());
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("Products.shop")).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.tryGetFilter())).
                 orderBy(field("Products.shop").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -276,23 +264,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Page<String> getVarieties(ProductFieldCriteria criteria) {
-        ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<String> getVarieties(Criteria criteria) {
+        int varietiesNumber = getVarietiesNumber(criteria);
+        Page.Metadata metadata = criteria.tryGetPageable().
+                createPageMetadata(varietiesNumber, 1000);
 
-        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
-                getVarietiesNumber(criteria.getNumberCriteria()), 1000
-        );
         if(metadata.isEmpty()) return metadata.createPage(List.of());
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("Products.variety")).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.tryGetFilter())).
                 orderBy(field("Products.variety").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -315,21 +296,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Page<String> getCategories(ProductCategoryCriteria criteria) {
-        ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<String> getCategories(Criteria criteria) {
+        int categoriesNumber = getCategoriesNumber(criteria);
+        Page.Metadata metadata = criteria.tryGetPageable().
+                createPageMetadata(categoriesNumber, 1000);
 
-        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
-                getCategoriesNumber(criteria.getNumberCriteria()), 1000
-        );
         if(metadata.isEmpty()) return metadata.createPage(List.of());
-
-        Condition condition = userFilter(criteria.getUser());
 
         String query = selectDistinct(field("Products.category")).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.tryGetFilter())).
                 orderBy(field("Products.category").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -352,23 +328,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Page<String> getManufacturers(ProductFieldCriteria criteria) {
-        ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
-        );
+    public Page<String> getManufacturers(Criteria criteria) {
+        int manufacturersNumber = getManufacturersNumber(criteria);
+        Page.Metadata metadata = criteria.tryGetPageable().
+                createPageMetadata(manufacturersNumber, 1000);
 
-        Page.Metadata metadata = criteria.getPageable().createPageMetadata(
-                getManufacturersNumber(criteria.getNumberCriteria()), 1000
-        );
         if(metadata.isEmpty()) return metadata.createPage(List.of());
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = selectDistinct(field("Products.manufacturer")).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.tryGetFilter())).
                 orderBy(field("Products.manufacturer").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -391,40 +360,34 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getProductsNumber(ProductsNumberCriteria criteria) {
+    public int getProductsNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("ProductRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.isOnlyFridge())
-            condition = condition.and(onlyFridgeFilter());
-        if(criteria.getFilter().isPresent())
-            condition = condition.and(switchFilter(criteria.getFilter().get()));
 
         String query = selectCount().
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
     }
 
     @Override
-    public int getTagsNumber(ProductFieldNumberCriteria criteria) {
+    public int getTagsNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("ProductRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("ProductTags.tagValue"))).
                 from("ProductTags").
                 join("Products").
                 on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -437,18 +400,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getShopsNumber(ProductFieldNumberCriteria criteria) {
+    public int getShopsNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("ProductRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("Products.shop"))).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -461,18 +422,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getVarietiesNumber(ProductFieldNumberCriteria criteria) {
+    public int getVarietiesNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("ProductRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("Products.variety"))).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -485,16 +444,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getCategoriesNumber(ProductCategoryNumberCriteria criteria) {
+    public int getCategoriesNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("ProductRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER))).
+                        and(r -> r.isTrue(criteria.getFilter().containsOnly(USER)))
+                        
         );
-
-        Condition condition = userFilter(criteria.getUser());
 
         String query = select(countDistinct(field("Products.category"))).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -507,18 +468,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getManufacturersNumber(ProductFieldNumberCriteria criteria) {
+    public int getManufacturersNumber(Criteria criteria) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("ProductRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser());
-        if(criteria.getProductCategory().isPresent())
-            condition = condition.and(categoryFilter(criteria.getProductCategory().get()));
 
         String query = select(countDistinct(field("Products.manufacturer"))).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -531,17 +490,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Optional<BigDecimal> getProductsSum(ProductSumCriteria criteria) {
+    public Optional<BigDecimal> getProductsSum(Criteria criteria) {
         ValidateException.check(
-                Rule.of("ProductRepositoryPostgres.criteria").notNull(criteria)
+                Rule.of("ProductRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
-
-        Condition condition = userFilter(criteria.getUser()).
-                and(switchFilter(criteria.getFilter()));
 
         String query = select(sum(field("price", BigDecimal.class)).as("totalPrice")).
                 from("Products").
-                where(condition).
+                where(switchFilter(criteria.getFilter())).
                 getSQL();
 
         return Optional.ofNullable(
@@ -773,6 +731,12 @@ public class ProductRepositoryPostgres implements ProductRepository {
                         map(this::switchFilter).
                         toList();
             }
+            case USER -> {
+                return List.of(userFilter((UserFilter) filter));
+            }
+            case MIN_QUANTITY -> {
+                return List.of(quantityFilter((QuantityFilter) filter));
+            }
             default -> throw new UnsupportedOperationException(
                     "Unsupported operation for " + filter.getType() + " constraint");
         }
@@ -800,6 +764,12 @@ public class ProductRepositoryPostgres implements ProductRepository {
             }
             case OR_ELSE -> {
                 return orElseFilter((OrElseFilter) filter);
+            }
+            case USER -> {
+                return userFilter((UserFilter) filter);
+            }
+            case MIN_QUANTITY -> {
+                return quantityFilter((QuantityFilter) filter);
             }
             default -> throw new UnsupportedOperationException(
                         "Unsupported operation for " + filter.getType() + " constraint");
@@ -858,12 +828,29 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
-    private Condition userFilter(User user) {
-        return field("userId").eq(inline(user.getId()));
+    private Condition userFilter(UserFilter filter) {
+        return field("userId").eq(inline(filter.getUser().getId()));
     }
 
-    private Condition onlyFridgeFilter() {
-        return field("quantity").greaterThan(inline(BigDecimal.ZERO));
+    private Condition quantityFilter(QuantityFilter filter) {
+        switch(filter.getRelative()) {
+            case LESS -> {
+                return field("quantity").lessThan(inline(filter.getQuantity()));
+            }
+            case LESS_OR_EQUAL -> {
+                return field("quantity").lessOrEqual(inline(filter.getQuantity()));
+            }
+            case GREATER -> {
+                return field("quantity").greaterThan(inline(filter.getQuantity()));
+            }
+            case GREATER_OR_EQUAL -> {
+                return field("quantity").greaterOrEqual(inline(filter.getQuantity()));
+            }
+            case EQUAL -> {
+                return field("quantity").eq(inline(filter.getQuantity()));
+            }
+            default -> throw new UnsupportedOperationException("Unknown relative = " + filter.getRelative());
+        }
     }
 
 

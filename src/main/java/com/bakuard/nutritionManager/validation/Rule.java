@@ -774,6 +774,27 @@ public class Rule {
         );
     }
 
+    public Result isTrue(boolean checkedValue) {
+        return isTrue(checkedValue, null);
+    }
+
+    public Result isTrue(boolean checkedValue, String field) {
+        Result.State state = Result.State.of(checkedValue);
+        String logMessage = null;
+
+        if(state == Result.State.FAIL && field != null) {
+            logMessage = field + " must be true. Actual: false";
+        } else if(state == Result.State.FAIL) {
+            logMessage = "must be true. Actual: false";
+        }
+
+        return createResult(
+                Constraint.IS_TRUE,
+                logMessage,
+                state
+        );
+    }
+
     public <S, T> Result doesNotThrow(Collection<S> source,
                                       Function<S, T> factory,
                                       Container<List<T>> container) {
