@@ -209,7 +209,21 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
 
         Product updatedProduct = new Product(product1);
+        updatedProduct.addQuantity(BigDecimal.TEN);
+        updatedProduct.setDescription("new description");
         updatedProduct.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
+        updatedProduct.setContext(
+                updatedProduct.getContext().
+                        setCategory("new Category").
+                        setShop("new Shop").
+                        setVariety("new Variety").
+                        setManufacturer("new Manufacturer").
+                        setUnit("new Unit").
+                        setPrice(new BigDecimal("150")).
+                        setPackingSize(new BigDecimal("1.5")).
+                        addTag(new Tag("new Tag")).
+                        removeTag(new Tag("1"))
+        );
         boolean isSaved = commit(() -> repository.save(updatedProduct));
 
         Assertions.assertTrue(isSaved);
@@ -231,7 +245,21 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
 
         Product expected = new Product(product1);
+        expected.addQuantity(BigDecimal.TEN);
+        expected.setDescription("new description");
         expected.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
+        expected.setContext(
+                expected.getContext().
+                        setCategory("new Category").
+                        setShop("new Shop").
+                        setVariety("new Variety").
+                        setManufacturer("new Manufacturer").
+                        setUnit("new Unit").
+                        setPrice(new BigDecimal("150")).
+                        setPackingSize(new BigDecimal("1.5")).
+                        addTag(new Tag("new Tag")).
+                        removeTag(new Tag("1"))
+        );
         commit(() -> repository.save(expected));
 
         Product actual = repository.getById(toUUID(1));

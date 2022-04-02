@@ -228,9 +228,11 @@ class UserRepositoryTest {
         User user = createUser(1);
         repository.save(user);
 
-        User updatedUser = new User(user);
-        updatedUser.setName("new name");
-        boolean isSaved = repository.save(updatedUser);
+        User expected = new User(user);
+        expected.setName("new name");
+        expected.setPassword("new password");
+        expected.setEmail("new email");
+        boolean isSaved = repository.save(expected);
 
         Assertions.assertTrue(isSaved);
     }
@@ -248,6 +250,8 @@ class UserRepositoryTest {
 
         User expected = new User(user);
         expected.setName("new name");
+        expected.setPassword("new password");
+        expected.setEmail("new email");
         commit(() -> repository.save(expected));
 
         User actual =  repository.getById(toUUID(1));

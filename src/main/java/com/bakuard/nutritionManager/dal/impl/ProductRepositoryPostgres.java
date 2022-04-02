@@ -630,8 +630,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         statement.batchUpdate(
                 """
-                        INSERT INTO ProductTags(productId, tagKey, tagValue)
-                          VALUES(?,?,?);
+                        INSERT INTO ProductTags(productId, tagValue)
+                          VALUES(?,?);
                         """,
                 new BatchPreparedStatementSetter() {
 

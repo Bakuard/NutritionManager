@@ -34,6 +34,7 @@ public class ProductContext {
     private final BigDecimal price;
     private final BigDecimal packingSize;
     private final ImmutableSortedSet<Tag> tags;
+    private final AppConfigData config;
 
     private ProductContext(String category,
                            String shop,
@@ -42,16 +43,18 @@ public class ProductContext {
                            String unit,
                            BigDecimal price,
                            BigDecimal packingSize,
-                           ImmutableSortedSet<Tag> tags) {
+                           ImmutableSortedSet<Tag> tags,
+                           AppConfigData config) {
         this.category = category;
         this.shop = shop;
         this.variety = variety;
         this.manufacturer = manufacturer;
         this.unit = unit;
-        this.price = price;
-        this.packingSize = packingSize;
+        this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
         this.tags = tags;
         this.hashKey = calculateSha256();
+        this.config = config;
     }
 
     private ProductContext(String category,
@@ -86,6 +89,7 @@ public class ProductContext {
         this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
         this.tags = ImmutableSortedSet.copyOf(container.get());
         this.hashKey = calculateSha256();
+        this.config = config;
     }
 
     /**
@@ -114,7 +118,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -144,7 +149,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -174,7 +180,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -204,7 +211,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -235,7 +243,8 @@ public class ProductContext {
                 resultUnit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -263,7 +272,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -291,7 +301,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -304,13 +315,13 @@ public class ProductContext {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public ProductContext addTag(Tag tag) {
-        List<Tag> tags = new ArrayList<>();
-        tags.add(tag);
-
         ValidateException.check(
                 Rule.of("Product.tag").notNull(tag),
                 Rule.of("Product.tags").notContainsItem(tags, tag)
         );
+
+        List<Tag> tags = new ArrayList<>(this.tags);
+        tags.add(tag);
 
         return new ProductContext(
                 category,
@@ -320,7 +331,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                ImmutableSortedSet.copyOf(tags)
+                ImmutableSortedSet.copyOf(tags),
+                config
         );
     }
 
@@ -341,7 +353,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags.headSet(tag)
+                tags.headSet(tag),
+                config
         );
     }
 
