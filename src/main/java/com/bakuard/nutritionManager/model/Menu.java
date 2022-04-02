@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Представляет собой меню - группу из неповторяющихся блюд, где для каждого блюда указанно его кол-во.
  */
-public class Menu {
+public class Menu implements Entity<Menu> {
 
     private final UUID id;
     private final UUID userId;
@@ -86,6 +86,7 @@ public class Menu {
      * Возвращает уникальный идентификатор данного блюда.
      * @return уникальный идентификатор данного блюда.
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -175,6 +176,11 @@ public class Menu {
      */
     public Optional<BigDecimal> getAveragePrice(ProductRepository repository, MathContext mc) {
         return Optional.empty();
+    }
+
+    @Override
+    public boolean equalsFullState(Menu other) {
+        return false;
     }
 
     /**

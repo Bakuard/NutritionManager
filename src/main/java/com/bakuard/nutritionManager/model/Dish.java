@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 /**
  * Представляет оределенное блюдо.
  */
-public class Dish {
+public class Dish implements Entity<Dish> {
 
     private final UUID id;
     private final User user;
@@ -222,6 +222,7 @@ public class Dish {
      * Возвращает уникальный идетификатор данного блюда.
      * @return уникальный идетификатор данного блюда.
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -389,6 +390,7 @@ public class Dish {
      * @param other блюдо с которым выполняется сравнение.
      * @return true - если все поля двух блюд соответственно равны, false - в противном случае.
      */
+    @Override
     public boolean equalsFullState(Dish other) {
         return id.equals(other.id) &&
                 user.equalsFullState(other.user) &&

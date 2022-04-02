@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Представляет данные об одном конкретном типе продуктов в сочетании с уточняющей информацией ({@link ProductContext});
  */
-public class Product {
+public class Product implements Entity<Product> {
 
     private final UUID id;
     private final User user;
@@ -139,6 +139,7 @@ public class Product {
      * Возвращает уникальный идентификатор для данного продукта.
      * @return уникальный идентификатор для данного продукта.
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -188,6 +189,7 @@ public class Product {
      * @param other продукт с которым выполняется сравнение.
      * @return true - если все поля двух продуктов соответственно равны, false - в противном случае.
      */
+    @Override
     public boolean equalsFullState(Product other) {
         if(this == other) return true;
         if(getClass() != other.getClass()) return false;

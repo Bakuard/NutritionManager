@@ -11,7 +11,7 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
-public class User {
+public class User implements Entity<User> {
 
     private final UUID id;
     private String name;
@@ -55,6 +55,7 @@ public class User {
         this.salt = salt;
     }
 
+    @Override
     public UUID getId() {
         return id;
     }
@@ -108,6 +109,7 @@ public class User {
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 
+    @Override
     public boolean equalsFullState(User other) {
         if(this == other) return true;
         if(getClass() != other.getClass()) return false;
