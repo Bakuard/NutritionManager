@@ -1,7 +1,6 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.validation.ValidateException;
-import com.bakuard.nutritionManager.dal.criteria.dishes.*;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.util.Page;
 
@@ -48,55 +47,55 @@ public interface DishRepository {
 
     /**
      * Возвращает упорядоченную выборку блюд из множества всех блюд с учетом заданных ограничений
-     * в виде criteria (см. {@link DishCriteria}).
+     * в виде criteria (см. {@link Criteria}).
      * @param criteria критерий формирования выборки блюд.
      * @return выборку блюд удовлетворяющую ограничениям criteria.
      * @throws ValidateException если criteria является null.
      */
-    public Page<Dish> getDishes(DishCriteria criteria);
+    public Page<Dish> getDishes(Criteria criteria);
 
     /**
      * Возвращает выборку тегов блюд упорядоченную по значению в возрастающем порядке ({@link Tag#getValue()}).
      * Выборка будет формироваться только из тех тегов, блюда которых удовлетворяют ограничению criteria
-     * (см. {@link DishCriteria}).
+     * (см. {@link Criteria}).
      * @param criteria критерий формирования выборки тегов.
      * @return выборку тегов удовлетворяющую ограничениям criteria.
      * @throws ValidateException если criteria является null.
      */
-    public Page<Tag> getTags(DishFieldCriteria criteria);
+    public Page<Tag> getTags(Criteria criteria);
 
     /**
      * Возвращает выборку из наименований единиц измерения блюд удовлетворяющих ограничению criteria
-     * (см. {@link DishFieldCriteria}).
+     * (см. {@link Criteria}).
      * @param criteria критерий формирования выборки единиц измерения блюд.
      * @return выборку из единиц измерения блюд удовлетворяющую ограничению criteria.
      * @throws ValidateException если criteria является null.
      */
-    public Page<String> getUnits(DishFieldCriteria criteria);
+    public Page<String> getUnits(Criteria criteria);
 
     /**
-     * Возвращает кол-во всех блюд удовлетворяющих ограничению criteria (см. {@link DishesNumberCriteria}).
+     * Возвращает кол-во всех блюд удовлетворяющих ограничению criteria (см. {@link Criteria}).
      * @param criteria критерий указывающий какие единицы измерения блюд подсчитывать.
      * @return  кол-во всех блюд удовлетворяющих ограничению criteria.
      * @throws ValidateException если criteria является null.
      */
-    public int getDishesNumber(DishesNumberCriteria criteria);
+    public int getDishesNumber(Criteria criteria);
 
     /**
-     * Возвращает кол-во всех тегов блюд удовлетворяющих ограничению criteria (см. {@link DishFieldNumberCriteria}).
+     * Возвращает кол-во всех тегов блюд удовлетворяющих ограничению criteria (см. {@link Criteria}).
      * @param criteria критерий указывающий какие единицы измерения блюд подсчитывать.
      * @return  кол-во всех блюд удовлетворяющих ограничению criteria.
      * @throws ValidateException если criteria является null.
      */
-    public int getTagsNumber(DishFieldNumberCriteria criteria);
+    public int getTagsNumber(Criteria criteria);
 
     /**
      * Возвращает общее число всех единиц измерения кол-ва блюд удовлетворяющих ограничению criteria
-     * (см. {@link DishFieldNumberCriteria}).
+     * (см. {@link Criteria}).
      * @param criteria критерий указывающий какие единицы измерения блюд подсчитывать.
      * @return общее число всех единиц измерения кол-ва блюд удовлетворяющих ограничению criteria.
      * @throws ValidateException если criteria является null.
      */
-    public int getUnitsNumber(DishFieldNumberCriteria criteria);
+    public int getUnitsNumber(Criteria criteria);
 
 }

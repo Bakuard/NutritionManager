@@ -34,6 +34,7 @@ public class ProductContext {
     private final BigDecimal price;
     private final BigDecimal packingSize;
     private final ImmutableSortedSet<Tag> tags;
+    private final AppConfigData config;
 
     private ProductContext(String category,
                            String shop,
@@ -42,16 +43,18 @@ public class ProductContext {
                            String unit,
                            BigDecimal price,
                            BigDecimal packingSize,
-                           ImmutableSortedSet<Tag> tags) {
+                           ImmutableSortedSet<Tag> tags,
+                           AppConfigData config) {
         this.category = category;
         this.shop = shop;
         this.variety = variety;
         this.manufacturer = manufacturer;
         this.unit = unit;
-        this.price = price;
-        this.packingSize = packingSize;
+        this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
         this.tags = tags;
         this.hashKey = calculateSha256();
+        this.config = config;
     }
 
     private ProductContext(String category,
@@ -63,19 +66,19 @@ public class ProductContext {
                            BigDecimal packingSize,
                            List<String> tags,
                            AppConfigData config) {
-        Container<List<Tag>> container = Validator.container();
+        Container<List<Tag>> container = new Container<>();
 
-        Validator.create().
-                field("category").notNull(category).and(v -> v.notBlank(category)).end().
-                field("shop").notNull(shop).and(v -> v.notBlank(shop)).end().
-                field("variety").notNull(variety).and(v -> v.notBlank(variety)).end().
-                field("manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)).end().
-                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
-                field("price").notNull(price).and(v -> v.notNegative(price)).end().
-                field("packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)).end().
-                field("config").notNull(config).end().
-                field("tags").doesNotThrow(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container)).end().
-                validate("Fail to create product context");
+        ValidateException.check(
+                Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category)),
+                Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop)),
+                Rule.of("Product.variety").notNull(variety).and(v -> v.notBlank(variety)),
+                Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)),
+                Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit)),
+                Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price)),
+                Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)),
+                Rule.of("Product.config").notNull(config),
+                Rule.of("Product.tags").doesNotThrow(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container.get()))
+        );
 
         this.category = category;
         this.shop = shop;
@@ -86,6 +89,7 @@ public class ProductContext {
         this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
         this.tags = ImmutableSortedSet.copyOf(container.get());
         this.hashKey = calculateSha256();
+        this.config = config;
     }
 
     /**
@@ -99,9 +103,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setCategory(String category) {
-        Validator.create().
-                field("category").notNull(category).and(v -> v.notBlank(category)).end().
-                validate("Fail to set product context category");
+        ValidateException.check(
+                Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category))
+        );
 
         String resultCategory = category.trim();
 
@@ -114,7 +118,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -129,9 +134,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setShop(String shop) {
-        Validator.create().
-                field("shop").notNull(shop).and(v -> v.notBlank(shop)).end().
-                validate("Fail to set product context shop");
+        ValidateException.check(
+                Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop))
+        );
 
         String resultShop = shop.trim();
 
@@ -144,7 +149,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -159,9 +165,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setVariety(String variety) {
-        Validator.create().
-                field("variety").notNull(variety).and(v -> v.notBlank(variety)).end().
-                validate("Fail to set product context variety");
+        ValidateException.check(
+                Rule.of("Product.variety").notNull(variety).and(v -> v.notBlank(variety))
+        );
 
         String resultVariety = variety.trim();
 
@@ -174,7 +180,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -189,9 +196,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setManufacturer(String manufacturer) {
-        Validator.create().
-                field("manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)).end().
-                validate("Fail to set product context manufacturer");
+        ValidateException.check(
+                Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer))
+        );
 
         String resultManufacturer = manufacturer.trim();
 
@@ -204,7 +211,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -219,9 +227,9 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setUnit(String unit) {
-        Validator.create().
-                field("unit").notNull(unit).and(v -> v.notBlank(unit)).end().
-                validate("Fail to set product context unit");
+        ValidateException.check(
+                Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit))
+        );
 
         String resultUnit = unit.trim();
 
@@ -235,7 +243,8 @@ public class ProductContext {
                 resultUnit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -249,9 +258,9 @@ public class ProductContext {
      *         2. если указанное значение цены меньше нуля.
      */
     public ProductContext setPrice(BigDecimal price) {
-        Validator.create().
-                field("price").notNull(price).and(v -> v.notNegative(price)).end().
-                validate("Fail to set product context price");
+        ValidateException.check(
+                Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price))
+        );
 
         if(this.price.equals(price)) return this;
 
@@ -263,7 +272,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -277,9 +287,9 @@ public class ProductContext {
      *         2. если packingSize меньше или равен нулю.
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
-        Validator.create().
-                field("packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)).end().
-                validate("Fail to set product context packing size");
+        ValidateException.check(
+                Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize))
+        );
 
         if(this.packingSize.equals(packingSize)) return this;
 
@@ -291,7 +301,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags
+                tags,
+                config
         );
     }
 
@@ -304,13 +315,13 @@ public class ProductContext {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public ProductContext addTag(Tag tag) {
-        List<Tag> tags = new ArrayList<>();
-        tags.add(tag);
+        ValidateException.check(
+                Rule.of("Product.tag").notNull(tag),
+                Rule.of("Product.tags").notContainsItem(tags, tag)
+        );
 
-        Validator.create().
-                field("tag").notNull(tag).end().
-                field("tags").notContainsItem(tags, tag).end().
-                validate("Fail to add tag to product context");
+        List<Tag> tags = new ArrayList<>(this.tags);
+        tags.add(tag);
 
         return new ProductContext(
                 category,
@@ -320,7 +331,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                ImmutableSortedSet.copyOf(tags)
+                ImmutableSortedSet.copyOf(tags),
+                config
         );
     }
 
@@ -341,7 +353,8 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags.headSet(tag)
+                tags.headSet(tag),
+                config
         );
     }
 

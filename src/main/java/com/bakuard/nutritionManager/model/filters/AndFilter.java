@@ -1,22 +1,23 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Validator;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
 
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Objects;
 
-public class AndFilter implements Filter {
+public class AndFilter extends AbstractFilter {
 
     private final ImmutableList<Filter> operands;
 
     AndFilter(List<Filter> operands) {
-        Validator.create().
-                field("operands").notNull(operands).
-                    and(v -> v.notContainsNull(operands)).
-                    and(v -> v.containsAtLeast(operands, 2)).end().
-                validate();
+        ValidateException.check(
+                Rule.of("AndFilter.operands").notNull(operands).
+                        and(v -> v.notContainsNull(operands)).
+                        and(v -> v.min(operands.size(), 2))
+        );
 
         this.operands = ImmutableList.copyOf(operands);
     }

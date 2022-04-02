@@ -126,7 +126,7 @@ class UserRepositoryTest {
         commit(() -> repository.save(expected));
 
         User actual = repository.getById(toUUID(1));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -146,14 +146,14 @@ class UserRepositoryTest {
     public void save5() {
         User user1 = createUser(1);
         User user2 = createUser(2);
-        User addedUser = createUser(3);
+        User expected = createUser(3);
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
-        commit(() -> repository.save(addedUser));
+        commit(() -> repository.save(expected));
 
-        User actualUser = repository.getById(toUUID(3));
-        Assertions.assertEquals(addedUser, actualUser);
+        User actual = repository.getById(toUUID(3));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -169,7 +169,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -191,7 +191,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -213,7 +213,7 @@ class UserRepositoryTest {
                 () -> repository.save(addedUser),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -228,9 +228,11 @@ class UserRepositoryTest {
         User user = createUser(1);
         repository.save(user);
 
-        User updatedUser = new User(user);
-        updatedUser.setName("new name");
-        boolean isSaved = repository.save(updatedUser);
+        User expected = new User(user);
+        expected.setName("new name");
+        expected.setPassword("new password");
+        expected.setEmail("new email");
+        boolean isSaved = repository.save(expected);
 
         Assertions.assertTrue(isSaved);
     }
@@ -248,9 +250,12 @@ class UserRepositoryTest {
 
         User expected = new User(user);
         expected.setName("new name");
+        expected.setPassword("new password");
+        expected.setEmail("new email");
         commit(() -> repository.save(expected));
 
-        Assertions.assertEquals(expected, repository.getById(toUUID(1)));
+        User actual =  repository.getById(toUUID(1));
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -274,7 +279,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -304,7 +309,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -334,7 +339,7 @@ class UserRepositoryTest {
                 () -> repository.save(expected),
                 UserRepositoryPostgres.class,
                 "save",
-                Constraint.ENTITY_MUST_UNIQUE_IN_DB
+                Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
 
@@ -404,7 +409,7 @@ class UserRepositoryTest {
 
         User actual = repository.getById(toUUID(1));
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -452,7 +457,7 @@ class UserRepositoryTest {
 
         User actual = repository.getByName("User1");
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -500,7 +505,7 @@ class UserRepositoryTest {
 
         User actual = repository.getByEmail("user1@mail.com");
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
 

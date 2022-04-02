@@ -1,188 +1,153 @@
 package com.bakuard.nutritionManager.validation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
 public final class Result {
 
     public enum State {
-        SUCCESS,
-        FAIL
+        SUCCESS(1),
+        UNKNOWN(0),
+        FAIL(-1);
+
+        public static State of(boolean value) {
+            return value ? SUCCESS : FAIL;
+        }
+
+
+        private final int weight;
+
+        private State(int weight) {
+            this.weight = weight;
+        }
+
+        public State or(State other) {
+            return other.weight < weight ? this : other;
+        }
+
+        public State and(State other) {
+            return other.weight < weight ? other : this;
+        }
+
+        public State not() {
+            int newWeight = weight * -1;
+
+            State result = null;
+            switch(newWeight) {
+                case -1 -> result = FAIL;
+                case 0 -> result = UNKNOWN;
+                case 1 -> result = SUCCESS;
+            }
+
+            return result;
+        }
+
     }
 
-    private final Class<?> checkedClass;
-    private final String methodName;
-    private final String fieldName;
     private final Constraint[] constraints;
     private final State state;
-    private final Result nextResult;
-    private final String userMessageKey;
     private final String logMessage;
-    private final Validator validator;
+    private final Rule rule;
+    private final List<Exception> suppressedExceptions;
 
-    public Result(Class<?> checkedClass,
-                  String methodName,
-                  String fieldName,
-                  Constraint constraint,
+    public Result(Constraint constraint,
                   State state,
-                  Result nextResult,
-                  String userMessageKey,
                   String logMessage,
-                  Validator validator) {
-        this.checkedClass = checkedClass;
-        this.methodName = methodName;
-        this.fieldName = fieldName;
-        this.constraints = new Constraint[]{constraint};
-        this.userMessageKey = userMessageKey != null ?
-                        userMessageKey :
-                        userMessageKey(checkedClass, methodName, fieldName, constraints);
-        this.state = state;
-        this.nextResult = nextResult;
+                  Rule rule,
+                  List<Exception> suppressedExceptions) {
+        this.constraints = new Constraint[]{Objects.requireNonNull(constraint, "constraint can't be null")};
+        this.state = Objects.requireNonNull(state, "state can't be null");
         this.logMessage = logMessage;
-        this.validator = validator;
+        this.rule = rule;
+        this.suppressedExceptions = suppressedExceptions;
     }
 
-    private Result(Class<?> checkedClass,
-                   String methodName,
-                   String fieldName,
-                   Constraint[] constraints,
+    private Result(Constraint[] constraints,
                    State state,
-                   Result nextResult,
-                   String userMessageKey,
                    String logMessage,
-                   Validator validator) {
-        this.checkedClass = checkedClass;
-        this.methodName = methodName;
-        this.fieldName = fieldName;
+                   Rule rule,
+                   List<Exception> suppressedExceptions) {
         this.constraints = constraints;
         this.state = state;
-        this.nextResult = nextResult;
-        this.userMessageKey = userMessageKey;
         this.logMessage = logMessage;
-        this.validator = validator;
+        this.rule = rule;
+        this.suppressedExceptions = suppressedExceptions;
     }
 
-    public Class<?> getCheckedClass() {
-        return checkedClass;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public Constraint getConstraint(int index) {
-        return constraints[index];
-    }
-
-    public int getConstraintsNumber() {
-        return constraints.length;
-    }
-
-    public boolean contains(Constraint constraint) {
-        return Arrays.stream(constraints).anyMatch(c -> c == constraint);
+    public Rule getRule() {
+        return rule;
     }
 
     public State getState() {
         return state;
     }
 
-    public Result getNextResult() {
-        return nextResult;
+    public boolean isFail() {
+        return state == State.FAIL;
     }
 
-    public String getUserMessageKey() {
-        return userMessageKey;
+    public boolean isSuccess() {
+        return state == State.SUCCESS;
     }
 
-    public String getLogMessage() {
-        String result = '(' +
-                (constraints.length > 1 ?
-                        "constraints " + Arrays.toString(constraints) :
-                        "constraint " + constraints[0]) +
-                " is " + state +
-                " for variable '" + fieldName + "'. ";
-
-        if(logMessage != null) result += logMessage;
-
-        result += ')';
-
-        return result;
+    public boolean isUnknown() {
+        return state == State.UNKNOWN;
     }
 
-    public Result and(Function<Validator, Result> other) {
-        return state == State.SUCCESS ? other.apply(validator) : this;
-    }
+    public Result and(Function<Rule, Result> other) {
+        Result result = null;
 
-    public Result or(Function<Validator, Result> other) {
-        if(state == State.SUCCESS) return this;
-
-        Result result = other.apply(validator);
-
-        if(result.state != State.SUCCESS) {
-            Constraint[] newConstraints = concat(constraints, result.constraints);
-
-            result = new Result(
-                    checkedClass,
-                    methodName,
-                    fieldName,
-                    newConstraints,
-                    state,
-                    nextResult,
-                    userMessageKey(checkedClass, methodName, fieldName, newConstraints),
-                    String.join(", ", logMessage, result.logMessage),
-                    validator
-            );
+        switch(state) {
+            case SUCCESS, UNKNOWN -> result = other.apply(rule);
+            case FAIL -> result = this;
         }
 
         return result;
     }
 
-    public Result or(Function<Validator, Result> other, String userMessageKey) {
-        if(state == State.SUCCESS) return this;
+    public Result or(Function<Rule, Result> other) {
+        Result result = null;
 
-        Result result = other.apply(validator);
+        switch(state) {
+            case SUCCESS -> result = this;
+            case UNKNOWN, FAIL -> result = other.apply(rule);
+        }
 
-        if(result.state != State.SUCCESS) {
-            Constraint[] newConstraints = concat(constraints, result.constraints);
+        switch(result.state) {
+            case UNKNOWN, FAIL -> {
+                ArrayList<Exception> suppressed = new ArrayList<>(suppressedExceptions);
+                suppressed.addAll(result.suppressedExceptions);
 
-            result = new Result(
-                    checkedClass,
-                    methodName,
-                    fieldName,
-                    newConstraints,
-                    state,
-                    nextResult,
+                result = new Result(
+                        concat(constraints, result.constraints),
+                        state.or(result.state),
+                        joinLogMessages(logMessage, result.logMessage),
+                        rule,
+                        suppressed
+                );
+            }
+        }
+
+        return result;
+    }
+
+    public RuleException check() {
+        if(!isSuccess()) {
+            String userMessageKey = rule.getRuleName() +
+                    Arrays.toString(constraints).replaceAll(" ", "");
+            RuleException exception = new RuleException(
                     userMessageKey,
-                    String.join(", ", logMessage, result.logMessage),
-                    validator
+                    getLogMessage(),
+                    constraints
             );
+            suppressedExceptions.forEach(exception::addSuppressed);
+            return exception;
         }
 
-        return result;
-    }
-
-    public Result append(Function<Validator, Result> other) {
-        return new Result(
-                checkedClass,
-                methodName,
-                fieldName,
-                constraints,
-                state,
-                other.apply(validator),
-                userMessageKey,
-                logMessage,
-                validator
-        );
-    }
-
-    public Validator end() {
-        validator.flushCurrentField(this);
-        return validator;
+        return null;
     }
 
     @Override
@@ -190,38 +155,29 @@ public final class Result {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Result result = (Result) o;
-        return checkedClass.equals(result.checkedClass) &&
-                methodName.equals(result.methodName) &&
-                fieldName.equals(result.fieldName) &&
-                Arrays.equals(constraints, result.constraints) &&
+        return Arrays.equals(constraints, result.constraints) &&
                 state == result.state &&
-                nextResult.equals(result.nextResult) &&
-                userMessageKey.equals(result.userMessageKey) &&
-                logMessage.equals(result.logMessage) &&
-                validator.equals(result.validator);
+                Objects.equals(logMessage, result.logMessage) &&
+                Objects.equals(rule, result.rule);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(checkedClass,
-                methodName,
-                fieldName,
-                state,
-                nextResult,
-                userMessageKey,
-                logMessage,
-                validator);
+        int result = Objects.hash(state, logMessage, rule);
         result = 31 * result + Arrays.hashCode(constraints);
         return result;
     }
 
-
-    private String userMessageKey(Class<?> checkedClass,
-                                  String methodName,
-                                  String fieldName,
-                                  Constraint[] constraints) {
-        return checkedClass.getSimpleName() + '.' + methodName + '(' + fieldName + ")[" + convertToString(constraints) + ']';
+    @Override
+    public String toString() {
+        return "Result{" +
+                ", constraints=" + Arrays.toString(constraints) +
+                ", state=" + state +
+                ", logMessage='" + logMessage + '\'' +
+                ", condition=" + rule +
+                '}';
     }
+
 
     private <T> T[] concat(T[] array1, T[] array2) {
         T[] result = Arrays.copyOf(array1, array1.length + array2.length);
@@ -229,11 +185,30 @@ public final class Result {
         return result;
     }
 
-    private String convertToString(Constraint[] constraints) {
-        return Arrays.stream(constraints).
-                map(Constraint::name).
-                reduce((a, b) -> a + ',' + b).
-                orElseThrow();
+    private String joinLogMessages(String message1, String message2) {
+        String result = "";
+
+        if(message1 != null && message2 != null) {
+            result = String.join(", ", message1, message2);
+        } else if(message1 != null) {
+            result = message1;
+        } else if(message2 != null) {
+            result = message2;
+        }
+
+        return result;
+    }
+
+    private String getLogMessage() {
+        StringBuilder result =  new StringBuilder(rule.getRuleName()).
+                append(Arrays.toString(constraints)).
+                append(" - is ").
+                append(state).
+                append(". ");
+
+        if(logMessage != null) result.append(logMessage);
+
+        return result.toString();
     }
 
 }

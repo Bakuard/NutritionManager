@@ -1,11 +1,13 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.Tag;
+import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,9 @@ public interface Filter {
         SHOPS,
         VARIETIES,
         MANUFACTURER,
-        INGREDIENTS
+        INGREDIENTS,
+        USER,
+        MIN_QUANTITY
     }
 
     /**
@@ -133,6 +137,30 @@ public interface Filter {
         return new MinTagsFilter(values);
     }
 
+    public static UserFilter user(User user) {
+        return new UserFilter(user);
+    }
+
+    public static QuantityFilter less(BigDecimal quantity) {
+        return new QuantityFilter(quantity, QuantityFilter.Relative.LESS);
+    }
+
+    public static QuantityFilter lessOrEqual(BigDecimal quantity) {
+        return new QuantityFilter(quantity, QuantityFilter.Relative.LESS_OR_EQUAL);
+    }
+
+    public static QuantityFilter greater(BigDecimal quantity) {
+        return new QuantityFilter(quantity, QuantityFilter.Relative.GREATER);
+    }
+
+    public static QuantityFilter greaterOrEqual(BigDecimal quantity) {
+        return new QuantityFilter(quantity, QuantityFilter.Relative.GREATER_OR_EQUAL);
+    }
+
+    public static QuantityFilter equal(BigDecimal quantity) {
+        return new QuantityFilter(quantity, QuantityFilter.Relative.EQUAL);
+    }
+
 
     private static List<String> toList(String a, String... other) {
         ArrayList<String> result = Lists.newArrayList(other);
@@ -157,5 +185,11 @@ public interface Filter {
     public Type getType();
 
     public ImmutableList<Filter> getOperands();
+
+    public boolean containsOnly(Type... types);
+
+    public boolean containsAtLeast(Type... types);
+
+    public <T extends Filter> T findAny(Type type);
 
 }

@@ -1,23 +1,13 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductCriteria;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductSumCriteria;
-import com.bakuard.nutritionManager.dal.criteria.products.ProductsNumberCriteria;
-import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.ProductSort;
-import com.bakuard.nutritionManager.model.filters.SortDirection;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
-import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Ингредиент блюда. В качестве ингредиента можно задать не только один конкретный продукт, а множетсво
@@ -29,11 +19,7 @@ public class DishIngredient {
     private final String name;
     private final Filter filter;
     private final BigDecimal quantity;
-
-    private final ProductRepository repository;
-    private final User user;
     private final AppConfigData config;
-    private final ProductSort sort;
 
     /**
      * Конструктор копирования. Выполняет глубокое копирование.
@@ -43,10 +29,7 @@ public class DishIngredient {
         this.name = other.name;
         this.filter = other.filter;
         this.quantity = other.quantity;
-        this.repository = other.repository;
-        this.user = new User(other.user);
         this.config = other.config;
-        this.sort = other.sort;
     }
 
     /**
@@ -55,9 +38,7 @@ public class DishIngredient {
      * @param filter ограничение задающее множество взаимозаменяемых продуктов, каждый из которых может
      *               выступать в качестве данного ингредиента.
      * @param quantity кол-во данного ингредиента необходимого для приготовления одной порции блюда.
-     * @param repository репозиторий продуктов.
-     * @param user пользователь, которому принадлежит блюдо, для которого создается данный ингредиент.
-     * @param config общие данные конфигурации приложения.
+     * @param config общие конфигурационные данные приложения
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. Если хотя бы один из параметров имеет значение null.<br/>
      *              2. Если имя ингредиента не содержит ни одного отображаемого символа.<br/>
@@ -66,26 +47,18 @@ public class DishIngredient {
     public DishIngredient(String name,
                           Filter filter,
                           BigDecimal quantity,
-                          ProductRepository repository,
-                          User user,
                           AppConfigData config) {
-        Validator.create().
-                field("name").notNull(name).and(v -> v.notBlank(name)).end().
-                field("filter").notNull(filter).end().
-                field("quantity").notNull(quantity).and(v -> v.positiveValue(quantity)).end().
-                field("repository").notNull(repository).end().
-                field("user").notNull(user).end().
-                field("config").notNull(config).end().
-                validate("Fail to create dish ingredient");
+        ValidateException.check(
+                Rule.of("DishIngredient.name").notNull(name).and(v -> v.notBlank(name)),
+                Rule.of("DishIngredient.filter").notNull(filter),
+                Rule.of("DishIngredient.quantity").notNull(quantity).and(v -> v.positiveValue(quantity)),
+                Rule.of("DishIngredient.config").notNull(config)
+        );
 
         this.name = name;
         this.filter = filter;
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.repository = repository;
-        this.user = user;
         this.config = config;
-
-        sort = new ProductSort(ProductSort.Parameter.PRICE, SortDirection.ASCENDING);
     }
 
     /**
@@ -105,143 +78,18 @@ public class DishIngredient {
     }
 
     /**
-     * Возвращает кол-во данного ингредиента необходимого для приготовления одной порции блюда.
-     * @return кол-во данного ингредиента необходимого для приготовления одной порции блюда.
-     */
-    public BigDecimal getNecessaryQuantity() {
-        return quantity;
-    }
-
-    /**
      * Возвращает кол-во данного ингредиента необходимого для приготовления указанного кол-ва порций блюда.
      * @param servingNumber кол-во порций блюда.
      * @return кол-во данного ингредиента необходимого для приготовления указанного кол-ва порций блюда.
      * @throws ValidateException если указанное значение null или не является положительным.
      */
     public BigDecimal getNecessaryQuantity(BigDecimal servingNumber) {
-        Validator.create().
-                field("servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber)).end().
-                validate("Fail to get necessary ingredient quantity.");
-
-        return quantity.multiply(servingNumber);
-    }
-
-    /**
-     * Для любого указанного продукта, из множества взаимозаменямых продуктов данного ингредиента, вычисляет
-     * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
-     * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
-     * Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
-     * то метод вернет результат для последнего продукта.<br/>
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
-     * то метод вернет пустой Optional.
-     * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
-     * @param servingNumber кол-во порций блюда.
-     * @return кол-во "упаковок" докупаемого продукта.
-     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
-     *              1. servingNumber является null.<br/>
-     *              2. productIndex < 0 <br/>
-     *              3. servingNumber <= 0
-     */
-    public Optional<BigDecimal> getLackQuantity(int productIndex, BigDecimal servingNumber) {
-        Validator.create().
-                field("servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber)).end().
-                validate("Fail to get product lack quantity");
-
-        return getProductByIndex(productIndex).
-                map(product -> {
-                    BigDecimal lackQuantity = getNecessaryQuantity(servingNumber).
-                            subtract(product.getQuantity()).
-                            max(BigDecimal.ZERO);
-
-                    if(lackQuantity.signum() > 0) {
-                        lackQuantity = lackQuantity.
-                                divide(product.getContext().getPackingSize(), config.getMathContext()).
-                                setScale(0, RoundingMode.UP);
-                    }
-
-                    return lackQuantity;
-                });
-    }
-
-    /**
-     * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта.<br/>
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
-     * то метод вернет пустой Optional.
-     * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
-     * @param servingNumber кол-во порций блюда.
-     * @return общую цену за недостающее кол-во докупаемого продукта.
-     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
-     *              1. servingNumber является null.<br/>
-     *              2. productIndex < 0 <br/>
-     *              3. servingNumber <= 0
-     */
-    public Optional<BigDecimal> getLackQuantityPrice(int productIndex, BigDecimal servingNumber) {
-        Validator.create().
-                field("servingNumber").notNull(servingNumber).and(v -> v.positiveValue(servingNumber)).end().
-                validate("Fail to get price of product lack quantity");
-
-        return getProductByIndex(productIndex).
-                map(product ->
-                    getLackQuantity(productIndex, servingNumber).get().
-                            multiply(product.getContext().getPrice(), config.getMathContext())
-                );
-    }
-
-    /**
-     * Возвращает продукт из множества всех взаимозаменяемых продуктов для данного ингредиента по его
-     * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
-     * ингредиента упорядоченно по цене. Особые случаи:<br/>
-     * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
-     *    то метод вернет пустой Optional.<br/>
-     * 2. Если в БД есть продукты соответствующие данному ингредиенту и productIndex больше или равен их кол-ву,
-     *    то метод вернет последний продукт из всего множества продуктов данного ингредиента.
-     * @param productIndex порядковому номер продукта.
-     * @return продукт по его порядковому номеру.
-     * @throws ValidateException если productIndex < 0
-     */
-    public Optional<Product> getProductByIndex(int productIndex) {
-        Validator.create().
-                field("productIndex").notNegative(productIndex).end().
-                validate("Fail to get product bu index");
-
-        Page<Product> page = repository.getProducts(
-                ProductCriteria.of(Pageable.ofIndex(5, productIndex), user).
-                        setProductSort(sort)
+        ValidateException.check(
+                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
+                        and(v -> v.positiveValue(servingNumber))
         );
 
-        Product product = null;
-
-        if(!page.getMetadata().isEmpty()) {
-            product = page.get(
-                    page.getMetadata().
-                            getTotalItems().
-                            subtract(BigInteger.ONE).
-                            min(BigInteger.valueOf(productIndex))
-            );
-        }
-
-        return Optional.ofNullable(product);
-    }
-
-    /**
-     * Возвращает кол-во всех продуктов которые могут использоваться в качестве данноо ингредиента.
-     * @return кол-во всех продуктов которые могут использоваться в качестве данноо ингредиента.
-     */
-    public int getProductsNumber() {
-        return repository.getProductsNumber(
-                ProductsNumberCriteria.of(user).setFilter(filter)
-        );
-    }
-
-    /**
-     * Возвращает суммарную цену всех продуктов которые могут использоваться в качестве данного ингредиента.
-     * Используется при расчете средней арифметической цены блюда, в которое входит данный ингредиент.<br/>
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link #getFilter()} данного ингредиента,
-     * то метод вернет пустой Optional.
-     * @return суммарную цену всех продуктов которые могут использоваться в качестве данноо ингредиента.
-     */
-    public Optional<BigDecimal> getProductsPriceSum() {
-        return repository.getProductsSum(ProductSumCriteria.of(user, filter));
+        return quantity.multiply(servingNumber, config.getMathContext());
     }
 
     @Override
@@ -269,6 +117,7 @@ public class DishIngredient {
     }
 
 
+
     /**
      * Реализация паттерна "Builder" для ингредиентов блюд ({@link DishIngredient}).
      */
@@ -277,8 +126,6 @@ public class DishIngredient {
         private String name;
         private Filter filter;
         private BigDecimal quantity;
-        private ProductRepository repository;
-        private User user;
         private AppConfigData config;
 
         public Builder() {
@@ -317,26 +164,6 @@ public class DishIngredient {
         }
 
         /**
-         * Задает ссылку на репозиторий продуктов.
-         * @param repository репозиторий продуктов.
-         * @return этот же объект.
-         */
-        public Builder setRepository(ProductRepository repository) {
-            this.repository = repository;
-            return this;
-        }
-
-        /**
-         * Устаналвивает ссылку на пользователя - владельца блюда для котороо создается данный ингредиент.
-         * @param user владелец блюда для котороо создается данный ингредиент.
-         * @return этот же объект.
-         */
-        public Builder setUser(User user) {
-            this.user = user;
-            return this;
-        }
-
-        /**
          * Устанавливает конфигурациооные данные всего приложения.
          * @param config конфигурациооные данные всего приложения.
          * @return этот же объект.
@@ -365,8 +192,6 @@ public class DishIngredient {
                     name,
                     filter,
                     quantity,
-                    repository,
-                    user,
                     config
             );
         }

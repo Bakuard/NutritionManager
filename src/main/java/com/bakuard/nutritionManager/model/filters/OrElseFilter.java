@@ -1,21 +1,24 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Validator;
+import com.bakuard.nutritionManager.validation.Result;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
+
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Objects;
 
-public class OrElseFilter implements Filter {
+public class OrElseFilter extends AbstractFilter {
 
     private final ImmutableList<Filter> operands;
 
     OrElseFilter(List<Filter> operands) {
-        Validator.create().
-                field("operands").notNull(operands).
-                    and(v -> v.notContainsNull(operands)).
-                    and(v -> v.containsAtLeast(operands, 2)).end().
-                validate();
+        ValidateException.check(
+                Rule.of("OrElseFilter.operands").notNull(operands).
+                        and(v -> v.notContainsNull(operands)).
+                        and(v -> v.min(operands.size(), 2))
+        );
 
         this.operands = ImmutableList.copyOf(operands);
     }

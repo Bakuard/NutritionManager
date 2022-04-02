@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
+import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 import com.bakuard.nutritionManager.validation.*;
 
 import com.google.common.hash.Hashing;
@@ -10,7 +11,7 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
-public class User {
+public class User implements Entity<User> {
 
     private final UUID id;
     private String name;
@@ -27,17 +28,17 @@ public class User {
     }
 
     public User(UUID id, String name, String password, String email) {
-        Validator.create().
-                field("id").notNull(id).end().
-                field("name").notNull(name).
-                    and(v -> v.notBlank(name)).
-                    and(v -> v.stringLength(name, 1, 40)).end().
-                field("password").notNull(password).
-                    and(v -> v.notBlank(password)).
-                    and(v -> v.stringLength(password, 8, 100)).end().
-                field("email").notNull(email).
-                    and(v -> v.notBlank(email)).end().
-                validate("Fail to create user");
+        ValidateException.check(
+                Rule.of("User.id").notNull(id),
+                Rule.of("User.name").notNull(name).
+                        and(v -> v.notBlank(name)).
+                        and(v -> v.stringLength(name, 1, 40)),
+                Rule.of("User.password").notNull(password).
+                        and(v -> v.notBlank(password)).
+                        and(v -> v.stringLength(password, 8, 100)),
+                Rule.of("User.email").notNull(email).
+                        and(v -> v.notBlank(email))
+        );
  
         this.id = id;
         this.name = name;
@@ -54,6 +55,7 @@ public class User {
         this.salt = salt;
     }
 
+    @Override
     public UUID getId() {
         return id;
     }
@@ -63,11 +65,11 @@ public class User {
     }
 
     public void setName(String name) {
-        Validator.create().
-                field("name").notNull(name).
-                    and(v -> v.notBlank(name)).
-                    and(v -> v.stringLength(name, 1, 40)).end().
-                validate("Fail to set user name");
+        ValidateException.check(
+                Rule.of("User.name").notNull(name).
+                        and(v -> v.notBlank(name)).
+                        and(v -> v.stringLength(name, 1, 40))
+        );
         this.name = name;
     }
 
@@ -76,11 +78,11 @@ public class User {
     }
 
     public void setPassword(String password) {
-        Validator.create().
-                field("password").notNull(password).
-                    and(v -> v.notBlank(password)).
-                    and(v -> v.stringLength(password, 8, 100)).end().
-                validate("Fail to set user password");
+        ValidateException.check(
+                Rule.of("User.password").notNull(password).
+                        and(v -> v.notBlank(password)).
+                        and(v -> v.stringLength(password, 8, 100))
+        );
         this.passwordHash = calculatePasswordHash(password, salt);
     }
 
@@ -89,9 +91,10 @@ public class User {
     }
 
     public void setEmail(String email) {
-        Validator.create().
-                field("email").notNull(email).and(v -> v.notBlank(email)).end().
-                validate("Fail to set user email");
+        ValidateException.check(
+                Rule.of("User.email").notNull(email).
+                        and(v -> v.notBlank(email))
+        );
         this.email = email;
     }
 
@@ -100,12 +103,13 @@ public class User {
     }
 
     public boolean isCorrectPassword(String password) {
-        Validator.create().
-                field("password").notNull(password).end().
-                validate();
+        ValidateException.check(
+                Rule.of("User.password").notNull(password)
+        );
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 
+    @Override
     public boolean equalsFullState(User other) {
         if(this == other) return true;
         if(getClass() != other.getClass()) return false;
@@ -135,6 +139,51 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+
+    public static class Builder implements AbstractBuilder<User> {
+
+        private UUID id;
+        private String name;
+        private String passwordHash;
+        private String email;
+        private String salt;
+
+        public Builder() {
+
+        }
+
+        public Builder setId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setPasswordHash(String passwordHash) {
+            this.passwordHash = passwordHash;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder setSalt(String salt) {
+            this.salt = salt;
+            return this;
+        }
+
+        @Override
+        public User tryBuild() throws ValidateException {
+            return new User(id, name, passwordHash, email, salt);
+        }
+
     }
 
 

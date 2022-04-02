@@ -81,8 +81,7 @@ public class ImageUploaderService implements DisposableBean {
 
             return imageUrl;
         } catch(Exception e) {
-            throw new ValidateException("Fail to upload product image").
-                    addReason(e);
+            throw new ValidateException("Fail to upload product image", e);
         }
     }
 

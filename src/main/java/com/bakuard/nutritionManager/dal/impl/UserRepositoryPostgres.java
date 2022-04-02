@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.Validator;
+import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Constraint;
 
 import com.bakuard.nutritionManager.validation.ValidateException;
@@ -25,9 +25,9 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public boolean save(User user) {
-        Validator.create().
-                field("user").notNull(user).end().
-                validate("Fail to save user");
+        ValidateException.check(
+                Rule.of("UserRepositoryPostgres.user").notNull(user)
+        );
 
         User oldUser = getByIdOrReturnNull(user.getId());
 
@@ -42,7 +42,7 @@ public class UserRepositoryPostgres implements UserRepository {
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save user").
-                    addReason("user", Constraint.ENTITY_MUST_UNIQUE_IN_DB);
+                    addReason(Rule.of("UserRepositoryPostgres.user").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
         }
 
         return wasSaved;
@@ -50,24 +50,24 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getById(UUID userId) {
-        Validator.create().
-                field("userId").notNull(userId).end().
-                validate("Fail to get user by id");
+        ValidateException.check(
+                Rule.of("UserRepositoryPostgres.userId").notNull(userId)
+        );
 
         User user = getByIdOrReturnNull(userId);
 
         if(user == null) {
-            throw new ValidateException("Fail to get user by i").
-                    addReason("userId", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+            throw new ValidateException("Fail to get user by id").
+                    addReason(Rule.of("UserRepositoryPostgres.userId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
         }
         return user;
     }
 
     @Override
     public User getByName(String name) {
-        Validator.create().
-                field("name").notNull(name).end().
-                validate("Fail to get user by name");
+        ValidateException.check(
+                Rule.of("UserRepositoryPostgres.name").notNull(name)
+        );
 
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
@@ -87,16 +87,16 @@ public class UserRepositoryPostgres implements UserRepository {
                         );
                     }
                     throw new ValidateException("Fail to get user by name=" + name).
-                            addReason("name", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+                            addReason(Rule.of("UserRepositoryPostgres.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
                 }
         );
     }
 
     @Override
     public User getByEmail(String email) {
-        Validator.create().
-                field("email").notNull(email).end().
-                validate("Fail to get user by email");
+        ValidateException.check(
+                Rule.of("UserRepositoryPostgres.email").notNull(email)
+        );
 
         return statement.query(
                 (Connection conn) -> conn.prepareStatement("""
@@ -116,7 +116,7 @@ public class UserRepositoryPostgres implements UserRepository {
                         );
                     }
                     throw new ValidateException("Fail to get user by email=" + email).
-                            addReason("email", Constraint.ENTITY_MUST_EXISTS_IN_DB);
+                            addReason(Rule.of("UserRepositoryPostgres.email").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
                 }
         );
     }

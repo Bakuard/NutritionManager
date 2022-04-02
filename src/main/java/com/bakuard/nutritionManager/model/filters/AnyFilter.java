@@ -1,10 +1,13 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Validator;
+import com.bakuard.nutritionManager.validation.Result;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Данное огрнаничение используется при фильтрации продуктов, блюд и меню по какому-то конкретному полю строкового
@@ -13,18 +16,18 @@ import java.util.Objects;
  * Определить фильтруемое поле можно по возвращаемому значению метода {@link #getType()}<br/><br/>
  * Объекты данного класса не изменяемы.
  */
-public class AnyFilter implements Filter {
+public class AnyFilter extends AbstractFilter {
 
     private final ImmutableList<String> values;
     private final Type type;
 
     AnyFilter(List<String> values, int minItems, Type type) {
-        Validator.create().
-                field("values").notNull(values).
-                    and(v -> v.notContainsNull(values)).
-                    and(v -> v.containsAtLeast(values, minItems)).
-                    and(v -> v.notContainsBlank(values)).end().
-                validate();
+        ValidateException.check(
+                Rule.of("AnyFilter.values").notNull(values).
+                        and(v -> v.notContainsNull(values)).
+                        and(v -> v.min(values.size(), minItems)).
+                        and(v -> v.notContains(values, s -> Result.State.of(!s.isBlank())))
+        );
 
         this.values = ImmutableList.copyOf(values);
         this.type = type;
