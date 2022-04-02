@@ -1,14 +1,19 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.filters.UserFilter;
-import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
+import com.bakuard.nutritionManager.model.filters.Sort;
+import com.bakuard.nutritionManager.model.filters.UserFilter;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
+import com.bakuard.nutritionManager.model.util.Page;
+import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.validation.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +33,9 @@ public class Dish implements Entity<Dish> {
     private final List<DishIngredient> ingredients;
     private final List<Tag> tags;
     private AppConfigData config;
+
     private ProductRepository productRepository;
+    private final Sort ingredientProductsSort;
 
     /**
      * Конструктор копирования. Выполняет глубокое копирование.
@@ -47,6 +54,7 @@ public class Dish implements Entity<Dish> {
                 map(DishIngredient::new).
                 collect(Collectors.toCollection(ArrayList::new));
         this.tags = new ArrayList<>(other.tags);
+        this.ingredientProductsSort = other.ingredientProductsSort;
     }
 
     private Dish(UUID id,
@@ -93,6 +101,7 @@ public class Dish implements Entity<Dish> {
         this.tags = new ArrayList<>(tagContainer.get());
         this.config = config;
         this.productRepository = productRepository;
+        this.ingredientProductsSort = Sort.products().asc("price");
     }
 
     /**
@@ -165,7 +174,7 @@ public class Dish implements Entity<Dish> {
      *         3. если name не содержит ни одного отображаемого символа.
      */
     public void putIngredient(String name, Filter filter, BigDecimal quantity) {
-        DishIngredient ingredient = new DishIngredient(name, filter, quantity, productRepository, config);
+        DishIngredient ingredient = new DishIngredient(name, filter, quantity, config);
 
         int index = IntStream.range(0, ingredients.size()).
                 filter(i -> ingredients.get(i).getName().equals(name)).
@@ -276,6 +285,111 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
+     * Возвращает продукт из множества всех взаимозаменяемых продуктов для данного ингредиента по его
+     * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
+     * ингредиента упорядоченно по цене. Особые случаи:<br/>
+     * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
+     *    данного ингредиента, то метод вернет пустой Optional.<br/>
+     * 2. Если в БД есть продукты соответствующие данному ингредиенту и productIndex больше или равен их
+     *    кол-ву, то метод вернет последний продукт из всего множества продуктов данного ингредиента.
+     * @param ingredient ингредиент для которого возвращается один из возможных взаимозаменяемых продуктов.
+     * @param productIndex порядковому номер продукта.
+     * @return продукт по его порядковому номеру.
+     * @throws ValidateException если productIndex < 0
+     */
+    public Optional<Product> getProduct(DishIngredient ingredient, int productIndex) {
+        ValidateException.check(
+                Rule.of("DishIngredient.productIndex").notNegative(productIndex)
+        );
+
+        Page<Product> page = productRepository.getProducts(
+                new Criteria().
+                        setPageable(Pageable.ofIndex(5, productIndex)).
+                        setSort(ingredientProductsSort).
+                        setFilter(ingredient.getFilter())
+        );
+
+        Product product = null;
+
+        if(!page.getMetadata().isEmpty()) {
+            product = page.get(
+                    page.getMetadata().
+                            getTotalItems().
+                            subtract(BigInteger.ONE).
+                            min(BigInteger.valueOf(productIndex))
+            );
+        }
+
+        return Optional.ofNullable(product);
+    }
+
+    /**
+     * Возвращает кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
+     * @param ingredient ингредиент для которого рассчитывается кол-во взаимозаменяемых продуктов.
+     * @return кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
+     */
+    public int getProductsNumber(DishIngredient ingredient) {
+        return productRepository.getProductsNumber(new Criteria().setFilter(ingredient.getFilter()));
+    }
+
+    /**
+     * Для любого указанного продукта, из множества взаимозаменямых продуктов данного ингредиента, вычисляет
+     * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
+     * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
+     * Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
+     * то метод вернет результат для последнего продукта.<br/>
+     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
+     * данного ингредиента, то метод вернет пустой Optional.
+     * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
+     * @param ingredient ингредиент для которого рассчитывается кол-во недостающих продуктов.
+     * @param servingNumber кол-во порций блюда.
+     * @return кол-во "упаковок" докупаемого продукта.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. servingNumber является null.<br/>
+     *              2. productIndex < 0 <br/>
+     *              3. servingNumber <= 0
+     */
+    public Optional<BigDecimal> getLackQuantity(DishIngredient ingredient,
+                                                int productIndex,
+                                                BigDecimal servingNumber) {
+        ValidateException.check(
+                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
+                        and(v -> v.positiveValue(servingNumber))
+        );
+
+        return getProduct(ingredient, productIndex).
+                map(product -> getLackQuantity(ingredient, product, servingNumber));
+    }
+
+    /**
+     * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта.<br/>
+     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
+     * данного ингредиента, то метод вернет пустой Optional.
+     * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
+     * @param ingredient ингредиент для которого рассчитывается общай цена недостающего кол-ва продуктов.
+     * @param servingNumber кол-во порций блюда.
+     * @return общую цену за недостающее кол-во докупаемого продукта.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. servingNumber является null.<br/>
+     *              2. productIndex < 0 <br/>
+     *              3. servingNumber <= 0
+     */
+    public Optional<BigDecimal> getLackQuantityPrice(DishIngredient ingredient,
+                                                     int productIndex,
+                                                     BigDecimal servingNumber) {
+        ValidateException.check(
+                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
+                        and(v -> v.positiveValue(servingNumber))
+        );
+
+        return getProduct(ingredient, productIndex).
+                map(
+                        product -> getLackQuantity(ingredient, product, servingNumber).
+                                multiply(product.getContext().getPrice(), config.getMathContext())
+                );
+    }
+
+    /**
      * Проверяет - содержится ли в блюде ингредиент с указанным именем.
      * @param name имя искомого ингредиента.
      * @return true - если указанный ингредиент содержится в данном блюде, иначе - false.
@@ -310,7 +424,7 @@ public class Dish implements Entity<Dish> {
         BigInteger result = BigInteger.ZERO;
 
         for(DishIngredient ingredient : ingredients) {
-            int productsNumber = ingredient.getProductsNumber();
+            int productsNumber = getProductsNumber(ingredient);
 
             if(result.signum() == 0 && productsNumber > 0) {
                 result = BigInteger.valueOf(productsNumber);
@@ -355,7 +469,7 @@ public class Dish implements Entity<Dish> {
         );
 
         return ingredients.stream().
-                map(i -> i.getLackQuantityPrice(productsIndex.get(i.getName()), servingNumber)).
+                map(i -> getLackQuantityPrice(i, productsIndex.get(i.getName()), servingNumber)).
                 filter(Optional::isPresent).
                 map(Optional::get).
                 reduce(BigDecimal::add);
@@ -371,15 +485,15 @@ public class Dish implements Entity<Dish> {
      */
     public Optional<BigDecimal> getAveragePrice() {
         return ingredients.stream().
-                map(DishIngredient::getProductsPriceSum).
+                map(this::getProductsPriceSum).
                 filter(Optional::isPresent).
                 map(Optional::get).
                 reduce(BigDecimal::add).
                 map(totalPrice -> {
                     BigDecimal totalNumber = ingredients.stream().
-                            map(i -> new BigDecimal(i.getProductsNumber())).
+                            map(i -> new BigDecimal(getProductsNumber(i))).
                             reduce(BigDecimal::add).
-                            get();
+                            orElseThrow();
 
                     return totalPrice.divide(totalNumber, config.getMathContext());
                 });
@@ -435,6 +549,33 @@ public class Dish implements Entity<Dish> {
                 ", tags=" + tags +
                 ", ingredients=" + ingredients +
                 '}';
+    }
+
+
+    /*
+     * Возвращает суммарную цену всех продуктов которые могут использоваться в качестве данного ингредиента.
+     * Используется при расчете средней арифметической цены блюда, в которое входит данный ингредиент.
+     * Если в БД нет ни одного продукта удовлетворяющего ограничению DishIngredient#getFilter() данного ингредиента,
+     * то метод вернет пустой Optional.
+     */
+    private Optional<BigDecimal> getProductsPriceSum(DishIngredient ingredient) {
+        return productRepository.getProductsSum(new Criteria().setFilter(ingredient.getFilter()));
+    }
+
+    private BigDecimal getLackQuantity(DishIngredient ingredient,
+                                       Product product,
+                                       BigDecimal servingNumber) {
+        BigDecimal lackQuantity = ingredient.getNecessaryQuantity(servingNumber).
+                subtract(product.getQuantity()).
+                max(BigDecimal.ZERO);
+
+        if(lackQuantity.signum() > 0) {
+            lackQuantity = lackQuantity.
+                    divide(product.getContext().getPackingSize(), config.getMathContext()).
+                    setScale(0, RoundingMode.UP);
+        }
+
+        return lackQuantity;
     }
 
 
@@ -513,8 +654,7 @@ public class Dish implements Entity<Dish> {
                             setName(name).
                             setFilter(filter).
                             setQuantity(quantity).
-                            setConfig(config).
-                            setRepository(repository)
+                            setConfig(config)
             );
             return this;
         }
@@ -526,9 +666,6 @@ public class Dish implements Entity<Dish> {
 
         public Builder setRepository(ProductRepository repository) {
             this.repository = repository;
-
-            ingredients.forEach(b -> b.setRepository(repository));
-
             return this;
         }
 

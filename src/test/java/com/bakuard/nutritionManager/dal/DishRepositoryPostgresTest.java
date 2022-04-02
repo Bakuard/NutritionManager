@@ -710,12 +710,9 @@ class DishRepositoryPostgresTest {
         );
 
         Assertions.assertAll(
-                () -> Assertions.assertTrue(dishes.get(0).equalsFullState(actual.get(0)),
-                        "expected: " + dishes.get(0) + "\nactual: " + actual.get(0)),
-                () -> Assertions.assertTrue(dishes.get(1).equalsFullState(actual.get(1)),
-                        "expected: " + dishes.get(1) + "\nactual: " + actual.get(1)),
-                () -> Assertions.assertTrue(dishes.get(2).equalsFullState(actual.get(2)),
-                        "expected: " + dishes.get(2) + "\nactual: " + actual.get(2))
+                () -> AssertUtil.assertEquals(dishes.get(0), actual.get(0)),
+                () -> AssertUtil.assertEquals(dishes.get(1), actual.get(1)),
+                () -> AssertUtil.assertEquals(dishes.get(2), actual.get(2))
         );
     }
 

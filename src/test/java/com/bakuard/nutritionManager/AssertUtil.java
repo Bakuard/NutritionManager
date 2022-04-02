@@ -82,15 +82,15 @@ public class AssertUtil {
     }
 
     public static void assertEquals(Product a, Product b) {
-        if(!a.equalsFullState(b)) Assertions.fail("Expected: " + a + ", actual: " + b);
+        if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
     }
 
     public static void assertEquals(Dish a, Dish b) {
-        if(!a.equalsFullState(b)) Assertions.fail("Expected: " + a + ", actual: " + b);
+        if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
     }
 
     public static void assertEquals(User a, User b) {
-        if(!a.equalsFullState(b)) Assertions.fail("Expected: " + a + ", actual: " + b);
+        if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
     }
 
 }
