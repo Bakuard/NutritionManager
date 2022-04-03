@@ -95,7 +95,7 @@ public class ProductController {
     )
     @Transactional
     @PostMapping("/add")
-    public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody AddedProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody ProductAddRequest dto) {
         logger.info("Add new product. dto={}", dto);
 
         Product product = mapper.toProductForAdd(JwsAuthenticationProvider.getAndClearUserId(), dto);
@@ -120,7 +120,7 @@ public class ProductController {
     )
     @Transactional
     @PutMapping("/update")
-    public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody UpdatedProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody ProductUpdateRequest dto) {
         logger.info("Update product. dto={}", dto);
 
         Product product = mapper.toProductForUpdate(JwsAuthenticationProvider.getAndClearUserId(), dto);

@@ -1,28 +1,44 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
+@Schema(description = "Возвращаемые частичные данные о блюде используемые в списке блюд")
 public class DishForListResponse {
 
-    private String imagePath;
+    @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Dish.")
+    private String type;
+    @Schema(description = "Путь к изображению данного блюда")
+    private URL imageUrl;
+    @Schema(description = "Наименование блюда")
     private String name;
+    @Schema(description = "Размер одной порции блюда")
     private BigDecimal servingSize;
+    @Schema(description = "Единица измерения кол-ва блюда")
     private String unit;
+    @Schema(description = "Среднеарифметическая цена блюда")
     private BigDecimal averagePrice;
+    @Schema(description = "Теги блюда")
     private List<String> tags;
 
     public DishForListResponse() {
-
+        type = "Dish";
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getType() {
+        return type;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public URL getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(URL imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getName() {
@@ -70,7 +86,7 @@ public class DishForListResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DishForListResponse that = (DishForListResponse) o;
-        return Objects.equals(imagePath, that.imagePath) &&
+        return Objects.equals(imageUrl, that.imageUrl) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(servingSize, that.servingSize) &&
                 Objects.equals(unit, that.unit) &&
@@ -80,13 +96,13 @@ public class DishForListResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(imagePath, name, servingSize, unit, averagePrice, tags);
+        return Objects.hash(imageUrl, name, servingSize, unit, averagePrice, tags);
     }
 
     @Override
     public String toString() {
         return "DishForListResponse{" +
-                "imagePath='" + imagePath + '\'' +
+                "imagePath='" + imageUrl + '\'' +
                 ", name='" + name + '\'' +
                 ", servingSize=" + servingSize +
                 ", unit='" + unit + '\'' +

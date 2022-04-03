@@ -25,6 +25,7 @@ public class ProductAsDishIngredientResponse {
     private BigDecimal lackQuantity;
     private BigDecimal lackQuantityPrice;
     private List<String> tags;
+    private int productsTotalNumber;
 
     public ProductAsDishIngredientResponse() {
         type = "Product";
@@ -158,12 +159,21 @@ public class ProductAsDishIngredientResponse {
         this.tags = tags;
     }
 
+    public int getProductsTotalNumber() {
+        return productsTotalNumber;
+    }
+
+    public void setProductsTotalNumber(int productsTotalNumber) {
+        this.productsTotalNumber = productsTotalNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProductAsDishIngredientResponse that = (ProductAsDishIngredientResponse) o;
-        return Objects.equals(type, that.type) &&
+        return productsTotalNumber == that.productsTotalNumber &&
+                Objects.equals(type, that.type) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(user, that.user) &&
                 Objects.equals(imagePath, that.imagePath) &&
@@ -183,8 +193,9 @@ public class ProductAsDishIngredientResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, id, user, imagePath, category, shop, grade, manufacturer, price,
-                packingSize, unit, quantity, necessaryQuantity, lackQuantity, lackQuantityPrice, tags);
+        return Objects.hash(type, id, user, imagePath, category, shop, grade,
+                manufacturer, price, packingSize, unit, quantity, necessaryQuantity,
+                lackQuantity, lackQuantityPrice, tags, productsTotalNumber);
     }
 
     @Override
@@ -206,6 +217,7 @@ public class ProductAsDishIngredientResponse {
                 ", lackQuantity=" + lackQuantity +
                 ", lackQuantityPrice=" + lackQuantityPrice +
                 ", tags=" + tags +
+                ",productsTotalNumber=" + productsTotalNumber +
                 '}';
     }
 

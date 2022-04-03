@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,7 +56,7 @@ public class DishController {
     )
     @Transactional
     @PostMapping("/add")
-    public ResponseEntity<DishResponse> add(@RequestBody DishRequest dto) {
+    public ResponseEntity<DishResponse> add(@RequestBody DishUpdateRequest dto) {
         logger.info("Add new dish. dto={}", dto);
 
         return ResponseEntity.ok(new DishResponse());
@@ -78,7 +77,7 @@ public class DishController {
     )
     @Transactional
     @PutMapping("/update")
-    public ResponseEntity<DishResponse> update(@RequestBody DishRequest dto) {
+    public ResponseEntity<DishResponse> update(@RequestBody DishUpdateRequest dto) {
         logger.info("Update dish. dto={}", dto);
 
         return ResponseEntity.ok(new DishResponse());
@@ -211,37 +210,6 @@ public class DishController {
         return ResponseEntity.ok(Pageable.firstEmptyPage());
     }
 
-    @Operation(summary = "Получение выборки из всех единиц измерения блюд указанного пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
-    @GetMapping("/getUnits")
-    public ResponseEntity<List<DishUnitResponse>> getUnits(
-            @RequestParam("page")
-            @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
-            int page,
-            @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
-            int size) {
-        logger.info("Get dish units by userId");
-        List<DishUnitResponse> response = List.of();
-        return ResponseEntity.ok(response);
-    }
-
     @Operation(summary = "Получение выборки из всех тегов используемых для блюд укзанного пользователя",
             responses = {
                     @ApiResponse(responseCode = "200"),
@@ -292,7 +260,7 @@ public class DishController {
     )
     @Transactional
     @PostMapping("/pickProductsList")
-    public ResponseEntity<DishProductsListResponse> pickProductsList(@RequestBody DishProductListRequest dto) {
+    public ResponseEntity<DishProductsListResponse> pickProductsList(@RequestBody DishProductsListRequest dto) {
         logger.info("Pick products list for dish. dto={}", dto);
 
         return ResponseEntity.ok(new DishProductsListResponse());

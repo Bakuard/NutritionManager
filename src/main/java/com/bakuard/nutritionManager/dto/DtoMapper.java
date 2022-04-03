@@ -57,7 +57,7 @@ public class DtoMapper {
         return response;
     }
 
-    public Product toProductForUpdate(UUID userId, UpdatedProductRequest dto) {
+    public Product toProductForUpdate(UUID userId, ProductUpdateRequest dto) {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 setId(dto.getId()).
@@ -78,7 +78,7 @@ public class DtoMapper {
         return builder.tryBuild();
     }
 
-    public Product toProductForAdd(UUID userId, AddedProductRequest dto) {
+    public Product toProductForAdd(UUID userId, ProductAddRequest dto) {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 generateId().
