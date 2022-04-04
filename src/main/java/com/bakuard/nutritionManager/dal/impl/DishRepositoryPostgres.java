@@ -170,6 +170,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setId(dishId).
                                     setUser(criteria.getFilter().<UserFilter>findAny(USER).getUser()).
                                     setName(rs.getString("name")).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImagePath(rs.getString("imagePath")).
@@ -335,18 +336,20 @@ public class DishRepositoryPostgres implements DishRepository {
                             dishId,
                             userId,
                             name,
+                            servingSize,
                             unit,
                             description,
                             imagePath
-                        ) VALUES (?,?,?, ?,?,?);
+                        ) VALUES (?,?,?, ?,?,?,?);
                         """,
                 (PreparedStatement ps) -> {
                     ps.setObject(1, dish.getId());
                     ps.setObject(2, dish.getUser().getId());
                     ps.setString(3, dish.getName());
-                    ps.setString(4, dish.getUnit());
-                    ps.setString(5, dish.getDescription());
-                    ps.setString(6, dish.getImageUrl() == null ? null : dish.getImageUrl().toString());
+                    ps.setBigDecimal(4, dish.getServingSize());
+                    ps.setString(5, dish.getUnit());
+                    ps.setString(6, dish.getDescription());
+                    ps.setString(7, dish.getImageUrl() == null ? null : dish.getImageUrl().toString());
                 }
         );
 
@@ -410,6 +413,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 """
                         UPDATE Dishes SET
                             name=?,
+                            servingSize=?,
                             unit=?,
                             description=?,
                             imagePath=?
@@ -417,11 +421,12 @@ public class DishRepositoryPostgres implements DishRepository {
                         """,
                 (PreparedStatement ps) -> {
                     ps.setString(1, newVersion.getName());
-                    ps.setString(2, newVersion.getUnit());
-                    ps.setString(3, newVersion.getDescription());
-                    ps.setString(4, newVersion.getImageUrl() == null ? null : newVersion.getImageUrl().toString());
-                    ps.setObject(5, newVersion.getUser().getId());
-                    ps.setObject(6, newVersion.getId());
+                    ps.setBigDecimal(2, newVersion.getServingSize());
+                    ps.setString(3, newVersion.getUnit());
+                    ps.setString(4, newVersion.getDescription());
+                    ps.setString(5, newVersion.getImageUrl() == null ? null : newVersion.getImageUrl().toString());
+                    ps.setObject(6, newVersion.getUser().getId());
+                    ps.setObject(7, newVersion.getId());
                 }
         );
 
@@ -541,6 +546,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                             rs.getString("userSalt")
                                     )).
                                     setName(rs.getString("name")).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImagePath(rs.getString("imagePath")).

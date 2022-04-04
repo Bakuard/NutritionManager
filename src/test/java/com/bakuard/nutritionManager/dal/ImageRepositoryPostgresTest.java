@@ -444,6 +444,7 @@ class ImageRepositoryPostgresTest {
                             setId(toUUID(i)).
                             setUser(user).
                             setName("dish#" + i).
+                            setServingSize(BigDecimal.ONE).
                             setUnit("unit A").
                             setDescription("description A").
                             setImagePath(imageUrls[i]).

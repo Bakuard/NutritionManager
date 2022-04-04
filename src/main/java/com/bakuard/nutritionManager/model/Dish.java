@@ -46,6 +46,7 @@ public class Dish implements Entity<Dish> {
         this.id = other.id;
         this.user = new User(other.user);
         this.name = other.name;
+        this.servingSize = other.servingSize;
         this.unit = other.unit;
         this.description = other.description;
         this.imageUrl = other.imageUrl;
@@ -61,6 +62,7 @@ public class Dish implements Entity<Dish> {
     private Dish(UUID id,
                  User user,
                  String name,
+                 BigDecimal servingSize,
                  String unit,
                  String description,
                  String imageUrl,
@@ -77,6 +79,7 @@ public class Dish implements Entity<Dish> {
                 Rule.of("Dish.user").notNull(user),
                 Rule.of("Dish.name").notNull(name).and(r -> r.notBlank(name)),
                 Rule.of("Dish.unit").notNull(unit).and(r -> r.notBlank(unit)),
+                Rule.of("Dish.servingSize").notNull(servingSize).and(r -> r.positiveValue(servingSize)),
                 Rule.of("Dish.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, urlContainer)),
                 Rule.of("Dish.ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).
                         and(r -> {
@@ -95,6 +98,7 @@ public class Dish implements Entity<Dish> {
         this.id = id;
         this.user = user;
         this.name = name.trim();
+        this.servingSize = servingSize;
         this.unit = unit.trim();
         this.description = description;
         this.imageUrl = urlContainer.get();
@@ -726,6 +730,7 @@ public class Dish implements Entity<Dish> {
                     id,
                     user,
                     name,
+                    servingSize,
                     unit,
                     description,
                     imagePath,

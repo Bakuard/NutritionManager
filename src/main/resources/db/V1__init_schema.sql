@@ -48,6 +48,7 @@ CREATE TABLE Dishes (
     dishId UUID NOT NULL,
     userId UUID NOT NULL,
     name VARCHAR(256) NOT NULL,
+    servingSize NUMERIC(16, 6) NOT NULL,
     unit VARCHAR(256) NOT NULL,
     description TEXT,
     imagePath VARCHAR(512),

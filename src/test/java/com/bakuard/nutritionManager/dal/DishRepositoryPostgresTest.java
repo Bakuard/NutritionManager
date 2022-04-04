@@ -230,6 +230,10 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(dish));
         Dish updatedDish = new Dish(dish);
         updatedDish.setName("New name");
+        updatedDish.setServingSize(new BigDecimal("0.75"));
+        updatedDish.setUnit("new unit");
+        updatedDish.setDescription("new description");
+        updatedDish.setImageUrl("https://newDishImage");
         updatedDish.removeIngredient("ingredient 1");
         updatedDish.putIngredient("ingredient 4", Filter.anyCategory("category Z"), BigDecimal.TEN);
         updatedDish.removeTag(new Tag("tag A"));
@@ -255,6 +259,10 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(dish));
         Dish expected = new Dish(dish);
         expected.setName("New name");
+        expected.setServingSize(new BigDecimal("0.75"));
+        expected.setUnit("new unit");
+        expected.setDescription("new description");
+        expected.setImageUrl("https://newDishImage");
         expected.removeIngredient("ingredient 1");
         expected.putIngredient(
                 "ingredient 4",
@@ -1327,6 +1335,7 @@ class DishRepositoryPostgresTest {
                 setId(toUUID(dishId)).
                 setUser(user).
                 setName("dish A").
+                setServingSize(BigDecimal.ONE).
                 setUnit("unit A").
                 setDescription("description A").
                 setImagePath("https://nutritionmanager.xyz/products/images?id=1").
@@ -1385,6 +1394,7 @@ class DishRepositoryPostgresTest {
                         setId(toUUID(1)).
                         setUser(user).
                         setName("dish 1").
+                        setServingSize(BigDecimal.ONE).
                         setUnit("unit A").
                         setDescription("description 1").
                         setImagePath("https://nutritionmanager.xyz/products/images?id=1").
@@ -1441,6 +1451,7 @@ class DishRepositoryPostgresTest {
                         setId(toUUID(2)).
                         setUser(user).
                         setName("dish 2").
+                        setServingSize(BigDecimal.ONE).
                         setUnit("unit A").
                         setDescription("description 2").
                         setImagePath("https://nutritionmanager.xyz/products/images?id=2").
@@ -1473,6 +1484,7 @@ class DishRepositoryPostgresTest {
                         setId(toUUID(3)).
                         setUser(user).
                         setName("dish 3").
+                        setServingSize(BigDecimal.ONE).
                         setUnit("unit B").
                         setDescription("description 3").
                         setImagePath("https://nutritionmanager.xyz/products/images?id=3").
@@ -1526,6 +1538,7 @@ class DishRepositoryPostgresTest {
                         setId(toUUID(4)).
                         setUser(user).
                         setName("dish 4").
+                        setServingSize(BigDecimal.ONE).
                         setUnit("unit C").
                         setDescription("description 4").
                         setImagePath("https://nutritionmanager.xyz/products/images?id=4").
