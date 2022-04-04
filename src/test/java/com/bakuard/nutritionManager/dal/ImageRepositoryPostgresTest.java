@@ -458,7 +458,7 @@ class ImageRepositoryPostgresTest {
                                                     Filter.minTags(new Tag("common tag")),
                                                     Filter.anyCategory("name A"),
                                                     Filter.anyShop("shop A"),
-                                                    Filter.anyVariety("variety A"),
+                                                    Filter.anyGrade("variety A"),
                                                     Filter.anyManufacturer("manufacturer A")
                                             ),
                                             Filter.and(

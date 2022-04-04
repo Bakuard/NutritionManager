@@ -2,9 +2,11 @@ package com.bakuard.nutritionManager.dto;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
+import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
+import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.dto.exceptions.*;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
@@ -21,20 +23,24 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class DtoMapper {
 
     private UserRepository userRepository;
     private ProductRepository productRepository;
+    private DishRepository dishRepository;
     private AppConfigData appConfiguration;
     private MessageSource messageSource;
 
     public DtoMapper(UserRepository userRepository,
                      ProductRepository productRepository,
+                     DishRepository dishRepository,
                      MessageSource messageSource,
                      AppConfigData appConfiguration) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.dishRepository = dishRepository;
         this.messageSource = messageSource;
         this.appConfiguration = appConfiguration;
     }
@@ -57,7 +63,7 @@ public class DtoMapper {
         return response;
     }
 
-    public Product toProductForUpdate(UUID userId, ProductUpdateRequest dto) {
+    public Product toProduct(UUID userId, ProductUpdateRequest dto) {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 setId(dto.getId()).
@@ -78,7 +84,7 @@ public class DtoMapper {
         return builder.tryBuild();
     }
 
-    public Product toProductForAdd(UUID userId, ProductAddRequest dto) {
+    public Product toProduct(UUID userId, ProductAddRequest dto) {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 generateId().
@@ -103,6 +109,109 @@ public class DtoMapper {
         return products.map(this::toProductResponse);
     }
 
+    public DishResponse toDishResponse(Dish dish) {
+        DishResponse response = new DishResponse();
+        response.setId(dish.getId());
+        response.setUser(toUserResponse(dish.getUser()));
+        response.setName(dish.getName());
+        response.setServingSize(dish.getServingSize());
+        response.setUnit(dish.getUnit());
+        response.setDescription(dish.getDescription());
+        response.setImageUrl(dish.getImageUrl());
+        response.setTags(toTagsResponse(dish.getTags()));
+
+        List<DishIngredient> ingredients = dish.getIngredients();
+        response.setIngredients(
+                IntStream.range(0, ingredients.size()).
+                        mapToObj(i -> toDishIngredientRequestResponse(ingredients.get(i), i)).
+                        toList()
+        );
+
+        return response;
+    }
+
+    public Dish toDish(UUID userId, DishAddRequest dto) {
+        Dish.Builder builder = new Dish.Builder().
+                generateId().
+                setUser(userRepository.getById(userId)).
+                setName(dto.getName()).
+                setServingSize(dto.getServingSize()).
+                setUnit(dto.getUnit()).
+                setDescription(dto.getDescription()).
+                setImagePath(dto.getImageUrl());
+
+        IntStream.range(0, dto.getIngredients().size()).
+                forEach(i -> {
+                    DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
+                    builder.addIngredient(toDishIngredient(ingredient, i));
+                });
+
+        dto.getTags().forEach(builder::addTag);
+
+        builder.setConfig(appConfiguration).
+                setRepository(productRepository);
+
+        return builder.tryBuild();
+    }
+
+    public Dish toDish(UUID userId, DishUpdateRequest dto) {
+        Dish.Builder builder = new Dish.Builder().
+                setId(dto.getId()).
+                setUser(userRepository.getById(userId)).
+                setName(dto.getName()).
+                setServingSize(dto.getServingSize()).
+                setUnit(dto.getUnit()).
+                setDescription(dto.getDescription()).
+                setImagePath(dto.getImageUrl());
+
+        IntStream.range(0, dto.getIngredients().size()).
+                forEach(i -> {
+                    DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
+                    builder.addIngredient(toDishIngredient(ingredient, i));
+                });
+
+        dto.getTags().forEach(builder::addTag);
+
+        builder.setConfig(appConfiguration).
+                setRepository(productRepository);
+
+        return builder.tryBuild();
+    }
+
+    public Page<DishForListResponse> toDishesResponse(Page<Dish> dishes) {
+        return dishes.map(this::toDishForListResponse);
+    }
+
+    public DishProductsListResponse toDishProductsListResponse(DishProductsListRequest dto) {
+        Dish dish = dishRepository.getById(dto.getDishId());
+
+        List<ProductAsDishIngredientResponse> ingredientsResponse =
+                dto.getIngredients().entrySet().stream().
+                        map(pair -> {
+                            DishIngredient ingredient = dish.getIngredients().get(pair.getKey());
+                            return toProductAsDishIngredientResponse(
+                                    dish,
+                                    ingredient,
+                                    pair.getValue(),
+                                    dto.getServingNumber()
+                            );
+                        }).
+                        toList();
+
+        BigDecimal totalPrice = ingredientsResponse.stream().
+                map(ProductAsDishIngredientResponse::getLackQuantityPrice).
+                reduce(BigDecimal::add).
+                orElse(null);
+
+        DishProductsListResponse response = new DishProductsListResponse();
+        response.setDishId(dish.getId());
+        response.setServingNumber(dto.getServingNumber());
+        response.setTotalPrice(totalPrice);
+        response.setIngredients(ingredientsResponse);
+
+        return response;
+    }
+
 
     public Criteria toProductCriteria(int page,
                                       int size,
@@ -121,7 +230,7 @@ public class DtoMapper {
         if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
         if(category != null) filters.add(Filter.anyCategory(category));
         if(shops != null) filters.add(Filter.anyShop(shops));
-        if(varieties != null) filters.add(Filter.anyVariety(varieties));
+        if(varieties != null) filters.add(Filter.anyGrade(varieties));
         if(manufacturers != null) filters.add(Filter.anyManufacturer(manufacturers));
         if(tags != null) filters.add(Filter.minTags(toTags(tags)));
 
@@ -132,6 +241,30 @@ public class DtoMapper {
         return new Criteria().
                 setPageable(Pageable.of(size, page)).
                 setSort(toProductSort(sortRule)).
+                setFilter(filter);
+    }
+
+    public Criteria toDishCriteria(int page,
+                                   int size,
+                                   UUID userId,
+                                   String sortRule,
+                                   List<String> productCategories,
+                                   List<String> tags) {
+        User user = userRepository.getById(userId);
+
+        List<Filter> filters = new ArrayList<>();
+        filters.add(Filter.user(user));
+
+        if(productCategories != null) filters.add(Filter.anyCategory(productCategories));
+        if(tags != null) filters.add(Filter.minTags(toTags(tags)));
+
+        Filter filter = null;
+        if(filters.size() == 1) filter = filters.get(0);
+        else if(filters.size() > 1) filter = Filter.and(filters);
+
+        return new Criteria().
+                setPageable(Pageable.of(size, page)).
+                setSort(toDishSort(sortRule)).
                 setFilter(filter);
     }
 
@@ -153,6 +286,21 @@ public class DtoMapper {
         response.setManufacturers(manufacturers.getContent().stream().map(FieldResponse::new).toList());
         response.setShops(shops.getContent().stream().map(FieldResponse::new).toList());
         response.setCategories(categories.getContent().stream().map(FieldResponse::new).toList());
+
+        return response;
+    }
+
+    public DishFieldsResponse toDishFieldsResponse(UUID userId) {
+        Criteria criteria = new Criteria().
+                setPageable(Pageable.of(1000, 0)).
+                setFilter(Filter.user(userRepository.getById(userId)));
+
+        Page<Tag> tags = dishRepository.getTags(criteria);
+        Page<String> units = dishRepository.getUnits(criteria);
+
+        DishFieldsResponse response = new DishFieldsResponse();
+        response.setTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
+        response.setUnits(units.getContent().stream().map(FieldResponse::new).toList());
 
         return response;
     }
@@ -224,13 +372,115 @@ public class DtoMapper {
     }
 
     private Sort toProductSort(String sortRuleAsString) {
-        if(sortRuleAsString == null) return null;
+        if(sortRuleAsString == null) return Sort.productDefaultSort();
         String[] parameters = sortRuleAsString.split("_");
         return Sort.products().put(parameters[0], parameters[1]);
     }
 
+    private Sort toDishSort(String sortRuleAsString) {
+        if(sortRuleAsString == null) return Sort.dishDefaultSort();
+        String[] parameters = sortRuleAsString.split("_");
+        return Sort.dishes().put(parameters[0], parameters[1]);
+    }
+
     private List<Tag> toTags(List<String> tags) {
         return tags.stream().map(Tag::new).toList();
+    }
+
+    private ProductAsDishIngredientResponse toProductAsDishIngredientResponse(Dish dish,
+                                                                              DishIngredient ingredient,
+                                                                              int productIndex,
+                                                                              BigDecimal servingNumber) {
+        return dish.getProduct(ingredient, productIndex).
+                map(product -> {
+                    ProductAsDishIngredientResponse response = new ProductAsDishIngredientResponse();
+                    response.setId(product.getId());
+                    response.setUser(toUserResponse(product.getUser()));
+                    response.setImageUrl(product.getImageUrl());
+                    response.setCategory(product.getContext().getCategory());
+                    response.setShop(product.getContext().getShop());
+                    response.setGrade(product.getContext().getVariety());
+                    response.setManufacturer(product.getContext().getManufacturer());
+                    response.setPrice(product.getContext().getPrice());
+                    response.setPackingSize(product.getContext().getPackingSize());
+                    response.setUnit(product.getContext().getUnit());
+                    response.setQuantity(product.getQuantity());
+                    response.setNecessaryQuantity(ingredient.getNecessaryQuantity(servingNumber));
+                    response.setLackQuantity(
+                            dish.getLackQuantity(ingredient, productIndex, servingNumber).orElseThrow()
+                    );
+                    response.setLackQuantityPrice(
+                            dish.getLackQuantityPrice(ingredient, productIndex, servingNumber).orElseThrow()
+                    );
+                    response.setTags(toTagsResponse(product.getContext().getTags()));
+                    response.setProductsTotalNumber(dish.getProductsNumber(ingredient));
+                    return response;
+                }).
+                orElse(null);
+    }
+
+    private DishForListResponse toDishForListResponse(Dish dish) {
+        DishForListResponse response = new DishForListResponse();
+        response.setImageUrl(dish.getImageUrl());
+        response.setName(dish.getName());
+        response.setServingSize(dish.getServingSize());
+        response.setUnit(dish.getUnit());
+        response.setAveragePrice(dish.getAveragePrice().orElse(null));
+        response.setTags(toTagsResponse(dish.getTags()));
+        return response;
+    }
+
+    private DishIngredient.Builder toDishIngredient(DishIngredientRequestResponse dto, int index) {
+        return new DishIngredient.Builder().
+                setConfig(appConfiguration).
+                setName("ingredient" + index).
+                setQuantity(dto.getQuantity()).
+                setFilter(toDishIngredientFilter(dto.getFilter()));
+    }
+
+    private Filter toDishIngredientFilter(DishIngredientFilterRequestResponse dto) {
+        List<Filter> filters = new ArrayList<>();
+        if(dto.getCategory() != null) filters.add(Filter.anyCategory(dto.getCategory()));
+        if(dto.getGrades() != null) filters.add(Filter.anyGrade(dto.getGrades()));
+        if(dto.getShops() != null) filters.add(Filter.anyShop(dto.getShops()));
+        if(dto.getManufacturers() != null) filters.add(Filter.anyManufacturer(dto.getManufacturers()));
+        if(dto.getTags() != null) filters.add(Filter.minTags(toTags(dto.getTags())));
+
+        Filter result = null;
+        if(filters.size() == 1) result = filters.get(0);
+        else if(filters.size() > 1) result = Filter.and(filters);
+
+        return result;
+    }
+
+    private DishIngredientRequestResponse toDishIngredientRequestResponse(DishIngredient ingredient, int index) {
+        DishIngredientRequestResponse response = new DishIngredientRequestResponse();
+        response.setIndex(index);
+        response.setQuantity(ingredient.getNecessaryQuantity(BigDecimal.ONE));
+        response.setFilter(toDishIngredientFilterRequestResponse(ingredient.getFilter()));
+        return response;
+    }
+
+    private DishIngredientFilterRequestResponse toDishIngredientFilterRequestResponse(Filter filter) {
+        DishIngredientFilterRequestResponse response = new DishIngredientFilterRequestResponse();
+
+        ArrayDeque<Filter> stack = new ArrayDeque<>();
+        stack.addLast(filter);
+        while(!stack.isEmpty()) {
+            Filter temp = stack.removeLast();
+
+            switch(temp.getType()) {
+                case MIN_TAGS -> response.setTags(toTagsResponse(((MinTagsFilter)temp).getTags()));
+                case CATEGORY -> response.setCategory(((AnyFilter)temp).getValues().get(0));
+                case SHOPS -> response.setShops(((AnyFilter)temp).getValues());
+                case GRADES -> response.setGrades(((AnyFilter)temp).getValues());
+                case MANUFACTURER -> response.setManufacturers(((AnyFilter)temp).getValues());
+            }
+
+            temp.getOperands().forEach(stack::addLast);
+        }
+
+        return response;
     }
 
 }

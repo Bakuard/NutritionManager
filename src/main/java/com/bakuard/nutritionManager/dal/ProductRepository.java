@@ -42,7 +42,7 @@ public interface ProductRepository {
      * Возвращает продукт по его идентификатору. Если в БД нет продукта с таким идентификатором -
      * выбрасывает исключение.
      * @param productId идентификатор продукта.
-     * @return объект Product или null.
+     * @return объект Product.
      * @throws ValidateException если верно одно из следующих условий:<br/>
      *         1. если не удалось найти продукт с таким ID.<br/>
      *         2. если productId равен null.

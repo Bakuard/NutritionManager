@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Возвращаемый список докупаемых продуктов блюда")
+@Schema(description = "Возвращаемый список продуктов блюда")
 public class DishProductsListResponse {
 
     @Schema(description = "Уникальный идентфикатор блюда")

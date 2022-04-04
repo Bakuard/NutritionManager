@@ -719,7 +719,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
             case SHOPS -> {
                 return List.of(shopFilter((AnyFilter) filter));
             }
-            case VARIETIES -> {
+            case GRADES -> {
                 return List.of(varietyFilter((AnyFilter) filter));
             }
             case MANUFACTURER -> {
@@ -756,7 +756,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
             case SHOPS -> {
                 return shopFilter((AnyFilter) filter);
             }
-            case VARIETIES -> {
+            case GRADES -> {
                 return varietyFilter((AnyFilter) filter);
             }
             case MANUFACTURER -> {

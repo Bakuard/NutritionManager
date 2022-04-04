@@ -19,7 +19,7 @@ public interface Filter {
         MIN_TAGS,
         CATEGORY,
         SHOPS,
-        VARIETIES,
+        GRADES,
         MANUFACTURER,
         INGREDIENTS,
         USER,
@@ -104,12 +104,12 @@ public interface Filter {
         return new AnyFilter(values, 1, Type.SHOPS);
     }
 
-    public static AnyFilter anyVariety(String a, String... other) {
-        return new AnyFilter(toList(a, other), 1, Type.VARIETIES);
+    public static AnyFilter anyGrade(String a, String... other) {
+        return new AnyFilter(toList(a, other), 1, Type.GRADES);
     }
 
-    public static AnyFilter anyVariety(List<String> values) {
-        return new AnyFilter(values, 1, Type.VARIETIES);
+    public static AnyFilter anyGrade(List<String> values) {
+        return new AnyFilter(values, 1, Type.GRADES);
     }
 
     public static AnyFilter anyIngredient(String productCategory, String... other) {

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Данные запроса на получение списка докупаемых продуктов для блюда")
+@Schema(description = "Данные запроса на получение списка продуктов для блюда")
 public class DishProductsListRequest {
 
     @Schema(description = "Уникальный идентфикатор блюда")

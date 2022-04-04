@@ -148,9 +148,15 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public DtoMapper dtoMapper(UserRepository userRepository,
                                ProductRepository productRepository,
+                               DishRepository dishRepository,
                                MessageSource messageSource,
                                AppConfigData appConfiguration) {
-        return new DtoMapper(userRepository, productRepository, messageSource, appConfiguration);
+        return new DtoMapper(
+                userRepository,
+                productRepository,
+                dishRepository,
+                messageSource,
+                appConfiguration);
     }
 
     @Bean

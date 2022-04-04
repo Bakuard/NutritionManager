@@ -1341,7 +1341,7 @@ class DishRepositoryPostgresTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 ),
                                 Filter.and(
@@ -1357,7 +1357,7 @@ class DishRepositoryPostgresTest {
                                         Filter.minTags(new Tag("value 1")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 ),
                                 Filter.and(
                                         Filter.user(user),
@@ -1371,7 +1371,7 @@ class DishRepositoryPostgresTest {
                                 Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                 Filter.anyCategory("name A"),
                                 Filter.anyShop("shop B"),
-                                Filter.anyVariety("variety B")
+                                Filter.anyGrade("variety B")
                         ),
                         new BigDecimal("0.1")).
                 tryBuild();
@@ -1400,7 +1400,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -1416,7 +1416,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.minTags(new Tag("value 1")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A")
+                                                Filter.anyGrade("variety A")
                                         ),
                                         Filter.and(
                                                 Filter.user(user),
@@ -1430,7 +1430,7 @@ class DishRepositoryPostgresTest {
                                         Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop B"),
-                                        Filter.anyVariety("variety B")
+                                        Filter.anyGrade("variety B")
                                 ),
                                 new BigDecimal("0.1")).
                         tryBuild()
@@ -1456,7 +1456,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -1492,7 +1492,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 ),
@@ -1515,7 +1515,7 @@ class DishRepositoryPostgresTest {
                                         Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop B"),
-                                        Filter.anyVariety("variety B")
+                                        Filter.anyGrade("variety B")
                                 ),
                                 new BigDecimal("0.1")).
                         tryBuild()
@@ -1543,7 +1543,7 @@ class DishRepositoryPostgresTest {
                                         Filter.and(
                                                 Filter.user(user),
                                                 Filter.anyShop("shop C"),
-                                                Filter.anyVariety("variety D")
+                                                Filter.anyGrade("variety D")
                                         )
                                 ),
                                 BigDecimal.TEN).

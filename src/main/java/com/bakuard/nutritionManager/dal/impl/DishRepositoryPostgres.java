@@ -120,6 +120,11 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
+    public Dish getByName(String name) {
+        return null;
+    }
+
+    @Override
     public Page<Dish> getDishes(Criteria criteria) {
         int dishesNumber = getDishesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable().
@@ -650,7 +655,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     case MIN_TAGS -> result = toMinTagsFilter(parser);
                     case CATEGORY -> result = toCategoryFilter(parser);
                     case SHOPS -> result = toShopsFilter(parser);
-                    case VARIETIES -> result = toVarietiesFilter(parser);
+                    case GRADES -> result = toVarietiesFilter(parser);
                     case MANUFACTURER -> result = toManufacturerFilter(parser);
                     case USER -> result = toUserFilter(parser);
                 }
@@ -723,7 +728,7 @@ public class DishRepositoryPostgres implements DishRepository {
             values.add(parser.getValueAsString());
         }
 
-        return Filter.anyVariety(values);
+        return Filter.anyGrade(values);
     }
 
     private MinTagsFilter toMinTagsFilter(JsonParser parser) throws IOException {
@@ -779,7 +784,7 @@ public class DishRepositoryPostgres implements DishRepository {
             case OR_ELSE -> toJson((OrElseFilter) filter, writer);
             case AND -> toJson((AndFilter) filter, writer);
             case MIN_TAGS -> toJson((MinTagsFilter) filter, writer);
-            case CATEGORY, SHOPS, VARIETIES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
+            case CATEGORY, SHOPS, GRADES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
             case USER -> toJson((UserFilter) filter, writer);
         }
     }

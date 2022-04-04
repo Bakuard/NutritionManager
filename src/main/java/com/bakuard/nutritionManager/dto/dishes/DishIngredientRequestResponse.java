@@ -8,6 +8,8 @@ import java.util.Objects;
 @Schema(description = "Данные ингредиента блюда")
 public class DishIngredientRequestResponse {
 
+    @Schema(description = "Порядковый номер ингредиента в спске ингредиентов блюда")
+    private int index;
     @Schema(description = "Кол-во данного ингредиента необходимого для приготовления одной порции блюда")
     private BigDecimal quantity;
     @Schema(description = "Фильтр задающий множество взаимозаменяемых продуктов для данного ингредиента")
@@ -15,6 +17,14 @@ public class DishIngredientRequestResponse {
 
     public DishIngredientRequestResponse() {
 
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     public BigDecimal getQuantity() {
@@ -38,19 +48,21 @@ public class DishIngredientRequestResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DishIngredientRequestResponse that = (DishIngredientRequestResponse) o;
-        return Objects.equals(quantity, that.quantity) &&
+        return index == that.index &&
+                Objects.equals(quantity, that.quantity) &&
                 Objects.equals(filter, that.filter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(quantity, filter);
+        return Objects.hash(index, quantity, filter);
     }
 
     @Override
     public String toString() {
-        return "DishIngredientRequest{" +
-                "quantity=" + quantity +
+        return "DishIngredientRequestResponse{" +
+                "index=" + index +
+                ", quantity=" + quantity +
                 ", filter=" + filter +
                 '}';
     }
