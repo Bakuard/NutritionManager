@@ -892,6 +892,7 @@ class DishTest {
                 setId(toUUID(dishId)).
                 setUser(user).
                 setName("dish A").
+                setServingSize(BigDecimal.TEN).
                 setUnit("unit A").
                 setDescription("description A").
                 setImagePath("https://nutritionmanager.xyz/products/images?id=1").
