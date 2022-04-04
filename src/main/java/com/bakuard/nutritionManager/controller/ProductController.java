@@ -289,7 +289,7 @@ public class ProductController {
                       по всем продуктам пользователя.
                      """,
                      schema = @Schema(defaultValue = "false"))
-            Boolean onlyFridge,
+            boolean onlyFridge,
             @RequestParam(value = "category", required = false)
             @Parameter(description = "Категория продуктов",
                     schema = @Schema(defaultValue = "null"))

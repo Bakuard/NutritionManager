@@ -236,7 +236,7 @@ public class DishController {
             @RequestParam("size")
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
             int size,
-            @RequestParam("sort")
+            @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
                 schema = @Schema(
                     defaultValue = "category_asc (Сортировка по категориям в порядке возрастания).",
