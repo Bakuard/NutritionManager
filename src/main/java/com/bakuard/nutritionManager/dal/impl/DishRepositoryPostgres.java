@@ -84,8 +84,6 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Dish remove(UUID dishId) {
         ValidateException.check(
-                "DishRepository.remove",
-                "Fail to remove dish. Unknown dish with id=null",
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
@@ -122,7 +120,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Dish getByName(String name) {
         ValidateException.check(
-                Rule.of("DishRepository.getByName").notNull(name)
+                Rule.of("DishRepository.name").notNull(name)
         );
 
         return statement.query(
@@ -340,7 +338,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getDishesNumber(Criteria criteria) {
         ValidateException.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -356,7 +354,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getTagsNumber(Criteria criteria) {
         ValidateException.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -380,7 +378,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getUnitsNumber(Criteria criteria) {
         ValidateException.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
