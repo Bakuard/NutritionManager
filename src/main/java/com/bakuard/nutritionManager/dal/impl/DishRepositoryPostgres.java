@@ -121,7 +121,77 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish getByName(String name) {
-        return null;
+        ValidateException.check(
+                Rule.of("DishRepository.getByName").notNull(name)
+        );
+
+        return statement.query(
+                (Connection con) -> con.prepareStatement(
+                        """
+                                SELECT Dishes.*, DishTags.*,
+                                       Users.userId,
+                                       Users.name as userName,
+                                       Users.passwordHash as userPassHash,
+                                       Users.email as userEmail,
+                                       Users.salt as userSalt,
+                                       DishIngredients.name as ingredientName,
+                                       DishIngredients.quantity as ingredientQuantity,
+                                       DishIngredients.filter as ingredientFilter
+                                    FROM Dishes
+                                    LEFT JOIN Users
+                                        ON Dishes.userId = Users.userId
+                                    LEFT JOIN DishTags
+                                        ON Dishes.dishId = DishTags.dishId
+                                    LEFT JOIN DishIngredients
+                                        ON Dishes.dishId = DishIngredients.dishId
+                                    WHERE Dishes.name = ?
+                                    ORDER BY DishTags.index, DishIngredients.index;
+                                """
+                ),
+                (PreparedStatement ps) -> ps.setObject(1, name),
+                (ResultSet rs) -> {
+                    Dish.Builder builder = null;
+
+                    while(rs.next()) {
+                        if(builder == null) {
+                            builder = new Dish.Builder().
+                                    setId((UUID) rs.getObject("dishId")).
+                                    setUser(new User(
+                                            (UUID) rs.getObject("userId"),
+                                            rs.getString("userName"),
+                                            rs.getString("userPassHash"),
+                                            rs.getString("userEmail"),
+                                            rs.getString("userSalt")
+                                    )).
+                                    setName(name).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
+                                    setUnit(rs.getString("unit")).
+                                    setDescription(rs.getString("description")).
+                                    setImagePath(rs.getString("imagePath")).
+                                    setConfig(appConfig).
+                                    setRepository(productRepository);
+                        }
+
+                        String tagValue = rs.getString("tagValue");
+                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+
+                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+                        if(!rs.wasNull()) {
+                            String ingredientName = rs.getString("ingredientName");
+                            Filter filter = toFilter(rs.getString("ingredientFilter"));
+                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
+                        }
+                    }
+
+                    if(builder != null) {
+                        return builder.tryBuild();
+                    } else {
+                        throw new ValidateException("Fail to get dish by name=" + name).
+                                addReason(Rule.of("DishRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                    }
+                }
+        );
     }
 
     @Override

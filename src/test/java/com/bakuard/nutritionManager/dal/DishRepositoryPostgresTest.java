@@ -460,6 +460,52 @@ class DishRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
+            getByName(name):
+             name is null
+             => exception
+            """)
+    public void getByName1() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getByName(null),
+                DishRepositoryPostgres.class,
+                "getByName",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(name):
+             not exists dish with such name
+             => exception
+            """)
+    public void getByName2() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getByName("unknown dish"),
+                DishRepositoryPostgres.class,
+                "getByName",
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(name):
+             exists dish with such name
+             => exception
+            """)
+    public void getByName3() {
+        User user = createAndSaveUser(1);
+        Dish expected = createDish(100, user);
+        commit(() -> dishRepository.save(expected));
+
+        Dish actual = dishRepository.getByName("dish A");
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
             getNumberDishes(criteria):
              criteria is null
              => exception
