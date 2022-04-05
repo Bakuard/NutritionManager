@@ -23,7 +23,7 @@ public class AnyFilter extends AbstractFilter {
 
     AnyFilter(List<String> values, int minItems, Type type) {
         ValidateException.check(
-                Rule.of("AnyFilter.values").notNull(values).
+                Rule.of("AnyFilter." + type).notNull(values).
                         and(v -> v.notContainsNull(values)).
                         and(v -> v.min(values.size(), minItems)).
                         and(v -> v.notContains(values, s -> Result.State.of(!s.isBlank())))

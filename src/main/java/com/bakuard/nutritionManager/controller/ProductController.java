@@ -95,10 +95,10 @@ public class ProductController {
     )
     @Transactional
     @PostMapping("/add")
-    public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody AddedProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody ProductAddRequest dto) {
         logger.info("Add new product. dto={}", dto);
 
-        Product product = mapper.toProductForAdd(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        Product product = mapper.toProduct(JwsAuthenticationProvider.getAndClearUserId(), dto);
         productRepository.save(product);
 
         ProductResponse response = mapper.toProductResponse(product);
@@ -120,10 +120,10 @@ public class ProductController {
     )
     @Transactional
     @PutMapping("/update")
-    public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody UpdatedProductRequest dto) {
+    public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody ProductUpdateRequest dto) {
         logger.info("Update product. dto={}", dto);
 
-        Product product = mapper.toProductForUpdate(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        Product product = mapper.toProduct(JwsAuthenticationProvider.getAndClearUserId(), dto);
         productRepository.save(product);
 
         ProductResponse response = mapper.toProductResponse(product);
@@ -251,10 +251,6 @@ public class ProductController {
                     @ApiResponse(responseCode = "401",
                             description = "Если передан некорректный токен или токен не указан",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
-                            content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class)))
             }
     )
@@ -293,7 +289,7 @@ public class ProductController {
                       по всем продуктам пользователя.
                      """,
                      schema = @Schema(defaultValue = "false"))
-            Boolean onlyFridge,
+            boolean onlyFridge,
             @RequestParam(value = "category", required = false)
             @Parameter(description = "Категория продуктов",
                     schema = @Schema(defaultValue = "null"))
@@ -368,16 +364,12 @@ public class ProductController {
 
     @Operation(summary = """
             Возвращает производителей, торговые точки, сорта, категории и теги всех продуктов указанного
-            пользователя без дубликатов.
+            пользователя.
             """,
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "401",
                             description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class)))
             }

@@ -549,7 +549,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety C")
+                                        Filter.anyGrade("variety C")
                                 )
                         )
         );
@@ -627,7 +627,7 @@ class ProductRepositoryTest {
                                 Filter.and(
                                         Filter.user(user),
                                         Filter.anyCategory("name B"),
-                                        Filter.anyVariety("variety C")
+                                        Filter.anyGrade("variety C")
                                 )
                         )
         );
@@ -659,7 +659,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("this tag not exists")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety C")
+                                        Filter.anyGrade("variety C")
                                 )
                         )
         );
@@ -691,7 +691,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("this name not exists"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety C")
+                                        Filter.anyGrade("variety C")
                                 )
                         )
         );
@@ -723,7 +723,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("this shop not exists"),
-                                        Filter.anyVariety("variety C")
+                                        Filter.anyGrade("variety C")
                                 )
                         )
         );
@@ -755,7 +755,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("this variety not exists")
+                                        Filter.anyGrade("this variety not exists")
                                 )
                         )
         );
@@ -787,7 +787,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety D")
+                                        Filter.anyGrade("variety D")
                                 )
                         )
         );
@@ -820,7 +820,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety D"),
+                                        Filter.anyGrade("variety D"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         )
@@ -854,7 +854,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         )
@@ -887,7 +887,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer Z")
                                 )
                         )
@@ -929,7 +929,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -937,7 +937,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
@@ -981,7 +981,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -990,7 +990,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
-                                                Filter.anyVariety("variety C"),
+                                                Filter.anyGrade("variety C"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
@@ -1032,7 +1032,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -1040,7 +1040,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("unknown variety"),
+                                                Filter.anyGrade("unknown variety"),
                                                 Filter.anyManufacturer("unknown manufacturer")
                                         )
                                 )
@@ -1252,7 +1252,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag B"), new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety D")
+                                        Filter.anyGrade("variety D")
                                 )
                         ).
                         setSort(Sort.productDefaultSort())
@@ -1285,7 +1285,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag A"), new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety D")
+                                        Filter.anyGrade("variety D")
                                 )
                         )
         );
@@ -1322,7 +1322,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag A"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 )
                         ).
                         setSort(Sort.productDefaultSort())
@@ -1358,7 +1358,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag Z"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop Z"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 )
                         )
         );
@@ -1427,7 +1427,7 @@ class ProductRepositoryTest {
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop Z"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 )
                         )
         );
@@ -1463,7 +1463,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety Z")
+                                        Filter.anyGrade("variety Z")
                                 )
                         )
         );
@@ -1498,7 +1498,7 @@ class ProductRepositoryTest {
                                         Filter.user(user),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 )
                         ).
                         setSort(Sort.productDefaultSort())
@@ -1534,7 +1534,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common Z")),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety Z")
+                                        Filter.anyGrade("variety Z")
                                 )
                         )
         );
@@ -1571,7 +1571,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
-                                        Filter.anyVariety("variety D"),
+                                        Filter.anyGrade("variety D"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         )
@@ -1611,7 +1611,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         ).
@@ -1649,7 +1649,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer Z")
                                 )
                         )
@@ -1694,7 +1694,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown name"),
                                                 Filter.anyShop("unknown shop"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -1702,7 +1702,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
@@ -1753,7 +1753,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -1762,7 +1762,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
-                                                Filter.anyVariety("variety C"),
+                                                Filter.anyGrade("variety C"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
@@ -1814,7 +1814,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
@@ -1872,7 +1872,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -1880,7 +1880,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
-                                                Filter.anyVariety("unknown variety"),
+                                                Filter.anyGrade("unknown variety"),
                                                 Filter.anyManufacturer("unknown manufacturer")
                                         )
                                 )
@@ -2919,7 +2919,7 @@ class ProductRepositoryTest {
                                         Filter.user(user),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         )
@@ -2948,7 +2948,7 @@ class ProductRepositoryTest {
                                         Filter.user(user),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("name A"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 )
                         )
         );
@@ -2979,7 +2979,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("unknown shop"),
-                                        Filter.anyVariety("unknown variety"),
+                                        Filter.anyGrade("unknown variety"),
                                         Filter.anyManufacturer("unknown manufacturer")
                                 )
                         )
@@ -3008,7 +3008,7 @@ class ProductRepositoryTest {
                                         Filter.user(user),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("unknown variety")
+                                        Filter.anyGrade("unknown variety")
                                 )
                         )
         );
@@ -3061,7 +3061,7 @@ class ProductRepositoryTest {
                                 Filter.and(
                                         Filter.user(user),
                                         Filter.minTags(new Tag("unknown tag")),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("unknown manufacturer")
                                 )
                         )
@@ -3090,7 +3090,7 @@ class ProductRepositoryTest {
                                         Filter.user(user),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 )
                         )
         );
@@ -3121,7 +3121,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("unknown shop"),
-                                        Filter.anyVariety("variety A")
+                                        Filter.anyGrade("variety A")
                                 )
                         )
         );
@@ -3152,7 +3152,7 @@ class ProductRepositoryTest {
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("shop A"),
-                                        Filter.anyVariety("unknown variety"),
+                                        Filter.anyGrade("unknown variety"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         )
@@ -3207,7 +3207,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.and(
                                         Filter.user(user),
-                                        Filter.anyVariety("variety A"),
+                                        Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         )
@@ -3238,7 +3238,7 @@ class ProductRepositoryTest {
                                         Filter.user(user),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("unknown shop"),
-                                        Filter.anyVariety("unknown variety"),
+                                        Filter.anyGrade("unknown variety"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
                         )
@@ -3332,7 +3332,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -3340,7 +3340,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         )
                                 )
@@ -3382,7 +3382,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
-                                                Filter.anyVariety("variety A"),
+                                                Filter.anyGrade("variety A"),
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
@@ -3390,7 +3390,7 @@ class ProductRepositoryTest {
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
-                                                Filter.anyVariety("unknown variety"),
+                                                Filter.anyGrade("unknown variety"),
                                                 Filter.anyManufacturer("unknown manufacturer")
                                         )
                                 )

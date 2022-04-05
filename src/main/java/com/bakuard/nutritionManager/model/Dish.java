@@ -27,13 +27,14 @@ public class Dish implements Entity<Dish> {
     private final UUID id;
     private final User user;
     private String name;
+    private BigDecimal servingSize;
     private String unit;
     private String description;
     private URL imageUrl;
     private final List<DishIngredient> ingredients;
     private final List<Tag> tags;
-    private AppConfigData config;
 
+    private AppConfigData config;
     private ProductRepository productRepository;
     private final Sort ingredientProductsSort;
 
@@ -45,6 +46,7 @@ public class Dish implements Entity<Dish> {
         this.id = other.id;
         this.user = new User(other.user);
         this.name = other.name;
+        this.servingSize = other.servingSize;
         this.unit = other.unit;
         this.description = other.description;
         this.imageUrl = other.imageUrl;
@@ -60,6 +62,7 @@ public class Dish implements Entity<Dish> {
     private Dish(UUID id,
                  User user,
                  String name,
+                 BigDecimal servingSize,
                  String unit,
                  String description,
                  String imageUrl,
@@ -76,6 +79,7 @@ public class Dish implements Entity<Dish> {
                 Rule.of("Dish.user").notNull(user),
                 Rule.of("Dish.name").notNull(name).and(r -> r.notBlank(name)),
                 Rule.of("Dish.unit").notNull(unit).and(r -> r.notBlank(unit)),
+                Rule.of("Dish.servingSize").notNull(servingSize).and(r -> r.positiveValue(servingSize)),
                 Rule.of("Dish.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, urlContainer)),
                 Rule.of("Dish.ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).
                         and(r -> {
@@ -94,6 +98,7 @@ public class Dish implements Entity<Dish> {
         this.id = id;
         this.user = user;
         this.name = name.trim();
+        this.servingSize = servingSize;
         this.unit = unit.trim();
         this.description = description;
         this.imageUrl = urlContainer.get();
@@ -118,6 +123,22 @@ public class Dish implements Entity<Dish> {
         );
 
         this.name = name.trim();
+    }
+
+    /**
+     * Устанавливает размер одной порции данного блюда.
+     * @param servingSize размер одной порции данного блюда.
+     * @throws ValidateException если выполняется одно из следующих условий:<br/>
+     *         1. если servingNumber имеет значение null.<br/>
+     *         2. если servingNumber меньше или равен нулю.
+     */
+    public void setServingSize(BigDecimal servingSize) {
+        ValidateException.check(
+                Rule.of("Dish.servingSize").notNull(servingSize).
+                        and(r -> r.positiveValue(servingSize))
+        );
+
+        this.servingSize = servingSize;
     }
 
     /**
@@ -253,6 +274,14 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
+     * Возвращает размер одной порции блюда.
+     * @return размер одной порции блюда.
+     */
+    public BigDecimal getServingSize() {
+        return servingSize;
+    }
+
+    /**
      * Возвращает наименование единицы измерения кол-ва для данного блюда.
      * @return наименование единицы измерения кол-ва для данного блюда.
      */
@@ -274,6 +303,18 @@ public class Dish implements Entity<Dish> {
      */
     public URL getImageUrl() {
         return imageUrl;
+    }
+
+    /**
+     * Возвращает ингредиент по его имени. Если у блюда нет ингредиента с таким имененем - возвращает
+     * пустой Optional.
+     * @param name имя искомого ингредиента.
+     * @return ингредиент блюда.
+     */
+    public Optional<DishIngredient> getIngredient(String name) {
+        return ingredients.stream().
+                filter(i -> i.getName().equals(name)).
+                findAny();
     }
 
     /**
@@ -476,12 +517,12 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает среднюю арифметическую цену для данного блюда. Особые случаи:<br/>
+     * Возвращает среднеарифметическую цену для данного блюда. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента или любому ингредиенту
      *    не соответсвует ни один продукт - возвращает пустой Optional.<br/>
-     * 2. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
+     * 2. Если для какого-либо ингредиента не соответствует ни одного продукта - то он не принимает участия
      *    в рассчете средней арифметической цены блюда.
-     * @return средня арифметическая цена данного блюда.
+     * @return среднеарифметическая цена данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
         return ingredients.stream().
@@ -587,6 +628,7 @@ public class Dish implements Entity<Dish> {
         private UUID id;
         private User user;
         private String name;
+        private BigDecimal servingSize;
         private String unit;
         private String description;
         private String imagePath;
@@ -617,6 +659,11 @@ public class Dish implements Entity<Dish> {
 
         public Builder setName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder setServingSize(BigDecimal servingSize) {
+            this.servingSize = servingSize;
             return this;
         }
 
@@ -683,6 +730,7 @@ public class Dish implements Entity<Dish> {
                     id,
                     user,
                     name,
+                    servingSize,
                     unit,
                     description,
                     imagePath,

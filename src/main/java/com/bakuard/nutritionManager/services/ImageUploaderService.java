@@ -26,6 +26,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.UUID;
@@ -61,25 +62,17 @@ public class ImageUploaderService implements DisposableBean {
         s3.setBucketPolicy("nutritionmanagerimages", policy.toJson());
     }
 
-    public URL uploadProductImage(UUID userId, MultipartFile image) throws AmazonServiceException {
+    public URL uploadDishImage(UUID userId, MultipartFile image) {
         try {
-            byte[] imageData = image.getBytes();
+            return uploadImage(userId, image, "dishimages");
+        } catch(Exception e) {
+            throw new ValidateException("Fail to upload dish image", e);
+        }
+    }
 
-            String imageKey = "productimages/" + DigestUtils.md2Hex(imageData).toUpperCase();
-
-            URL imageUrl = imageRepository.getImageUrl(userId, imageKey);
-
-            if(imageUrl == null) {
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata.setContentLength(imageData.length);
-                s3.putObject("nutritionmanagerimages", imageKey, image.getInputStream(), metadata);
-
-                imageUrl = s3.getUrl("nutritionmanagerimages", imageKey);
-
-                imageRepository.addImageUrl(userId, imageKey, imageUrl);
-            }
-
-            return imageUrl;
+    public URL uploadProductImage(UUID userId, MultipartFile image) {
+        try {
+            return uploadImage(userId, image, "productimages");
         } catch(Exception e) {
             throw new ValidateException("Fail to upload product image", e);
         }
@@ -104,6 +97,31 @@ public class ImageUploaderService implements DisposableBean {
     @Override
     public void destroy() throws Exception {
         s3.shutdown();
+    }
+
+
+    private URL uploadImage(UUID userId, MultipartFile image, String folderName) {
+        try {
+            byte[] imageData = image.getBytes();
+
+            String imageKey = folderName + '/' + DigestUtils.md2Hex(imageData).toUpperCase();
+
+            URL imageUrl = imageRepository.getImageUrl(userId, imageKey);
+
+            if(imageUrl == null) {
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentLength(imageData.length);
+                s3.putObject("nutritionmanagerimages", imageKey, image.getInputStream(), metadata);
+
+                imageUrl = s3.getUrl("nutritionmanagerimages", imageKey);
+
+                imageRepository.addImageUrl(userId, imageKey, imageUrl);
+            }
+
+            return imageUrl;
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

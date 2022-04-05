@@ -1,24 +1,19 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
-import com.bakuard.nutritionManager.dto.users.UserResponse;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
-import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Возвращаемые подробные данные о блюде")
-public class DishResponse {
+@Schema(description = """
+        Данные используемые в запросе обновления блюда.
+        """)
+public class DishUpdateRequest {
 
-    @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Dish.")
-    private String type;
     @Schema(description = "Уникальный идентфикатор блюда")
     private UUID id;
-    @Schema(description = "Данные пользователя, которому принадлежит блюдо")
-    private UserResponse user;
     @Schema(description = "Наименование блюда")
     private String name;
     @Schema(description = "Размер одной порции блюда")
@@ -28,18 +23,14 @@ public class DishResponse {
     @Schema(description = "Описание блюда")
     private String description;
     @Schema(description = "Путь к изображению данного блюда")
-    private URL imageUrl;
+    private String imageUrl;
     @Schema(description = "Ингредиенты блюда")
     private List<DishIngredientRequestResponse> ingredients;
     @Schema(description = "Теги блюда")
     private List<String> tags;
 
-    public DishResponse() {
-        type = "Dish";
-    }
+    public DishUpdateRequest() {
 
-    public String getType() {
-        return type;
     }
 
     public UUID getId() {
@@ -48,14 +39,6 @@ public class DishResponse {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public UserResponse getUser() {
-        return user;
-    }
-
-    public void setUser(UserResponse user) {
-        this.user = user;
     }
 
     public String getName() {
@@ -90,11 +73,11 @@ public class DishResponse {
         this.description = description;
     }
 
-    public URL getImageUrl() {
+    public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(URL imageUrl) {
+    public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
@@ -118,9 +101,8 @@ public class DishResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishResponse that = (DishResponse) o;
+        DishUpdateRequest that = (DishUpdateRequest) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(user, that.user) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(servingSize, that.servingSize) &&
                 Objects.equals(unit, that.unit) &&
@@ -132,15 +114,14 @@ public class DishResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, name, servingSize, unit,
+        return Objects.hash(id, name, servingSize, unit,
                 description, imageUrl, ingredients, tags);
     }
 
     @Override
     public String toString() {
-        return "DishResponse{" +
+        return "DishRequest{" +
                 "id=" + id +
-                ", user=" + user +
                 ", name='" + name + '\'' +
                 ", servingSize=" + servingSize +
                 ", unit='" + unit + '\'' +

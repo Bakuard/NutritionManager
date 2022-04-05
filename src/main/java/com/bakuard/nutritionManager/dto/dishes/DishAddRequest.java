@@ -1,32 +1,33 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
-import java.net.URL;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
-public class DishRequest {
+@Schema(description = """
+        Данные используемые в запросе на добавление блюда.
+        """)
+public class DishAddRequest {
 
-    private UUID id;
+    @Schema(description = "Наименование блюда")
     private String name;
+    @Schema(description = "Размер одной порции блюда")
     private BigDecimal servingSize;
+    @Schema(description = "Единица измерения кол-ва блюда")
     private String unit;
+    @Schema(description = "Описание блюда")
     private String description;
+    @Schema(description = "Путь к изображению данного блюда")
     private String imageUrl;
-    private List<DishIngredientRequestAndResponse> ingredients;
+    @Schema(description = "Ингредиенты блюда")
+    private List<DishIngredientRequestResponse> ingredients;
+    @Schema(description = "Теги блюда")
     private List<String> tags;
 
-    public DishRequest() {
+    public DishAddRequest() {
 
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -69,11 +70,11 @@ public class DishRequest {
         this.imageUrl = imageUrl;
     }
 
-    public List<DishIngredientRequestAndResponse> getIngredients() {
+    public List<DishIngredientRequestResponse> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<DishIngredientRequestAndResponse> ingredients) {
+    public void setIngredients(List<DishIngredientRequestResponse> ingredients) {
         this.ingredients = ingredients;
     }
 
@@ -89,9 +90,8 @@ public class DishRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishRequest that = (DishRequest) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(name, that.name) &&
+        DishAddRequest that = (DishAddRequest) o;
+        return Objects.equals(name, that.name) &&
                 Objects.equals(servingSize, that.servingSize) &&
                 Objects.equals(unit, that.unit) &&
                 Objects.equals(description, that.description) &&
@@ -102,15 +102,13 @@ public class DishRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, servingSize, unit,
-                description, imageUrl, ingredients, tags);
+        return Objects.hash(name, servingSize, unit, description, imageUrl, ingredients, tags);
     }
 
     @Override
     public String toString() {
-        return "DishRequest{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+        return "DishAddRequest{" +
+                "name='" + name + '\'' +
                 ", servingSize=" + servingSize +
                 ", unit='" + unit + '\'' +
                 ", description='" + description + '\'' +

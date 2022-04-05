@@ -2,18 +2,40 @@ package com.bakuard.nutritionManager.dto.dishes;
 
 import com.bakuard.nutritionManager.dto.products.ProductAsDishIngredientResponse;
 
-import java.math.BigDecimal;
-import java.util.Objects;
-import java.util.SortedMap;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+@Schema(description = "Возвращаемый список продуктов блюда")
 public class DishProductsListResponse {
 
+    @Schema(description = "Уникальный идентфикатор блюда")
+    private UUID dishId;
+    @Schema(description = "Кол-во порций блюда на которое рассчитывается список докупаемых продуктов")
     private BigDecimal servingNumber;
+    @Schema(description = "Общая стоимость всех докупаемых продуктов с учетом кол-ва порций блюда")
     private BigDecimal totalPrice;
-    private SortedMap<String, ProductAsDishIngredientResponse> ingredients;
+    @Schema(description = """
+            Список докупаемых продуктов блюда. Индекс каждого продукта в этом списке соответствует
+             ингредиенту блюда с таким же индексом. Если в запросе на получение списка докупаемых
+             продуктов не запрашивался продукт для некоторого ингредиента или этому ингредиенту не
+             соответствует ни один продукт - то в соответствующей позиции данного списка будет null.
+            """)
+    private List<ProductAsDishIngredientResponse> ingredients;
 
     public DishProductsListResponse() {
 
+    }
+
+    public UUID getDishId() {
+        return dishId;
+    }
+
+    public void setDishId(UUID dishId) {
+        this.dishId = dishId;
     }
 
     public BigDecimal getServingNumber() {
@@ -32,11 +54,11 @@ public class DishProductsListResponse {
         this.totalPrice = totalPrice;
     }
 
-    public SortedMap<String, ProductAsDishIngredientResponse> getIngredients() {
+    public List<ProductAsDishIngredientResponse> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(SortedMap<String, ProductAsDishIngredientResponse> ingredients) {
+    public void setIngredients(List<ProductAsDishIngredientResponse> ingredients) {
         this.ingredients = ingredients;
     }
 
@@ -45,20 +67,22 @@ public class DishProductsListResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DishProductsListResponse that = (DishProductsListResponse) o;
-        return Objects.equals(servingNumber, that.servingNumber) &&
+        return Objects.equals(dishId, that.dishId) &&
+                Objects.equals(servingNumber, that.servingNumber) &&
                 Objects.equals(totalPrice, that.totalPrice) &&
                 Objects.equals(ingredients, that.ingredients);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(servingNumber, totalPrice, ingredients);
+        return Objects.hash(dishId, servingNumber, totalPrice, ingredients);
     }
 
     @Override
     public String toString() {
         return "DishProductsListResponse{" +
-                "servingNumber=" + servingNumber +
+                "dishId=" + dishId +
+                ", servingNumber=" + servingNumber +
                 ", totalPrice=" + totalPrice +
                 ", ingredients=" + ingredients +
                 '}';

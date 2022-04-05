@@ -84,8 +84,6 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Dish remove(UUID dishId) {
         ValidateException.check(
-                "DishRepository.remove",
-                "Fail to remove dish. Unknown dish with id=null",
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
@@ -117,6 +115,81 @@ public class DishRepositoryPostgres implements DishRepository {
         }
 
         return dish;
+    }
+
+    @Override
+    public Dish getByName(String name) {
+        ValidateException.check(
+                Rule.of("DishRepository.name").notNull(name)
+        );
+
+        return statement.query(
+                (Connection con) -> con.prepareStatement(
+                        """
+                                SELECT Dishes.*, DishTags.*,
+                                       Users.userId,
+                                       Users.name as userName,
+                                       Users.passwordHash as userPassHash,
+                                       Users.email as userEmail,
+                                       Users.salt as userSalt,
+                                       DishIngredients.name as ingredientName,
+                                       DishIngredients.quantity as ingredientQuantity,
+                                       DishIngredients.filter as ingredientFilter
+                                    FROM Dishes
+                                    LEFT JOIN Users
+                                        ON Dishes.userId = Users.userId
+                                    LEFT JOIN DishTags
+                                        ON Dishes.dishId = DishTags.dishId
+                                    LEFT JOIN DishIngredients
+                                        ON Dishes.dishId = DishIngredients.dishId
+                                    WHERE Dishes.name = ?
+                                    ORDER BY DishTags.index, DishIngredients.index;
+                                """
+                ),
+                (PreparedStatement ps) -> ps.setObject(1, name),
+                (ResultSet rs) -> {
+                    Dish.Builder builder = null;
+
+                    while(rs.next()) {
+                        if(builder == null) {
+                            builder = new Dish.Builder().
+                                    setId((UUID) rs.getObject("dishId")).
+                                    setUser(new User(
+                                            (UUID) rs.getObject("userId"),
+                                            rs.getString("userName"),
+                                            rs.getString("userPassHash"),
+                                            rs.getString("userEmail"),
+                                            rs.getString("userSalt")
+                                    )).
+                                    setName(name).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
+                                    setUnit(rs.getString("unit")).
+                                    setDescription(rs.getString("description")).
+                                    setImagePath(rs.getString("imagePath")).
+                                    setConfig(appConfig).
+                                    setRepository(productRepository);
+                        }
+
+                        String tagValue = rs.getString("tagValue");
+                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+
+                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+                        if(!rs.wasNull()) {
+                            String ingredientName = rs.getString("ingredientName");
+                            Filter filter = toFilter(rs.getString("ingredientFilter"));
+                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
+                        }
+                    }
+
+                    if(builder != null) {
+                        return builder.tryBuild();
+                    } else {
+                        throw new ValidateException("Fail to get dish by name=" + name).
+                                addReason(Rule.of("DishRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                    }
+                }
+        );
     }
 
     @Override
@@ -165,6 +238,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setId(dishId).
                                     setUser(criteria.getFilter().<UserFilter>findAny(USER).getUser()).
                                     setName(rs.getString("name")).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImagePath(rs.getString("imagePath")).
@@ -264,7 +338,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getDishesNumber(Criteria criteria) {
         ValidateException.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -280,7 +354,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getTagsNumber(Criteria criteria) {
         ValidateException.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -304,7 +378,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getUnitsNumber(Criteria criteria) {
         ValidateException.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -330,18 +404,20 @@ public class DishRepositoryPostgres implements DishRepository {
                             dishId,
                             userId,
                             name,
+                            servingSize,
                             unit,
                             description,
                             imagePath
-                        ) VALUES (?,?,?, ?,?,?);
+                        ) VALUES (?,?,?, ?,?,?,?);
                         """,
                 (PreparedStatement ps) -> {
                     ps.setObject(1, dish.getId());
                     ps.setObject(2, dish.getUser().getId());
                     ps.setString(3, dish.getName());
-                    ps.setString(4, dish.getUnit());
-                    ps.setString(5, dish.getDescription());
-                    ps.setString(6, dish.getImageUrl() == null ? null : dish.getImageUrl().toString());
+                    ps.setBigDecimal(4, dish.getServingSize());
+                    ps.setString(5, dish.getUnit());
+                    ps.setString(6, dish.getDescription());
+                    ps.setString(7, dish.getImageUrl() == null ? null : dish.getImageUrl().toString());
                 }
         );
 
@@ -405,6 +481,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 """
                         UPDATE Dishes SET
                             name=?,
+                            servingSize=?,
                             unit=?,
                             description=?,
                             imagePath=?
@@ -412,11 +489,12 @@ public class DishRepositoryPostgres implements DishRepository {
                         """,
                 (PreparedStatement ps) -> {
                     ps.setString(1, newVersion.getName());
-                    ps.setString(2, newVersion.getUnit());
-                    ps.setString(3, newVersion.getDescription());
-                    ps.setString(4, newVersion.getImageUrl() == null ? null : newVersion.getImageUrl().toString());
-                    ps.setObject(5, newVersion.getUser().getId());
-                    ps.setObject(6, newVersion.getId());
+                    ps.setBigDecimal(2, newVersion.getServingSize());
+                    ps.setString(3, newVersion.getUnit());
+                    ps.setString(4, newVersion.getDescription());
+                    ps.setString(5, newVersion.getImageUrl() == null ? null : newVersion.getImageUrl().toString());
+                    ps.setObject(6, newVersion.getUser().getId());
+                    ps.setObject(7, newVersion.getId());
                 }
         );
 
@@ -536,6 +614,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                             rs.getString("userSalt")
                                     )).
                                     setName(rs.getString("name")).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImagePath(rs.getString("imagePath")).
@@ -650,7 +729,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     case MIN_TAGS -> result = toMinTagsFilter(parser);
                     case CATEGORY -> result = toCategoryFilter(parser);
                     case SHOPS -> result = toShopsFilter(parser);
-                    case VARIETIES -> result = toVarietiesFilter(parser);
+                    case GRADES -> result = toVarietiesFilter(parser);
                     case MANUFACTURER -> result = toManufacturerFilter(parser);
                     case USER -> result = toUserFilter(parser);
                 }
@@ -723,7 +802,7 @@ public class DishRepositoryPostgres implements DishRepository {
             values.add(parser.getValueAsString());
         }
 
-        return Filter.anyVariety(values);
+        return Filter.anyGrade(values);
     }
 
     private MinTagsFilter toMinTagsFilter(JsonParser parser) throws IOException {
@@ -779,7 +858,7 @@ public class DishRepositoryPostgres implements DishRepository {
             case OR_ELSE -> toJson((OrElseFilter) filter, writer);
             case AND -> toJson((AndFilter) filter, writer);
             case MIN_TAGS -> toJson((MinTagsFilter) filter, writer);
-            case CATEGORY, SHOPS, VARIETIES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
+            case CATEGORY, SHOPS, GRADES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
             case USER -> toJson((UserFilter) filter, writer);
         }
     }

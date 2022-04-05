@@ -5,15 +5,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @Schema(description = """
-        Данные используемые в запросе на обновление продукта.
+        Данные используемые в запросе на добавление продукта.
         """)
-public class UpdatedProductRequest {
+public class ProductAddRequest {
 
-    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
-    private UUID id;
     @Schema(description = "Категория к которой относится продукт", example = "Помидор")
     private String category;
     @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
@@ -37,16 +34,8 @@ public class UpdatedProductRequest {
     @Schema(description = "Теги указаныне для данного продукта")
     private List<String> tags;
 
-    public UpdatedProductRequest() {
+    public ProductAddRequest() {
 
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getCategory() {
@@ -141,9 +130,8 @@ public class UpdatedProductRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UpdatedProductRequest that = (UpdatedProductRequest) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(category, that.category) &&
+        ProductAddRequest that = (ProductAddRequest) o;
+        return Objects.equals(category, that.category) &&
                 Objects.equals(shop, that.shop) &&
                 Objects.equals(grade, that.grade) &&
                 Objects.equals(manufacturer, that.manufacturer) &&
@@ -158,14 +146,13 @@ public class UpdatedProductRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, category, shop, grade, manufacturer,
+        return Objects.hash(category, shop, grade, manufacturer,
                 price, packingSize, unit, quantity, description, imageUrl, tags);
     }
 
     @Override
     public String toString() {
         return "ProductRequest{" +
-                "id=" + id +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
                 ", grade='" + grade + '\'' +

@@ -8,10 +8,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Schema(description = """
-        Данные используемые в запросе на добавление продукта.
+        Данные используемые в запросе на обновление продукта.
         """)
-public class AddedProductRequest {
+public class ProductUpdateRequest {
 
+    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
+    private UUID id;
     @Schema(description = "Категория к которой относится продукт", example = "Помидор")
     private String category;
     @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
@@ -35,8 +37,16 @@ public class AddedProductRequest {
     @Schema(description = "Теги указаныне для данного продукта")
     private List<String> tags;
 
-    public AddedProductRequest() {
+    public ProductUpdateRequest() {
 
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getCategory() {
@@ -131,8 +141,9 @@ public class AddedProductRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AddedProductRequest that = (AddedProductRequest) o;
-        return Objects.equals(category, that.category) &&
+        ProductUpdateRequest that = (ProductUpdateRequest) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(category, that.category) &&
                 Objects.equals(shop, that.shop) &&
                 Objects.equals(grade, that.grade) &&
                 Objects.equals(manufacturer, that.manufacturer) &&
@@ -147,13 +158,14 @@ public class AddedProductRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, shop, grade, manufacturer,
+        return Objects.hash(id, category, shop, grade, manufacturer,
                 price, packingSize, unit, quantity, description, imageUrl, tags);
     }
 
     @Override
     public String toString() {
         return "ProductRequest{" +
+                "id=" + id +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
                 ", grade='" + grade + '\'' +

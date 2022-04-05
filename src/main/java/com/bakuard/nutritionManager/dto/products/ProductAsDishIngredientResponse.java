@@ -2,29 +2,57 @@ package com.bakuard.nutritionManager.dto.products;
 
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@Schema(description = "Содержит данные продукта входящего в список докупаемых продуктов блюда")
 public class ProductAsDishIngredientResponse {
 
+    @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Product.")
     private String type;
+    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
     private UUID id;
+    @Schema(description = "Учетные данные и ID пользователя к которому относится данный продукт")
     private UserResponse user;
-    private String imagePath;
+    @Schema(description = "Путь к изображению данного продукта")
+    private URL imageUrl;
+    @Schema(description = "Категория к которой относится продукт", example = "Помидор")
     private String category;
+    @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
     private String shop;
+    @Schema(description = "Один из сортов продуктов указанной категории")
     private String grade;
+    @Schema(description = "Один из производителей продуктов указанной категории")
     private String manufacturer;
+    @Schema(description = "Цена прдукта указанной категории, сорта, производителя и продающегося в указанном магазине")
     private BigDecimal price;
+    @Schema(description = "Размер упаковки")
     private BigDecimal packingSize;
+    @Schema(description = "Единица измерения кол-ва продукта")
     private String unit;
+    @Schema(description = "Кол-во продукта имеющегося в наличии у пользователя")
     private BigDecimal quantity;
+    @Schema(description = "Кол-во продукта необходимого для приготовления заданноо кол-ва порций блюда")
     private BigDecimal necessaryQuantity;
+    @Schema(description = """
+            Недостающее кол-во продукта (с учетом уже имеющегося у пользователя в наличии) необходимого
+             для приготовления указанного кол-ва порций
+            """)
     private BigDecimal lackQuantity;
+    @Schema(description = """
+            Общая стоимость недостающего кол-ва продукта (с учетом уже имеющегося у пользователя в наличии)
+             необзодимого для приготовления указанного кол-ва порций
+            """)
     private BigDecimal lackQuantityPrice;
+    @Schema(description = "Теги указаныне для данного продукта")
     private List<String> tags;
+    @Schema(description = "Общее кол-во всех взаимозаменяемых продуктов связанных с данным ингредиентом")
+    private int productsTotalNumber;
 
     public ProductAsDishIngredientResponse() {
         type = "Product";
@@ -54,12 +82,12 @@ public class ProductAsDishIngredientResponse {
         this.type = type;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public URL getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUrl(URL imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getCategory() {
@@ -158,15 +186,24 @@ public class ProductAsDishIngredientResponse {
         this.tags = tags;
     }
 
+    public int getProductsTotalNumber() {
+        return productsTotalNumber;
+    }
+
+    public void setProductsTotalNumber(int productsTotalNumber) {
+        this.productsTotalNumber = productsTotalNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProductAsDishIngredientResponse that = (ProductAsDishIngredientResponse) o;
-        return Objects.equals(type, that.type) &&
+        return productsTotalNumber == that.productsTotalNumber &&
+                Objects.equals(type, that.type) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(user, that.user) &&
-                Objects.equals(imagePath, that.imagePath) &&
+                Objects.equals(imageUrl, that.imageUrl) &&
                 Objects.equals(category, that.category) &&
                 Objects.equals(shop, that.shop) &&
                 Objects.equals(grade, that.grade) &&
@@ -183,8 +220,9 @@ public class ProductAsDishIngredientResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, id, user, imagePath, category, shop, grade, manufacturer, price,
-                packingSize, unit, quantity, necessaryQuantity, lackQuantity, lackQuantityPrice, tags);
+        return Objects.hash(type, id, user, imageUrl, category, shop, grade,
+                manufacturer, price, packingSize, unit, quantity, necessaryQuantity,
+                lackQuantity, lackQuantityPrice, tags, productsTotalNumber);
     }
 
     @Override
@@ -193,7 +231,7 @@ public class ProductAsDishIngredientResponse {
                 "type='" + type + '\'' +
                 ", id=" + id +
                 ", user=" + user +
-                ", imagePath='" + imagePath + '\'' +
+                ", imagePath='" + imageUrl + '\'' +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
                 ", grade='" + grade + '\'' +
@@ -206,6 +244,7 @@ public class ProductAsDishIngredientResponse {
                 ", lackQuantity=" + lackQuantity +
                 ", lackQuantityPrice=" + lackQuantityPrice +
                 ", tags=" + tags +
+                ",productsTotalNumber=" + productsTotalNumber +
                 '}';
     }
 
