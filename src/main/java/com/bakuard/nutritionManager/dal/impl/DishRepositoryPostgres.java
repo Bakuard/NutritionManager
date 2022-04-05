@@ -210,7 +210,7 @@ public class DishRepositoryPostgres implements DishRepository {
                             select(field("*")).
                                 from("Dishes").
                                 where(switchFilter(criteria.getFilter())).
-                                orderBy(getOrderFields(criteria.getSort(), "Dishes", true)).
+                                orderBy(getOrderFields(criteria.getSort(), "Dishes")).
                                 limit(inline(metadata.getActualSize())).
                                 offset(inline(metadata.getOffset())).
                                 asTable("{D}")
@@ -219,7 +219,7 @@ public class DishRepositoryPostgres implements DishRepository {
                             on(field("D.dishId").eq(field("DishTags.dishId"))).
                         leftJoin("DishIngredients").
                             on(field("D.dishId").eq(field("DishIngredients.dishId"))).
-                        orderBy(getOrderFields(criteria.getSort(), "D", false)).
+                        orderBy(getOrderFields(criteria.getSort(), "D")).
                         getSQL().
                         replace("\"{D}\"", "as D");
 
@@ -938,8 +938,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
 
     private List<SortField<?>> getOrderFields(Sort dishSort,
-                                              String tableName,
-                                              boolean onlyDishTable) {
+                                              String tableName) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
 
         for(int i = 0; i < dishSort.getParametersNumber(); i++) {
@@ -953,7 +952,7 @@ public class DishRepositoryPostgres implements DishRepository {
             }
         }
         fields.add(field(tableName + ".dishId").asc());
-        if(!onlyDishTable) {
+        if("D".equals(tableName)) {
             fields.add(field("DishIngredients.index").asc());
             fields.add(field("DishTags.index").asc());
         }

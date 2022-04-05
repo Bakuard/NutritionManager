@@ -4,7 +4,7 @@ import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
-import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 
 import java.io.ByteArrayOutputStream;
@@ -33,7 +33,7 @@ public class ProductContext {
     private final String unit;
     private final BigDecimal price;
     private final BigDecimal packingSize;
-    private final ImmutableSortedSet<Tag> tags;
+    private final ImmutableList<Tag> tags;
     private final AppConfigData config;
 
     private ProductContext(String category,
@@ -43,7 +43,7 @@ public class ProductContext {
                            String unit,
                            BigDecimal price,
                            BigDecimal packingSize,
-                           ImmutableSortedSet<Tag> tags,
+                           ImmutableList<Tag> tags,
                            AppConfigData config) {
         this.category = category;
         this.shop = shop;
@@ -87,7 +87,7 @@ public class ProductContext {
         this.unit = unit;
         this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
         this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.tags = ImmutableSortedSet.copyOf(container.get());
+        this.tags = ImmutableList.copyOf(container.get());
         this.hashKey = calculateSha256();
         this.config = config;
     }
@@ -331,7 +331,7 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                ImmutableSortedSet.copyOf(tags),
+                ImmutableList.copyOf(tags),
                 config
         );
     }
@@ -353,7 +353,9 @@ public class ProductContext {
                 unit,
                 price,
                 packingSize,
-                tags.headSet(tag),
+                tags.stream().
+                        filter(t -> !t.equals(tag)).
+                        collect(ImmutableList.toImmutableList()),
                 config
         );
     }
@@ -446,7 +448,7 @@ public class ProductContext {
      * Возвращает набор всех тегов данного продукта доступный только для чтения.
      * @return набор всех тегов данного продукта.
      */
-    public ImmutableSortedSet<Tag> getTags() {
+    public ImmutableList<Tag> getTags() {
         return tags;
     }
 

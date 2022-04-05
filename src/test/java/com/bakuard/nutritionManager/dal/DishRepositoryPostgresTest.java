@@ -1389,6 +1389,10 @@ class DishRepositoryPostgresTest {
                 setRepository(productRepository).
                 addTag("tag A").
                 addTag("common tag").
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("tag 1").
+                addTag("1 tag").
                 addIngredient("ingredient 1",
                         Filter.orElse(
                                 Filter.and(

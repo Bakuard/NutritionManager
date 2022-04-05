@@ -116,23 +116,24 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
-        List<Condition> conditions = List.of();
         List<String> fieldsName = new ArrayList<>();
         List<Field<?>> fields = new ArrayList<>();
         fields.add(field("*"));
         if(criteria.getFilter() != null) {
-            conditions = splitFilter(criteria.getFilter());
+            List<Condition> conditions = splitFilter(criteria.getFilter());
             for(int i = 0; i < conditions.size(); i++) {
                 String fieldName = "condition" + i;
                 fieldsName.add(fieldName);
-                fields.add(field("(" + conditions.get(i) + ") as " + fieldName));
+
+                Field<?> field = field("(" + conditions.get(i) + ") as " + fieldName);
+                fields.add(field);
             }
         }
 
         Condition condition = fieldsName.stream().
                 map(field -> field(field).isTrue()).
                 reduce(Condition::or).
-                orElseThrow();
+                orElse(trueCondition());
 
         String query =
             select(field("*")).
@@ -546,8 +547,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         statement.batchUpdate(
                 """
-                        INSERT INTO ProductTags(productId, tagValue)
-                          VALUES(?,?);
+                        INSERT INTO ProductTags(productId, tagValue, index)
+                          VALUES(?,?,?);
                         """,
                 new BatchPreparedStatementSetter() {
 
@@ -558,6 +559,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                         Tag tag = tags.get(i);
                         ps.setObject(1, product.getId());
                         ps.setString(2, tag.getValue());
+                        ps.setInt(3, i);
                     }
 
                     @Override
@@ -602,54 +604,34 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        statement.batchUpdate(
+        statement.update(
                 """
                         DELETE FROM ProductTags
-                          WHERE productId=? AND tagValue=?;
+                          WHERE productId=?;
                         """,
-                new BatchPreparedStatementSetter() {
-
-                    private final List<Tag> deletedTags = Sets.difference(
-                            oldVersion.getContext().getTags(),
-                            newVersion.getContext().getTags()
-                    ).stream().toList();
-
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Tag tag = deletedTags.get(i);
-                        ps.setObject(1, newVersion.getId());
-                        ps.setString(2, tag.getValue());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return deletedTags.size();
-                    }
+                (PreparedStatement ps) -> {
+                    ps.setObject(1, newVersion.getId());
                 }
         );
 
         statement.batchUpdate(
                 """
-                        INSERT INTO ProductTags(productId, tagValue)
-                          VALUES(?,?);
+                        INSERT INTO ProductTags(productId, tagValue, index)
+                          VALUES(?,?,?);
                         """,
                 new BatchPreparedStatementSetter() {
 
-                    private final List<Tag> addedTags = Sets.difference(
-                            newVersion.getContext().getTags(),
-                            oldVersion.getContext().getTags()
-                    ).stream().toList();
-
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Tag tag = addedTags.get(i);
+                        Tag tag = newVersion.getContext().getTags().get(i);
                         ps.setObject(1, newVersion.getId());
                         ps.setString(2, tag.getValue());
+                        ps.setObject(3, i);
                     }
 
                     @Override
                     public int getBatchSize() {
-                        return addedTags.size();
+                        return newVersion.getContext().getTags().size();
                     }
                 }
         );
@@ -665,7 +647,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                           ON Products.userId = Users.userId
                         LEFT JOIN ProductTags
                           ON Products.productId = ProductTags.productId
-                        WHERE Products.productId = ?;
+                        WHERE Products.productId = ?
+                        ORDER BY ProductTags.index;
                     """),
                 (PreparedStatement ps) -> ps.setObject(1, productId),
                 (ResultSet rs) -> {
@@ -878,6 +861,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
             }
         }
         fields.add(field(tableName + ".productId").asc());
+        if("P".equals(tableName)) {
+            fields.add(field("ProductTags.index").asc());
+        }
         return fields;
     }
 

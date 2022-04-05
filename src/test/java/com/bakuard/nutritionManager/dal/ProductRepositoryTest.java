@@ -3453,8 +3453,12 @@ class ProductRepositoryTest {
                 setDescription("some description A").
                 setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
                 addTag("tag 1").
+                addTag("1 tag").
                 addTag("tag 2").
-                addTag("tag 3");
+                addTag("2 tag").
+                addTag("tag 3").
+                addTag("3 tag").
+                addTag("a tag");
     }
 
     private UUID toUUID(int number) {
@@ -3479,9 +3483,9 @@ class ProductRepositoryTest {
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description A").
                         setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
+                        addTag("value 1").
                         addTag("common tag").
                         addTag("tag A").
-                        addTag("value 1").
                         tryBuild()
         );
 
@@ -3500,8 +3504,8 @@ class ProductRepositoryTest {
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description B").
                         setImageUrl("https://nutritionmanager.xyz/products/images?id=2").
-                        addTag("common tag").
                         addTag("tag A").
+                        addTag("common tag").
                         addTag("value 2").
                         tryBuild()
         );
@@ -3521,8 +3525,8 @@ class ProductRepositoryTest {
                         setQuantity(BigDecimal.ZERO).
                         setDescription("some description C").
                         setImageUrl("https://nutritionmanager.xyz/products/images?id=3").
-                        addTag("common tag").
                         addTag("tag A").
+                        addTag("common tag").
                         addTag("value 3").
                         tryBuild()
         );
@@ -3542,8 +3546,8 @@ class ProductRepositoryTest {
                         setQuantity(new BigDecimal("12.5")).
                         setDescription("some description D").
                         setImageUrl("https://nutritionmanager.xyz/products/images?id=4").
-                        addTag("common tag").
                         addTag("tag B").
+                        addTag("common tag").
                         addTag("value 4").
                         tryBuild()
         );
@@ -3563,8 +3567,8 @@ class ProductRepositoryTest {
                         setQuantity(new BigDecimal("6")).
                         setDescription("some description E").
                         setImageUrl("https://nutritionmanager.xyz/products/images?id=5").
-                        addTag("common tag").
                         addTag("tag B").
+                        addTag("common tag").
                         addTag("value 5").
                         tryBuild()
         );
@@ -3584,8 +3588,8 @@ class ProductRepositoryTest {
                         setQuantity(new BigDecimal("9.2")).
                         setDescription("some description F").
                         setImageUrl("https://nutritionmanager.xyz/products/images?id=6").
-                        addTag("common tag").
                         addTag("tag B").
+                        addTag("common tag").
                         addTag("value 6").
                         tryBuild()
         );

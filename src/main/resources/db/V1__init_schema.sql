@@ -82,6 +82,7 @@ CREATE TABLE MenusToDishes (
 CREATE TABLE ProductTags (
     productId UUID NOT NULL,
     tagValue VARCHAR(256) NOT NULL,
+    index INT NOT NULL,
     FOREIGN KEY(productId) REFERENCES Products(productId) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(productId, tagValue)
 );
