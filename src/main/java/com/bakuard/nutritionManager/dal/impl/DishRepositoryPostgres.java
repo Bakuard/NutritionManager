@@ -745,7 +745,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     case MIN_TAGS -> result = toMinTagsFilter(parser);
                     case CATEGORY -> result = toCategoryFilter(parser);
                     case SHOPS -> result = toShopsFilter(parser);
-                    case GRADES -> result = toVarietiesFilter(parser);
+                    case GRADES -> result = toGradesFilter(parser);
                     case MANUFACTURER -> result = toManufacturerFilter(parser);
                     case USER -> result = toUserFilter(parser);
                 }
@@ -810,7 +810,7 @@ public class DishRepositoryPostgres implements DishRepository {
         return Filter.anyShop(values);
     }
 
-    private AnyFilter toVarietiesFilter(JsonParser parser) throws IOException {
+    private AnyFilter toGradesFilter(JsonParser parser) throws IOException {
         List<String> values = new ArrayList<>();
 
         parser.nextToken(); //BEGIN_ARRAY

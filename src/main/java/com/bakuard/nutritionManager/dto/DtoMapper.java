@@ -51,7 +51,7 @@ public class DtoMapper {
         response.setUser(toUserResponse(product.getUser()));
         response.setCategory(product.getContext().getCategory());
         response.setShop(product.getContext().getShop());
-        response.setGrade(product.getContext().getVariety());
+        response.setGrade(product.getContext().getGrade());
         response.setManufacturer(product.getContext().getManufacturer());
         response.setPrice(product.getContext().getPrice());
         response.setPackingSize(product.getContext().getPackingSize());
@@ -70,7 +70,7 @@ public class DtoMapper {
                 setUser(userRepository.getById(userId)).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
-                setVariety(dto.getGrade()).
+                setGrade(dto.getGrade()).
                 setManufacturer(dto.getManufacturer()).
                 setPrice(dto.getPrice()).
                 setPackingSize(dto.getPackingSize()).
@@ -91,7 +91,7 @@ public class DtoMapper {
                 setUser(userRepository.getById(userId)).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
-                setVariety(dto.getGrade()).
+                setGrade(dto.getGrade()).
                 setManufacturer(dto.getManufacturer()).
                 setPrice(dto.getPrice()).
                 setPackingSize(dto.getPackingSize()).
@@ -224,7 +224,7 @@ public class DtoMapper {
                                       boolean onlyFridge,
                                       String category,
                                       List<String> shops,
-                                      List<String> varieties,
+                                      List<String> grades,
                                       List<String> manufacturers,
                                       List<String> tags) {
         List<Filter> filters = new ArrayList<>();
@@ -232,7 +232,7 @@ public class DtoMapper {
         if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
         if(category != null) filters.add(Filter.anyCategory(category));
         if(shops != null) filters.add(Filter.anyShop(shops));
-        if(varieties != null) filters.add(Filter.anyGrade(varieties));
+        if(grades != null) filters.add(Filter.anyGrade(grades));
         if(manufacturers != null) filters.add(Filter.anyManufacturer(manufacturers));
         if(tags != null) filters.add(Filter.minTags(toTags(tags)));
 
@@ -275,14 +275,14 @@ public class DtoMapper {
                 setFilter(Filter.user(userId));
 
         Page<String> manufacturers = productRepository.getManufacturers(criteria);
-        Page<String> varieties = productRepository.getVarieties(criteria);
+        Page<String> grades = productRepository.getGrades(criteria);
         Page<String> shops = productRepository.getShops(criteria);
         Page<String> categories = productRepository.getCategories(criteria);
         Page<Tag> tags = productRepository.getTags(criteria);
 
         ProductFieldsResponse response = new ProductFieldsResponse();
         response.setTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
-        response.setVarieties(varieties.getContent().stream().map(FieldResponse::new).toList());
+        response.setGrades(grades.getContent().stream().map(FieldResponse::new).toList());
         response.setManufacturers(manufacturers.getContent().stream().map(FieldResponse::new).toList());
         response.setShops(shops.getContent().stream().map(FieldResponse::new).toList());
         response.setCategories(categories.getContent().stream().map(FieldResponse::new).toList());
@@ -387,7 +387,7 @@ public class DtoMapper {
                     response.setImageUrl(product.getImageUrl());
                     response.setCategory(product.getContext().getCategory());
                     response.setShop(product.getContext().getShop());
-                    response.setGrade(product.getContext().getVariety());
+                    response.setGrade(product.getContext().getGrade());
                     response.setManufacturer(product.getContext().getManufacturer());
                     response.setPrice(product.getContext().getPrice());
                     response.setPackingSize(product.getContext().getPackingSize());

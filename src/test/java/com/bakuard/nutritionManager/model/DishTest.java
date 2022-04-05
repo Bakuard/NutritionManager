@@ -873,7 +873,7 @@ class DishTest {
                 setUser(createUser(userId)).
                 setCategory("name " + id).
                 setShop("shop " + id).
-                setVariety("variety " + id).
+                setGrade("variety " + id).
                 setManufacturer("manufacturer " + id).
                 setUnit("unitA").
                 setPrice(new BigDecimal(id * 10).abs()).

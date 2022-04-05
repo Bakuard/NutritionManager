@@ -216,7 +216,7 @@ class ProductRepositoryTest {
                 updatedProduct.getContext().
                         setCategory("new Category").
                         setShop("new Shop").
-                        setVariety("new Variety").
+                        setGrade("new Variety").
                         setManufacturer("new Manufacturer").
                         setUnit("new Unit").
                         setPrice(new BigDecimal("150")).
@@ -252,7 +252,7 @@ class ProductRepositoryTest {
                 expected.getContext().
                         setCategory("new Category").
                         setShop("new Shop").
-                        setVariety("new Variety").
+                        setGrade("new Variety").
                         setManufacturer("new Manufacturer").
                         setUnit("new Unit").
                         setPrice(new BigDecimal("150")).
@@ -533,7 +533,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches exist
             """)
     void getProductsNumber6() {
@@ -614,7 +614,7 @@ class ProductRepositoryTest {
              onlyFridge = false,
              filter is AndConstraint. Operands:
                 CategoryConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches exist
             """)
     void getProductsNumber9() {
@@ -644,7 +644,7 @@ class ProductRepositoryTest {
                 MinTags - matches not exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber10() {
@@ -676,7 +676,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches not exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber11() {
@@ -708,7 +708,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches not exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber12() {
@@ -740,7 +740,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches not exist,
+                GradesConstraints - matches not exist,
              matches not exist
             """)
     void getProductsNumber13() {
@@ -772,7 +772,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber14() {
@@ -804,7 +804,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
                 ManufacturerConstraint - matches exists
              matches not exist
             """)
@@ -838,7 +838,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
                 ManufacturerConstraint - matches exists
              matches exist
             """)
@@ -872,7 +872,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
                 ManufacturerConstraint - matches not exists
             """)
     void getProductsNumber17() {
@@ -906,13 +906,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return correct result
             """)
@@ -957,13 +957,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return correct result
             """)
@@ -1009,13 +1009,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match not exists,
+                    GradesConstraints - match not exists,
                     ManufacturerConstraint - match not exists
              => return 0
             """)
@@ -1233,7 +1233,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts8() {
         User user = createAndSaveUser(1);
@@ -1303,7 +1303,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts10() {
         User user = createAndSaveUser(1);
@@ -1341,7 +1341,7 @@ class ProductRepositoryTest {
                 MinTags - match not exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts11() {
         User user = createAndSaveUser(1);
@@ -1410,7 +1410,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts13() {
         User user = createAndSaveUser(1);
@@ -1445,7 +1445,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraints - match not exists
             """)
     void getProducts14() {
         User user = createAndSaveUser(1);
@@ -1480,7 +1480,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 MinTags - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts15() {
         User user = createAndSaveUser(1);
@@ -1517,7 +1517,7 @@ class ProductRepositoryTest {
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraints - match not exists
             """)
     void getProducts16() {
         User user = createAndSaveUser(1);
@@ -1552,7 +1552,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraints - match exists,
                 ManufacturerConstraint - match exists
              match not exists
             """)
@@ -1590,7 +1590,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraints - match exists,
                 ManufacturerConstraint - match exists
              match exists
             """)
@@ -1631,7 +1631,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraints - match exists,
                 ManufacturerConstraint - match not exists
             """)
     void getProducts19() {
@@ -1669,13 +1669,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return full page
             """)
@@ -1727,13 +1727,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return full page
             """)
@@ -1790,7 +1790,7 @@ class ProductRepositoryTest {
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return full page
             """)
@@ -1847,13 +1847,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match not exists,
+                    GradesConstraints - match not exists,
                     ManufacturerConstraint - match not exists
              => return empty page
             """)
@@ -2317,29 +2317,29 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              criteria is null
              => exception
             """)
-    void getVarietiesNumber1() {
+    void getGradesNumber1() {
         AssertUtil.assertValidateException(
-                () -> repository.getVarietiesNumber(null),
+                () -> repository.getGradesNumber(null),
                 ProductRepositoryPostgres.class,
-                "getVarietiesNumber",
+                "getGradesNumber",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              user haven't any products
              => return 0
             """)
-    void getVarietiesNumber2() {
+    void getGradesNumber2() {
         User user = createAndSaveUser(1);
 
-        int actual = repository.getVarietiesNumber(
+        int actual = repository.getGradesNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
@@ -2348,16 +2348,16 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              user have some products,
              productName not specified
              => return correct result
             """)
-    void getVarietiesNumber3() {
+    void getGradesNumber3() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
-        int actual = repository.getVarietiesNumber(
+        int actual = repository.getGradesNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
@@ -2366,16 +2366,16 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              user have some products,
              productName specified
              => return correct result
             """)
-    void getVarietiesNumber4() {
+    void getGradesNumber4() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
-        int actual = repository.getVarietiesNumber(
+        int actual = repository.getGradesNumber(
                 new Criteria().
                         setFilter(
                                 Filter.and(
@@ -2390,28 +2390,28 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              criteria is null
              => exception
             """)
-    void getVarieties1() {
+    void getGrades1() {
         AssertUtil.assertValidateException(
-                () -> repository.getVarieties(null),
+                () -> repository.getGrades(null),
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user haven't any products
              => return empty page
             """)
-    void getVarieties2() {
+    void getGrades2() {
         User user = createAndSaveUser(1);
         Page<String> expected = Pageable.firstEmptyPage();
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
@@ -2422,19 +2422,19 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is full,
              productName not specified
             """)
-    void getVarieties3() {
+    void getGrades3() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(4, 0).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(4, 0))
@@ -2445,19 +2445,19 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is partial,
              productName not specified
             """)
-    void getVarieties4() {
+    void getGrades4() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety D"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(3, 1))
@@ -2468,19 +2468,19 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is full,
              productName specified
             """)
-    void getVarieties5() {
+    void getGrades5() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(
                                 Filter.and(
@@ -2496,19 +2496,19 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is partial,
              productName specified
             """)
-    void getVarieties6() {
+    void getGrades6() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(
                                 Filter.and(
@@ -2801,7 +2801,7 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getManufacturers(criteria):
              user have some products,
              pageable is full,
              productName specified
@@ -2904,7 +2904,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraint - match exists,
                 ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -2934,7 +2934,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraint - match not exists
              => return empty Optional
             """)
     void getProductsSum4() {
@@ -2963,7 +2963,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match not exists,
+                GradesConstraint - match not exists,
                 ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -2994,7 +2994,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 MinTags - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraint - match not exists
              => return empty Optional
             """)
     void getProductsSum6() {
@@ -3047,7 +3047,7 @@ class ProductRepositoryTest {
             getProductsSum(criteria):
              filter is AndConstraint. Operands:
                 MinTags - match not exists,
-                VarietiesConstraint - match exists,
+                GradesConstraint - match exists,
                 ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -3076,7 +3076,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraint - match exists
              => return Optional with correct result
             """)
     void getProductsSum9() {
@@ -3106,7 +3106,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match exists
+                GradesConstraint - match exists
              => return empty Optional
             """)
     void getProductsSum10() {
@@ -3136,7 +3136,7 @@ class ProductRepositoryTest {
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists,
+                GradesConstraint - match not exists,
                 ManufacturerConstraint - match exists
              => return empty Optional
             """)
@@ -3194,7 +3194,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsSum(criteria):
              filter is AndConstraint. Operands:
-                VarietiesConstraint - match exists,
+                GradesConstraint - match exists,
                 ManufacturerConstraint - match exists
              => return Optional with correct result
             """)
@@ -3223,7 +3223,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match not exists,
+                GradesConstraint - match not exists,
                 ManufacturerConstraint - match exists
              => return empty Optional
             """)
@@ -3309,13 +3309,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraint - match exists,
                     ManufacturerConstraint - match exists
                 second operands is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraint - match exists,
                     ManufacturerConstraint - match exists
              => return Optional with correct result
             """)
@@ -3359,13 +3359,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraint - match exists,
                     ManufacturerConstraint - match exists
                 second operands is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match not exists,
+                    GradesConstraint - match not exists,
                     ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -3444,7 +3444,7 @@ class ProductRepositoryTest {
                 setUser(user).
                 setCategory("name#" + user.getName()).
                 setShop("shop#" + user.getName()).
-                setVariety("variety#" + user.getName()).
+                setGrade("variety#" + user.getName()).
                 setManufacturer("manufacturer#" + user.getName()).
                 setUnit("unitA").
                 setPrice(BigDecimal.ZERO).
@@ -3475,7 +3475,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(25)).
@@ -3496,7 +3496,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(37)).
@@ -3517,7 +3517,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop B").
-                        setVariety("variety B").
+                        setGrade("variety B").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(45)).
@@ -3538,7 +3538,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop B").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(60)).
@@ -3559,7 +3559,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(95)).
@@ -3580,7 +3580,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety D").
+                        setGrade("variety D").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(140)).

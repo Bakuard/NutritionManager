@@ -29,7 +29,7 @@ CREATE TABLE Products (
     userId UUID NOT NULL,
     category VARCHAR(256) NOT NULL,
     shop VARCHAR(256) NOT NULL,
-    variety VARCHAR(256) NOT NULL,
+    grade VARCHAR(256) NOT NULL,
     manufacturer VARCHAR(256) NOT NULL,
     description TEXT,
     imagePath VARCHAR(512),

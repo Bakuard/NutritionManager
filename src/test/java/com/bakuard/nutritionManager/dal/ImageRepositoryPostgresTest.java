@@ -417,7 +417,7 @@ class ImageRepositoryPostgresTest {
                             setUser(user).
                             setCategory("name#" + i).
                             setShop("shop#" + i).
-                            setVariety("variety#" + i).
+                            setGrade("variety#" + i).
                             setManufacturer("manufacturer#" + i).
                             setUnit("unitA").
                             setPrice(BigDecimal.ZERO).

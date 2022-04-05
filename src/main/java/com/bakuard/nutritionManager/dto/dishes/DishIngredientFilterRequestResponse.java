@@ -103,7 +103,7 @@ public class DishIngredientFilterRequestResponse {
         return "DishIngredientFilterRequestResponse{" +
                 "category='" + category + '\'' +
                 ", shops=" + shops +
-                ", varieties=" + grades +
+                ", grades=" + grades +
                 ", manufacturers=" + manufacturers +
                 ", tags=" + tags +
                 '}';

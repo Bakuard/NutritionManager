@@ -12,8 +12,6 @@ import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
-import com.google.common.collect.Sets;
-
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.SortField;
@@ -184,7 +182,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                                     ).
                                     setCategory(rs.getString("category")).
                                     setShop(rs.getString("shop")).
-                                    setVariety(rs.getString("variety")).
+                                    setGrade(rs.getString("grade")).
                                     setManufacturer(rs.getString("manufacturer")).
                                     setUnit(rs.getString("unit")).
                                     setPrice(rs.getBigDecimal("price")).
@@ -277,22 +275,22 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Page<String> getVarieties(Criteria criteria) {
-        int varietiesNumber = getVarietiesNumber(criteria);
+    public Page<String> getGrades(Criteria criteria) {
+        int gradesNumber = getGradesNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable().
-                createPageMetadata(varietiesNumber, 1000);
+                createPageMetadata(gradesNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
-        String query = selectDistinct(field("Products.variety")).
+        String query = selectDistinct(field("Products.grade")).
                 from("Products").
                 where(switchFilter(criteria.tryGetFilter())).
-                orderBy(field("Products.variety").asc()).
+                orderBy(field("Products.grade").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
                 getSQL();
 
-        List<String> varieties = statement.query(
+        List<String> grades = statement.query(
                 query,
                 (ResultSet rs) -> {
                     List<String> result = new ArrayList<>();
@@ -305,7 +303,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return metadata.createPage(varieties);
+        return metadata.createPage(grades);
     }
 
     @Override
@@ -324,7 +322,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 offset(inline(metadata.getOffset())).
                 getSQL();
 
-        List<String> varieties = statement.query(
+        List<String> categories = statement.query(
                 query,
                 (ResultSet rs) -> {
                     List<String> result = new ArrayList<>();
@@ -337,7 +335,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return metadata.createPage(varieties);
+        return metadata.createPage(categories);
     }
 
     @Override
@@ -356,7 +354,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 offset(inline(metadata.getOffset())).
                 getSQL();
 
-        List<String> varieties = statement.query(
+        List<String> manufacturers = statement.query(
                 query,
                 (ResultSet rs) -> {
                     List<String> result = new ArrayList<>();
@@ -369,7 +367,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
 
-        return metadata.createPage(varieties);
+        return metadata.createPage(manufacturers);
     }
 
     @Override
@@ -435,14 +433,14 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getVarietiesNumber(Criteria criteria) {
+    public int getGradesNumber(Criteria criteria) {
         ValidateException.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
-        String query = select(countDistinct(field("Products.variety"))).
+        String query = select(countDistinct(field("Products.grade"))).
                 from("Products").
                 where(switchFilter(criteria.getFilter())).
                 getSQL();
@@ -529,7 +527,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                           userId,
                           category,
                           shop,
-                          variety,
+                          grade,
                           manufacturer,
                           contextHash,
                           description,
@@ -545,7 +543,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     ps.setObject(2, product.getUser().getId());
                     ps.setString(3, product.getContext().getCategory());
                     ps.setString(4, product.getContext().getShop());
-                    ps.setString(5, product.getContext().getVariety());
+                    ps.setString(5, product.getContext().getGrade());
                     ps.setString(6, product.getContext().getManufacturer());
                     ps.setString(7, product.getContext().hashKey());
                     ps.setString(8, product.getDescription());
@@ -588,7 +586,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                         UPDATE Products SET
                           category=?,
                           shop=?,
-                          variety=?,
+                          grade=?,
                           manufacturer=?,
                           contextHash=?,
                           description=?,
@@ -602,7 +600,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 (PreparedStatement ps) -> {
                     ps.setString(1, newVersion.getContext().getCategory());
                     ps.setString(2, newVersion.getContext().getShop());
-                    ps.setString(3, newVersion.getContext().getVariety());
+                    ps.setString(3, newVersion.getContext().getGrade());
                     ps.setString(4, newVersion.getContext().getManufacturer());
                     ps.setString(5, newVersion.getContext().hashKey());
                     ps.setString(6, newVersion.getDescription());
@@ -680,7 +678,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                                     )).
                                     setCategory(rs.getString("category")).
                                     setShop(rs.getString("shop")).
-                                    setVariety(rs.getString("variety")).
+                                    setGrade(rs.getString("grade")).
                                     setManufacturer(rs.getString("manufacturer")).
                                     setUnit(rs.getString("unit")).
                                     setPrice(rs.getBigDecimal("price")).
@@ -715,7 +713,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 return List.of(shopFilter((AnyFilter) filter));
             }
             case GRADES -> {
-                return List.of(varietyFilter((AnyFilter) filter));
+                return List.of(gradeFilter((AnyFilter) filter));
             }
             case MANUFACTURER -> {
                 return List.of(manufacturerFilter((AnyFilter) filter));
@@ -752,7 +750,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 return shopFilter((AnyFilter) filter);
             }
             case GRADES -> {
-                return varietyFilter((AnyFilter) filter);
+                return gradeFilter((AnyFilter) filter);
             }
             case MANUFACTURER -> {
                 return manufacturerFilter((AnyFilter) filter);
@@ -811,8 +809,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
-    private Condition varietyFilter(AnyFilter filter) {
-        return field("variety").in(
+    private Condition gradeFilter(AnyFilter filter) {
+        return field("grade").in(
                 filter.getValues().stream().map(DSL::inline).toList()
         );
     }

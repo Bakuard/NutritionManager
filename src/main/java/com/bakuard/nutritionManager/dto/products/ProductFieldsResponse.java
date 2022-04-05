@@ -46,8 +46,8 @@ public class ProductFieldsResponse {
         return varieties;
     }
 
-    public void setVarieties(List<FieldResponse> varieties) {
-        this.varieties = varieties;
+    public void setGrades(List<FieldResponse> grades) {
+        this.varieties = grades;
     }
 
     public List<FieldResponse> getShops() {
@@ -81,7 +81,7 @@ public class ProductFieldsResponse {
                 "tags=" + tags +
                 ", categories=" + categories +
                 ", manufacturers=" + manufacturers +
-                ", varieties=" + varieties +
+                ", grades=" + varieties +
                 ", shops=" + shops +
                 '}';
     }

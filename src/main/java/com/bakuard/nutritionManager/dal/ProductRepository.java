@@ -83,7 +83,7 @@ public interface ProductRepository {
      * @return выборку из сортов продуктов удовлетворяющую ограничению criteria.
      * @throws ValidateException если criteria является null.
      */
-    public Page<String> getVarieties(Criteria criteria);
+    public Page<String> getGrades(Criteria criteria);
 
     /**
      * Возвращает выборку категорий продуктов удовлетворяющую ограничению criteria упорядоченную в порядке
@@ -133,7 +133,7 @@ public interface ProductRepository {
      * @return выборку из сортов продуктов.
      * @throws ValidateException если criteria является null.
      */
-    public int getVarietiesNumber(Criteria criteria);
+    public int getGradesNumber(Criteria criteria);
 
     /**
      * Возвращает кол-во категорий продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).

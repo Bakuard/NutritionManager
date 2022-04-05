@@ -272,8 +272,8 @@ public class Product implements Entity<Product> {
             return this;
         }
 
-        public Builder setVariety(String variety) {
-            contextBuilder.setVariety(variety);
+        public Builder setGrade(String variety) {
+            contextBuilder.setGrade(variety);
             return this;
         }
 

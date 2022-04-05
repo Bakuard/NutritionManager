@@ -1254,7 +1254,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(25)).
@@ -1275,7 +1275,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(37)).
@@ -1296,7 +1296,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop B").
-                        setVariety("variety B").
+                        setGrade("variety B").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(45)).
@@ -1317,7 +1317,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop B").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(60)).
@@ -1338,7 +1338,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(95)).
@@ -1359,7 +1359,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety D").
+                        setGrade("variety D").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(140)).
