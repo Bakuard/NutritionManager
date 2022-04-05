@@ -242,7 +242,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(Pageable.of(size, page)).
-                setSort(toProductSort(sortRule)).
+                setSort(Sort.products(List.of(sortRule))).
                 setFilter(filter);
     }
 
@@ -264,7 +264,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(Pageable.of(size, page)).
-                setSort(toDishSort(sortRule)).
+                setSort(Sort.dishes(List.of(sortRule))).
                 setFilter(filter);
     }
 
@@ -369,18 +369,6 @@ public class DtoMapper {
 
     private List<String> toTagsResponse(Collection<Tag> tags) {
         return tags.stream().map(Tag::getValue).toList();
-    }
-
-    private Sort toProductSort(String sortRuleAsString) {
-        if(sortRuleAsString == null) return Sort.productDefaultSort();
-        String[] parameters = sortRuleAsString.split("_");
-        return Sort.products().put(parameters[0], parameters[1]);
-    }
-
-    private Sort toDishSort(String sortRuleAsString) {
-        if(sortRuleAsString == null) return Sort.dishDefaultSort();
-        String[] parameters = sortRuleAsString.split("_");
-        return Sort.dishes().put(parameters[0], parameters[1]);
     }
 
     private List<Tag> toTags(List<String> tags) {
