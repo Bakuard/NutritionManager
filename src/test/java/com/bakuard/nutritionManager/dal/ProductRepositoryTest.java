@@ -1082,7 +1082,7 @@ class ProductRepositoryTest {
                         setFilter(Filter.user(user2.getId()))
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1108,7 +1108,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1134,7 +1134,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1165,7 +1165,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1196,7 +1196,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1258,7 +1258,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1290,7 +1290,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1328,7 +1328,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1363,7 +1363,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1398,7 +1398,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1432,7 +1432,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1468,7 +1468,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1504,7 +1504,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1539,7 +1539,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1577,7 +1577,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1618,7 +1618,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1655,7 +1655,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1713,7 +1713,7 @@ class ProductRepositoryTest {
         Page<Product> expected = Pageable.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1773,7 +1773,7 @@ class ProductRepositoryTest {
         Page<Product> expected = Pageable.of(5, 0).
                 createPageMetadata(1, 200).
                 createPage(products.subList(3, 4));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1834,7 +1834,7 @@ class ProductRepositoryTest {
                                 products.get(0)
                         )
                 );
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1888,7 +1888,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test

@@ -1,8 +1,10 @@
 package com.bakuard.nutritionManager;
 
 import com.bakuard.nutritionManager.model.Dish;
+import com.bakuard.nutritionManager.model.Entity;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
+import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class AssertUtil {
 
@@ -81,16 +84,20 @@ public class AssertUtil {
         if(a.compareTo(b) != 0) Assertions.fail("Expected: " + a + ", actual: " + b);
     }
 
-    public static void assertEquals(Product a, Product b) {
+    public static <T extends Entity<T>> void assertEquals(T a, T b) {
         if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
     }
 
-    public static void assertEquals(Dish a, Dish b) {
-        if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
-    }
+    public static <T extends Entity<T>> void assertEquals(Page<T> a, Page<T> b) {
+        boolean isEqual = a.getMetadata().equals(b.getMetadata()) &&
+                IntStream.range(0, a.getMetadata().getActualSize()).
+                        allMatch(i -> {
+                            T entityA = a.getContent().get(i);
+                            T entityB = b.getContent().get(i);
+                            return entityA.equalsFullState(entityB);
+                        });
 
-    public static void assertEquals(User a, User b) {
-        if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
+        if(!isEqual) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
     }
 
 }

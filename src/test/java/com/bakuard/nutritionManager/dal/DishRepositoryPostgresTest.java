@@ -741,7 +741,7 @@ class DishRepositoryPostgresTest {
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -792,7 +792,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(dishes.subList(3, 4));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -820,7 +820,7 @@ class DishRepositoryPostgresTest {
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -850,7 +850,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -882,7 +882,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(4, 0).
                 createPageMetadata(3, 200).
                 createPage(dishes.subList(0, 3));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -912,7 +912,7 @@ class DishRepositoryPostgresTest {
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -947,7 +947,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(0, 2));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -980,7 +980,7 @@ class DishRepositoryPostgresTest {
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
