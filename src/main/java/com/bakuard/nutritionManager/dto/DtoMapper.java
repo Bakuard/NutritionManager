@@ -145,7 +145,7 @@ public class DtoMapper {
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
                     DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(user, ingredient, i));
+                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
                 });
 
         dto.getTags().forEach(builder::addTag);
@@ -171,7 +171,7 @@ public class DtoMapper {
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
                     DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(user, ingredient, i));
+                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
                 });
 
         dto.getTags().forEach(builder::addTag);
@@ -227,10 +227,8 @@ public class DtoMapper {
                                       List<String> varieties,
                                       List<String> manufacturers,
                                       List<String> tags) {
-        User user = userRepository.getById(userId);
-
         List<Filter> filters = new ArrayList<>();
-        filters.add(Filter.user(user));
+        filters.add(Filter.user(userId));
         if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
         if(category != null) filters.add(Filter.anyCategory(category));
         if(shops != null) filters.add(Filter.anyShop(shops));
@@ -254,10 +252,8 @@ public class DtoMapper {
                                    String sortRule,
                                    List<String> productCategories,
                                    List<String> tags) {
-        User user = userRepository.getById(userId);
-
         List<Filter> filters = new ArrayList<>();
-        filters.add(Filter.user(user));
+        filters.add(Filter.user(userId));
 
         if(productCategories != null) filters.add(Filter.anyIngredient(productCategories));
         if(tags != null) filters.add(Filter.minTags(toTags(tags)));
@@ -276,7 +272,7 @@ public class DtoMapper {
     public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
                 setPageable(Pageable.of(1000, 0)).
-                setFilter(Filter.user(userRepository.getById(userId)));
+                setFilter(Filter.user(userId));
 
         Page<String> manufacturers = productRepository.getManufacturers(criteria);
         Page<String> varieties = productRepository.getVarieties(criteria);
@@ -297,7 +293,7 @@ public class DtoMapper {
     public DishFieldsResponse toDishFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
                 setPageable(Pageable.of(1000, 0)).
-                setFilter(Filter.user(userRepository.getById(userId)));
+                setFilter(Filter.user(userId));
 
         Page<Tag> tags = dishRepository.getTags(criteria);
         Page<String> units = dishRepository.getUnits(criteria);
@@ -435,17 +431,17 @@ public class DtoMapper {
         return response;
     }
 
-    private DishIngredient.Builder toDishIngredient(User user, DishIngredientRequestResponse dto, int index) {
+    private DishIngredient.Builder toDishIngredient(UUID userId, DishIngredientRequestResponse dto, int index) {
         return new DishIngredient.Builder().
                 setConfig(appConfiguration).
                 setName("ingredient" + index).
                 setQuantity(dto.getQuantity()).
-                setFilter(toDishIngredientFilter(user, dto.getFilter()));
+                setFilter(toDishIngredientFilter(userId, dto.getFilter()));
     }
 
-    private Filter toDishIngredientFilter(User user, DishIngredientFilterRequestResponse dto) {
+    private Filter toDishIngredientFilter(UUID userId, DishIngredientFilterRequestResponse dto) {
         List<Filter> filters = new ArrayList<>();
-        filters.add(Filter.user(user));
+        filters.add(Filter.user(userId));
         filters.add(Filter.anyCategory(dto.getCategory()));
         if(dto.getGrades() != null) filters.add(Filter.anyGrade(dto.getGrades()));
         if(dto.getShops() != null) filters.add(Filter.anyShop(dto.getShops()));

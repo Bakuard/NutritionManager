@@ -455,7 +455,7 @@ class ImageRepositoryPostgresTest {
                             addIngredient("ingredient 1",
                                     Filter.orElse(
                                             Filter.and(
-                                                    Filter.user(user),
+                                                    Filter.user(user.getId()),
                                                     Filter.minTags(new Tag("common tag")),
                                                     Filter.anyCategory("name A"),
                                                     Filter.anyShop("shop A"),
@@ -463,7 +463,7 @@ class ImageRepositoryPostgresTest {
                                                     Filter.anyManufacturer("manufacturer A")
                                             ),
                                             Filter.and(
-                                                    Filter.user(user),
+                                                    Filter.user(user.getId()),
                                                     Filter.minTags(new Tag("tag B"))
                                             )
                                     ),

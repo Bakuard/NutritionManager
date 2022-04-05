@@ -152,6 +152,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 ).
                 leftJoin("ProductTags").
                     on(field("P.productId").eq(field("ProductTags.productId"))).
+                leftJoin("Users").
+                    on(field("P.userId").eq(field("Users.userId"))).
                 orderBy(getOrderFields(fieldsName, criteria.tryGetSort(), "P")).
                 getSQL().
                 replace("\"{P}\"", "as P").//Этот костыль исправляет странное поведение JOOQ в конструкциях asTable()
@@ -171,7 +173,15 @@ public class ProductRepositoryPostgres implements ProductRepository {
                             builder = new Product.Builder().
                                     setAppConfiguration(appConfig).
                                     setId(productId).
-                                    setUser(criteria.getFilter().<UserFilter>findAny(USER).getUser()).
+                                    setUser(
+                                            new User.Builder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("name")).
+                                                    setEmail(rs.getString("email")).
+                                                    setPasswordHash(rs.getString("passwordHash")).
+                                                    setSalt(rs.getString("salt")).
+                                                    tryBuild()
+                                    ).
                                     setCategory(rs.getString("category")).
                                     setShop(rs.getString("shop")).
                                     setVariety(rs.getString("variety")).
@@ -187,6 +197,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
                         String tagValue = rs.getString("tagValue");
                         if(!rs.wasNull()) builder.addTag(tagValue);
+
+
                     }
 
                     if(builder != null) result.add(builder.tryBuild());
@@ -812,7 +824,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     private Condition userFilter(UserFilter filter) {
-        return field("userId").eq(inline(filter.getUser().getId()));
+        return field("userId").eq(inline(filter.getUserId()));
     }
 
     private Condition quantityFilter(QuantityFilter filter) {

@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public interface Filter {
 
@@ -137,8 +138,8 @@ public interface Filter {
         return new MinTagsFilter(values);
     }
 
-    public static UserFilter user(User user) {
-        return new UserFilter(user);
+    public static UserFilter user(UUID userId) {
+        return new UserFilter(userId);
     }
 
     public static QuantityFilter less(BigDecimal quantity) {

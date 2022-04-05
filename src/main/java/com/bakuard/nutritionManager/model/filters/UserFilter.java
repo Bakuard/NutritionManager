@@ -1,21 +1,22 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
 import com.google.common.collect.ImmutableList;
 
+import java.util.UUID;
+
 public class UserFilter extends AbstractFilter {
 
-    private final User user;
+    private final UUID userId;
 
-    UserFilter(User user) {
+    UserFilter(UUID userId) {
         ValidateException.check(
-                Rule.of("UserFilter.user").notNull(user)
+                Rule.of("UserFilter.userId").notNull(userId)
         );
 
-        this.user = user;
+        this.userId = userId;
     }
 
     @Override
@@ -28,8 +29,8 @@ public class UserFilter extends AbstractFilter {
         return ImmutableList.of();
     }
 
-    public User getUser() {
-        return user;
+    public UUID getUserId() {
+        return userId;
     }
 
     @Override
@@ -37,18 +38,18 @@ public class UserFilter extends AbstractFilter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserFilter that = (UserFilter) o;
-        return user.equals(that.user);
+        return userId.equals(that.userId);
     }
 
     @Override
     public int hashCode() {
-        return user.hashCode();
+        return userId.hashCode();
     }
 
     @Override
     public String toString() {
         return "UserFilter{" +
-                "user=" + user +
+                "userId=" + userId +
                 '}';
     }
 

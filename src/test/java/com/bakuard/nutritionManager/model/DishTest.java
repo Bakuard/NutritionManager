@@ -52,7 +52,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -83,7 +83,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -114,7 +114,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -153,7 +153,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -190,7 +190,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -226,7 +226,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -263,7 +263,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -300,7 +300,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -338,7 +338,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -366,7 +366,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -397,7 +397,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -428,7 +428,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -467,7 +467,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -504,7 +504,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -540,7 +540,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -577,7 +577,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -614,7 +614,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -652,7 +652,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -681,7 +681,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -718,7 +718,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -757,7 +757,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -796,7 +796,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -826,7 +826,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setQuantity(BigDecimal.TEN).
@@ -908,7 +908,7 @@ class DishTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setSort(Sort.products().asc("price"));

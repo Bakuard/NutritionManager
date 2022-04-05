@@ -452,7 +452,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getProductsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -473,7 +473,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO)
                                 )
                         )
@@ -494,7 +494,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(6, actual);
@@ -515,7 +515,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user2),
+                                        Filter.user(user2.getId()),
                                         Filter.minTags(new Tag("common tag"))
                                 )
                         )
@@ -544,7 +544,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
@@ -573,7 +573,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(
                         Filter.and(
                                 Filter.minTags(new Tag("common tag")),
-                                Filter.user(user)
+                                Filter.user(user.getId())
                         )
                 )
         );
@@ -597,7 +597,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.anyShop("shop C")
                                 )
@@ -625,7 +625,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name B"),
                                         Filter.anyGrade("variety C")
                                 )
@@ -655,7 +655,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("this tag not exists")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -687,7 +687,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("this name not exists"),
                                         Filter.anyShop("shop C"),
@@ -719,7 +719,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("this shop not exists"),
@@ -751,7 +751,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -783,7 +783,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -816,7 +816,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -850,7 +850,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -883,7 +883,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -925,7 +925,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -933,7 +933,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -976,7 +976,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
@@ -985,7 +985,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
@@ -1028,7 +1028,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -1036,7 +1036,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1079,7 +1079,7 @@ class ProductRepositoryTest {
         Page<Product> actual = repository.getProducts(
                 new Criteria().
                         setPageable(Pageable.of(6, 0)).
-                        setFilter(Filter.user(user2))
+                        setFilter(Filter.user(user2.getId()))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -1104,7 +1104,7 @@ class ProductRepositoryTest {
         Page<Product> actual = repository.getProducts(
                 new Criteria().
                         setPageable(Pageable.of(5, 0)).
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setSort(Sort.productDefaultSort())
         );
 
@@ -1130,7 +1130,7 @@ class ProductRepositoryTest {
         Page<Product> actual = repository.getProducts(
                 new Criteria().
                         setPageable(Pageable.of(5, 1)).
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setSort(Sort.productDefaultSort())
         );
 
@@ -1158,7 +1158,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO)
                                 )
                         ).
@@ -1189,7 +1189,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 1)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO)
                                 )
                         ).
@@ -1214,7 +1214,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(6, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"))
                                 )
                         )
@@ -1248,7 +1248,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(1, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag B"), new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -1280,7 +1280,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(6, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("tag A"), new Tag("common tag")),
                                         Filter.anyCategory("name B"),
@@ -1318,7 +1318,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1354,7 +1354,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag Z"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop Z"),
@@ -1389,7 +1389,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C")
@@ -1423,7 +1423,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop Z"),
@@ -1458,7 +1458,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
@@ -1495,7 +1495,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A")
@@ -1530,7 +1530,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common Z")),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop A"),
@@ -1567,7 +1567,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(6, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -1607,7 +1607,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1645,7 +1645,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1690,7 +1690,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown name"),
                                                 Filter.anyShop("unknown shop"),
@@ -1698,7 +1698,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1748,7 +1748,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
@@ -1757,7 +1757,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
@@ -1805,12 +1805,12 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyManufacturer("manufacturer B")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1868,7 +1868,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -1876,7 +1876,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
@@ -1916,7 +1916,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getTagsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -1933,7 +1933,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
-        int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user)));
+        int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
         Assertions.assertEquals(9, actual);
     }
@@ -1952,7 +1952,7 @@ class ProductRepositoryTest {
         int actual = repository.getTagsNumber(
                 new Criteria().setFilter(
                         Filter.and(
-                                Filter.user(user),
+                                Filter.user(user.getId()),
                                 Filter.anyCategory("name A")
                         )
                 )
@@ -1987,7 +1987,7 @@ class ProductRepositoryTest {
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2011,7 +2011,7 @@ class ProductRepositoryTest {
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2035,7 +2035,7 @@ class ProductRepositoryTest {
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(4, 2))
         );
 
@@ -2067,7 +2067,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2098,7 +2098,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2133,7 +2133,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getShopsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2151,7 +2151,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getShopsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(3, actual);
@@ -2172,7 +2172,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         )
@@ -2206,7 +2206,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2229,7 +2229,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(3, 0))
         );
 
@@ -2252,7 +2252,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -2277,7 +2277,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2305,7 +2305,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2340,7 +2340,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getVarietiesNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2358,7 +2358,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getVarietiesNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(4, actual);
@@ -2379,7 +2379,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         )
@@ -2413,7 +2413,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getVarieties(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2436,7 +2436,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getVarieties(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(4, 0))
         );
 
@@ -2459,7 +2459,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getVarieties(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(3, 1))
         );
 
@@ -2484,7 +2484,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2512,7 +2512,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2547,7 +2547,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getCategoriesNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2564,7 +2564,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getCategoriesNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2595,7 +2595,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 0))
         );
 
@@ -2618,7 +2618,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2641,7 +2641,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(1, 1))
         );
 
@@ -2673,7 +2673,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getManufacturersNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2691,7 +2691,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getManufacturersNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2712,7 +2712,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name B")
                                 )
                         )
@@ -2746,7 +2746,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2769,7 +2769,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 0))
         );
 
@@ -2792,7 +2792,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2817,7 +2817,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name B")
                                 )
                         ).
@@ -2845,7 +2845,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2887,7 +2887,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyShop("unknown shop"),
                                         Filter.anyManufacturer("manufacturer A")
@@ -2916,7 +2916,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A"),
@@ -2945,7 +2945,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyGrade("variety A")
@@ -2975,7 +2975,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("unknown shop"),
@@ -3005,7 +3005,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("unknown variety")
@@ -3032,7 +3032,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("unknown name")
                                 )
@@ -3059,7 +3059,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("unknown manufacturer")
@@ -3087,7 +3087,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A")
@@ -3117,7 +3117,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("unknown shop"),
@@ -3148,7 +3148,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("shop A"),
@@ -3178,7 +3178,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyManufacturer("manufacturer A")
@@ -3206,7 +3206,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
@@ -3235,7 +3235,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("unknown shop"),
                                         Filter.anyGrade("unknown variety"),
@@ -3261,7 +3261,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyShop("shop A")
                                 )
                         )
@@ -3289,7 +3289,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("unknown shop"),
@@ -3328,7 +3328,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -3336,7 +3336,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -3378,7 +3378,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -3386,7 +3386,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),

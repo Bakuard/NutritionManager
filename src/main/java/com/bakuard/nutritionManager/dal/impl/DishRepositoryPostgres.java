@@ -205,7 +205,12 @@ public class DishRepositoryPostgres implements DishRepository {
                         field("DishIngredients.name as ingredientName"),
                         field("DishIngredients.quantity as ingredientQuantity"),
                         field("DishIngredients.filter as ingredientFilter"),
-                        field("DishTags.tagValue as tagValue")).
+                        field("DishTags.tagValue as tagValue"),
+                        field("Users.userId as userId"),
+                        field("Users.name as userName"),
+                        field("Users.email as userEmail"),
+                        field("Users.passwordHash as userPasswordHash"),
+                        field("Users.salt as userSalt")).
                         from(
                             select(field("*")).
                                 from("Dishes").
@@ -219,6 +224,8 @@ public class DishRepositoryPostgres implements DishRepository {
                             on(field("D.dishId").eq(field("DishTags.dishId"))).
                         leftJoin("DishIngredients").
                             on(field("D.dishId").eq(field("DishIngredients.dishId"))).
+                        leftJoin("Users").
+                            on(field("D.userId").eq(field("Users.userId"))).
                         orderBy(getOrderFields(criteria.getSort(), "D")).
                         getSQL().
                         replace("\"{D}\"", "as D");
@@ -236,7 +243,15 @@ public class DishRepositoryPostgres implements DishRepository {
                             if (builder != null) result.add(builder.tryBuild());
                             builder = new Dish.Builder().
                                     setId(dishId).
-                                    setUser(criteria.getFilter().<UserFilter>findAny(USER).getUser()).
+                                    setUser(
+                                            new User.Builder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("userName")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setPasswordHash(rs.getString("userPasswordHash")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
                                     setName(rs.getString("name")).
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
@@ -606,7 +621,8 @@ public class DishRepositoryPostgres implements DishRepository {
                         if(builder == null) {
                             builder = new Dish.Builder().
                                     setId(dishId).
-                                    setUser(new User(
+                                    setUser(
+                                            new User(
                                             (UUID) rs.getObject("userId"),
                                             rs.getString("userName"),
                                             rs.getString("userPassHash"),
@@ -668,7 +684,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     private Condition userFilter(UserFilter filter) {
-        return field("userId").eq(inline(filter.getUser().getId()));
+        return field("userId").eq(inline(filter.getUserId()));
     }
 
     private Condition minTagsFilter(MinTagsFilter filter) {
@@ -817,23 +833,11 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     private UserFilter toUserFilter(JsonParser parser) throws IOException {
-        User.Builder builder = new User.Builder();
-
         parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            if(parser.currentToken() == JsonToken.FIELD_NAME) {
-                String fieldName = parser.getCurrentName();
-                switch(fieldName) {
-                    case "id" -> builder.setId(UUID.fromString(parser.nextTextValue()));
-                    case "name" -> builder.setName(parser.nextTextValue());
-                    case "email" -> builder.setEmail(parser.nextTextValue());
-                    case "passwordHash" -> builder.setPasswordHash(parser.nextTextValue());
-                    case "salt" -> builder.setSalt(parser.nextTextValue());
-                }
-            }
-        }
+        UUID userId = UUID.fromString(parser.nextTextValue());
+        parser.nextToken(); //END_ARRAY
 
-        return Filter.user(builder.tryBuild());
+        return Filter.user(userId);
     }
 
 
@@ -922,15 +926,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         writer.writeFieldName("values");
         writer.writeStartArray();
-
-        writer.writeStartObject();
-        writer.writeStringField("id", filter.getUser().getId().toString());
-        writer.writeStringField("name", filter.getUser().getName());
-        writer.writeStringField("email", filter.getUser().getEmail());
-        writer.writeStringField("passwordHash", filter.getUser().getPasswordHash());
-        writer.writeStringField("salt", filter.getUser().getSalt());
-        writer.writeEndObject();
-
+        writer.writeString(filter.getUserId().toString());
         writer.writeEndArray();
 
         writer.writeEndObject();

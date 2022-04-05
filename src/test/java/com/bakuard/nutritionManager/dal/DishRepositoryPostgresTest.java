@@ -266,7 +266,7 @@ class DishRepositoryPostgresTest {
         expected.removeIngredient("ingredient 1");
         expected.putIngredient(
                 "ingredient 4",
-                Filter.and(Filter.user(user), Filter.anyCategory("category Z")),
+                Filter.and(Filter.user(user.getId()), Filter.anyCategory("category Z")),
                 BigDecimal.TEN
         );
         expected.removeTag(new Tag("tag A"));
@@ -532,7 +532,7 @@ class DishRepositoryPostgresTest {
         User actualUser = createAndSaveUser(2);
 
         int actual = dishRepository.getDishesNumber(
-                new Criteria().setFilter(Filter.user(actualUser))
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -549,7 +549,7 @@ class DishRepositoryPostgresTest {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
-        int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user)));
+        int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
         Assertions.assertEquals(4, actual);
     }
@@ -569,7 +569,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("unknown tag"))
                                 )
                         )
@@ -593,7 +593,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag A"))
                                 )
                         )
@@ -618,7 +618,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name A", "name Z")
                                 )
                         )
@@ -643,7 +643,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name C", "name D")
                                 )
                         )
@@ -670,7 +670,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B")),
                                         Filter.anyIngredient("name B", "name Z")
                                 )
@@ -698,7 +698,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B")),
                                         Filter.anyIngredient("name C", "name D")
                                 )
@@ -735,7 +735,7 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
-                        setFilter(Filter.user(actualUser)).
+                        setFilter(Filter.user(actualUser.getId())).
                         setPageable(Pageable.of(2, 0)).
                         setSort(Sort.dishDefaultSort())
         );
@@ -758,7 +758,7 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(4, 0)).
                         setSort(Sort.dishDefaultSort())
         );
@@ -784,7 +784,7 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(3, 1)).
                         setSort(Sort.dishDefaultSort())
         );
@@ -811,7 +811,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag"))
                                 )
                         ).
@@ -839,7 +839,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B"))
                                 )
                         ).
@@ -871,7 +871,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name A", "name C", "name D")
                                 )
                         ).
@@ -903,7 +903,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name C", "name D", "name E")
                                 )
                         ).
@@ -935,7 +935,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag A")),
                                         Filter.anyIngredient("name A", "name Z")
                                 )
@@ -970,7 +970,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B")),
                                         Filter.anyIngredient("name C", "name D")
                                 )
@@ -1011,7 +1011,7 @@ class DishRepositoryPostgresTest {
         User actualUser = createAndSaveUser(100);
 
         int actual = dishRepository.getTagsNumber(
-                new Criteria().setFilter(Filter.user(actualUser))
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -1029,7 +1029,7 @@ class DishRepositoryPostgresTest {
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
 
         int actual = dishRepository.getTagsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(7, actual);
@@ -1062,7 +1062,7 @@ class DishRepositoryPostgresTest {
 
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(actualUser)).
+                        setFilter(Filter.user(actualUser.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -1083,7 +1083,7 @@ class DishRepositoryPostgresTest {
 
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -1121,7 +1121,7 @@ class DishRepositoryPostgresTest {
         User actualUser = createAndSaveUser(100);
 
         int actual = dishRepository.getUnitsNumber(
-                new Criteria().setFilter(Filter.user(actualUser))
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -1139,7 +1139,7 @@ class DishRepositoryPostgresTest {
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
 
         int actual = dishRepository.getUnitsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(3, actual);
@@ -1172,7 +1172,7 @@ class DishRepositoryPostgresTest {
 
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
-                        setFilter(Filter.user(actualUser)).
+                        setFilter(Filter.user(actualUser.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -1193,7 +1193,7 @@ class DishRepositoryPostgresTest {
 
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -1396,7 +1396,7 @@ class DishRepositoryPostgresTest {
                 addIngredient("ingredient 1",
                         Filter.orElse(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1404,7 +1404,7 @@ class DishRepositoryPostgresTest {
                                         Filter.anyManufacturer("manufacturer A")
                                 ),
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag B"))
                                 )
                         ),
@@ -1412,21 +1412,21 @@ class DishRepositoryPostgresTest {
                 addIngredient("ingredient 2",
                         Filter.orElse(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 1")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A")
                                 ),
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyManufacturer("manufacturer B")
                                 )
                         ),
                         new BigDecimal("2.5")).
                 addIngredient("ingredient 3",
                         Filter.and(
-                                Filter.user(user),
+                                Filter.user(user.getId()),
                                 Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                 Filter.anyCategory("name A"),
                                 Filter.anyShop("shop B"),
@@ -1456,7 +1456,7 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1464,7 +1464,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         )
                                 ),
@@ -1472,21 +1472,21 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 2",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("value 1")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
                                                 Filter.anyGrade("variety A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyManufacturer("manufacturer B")
                                         )
                                 ),
                                 new BigDecimal("2.5")).
                         addIngredient("ingredient 3",
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop B"),
@@ -1513,7 +1513,7 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1521,7 +1521,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         )
                                 ),
@@ -1546,11 +1546,11 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1562,18 +1562,18 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 2",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyShop("shop B")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyManufacturer("manufacturer B")
                                         )
                                 ),
                                 new BigDecimal("2.5")).
                         addIngredient("ingredient 3",
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop B"),
@@ -1600,11 +1600,11 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyShop("shop C"),
                                                 Filter.anyGrade("variety D")
                                         )
@@ -1613,11 +1613,11 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 2",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyShop("variety C")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyManufacturer("manufacturer B")
                                         )
                                 ),

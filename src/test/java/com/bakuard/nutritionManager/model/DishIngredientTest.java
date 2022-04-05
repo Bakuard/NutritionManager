@@ -50,7 +50,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -75,7 +75,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -100,7 +100,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -123,7 +123,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -184,7 +184,7 @@ class DishIngredientTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setSort(Sort.products().asc("price"));

@@ -85,7 +85,7 @@ public class Dish implements Entity<Dish> {
                         and(r -> {
                             boolean b = ingredientContainer.get().stream().
                                     map(i -> i.getFilter().<UserFilter>findAny(Filter.Type.USER)).
-                                    allMatch(u -> u != null && user.equals(u.getUser()));
+                                    allMatch(u -> u != null && user.getId().equals(u.getUserId()));
                             if(b) return r.success(Constraint.IS_TRUE);
                             else return r.failure(Constraint.IS_TRUE,
                                     "All ingredients must have UserFilter and UserFilter.getUser() must be equal Dish.getUser()");
