@@ -1,5 +1,8 @@
 package com.bakuard.nutritionManager.validation;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class RuleException extends RuntimeException {
 
     private final String userMessageKey;
@@ -7,7 +10,7 @@ public class RuleException extends RuntimeException {
 
     public RuleException(String userMessageKey, String logMessage, Constraint... constraints) {
         super(logMessage, null, true, false);
-        this.userMessageKey = userMessageKey;
+        this.userMessageKey = Objects.requireNonNull(userMessageKey, "UserMessageKey can't be null");
         this.constraints = constraints;
     }
 
@@ -21,6 +24,31 @@ public class RuleException extends RuntimeException {
             find = constraints[i] == constraint;
         }
         return find;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RuleException that = (RuleException) o;
+        return userMessageKey.equals(that.userMessageKey) &&
+                Arrays.equals(constraints, that.constraints);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(userMessageKey);
+        result = 31 * result + Arrays.hashCode(constraints);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RuleException{" +
+                "userMessageKey='" + userMessageKey + '\'' +
+                ", constraints=" + Arrays.toString(constraints) +
+                ", message=" + super.toString() +
+                '}';
     }
 
 }

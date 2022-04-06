@@ -15,7 +15,6 @@ import com.bakuard.nutritionManager.validation.*;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
-import com.bakuard.nutritionManager.services.AuthService;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -340,8 +339,11 @@ public class DtoMapper {
 
     public ExceptionResponse toExceptionResponse(ValidateException e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        if(e.getCheckedClass() == AuthService.class) httpStatus = HttpStatus.FORBIDDEN;
-        else if(e.containsConstraint(Constraint.ENTITY_MUST_EXISTS_IN_DB)) httpStatus = HttpStatus.NOT_FOUND;
+        if(e.getUserMessageKey() != null && e.getUserMessageKey().startsWith("AuthService")) {
+            httpStatus = HttpStatus.FORBIDDEN;
+        } else if(e.containsConstraint(Constraint.ENTITY_MUST_EXISTS_IN_DB)) {
+            httpStatus = HttpStatus.NOT_FOUND;
+        }
 
         ExceptionResponse response = new ExceptionResponse(
                 httpStatus,

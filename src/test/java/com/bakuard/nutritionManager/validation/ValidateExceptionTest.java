@@ -11,7 +11,7 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             iterator():
-             validate exception doesn't contain any field exceptions,
+             validate exception doesn't contain any rule exceptions,
              validate exception doesn't contain nested validation exceptions
              => iterator#hasNext() return false
             """)
@@ -26,16 +26,16 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             iterator():
-             validate exception doesn't contain any field exceptions,
+             validate exception doesn't contain any rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions don't contain any field exceptions
+             nested validation exceptions don't contain any rule exceptions
              => iterator#hasNext() return false
             """)
     public void iterator2() {
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(new ValidateException());
-        validateException.addReason(new ValidateException());
-        validateException.addReason(new ValidateException());
+        ValidateException validateException = new ValidateException().
+                addReason(new ValidateException()).
+                addReason(new ValidateException()).
+                addReason(new ValidateException());
 
         Iterator<RuleException> iterator = validateException.iterator();
 
@@ -45,25 +45,25 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             iterator():
-             validate exception doesn't contain any field exceptions,
+             validate exception doesn't contain any rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions contains some field exceptions
+             nested validation exceptions contains some rule exceptions
              => iterator#hasNext() return true
             """)
     public void iterator3() {
-        ValidateException validateException = new ValidateException();
-        ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
-        nestedValidateException.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
-        nestedValidateException.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
-        validateException.addReason(nestedValidateException);
-        ValidateException nestedValidateException2 = new ValidateException();
-        ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
-        nestedValidateException3.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
-        nestedValidateException3.addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check());
-        nestedValidateException2.addReason(nestedValidateException3);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException().
+                addReason(
+                        new ValidateException().
+                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
+                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
+                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check())
+                ).
+                addReason(
+                        new ValidateException().
+                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
+                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
+                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check())
+                );
 
         Iterator<RuleException> iterator = validateException.iterator();
 
@@ -73,10 +73,10 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             iterator():
-             validate exception doesn't contain any field exceptions,
+             validate exception doesn't contain any rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions contains some field exceptions
-             => iterator#next() return all field exceptions
+             nested validation exceptions contains some rule exceptions
+             => iterator#next() return all rule exceptions
             """)
     public void iterator4() {
         List<RuleException> expected = List.of(
@@ -88,19 +88,19 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason(expected.get(0));
-        nestedValidateException.addReason(expected.get(1));
-        nestedValidateException.addReason(expected.get(2));
-        ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason(expected.get(3));
-        nestedValidateException3.addReason(expected.get(4));
-        nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                );
 
         Assertions.assertIterableEquals(expected, validateException);
     }
@@ -108,10 +108,10 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             iterator():
-             validate exception contains field exceptions,
+             validate exception contains rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions don't contain any field exceptions
-             => iterator#next() return all field exceptions
+             nested validation exceptions don't contain any rule exceptions
+             => iterator#next() return all rule exceptions
             """)
     public void iterator5() {
         List<RuleException> expected = List.of(
@@ -123,14 +123,20 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        ValidateException nestedValidateException3 = new ValidateException();
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
-        expected.forEach(validateException::addReason);
+        ValidateException validateException = new ValidateException().
+                addReason(
+                        new ValidateException()
+                ).
+                addReason(
+                        new ValidateException().
+                                addReason(new ValidateException())
+                ).
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(expected.get(2)).
+                addReason(expected.get(3)).
+                addReason(expected.get(4)).
+                addReason(expected.get(5));
 
         Assertions.assertIterableEquals(expected, validateException);
     }
@@ -138,10 +144,10 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             iterator():
-             validate exception contains field exceptions,
+             validate exception contains rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions contains some field exceptions
-             => iterator#next() return all field exceptions
+             nested validation exceptions contains some rule exceptions
+             => iterator#next() return all rule exceptions
             """)
     public void iterator6() {
         List<RuleException> expected = List.of(
@@ -153,19 +159,19 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason(expected.get(2));
-        nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason(expected.get(4));
-        nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(expected.get(0));
-        validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                );
 
         Assertions.assertIterableEquals(expected, validateException);
     }
@@ -173,10 +179,10 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             iterator():
-             validate exception contains field exceptions,
+             validate exception contains rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions contains some field exceptions
-             => number iteration = number of all field exceptions
+             nested validation exceptions contains some rule exceptions
+             => number iteration = number of all rule exceptions
             """)
     public void iterator7() {
         List<RuleException> expected = List.of(
@@ -188,19 +194,19 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason(expected.get(2));
-        nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason(expected.get(4));
-        nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(expected.get(0));
-        validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                );
 
         Iterator<RuleException> iterator = validateException.iterator();
         int number = 0;
@@ -214,8 +220,52 @@ class ValidateExceptionTest {
 
     @Test
     @DisplayName("""
+            iterator():
+             validate exception contains rule exceptions,
+             validate exception contains nested validation exceptions,
+             nested validation exceptions contains some rule exceptions,
+             nested rule exceptions contains some validate exceptions
+             => iterate all fields
+            """)
+    public void iterator8() {
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check(),
+                Rule.of("rule7").failure(Constraint.IS_TRUE).check(),
+                Rule.of("rule8").failure(Constraint.CONTAINS_ITEM).check()
+        );
+
+        RuleException ruleException = expected.get(6);
+        ruleException.addSuppressed(
+                new ValidateException().
+                        addReason(expected.get(7))
+        );
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                ).
+                addReason(ruleException);
+
+        Assertions.assertIterableEquals(expected, validateException);
+    }
+
+    @Test
+    @DisplayName("""
             forEach(action):
-             validate exception doesn't contain any field exceptions,
+             validate exception doesn't contain any rule exceptions,
              validate exception doesn't contain nested validation exceptions
              => number iterations = 0
             """)
@@ -231,16 +281,16 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             forEach(action):
-             validate exception doesn't contain any field exceptions,
+             validate exception doesn't contain any rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions don't contain any field exceptions
+             nested validation exceptions don't contain any rule exceptions
              => number iterations = 0
             """)
     public void forEach2() {
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(new ValidateException());
-        validateException.addReason(new ValidateException());
-        validateException.addReason(new ValidateException());
+        ValidateException validateException = new ValidateException()
+                .addReason(new ValidateException())
+                .addReason(new ValidateException())
+                .addReason(new ValidateException());
 
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
@@ -251,9 +301,9 @@ class ValidateExceptionTest {
     @Test
     @DisplayName("""
             forEach(action):
-             validate exception doesn't contain any field exceptions,
+             validate exception doesn't contain any rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions contains some field exceptions
+             nested validation exceptions contains some rule exceptions
              => iterate all fields
             """)
     public void forEach3() {
@@ -266,32 +316,32 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason(expected.get(0));
-        nestedValidateException.addReason(expected.get(1));
-        nestedValidateException.addReason(expected.get(2));
-        ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason(expected.get(3));
-        nestedValidateException3.addReason(expected.get(4));
-        nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                );
 
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
             forEach(action):
-             validate exception contains field exceptions,
+             validate exception contains rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions don't contain any field exceptions
+             nested validation exceptions don't contain any rule exceptions
              => iterate all fields
             """)
     public void forEach4() {
@@ -304,27 +354,32 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        ValidateException nestedValidateException3 = new ValidateException();
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
-        expected.forEach(validateException::addReason);
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                );
 
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
             forEach(action):
-             validate exception contains field exceptions,
+             validate exception contains rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions contains some field exceptions
+             nested validation exceptions contains some rule exceptions
              => iterate all fields
             """)
     public void forEach5() {
@@ -337,32 +392,32 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason(expected.get(2));
-        nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason(expected.get(4));
-        nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(expected.get(0));
-        validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                );
 
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
             forEach(action):
-             validate exception contains field exceptions,
+             validate exception contains rule exceptions,
              validate exception contains nested validation exceptions,
-             nested validation exceptions contains some field exceptions
+             nested validation exceptions contains some rule exceptions
              => iterate all fields
             """)
     public void forEach6() {
@@ -375,24 +430,71 @@ class ValidateExceptionTest {
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
         );
 
-        ValidateException nestedValidateException = new ValidateException();
-        nestedValidateException.addReason(expected.get(2));
-        nestedValidateException.addReason(expected.get(3));
-        ValidateException nestedValidateException3 = new ValidateException();
-        nestedValidateException3.addReason(expected.get(4));
-        nestedValidateException3.addReason(expected.get(5));
-        ValidateException nestedValidateException2 = new ValidateException();
-        nestedValidateException2.addReason(nestedValidateException3);
-        ValidateException validateException = new ValidateException();
-        validateException.addReason(expected.get(0));
-        validateException.addReason(expected.get(1));
-        validateException.addReason(nestedValidateException);
-        validateException.addReason(nestedValidateException2);
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                );
 
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertTrue(expected.containsAll(actual) && actual.containsAll(expected));
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            forEach(action):
+             validate exception contains rule exceptions,
+             validate exception contains nested validation exceptions,
+             nested validation exceptions contains some rule exceptions,
+             nested rule exceptions contains some validate exceptions
+             => iterate all fields
+            """)
+    public void forEach7() {
+        List<RuleException> expected = List.of(
+                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
+                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
+                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
+                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
+                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check(),
+                Rule.of("rule7").failure(Constraint.IS_TRUE).check(),
+                Rule.of("rule8").failure(Constraint.CONTAINS_ITEM).check()
+        );
+
+        RuleException ruleException = expected.get(6);
+        ruleException.addSuppressed(
+                new ValidateException().
+                        addReason(expected.get(7))
+        );
+        ValidateException validateException = new ValidateException().
+                addReason(expected.get(0)).
+                addReason(expected.get(1)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(2))
+                ).
+                addReason(expected.get(3)).
+                addReason(
+                        new ValidateException().
+                                addReason(expected.get(4)).
+                                addReason(expected.get(5))
+                ).
+                addReason(ruleException);
+
+        List<RuleException> actual = new ArrayList<>();
+        validateException.forEach(actual::add);
+
+        Assertions.assertEquals(expected, actual);
     }
 
 }

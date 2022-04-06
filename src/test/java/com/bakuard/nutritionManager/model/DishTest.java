@@ -64,8 +64,7 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantity(ingredient, -1, new BigDecimal("1.5")),
-                Dish.class,
-                "getProduct",
+                "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
     }
@@ -95,8 +94,7 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantity(ingredient, 0, BigDecimal.ZERO),
-                Dish.class,
-                "getLackQuantity",
+                "Dish.getLackQuantity",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -126,8 +124,7 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantity(ingredient, 0, null),
-                Dish.class,
-                "getLackQuantity",
+                "Dish.getLackQuantity",
                 Constraint.NOT_NULL
         );
     }
@@ -378,8 +375,7 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantityPrice(ingredient, -1, new BigDecimal("1.5")),
-                Dish.class,
-                "getProduct",
+                "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
     }
@@ -409,8 +405,7 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantityPrice(ingredient, 0, BigDecimal.ZERO),
-                Dish.class,
-                "getLackQuantityPrice",
+                "Dish.getLackQuantityPrice",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -440,8 +435,7 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantityPrice(ingredient, 0, null),
-                Dish.class,
-                "getLackQuantityPrice",
+                "Dish.getLackQuantityPrice",
                 Constraint.NOT_NULL
         );
     }
@@ -838,8 +832,7 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getProduct(ingredient, -1),
-                Dish.class,
-                "getProduct",
+                "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
     }

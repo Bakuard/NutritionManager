@@ -110,8 +110,7 @@ class ProductRepositoryTest {
     void save1() {
         AssertUtil.assertValidateException(
                 () -> repository.save(null),
-                ProductRepositoryPostgres.class,
-                "save",
+                "ProductRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -187,8 +186,7 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() ->repository.save(addedProduct)),
-                ProductRepositoryPostgres.class,
-                "save",
+                "ProductRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -293,8 +291,7 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.save(updatedProduct)),
-                ProductRepositoryPostgres.class,
-                "save",
+                "ProductRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -347,8 +344,7 @@ class ProductRepositoryTest {
     void remove1() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.remove(null)),
-                ProductRepositoryPostgres.class,
-                "remove",
+                "ProductRepositoryPostgres.remove",
                 Constraint.NOT_NULL
         );
     }
@@ -358,8 +354,7 @@ class ProductRepositoryTest {
     void remove2() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.remove(toUUID(10))),
-                ProductRepositoryPostgres.class,
-                "remove",
+                "ProductRepositoryPostgres.remove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -375,8 +370,7 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(toUUID(1))),
-                ProductRepositoryPostgres.class,
-                "getById",
+                "ProductRepositoryPostgres.getById",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -398,8 +392,7 @@ class ProductRepositoryTest {
     void getById1() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(null)),
-                ProductRepositoryPostgres.class,
-                "getById",
+                "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -409,8 +402,7 @@ class ProductRepositoryTest {
     void getById2() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(toUUID(256))),
-                ProductRepositoryPostgres.class,
-                "getById",
+                "ProductRepositoryPostgres.getById",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -436,8 +428,7 @@ class ProductRepositoryTest {
     void getProductsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getProductsNumber(null),
-                ProductRepositoryPostgres.class,
-                "getProductsNumber",
+                "ProductRepositoryPostgres.getProductsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1900,8 +1891,7 @@ class ProductRepositoryTest {
     void getTagsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getTagsNumber(null),
-                ProductRepositoryPostgres.class,
-                "getTagsNumber",
+                "ProductRepositoryPostgres.getTagsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2117,8 +2107,7 @@ class ProductRepositoryTest {
     void getShopsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getShopsNumber(null),
-                ProductRepositoryPostgres.class,
-                "getShopsNumber",
+                "ProductRepositoryPostgres.getShopsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2324,8 +2313,7 @@ class ProductRepositoryTest {
     void getGradesNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getGradesNumber(null),
-                ProductRepositoryPostgres.class,
-                "getGradesNumber",
+                "ProductRepositoryPostgres.getGradesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2531,8 +2519,7 @@ class ProductRepositoryTest {
     void getCategoriesNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getCategoriesNumber(null),
-                ProductRepositoryPostgres.class,
-                "getCategoriesNumber",
+                "ProductRepositoryPostgres.getCategoriesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2657,8 +2644,7 @@ class ProductRepositoryTest {
     void getManufacturersNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getManufacturersNumber(null),
-                ProductRepositoryPostgres.class,
-                "getManufacturersNumber",
+                "ProductRepositoryPostgres.getManufacturersNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2864,8 +2850,7 @@ class ProductRepositoryTest {
     void getProductsSum1() {
         AssertUtil.assertValidateException(
                 () -> repository.getProductsSum(null),
-                ProductRepositoryPostgres.class,
-                "getProductsSum",
+                "ProductRepositoryPostgres.getProductsSum",
                 Constraint.NOT_NULL
         );
     }

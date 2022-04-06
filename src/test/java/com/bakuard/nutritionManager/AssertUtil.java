@@ -1,9 +1,6 @@
 package com.bakuard.nutritionManager;
 
-import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.Entity;
-import com.bakuard.nutritionManager.model.Product;
-import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.ValidateException;
@@ -17,8 +14,7 @@ import java.util.stream.IntStream;
 public class AssertUtil {
 
     public static void assertValidateException(Action action,
-                                               Class<?> checkedClass,
-                                               String methodName,
+                                               String userMessageKey,
                                                Constraint... expectedConstraints) {
         try {
             action.act();
@@ -43,10 +39,9 @@ public class AssertUtil {
                 }
             }
 
-            if(!ex.isOriginate(checkedClass, methodName)) {
-                Assertions.fail("Unexpected checkedClass or methodName. Expected: " +
-                        checkedClass.getName() + ", " + methodName +
-                        ". Actual: " + ex.getCheckedClass().getName() + ", " + ex.getMethodName()
+            if(!userMessageKey.equals(ex.getUserMessageKey())) {
+                Assertions.fail("Unexpected user message key. Expected: " + userMessageKey +
+                        ". Actual: " + ex.getUserMessageKey()
                 );
             }
         }
