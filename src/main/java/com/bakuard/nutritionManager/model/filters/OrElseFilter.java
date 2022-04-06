@@ -1,8 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Result;
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.collect.ImmutableList;
 
@@ -14,7 +13,7 @@ public class OrElseFilter extends AbstractFilter {
     private final ImmutableList<Filter> operands;
 
     OrElseFilter(List<Filter> operands) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("OrElseFilter.operands").notNull(operands).
                         and(v -> v.notContainsNull(operands)).
                         and(v -> v.min(operands.size(), 2))

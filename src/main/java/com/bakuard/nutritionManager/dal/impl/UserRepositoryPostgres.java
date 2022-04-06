@@ -2,10 +2,11 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Constraint;
-
+import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -25,7 +26,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public boolean save(User user) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.user").notNull(user)
         );
 
@@ -50,7 +51,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getById(UUID userId) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.userId").notNull(userId)
         );
 
@@ -65,7 +66,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getByName(String name) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.name").notNull(name)
         );
 
@@ -94,7 +95,7 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public User getByEmail(String email) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.email").notNull(email)
         );
 

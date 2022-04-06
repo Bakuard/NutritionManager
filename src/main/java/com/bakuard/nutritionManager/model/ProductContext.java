@@ -1,7 +1,10 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.validation.*;
+import com.bakuard.nutritionManager.validation.Container;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
@@ -67,7 +70,7 @@ public class ProductContext {
                            AppConfigData config) {
         Container<List<Tag>> container = new Container<>();
 
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category)),
                 Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop)),
                 Rule.of("Product.grade").notNull(grade).and(v -> v.notBlank(grade)),
@@ -102,7 +105,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setCategory(String category) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category))
         );
 
@@ -133,7 +136,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setShop(String shop) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop))
         );
 
@@ -164,7 +167,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setGrade(String grade) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.variety").notNull(grade).and(v -> v.notBlank(grade))
         );
 
@@ -195,7 +198,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setManufacturer(String manufacturer) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer))
         );
 
@@ -226,7 +229,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setUnit(String unit) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit))
         );
 
@@ -257,7 +260,7 @@ public class ProductContext {
      *         2. если указанное значение цены меньше нуля.
      */
     public ProductContext setPrice(BigDecimal price) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price))
         );
 
@@ -286,7 +289,7 @@ public class ProductContext {
      *         2. если packingSize меньше или равен нулю.
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize))
         );
 
@@ -314,7 +317,7 @@ public class ProductContext {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public ProductContext addTag(Tag tag) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.tag").notNull(tag),
                 Rule.of("Product.tags").notContainsItem(tags, tag)
         );

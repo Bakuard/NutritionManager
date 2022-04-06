@@ -7,12 +7,13 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.Constraint;
-import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.validation.Constraint;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import com.fasterxml.jackson.core.*;
 
@@ -37,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static org.jooq.impl.DSL.*;
 
 public class DishRepositoryPostgres implements DishRepository {
@@ -58,7 +59,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public boolean save(Dish dish) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.dish").notNull(dish)
         );
 
@@ -83,7 +84,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish remove(UUID dishId) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
@@ -104,7 +105,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish getById(UUID dishId) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
@@ -119,7 +120,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish getByName(String name) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.name").notNull(name)
         );
 
@@ -353,7 +354,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getDishesNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -369,7 +370,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getTagsNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -393,7 +394,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getUnitsNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))

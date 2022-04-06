@@ -14,56 +14,6 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
             4
     );
 
-    public static void check(String userMessageKey, String logMessage, Result... results) {
-        List<RuleException> failedResults = Arrays.stream(results).
-                map(Result::check).
-                filter(Objects::nonNull).
-                toList();
-
-        if(!failedResults.isEmpty()) {
-            StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-
-            ValidateException exception = new ValidateException(logMessage).
-                    setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
-            failedResults.forEach(exception::addReason);
-            exception.setUserMessageKey(userMessageKey);
-            throw exception;
-        }
-    }
-
-    public static void check(String userMessageKey, Result... results) {
-        List<RuleException> failedResults = Arrays.stream(results).
-                map(Result::check).
-                filter(Objects::nonNull).
-                toList();
-
-        if(!failedResults.isEmpty()) {
-            StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-
-            ValidateException exception = new ValidateException().
-                    setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
-            failedResults.forEach(exception::addReason);
-            exception.setUserMessageKey(userMessageKey);
-            throw exception;
-        }
-    }
-
-    public static void check(Result... results) {
-        List<RuleException> failedResults = Arrays.stream(results).
-                map(Result::check).
-                filter(Objects::nonNull).
-                toList();
-
-        if(!failedResults.isEmpty()) {
-            StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-
-            ValidateException exception = new ValidateException().
-                    setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
-            failedResults.forEach(exception::addReason);
-            throw exception;
-        }
-    }
-
 
     private String userMessageKey;
 

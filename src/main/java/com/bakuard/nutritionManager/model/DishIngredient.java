@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -47,7 +48,7 @@ public class DishIngredient {
                           Filter filter,
                           BigDecimal quantity,
                           AppConfigData config) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishIngredient.name").notNull(name).and(v -> v.notBlank(name)),
                 Rule.of("DishIngredient.filter").notNull(filter),
                 Rule.of("DishIngredient.quantity").notNull(quantity).and(v -> v.positiveValue(quantity)),
@@ -83,7 +84,7 @@ public class DishIngredient {
      * @throws ValidateException если указанное значение null или не является положительным.
      */
     public BigDecimal getNecessaryQuantity(BigDecimal servingNumber) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
                         and(v -> v.positiveValue(servingNumber))
         );

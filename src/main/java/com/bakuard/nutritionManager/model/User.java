@@ -1,6 +1,8 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.validation.*;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.hash.Hashing;
 
@@ -27,7 +29,7 @@ public class User implements Entity<User> {
     }
 
     private User(UUID id, String name, String password, String email) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("User.id").notNull(id),
                 Rule.of("User.name").notNull(name).
                         and(v -> v.notBlank(name)).
@@ -64,7 +66,7 @@ public class User implements Entity<User> {
     }
 
     public void setName(String name) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("User.name").notNull(name).
                         and(v -> v.notBlank(name)).
                         and(v -> v.stringLength(name, 1, 40))
@@ -77,7 +79,7 @@ public class User implements Entity<User> {
     }
 
     public void setPassword(String password) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("User.password").notNull(password).
                         and(v -> v.notBlank(password)).
                         and(v -> v.stringLength(password, 8, 100))
@@ -90,7 +92,7 @@ public class User implements Entity<User> {
     }
 
     public void setEmail(String email) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("User.email").notNull(email).
                         and(v -> v.notBlank(email))
         );
@@ -102,7 +104,7 @@ public class User implements Entity<User> {
     }
 
     public boolean isCorrectPassword(String password) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("User.password").notNull(password)
         );
         return passwordHash.equals(calculatePasswordHash(password, salt));

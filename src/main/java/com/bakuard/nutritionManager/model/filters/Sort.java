@@ -1,9 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Constraint;
-import com.bakuard.nutritionManager.validation.Container;
-import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,9 +130,9 @@ public class Sort {
     private boolean toDirection(String direction) {
         Container<Boolean> d = new Container<>();
 
-        ValidateException.check(
-                "Sort.put",
-                "Unknown sort direction",
+        Validator.check(
+                () -> new ValidateException("Unknown sort direction").
+                        setUserMessageKey("Sort.put"),
                 Rule.of("Sort.direction").notNull(direction).
                         and(r -> {
                             switch(direction) {
@@ -152,7 +149,7 @@ public class Sort {
     }
 
     private Sort put(String parameter, boolean isAscending) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Sort.parameter").notNull(parameter).
                         and(r -> r.containsItem(validParameters, parameter))
         );

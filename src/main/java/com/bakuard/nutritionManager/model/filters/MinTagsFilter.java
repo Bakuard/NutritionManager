@@ -3,7 +3,8 @@ package com.bakuard.nutritionManager.model.filters;
 import com.bakuard.nutritionManager.model.Tag;
 
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 
@@ -15,7 +16,7 @@ public class MinTagsFilter extends AbstractFilter {
     private final ImmutableSortedSet<Tag> tags;
 
     MinTagsFilter(List<Tag> tags) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("MinTagsFilter.tags").notNull(tags).
                         and(v -> v.notContainsNull(tags)).
                         and(v -> v.min(tags.size(), 1))

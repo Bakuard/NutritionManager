@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.collect.ImmutableList;
 
@@ -12,7 +12,7 @@ public class UserFilter extends AbstractFilter {
     private final UUID userId;
 
     UserFilter(UUID userId) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("UserFilter.userId").notNull(userId)
         );
 

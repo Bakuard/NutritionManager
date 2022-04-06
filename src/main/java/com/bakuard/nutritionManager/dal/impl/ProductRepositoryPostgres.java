@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.Criteria;
+import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
@@ -11,6 +11,7 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -32,8 +33,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static org.jooq.impl.DSL.*;
-import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
 
 public class ProductRepositoryPostgres implements ProductRepository {
 
@@ -47,7 +48,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public boolean save(Product product) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.product").notNull(product)
         );
 
@@ -72,7 +73,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product remove(UUID productId) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.productId").notNull(productId)
         );
 
@@ -93,7 +94,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product getById(UUID productId) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.productId").notNull(productId)
         );
 
@@ -372,7 +373,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getProductsNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -388,7 +389,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getTagsNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -412,7 +413,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getShopsNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -434,7 +435,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getGradesNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -456,7 +457,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getCategoriesNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER))).
@@ -480,7 +481,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public int getManufacturersNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -502,7 +503,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Optional<BigDecimal> getProductsSum(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter())).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))

@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.JwsBlackListRepository;
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -23,7 +23,7 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public boolean addToBlackList(UUID tokenId, LocalDateTime expired) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("JwsBlackListPostgres.tokenId").notNull(tokenId),
                 Rule.of("JwsBlackListPostgres.expired").notNull(expired)
         );
@@ -48,7 +48,7 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public boolean inBlackList(UUID tokenId) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("JwsBlackListPostgres.tokenId").notNull(tokenId)
         );
 
@@ -63,7 +63,7 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     @Override
     public int removeAllExpired(LocalDateTime deadline) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("JwsBlackListPostgres.deadline").notNull(deadline)
         );
 

@@ -73,7 +73,7 @@ public class Dish implements Entity<Dish> {
         Container<List<DishIngredient>> ingredientContainer = new Container<>();
         Container<URL> urlContainer = new Container<>();
 
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Dish.id").notNull(id),
                 Rule.of("Dish.user").notNull(user),
                 Rule.of("Dish.name").notNull(name).and(r -> r.notBlank(name)),
@@ -117,7 +117,7 @@ public class Dish implements Entity<Dish> {
      *         2. если name не содержит ни одного отображаемого символа.
      */
     public void setName(String name) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Dish.name").notNull(name).and(v -> v.notBlank(name))
         );
 
@@ -132,7 +132,7 @@ public class Dish implements Entity<Dish> {
      *         2. если servingNumber меньше или равен нулю.
      */
     public void setServingSize(BigDecimal servingSize) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Dish.servingSize").notNull(servingSize).
                         and(r -> r.positiveValue(servingSize))
         );
@@ -149,7 +149,7 @@ public class Dish implements Entity<Dish> {
      *         2. если unit не содержит ни одного отображаемого символа.
      */
     public void setUnit(String unit) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Dish.unit").notNull(unit).and(v -> v.notBlank(unit))
         );
 
@@ -172,7 +172,7 @@ public class Dish implements Entity<Dish> {
     public void setImageUrl(String imageUrl) {
         Container<URL> urlContainer = new Container<>();
 
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Dish.imageUrl").isNull(imageUrl).or(v -> v.isUrl(imageUrl, urlContainer))
         );
 
@@ -230,7 +230,7 @@ public class Dish implements Entity<Dish> {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public void addTag(Tag tag) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Dish.tag").notNull(tag),
                 Rule.of("Dish.tags").notContainsItem(tags, tag)
         );
@@ -338,7 +338,7 @@ public class Dish implements Entity<Dish> {
      * @throws ValidateException если productIndex < 0
      */
     public Optional<Product> getProduct(DishIngredient ingredient, int productIndex) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishIngredient.productIndex").notNegative(productIndex)
         );
 
@@ -392,7 +392,7 @@ public class Dish implements Entity<Dish> {
     public Optional<BigDecimal> getLackQuantity(DishIngredient ingredient,
                                                 int productIndex,
                                                 BigDecimal servingNumber) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
                         and(v -> v.positiveValue(servingNumber))
         );
@@ -417,7 +417,7 @@ public class Dish implements Entity<Dish> {
     public Optional<BigDecimal> getLackQuantityPrice(DishIngredient ingredient,
                                                      int productIndex,
                                                      BigDecimal servingNumber) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
                         and(v -> v.positiveValue(servingNumber))
         );
@@ -497,7 +497,7 @@ public class Dish implements Entity<Dish> {
      */
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
                                          Map<String, Integer> productsIndex) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(v -> v.positiveValue(servingNumber)),
                 Rule.of("Dish.productsIndex").notNull(productsIndex).

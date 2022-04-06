@@ -2,12 +2,12 @@ package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.validation.Result;
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
+
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * Данное огрнаничение используется при фильтрации продуктов, блюд и меню по какому-то конкретному полю строкового
@@ -22,7 +22,7 @@ public class AnyFilter extends AbstractFilter {
     private final Type type;
 
     AnyFilter(List<String> values, int minItems, Type type) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("AnyFilter." + type).notNull(values).
                         and(v -> v.notContainsNull(values)).
                         and(v -> v.min(values.size(), minItems)).
