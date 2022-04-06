@@ -4,8 +4,8 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.User;
-
 import com.bakuard.nutritionManager.validation.Constraint;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.*;
+
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -179,13 +180,13 @@ class UserRepositoryTest {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
-        User addedUser = new User(
-                toUUID(2),
-                "user2",
-                user1.getPasswordHash(),
-                "email",
-                user1.getSalt()
-        );
+        User addedUser = new User.LoadBuilder().
+                setId(toUUID(2)).
+                setName("user2").
+                setEmail("email").
+                setPasswordHash(user1.getPasswordHash()).
+                setSalt(user1.getSalt()).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
@@ -201,13 +202,13 @@ class UserRepositoryTest {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
-        User addedUser = new User(
-                toUUID(2),
-                "user2",
-                "passwordHash",
-                user1.getEmail(),
-                user1.getSalt()
-        );
+        User addedUser = new User.LoadBuilder().
+                setId(toUUID(2)).
+                setName("user2").
+                setEmail(user1.getEmail()).
+                setSalt(user1.getSalt()).
+                setPasswordHash("passwordHash").
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
@@ -297,13 +298,13 @@ class UserRepositoryTest {
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
-        User expected = new User(
-                toUUID(3),
-                "user3",
-                user1.getPasswordHash(),
-                "email",
-                user1.getSalt()
-        );
+        User expected = new User.LoadBuilder().
+                setId(toUUID(3)).
+                setName("user3").
+                setEmail("email").
+                setSalt(user1.getSalt()).
+                setPasswordHash(user1.getPasswordHash()).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
@@ -327,13 +328,13 @@ class UserRepositoryTest {
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
-        User expected = new User(
-                toUUID(3),
-                "user3",
-                "passwordHash",
-                user1.getEmail(),
-                user1.getSalt()
-        );
+        User expected = new User.LoadBuilder().
+                setId(toUUID(3)).
+                setName("user3").
+                setEmail(user1.getEmail()).
+                setPasswordHash("passwordHash").
+                setSalt(user1.getSalt()).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
@@ -522,11 +523,13 @@ class UserRepositoryTest {
         }
     }
 
-    private User createUser(int id) {
-        return new User(toUUID(id),
-                "User" + id,
-                "password" + id,
-                "user" + id + "@mail.com");
+    private User createUser(int userId) {
+        return new User.Builder().
+                setId(toUUID(userId)).
+                setName("User" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
     }
 
     private UUID toUUID(int number) {

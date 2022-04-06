@@ -2,7 +2,6 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.*;
-import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -50,7 +49,7 @@ public class Product implements Entity<Product> {
                 Rule.of("Product.config").notNull(config),
                 Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url)),
                 Rule.of("Product.context").notNull(contextBuilder).
-                        and(v -> v.doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context))
+                        and(v -> v.doesNotThrow(contextBuilder, Entity.Builder::tryBuild, context))
         );
 
         this.id = id;
@@ -233,7 +232,7 @@ public class Product implements Entity<Product> {
      * Объекты данного класса не устанавливают никаких значений по умолчанию для конструирования объектов
      * Product.
      */
-    public static class Builder implements AbstractBuilder<Product> {
+    public static class Builder implements Entity.Builder<Product> {
 
         private UUID id;
         private User user;

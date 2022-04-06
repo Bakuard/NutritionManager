@@ -154,13 +154,15 @@ public class DishRepositoryPostgres implements DishRepository {
                         if(builder == null) {
                             builder = new Dish.Builder().
                                     setId((UUID) rs.getObject("dishId")).
-                                    setUser(new User(
-                                            (UUID) rs.getObject("userId"),
-                                            rs.getString("userName"),
-                                            rs.getString("userPassHash"),
-                                            rs.getString("userEmail"),
-                                            rs.getString("userSalt")
-                                    )).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("userName")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setPasswordHash(rs.getString("userPassHash")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
                                     setName(name).
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
@@ -244,7 +246,7 @@ public class DishRepositoryPostgres implements DishRepository {
                             builder = new Dish.Builder().
                                     setId(dishId).
                                     setUser(
-                                            new User.Builder().
+                                            new User.LoadBuilder().
                                                     setId((UUID) rs.getObject("userId")).
                                                     setName(rs.getString("userName")).
                                                     setEmail(rs.getString("userEmail")).
@@ -622,13 +624,14 @@ public class DishRepositoryPostgres implements DishRepository {
                             builder = new Dish.Builder().
                                     setId(dishId).
                                     setUser(
-                                            new User(
-                                            (UUID) rs.getObject("userId"),
-                                            rs.getString("userName"),
-                                            rs.getString("userPassHash"),
-                                            rs.getString("userEmail"),
-                                            rs.getString("userSalt")
-                                    )).
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("userName")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setPasswordHash(rs.getString("userPassHash")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
                                     setName(rs.getString("name")).
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).

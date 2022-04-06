@@ -133,11 +133,13 @@ class DishIngredientTest {
     }
 
 
-    private User createUser(int id) {
-        return new User(toUUID(id),
-                "User" + id,
-                "password" + id,
-                "user" + id + "@mail.com");
+    private User createUser(int userId) {
+        return new User.Builder().
+                setId(toUUID(userId)).
+                setName("User" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
     }
 
     private UUID toUUID(int number) {

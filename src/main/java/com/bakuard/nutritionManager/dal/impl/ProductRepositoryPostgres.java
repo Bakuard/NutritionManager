@@ -172,7 +172,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                                     setAppConfiguration(appConfig).
                                     setId(productId).
                                     setUser(
-                                            new User.Builder().
+                                            new User.LoadBuilder().
                                                     setId((UUID) rs.getObject("userId")).
                                                     setName(rs.getString("name")).
                                                     setEmail(rs.getString("email")).
@@ -669,13 +669,15 @@ public class ProductRepositoryPostgres implements ProductRepository {
                             builder = new Product.Builder().
                                     setAppConfiguration(appConfig).
                                     setId(productId).
-                                    setUser(new User(
-                                            (UUID) rs.getObject("userId"),
-                                            rs.getString("name"),
-                                            rs.getString("passwordHash"),
-                                            rs.getString("email"),
-                                            rs.getString("salt")
-                                    )).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("name")).
+                                                    setEmail(rs.getString("email")).
+                                                    setPasswordHash(rs.getString("passwordHash")).
+                                                    setSalt(rs.getString("salt")).
+                                                    tryBuild()
+                                    ).
                                     setCategory(rs.getString("category")).
                                     setShop(rs.getString("shop")).
                                     setGrade(rs.getString("grade")).

@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 import com.bakuard.nutritionManager.validation.*;
 
 import com.google.common.hash.Hashing;
@@ -27,7 +26,7 @@ public class User implements Entity<User> {
         salt = other.salt;
     }
 
-    public User(UUID id, String name, String password, String email) {
+    private User(UUID id, String name, String password, String email) {
         ValidateException.check(
                 Rule.of("User.id").notNull(id),
                 Rule.of("User.name").notNull(name).
@@ -47,7 +46,7 @@ public class User implements Entity<User> {
         this.email = email;
     }
 
-    public User(UUID id, String name, String passwordHash, String email, String salt) {
+    private User(UUID id, String name, String passwordHash, String email, String salt) {
         this.id = id;
         this.name = name;
         this.passwordHash = passwordHash;
@@ -138,20 +137,32 @@ public class User implements Entity<User> {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", passwordHash='" + passwordHash + '\'' +
+                ", email='" + email + '\'' +
+                ", salt='" + salt + '\'' +
                 '}';
     }
 
 
-    public static class Builder implements AbstractBuilder<User> {
+    private String calculatePasswordHash(String password, String salt) {
+        return Hashing.sha256().hashBytes(password.concat(salt).getBytes(StandardCharsets.UTF_8)).toString();
+    }
+
+
+    public static class Builder implements Entity.Builder<User> {
 
         private UUID id;
         private String name;
-        private String passwordHash;
+        private String password;
         private String email;
-        private String salt;
 
         public Builder() {
 
+        }
+
+        public Builder generateId() {
+            id = UUID.randomUUID();
+            return this;
         }
 
         public Builder setId(UUID id) {
@@ -164,8 +175,8 @@ public class User implements Entity<User> {
             return this;
         }
 
-        public Builder setPasswordHash(String passwordHash) {
-            this.passwordHash = passwordHash;
+        public Builder setPassword(String password) {
+            this.password = password;
             return this;
         }
 
@@ -174,7 +185,47 @@ public class User implements Entity<User> {
             return this;
         }
 
-        public Builder setSalt(String salt) {
+        @Override
+        public User tryBuild() throws ValidateException {
+            return new User(id, name, password, email);
+        }
+
+    }
+
+
+    public static class LoadBuilder implements Entity.Builder<User> {
+
+        private UUID id;
+        private String name;
+        private String passwordHash;
+        private String email;
+        private String salt;
+
+        public LoadBuilder() {
+
+        }
+
+        public LoadBuilder setId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public LoadBuilder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public LoadBuilder setPasswordHash(String passwordHash) {
+            this.passwordHash = passwordHash;
+            return this;
+        }
+
+        public LoadBuilder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public LoadBuilder setSalt(String salt) {
             this.salt = salt;
             return this;
         }
@@ -184,11 +235,6 @@ public class User implements Entity<User> {
             return new User(id, name, passwordHash, email, salt);
         }
 
-    }
-
-
-    private String calculatePasswordHash(String password, String salt) {
-        return Hashing.sha256().hashBytes(password.concat(salt).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
 }

@@ -2,7 +2,6 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
@@ -121,7 +120,7 @@ public class DishIngredient {
     /**
      * Реализация паттерна "Builder" для ингредиентов блюд ({@link DishIngredient}).
      */
-    public static class Builder implements AbstractBuilder<DishIngredient> {
+    public static class Builder implements Entity.Builder<DishIngredient> {
 
         private String name;
         private Filter filter;

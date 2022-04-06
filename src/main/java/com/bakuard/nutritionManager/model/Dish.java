@@ -6,7 +6,6 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.filters.UserFilter;
-import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 import com.bakuard.nutritionManager.validation.*;
@@ -623,7 +622,7 @@ public class Dish implements Entity<Dish> {
     /**
      * Реализация паттерна "Builder" для блюда ({@link Dish}).
      */
-    public static class Builder implements AbstractBuilder<Dish> {
+    public static class Builder implements Entity.Builder<Dish> {
 
         private UUID id;
         private User user;

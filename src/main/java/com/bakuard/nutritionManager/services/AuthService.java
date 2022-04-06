@@ -49,12 +49,12 @@ public class AuthService {
         try {
             String email = jwsService.parseRegistrationJws(jws);
 
-            User user = new User(
-                    UUID.randomUUID(),
-                    name,
-                    password,
-                    email
-            );
+            User user = new User.Builder().
+                    generateId().
+                    setName(name).
+                    setEmail(email).
+                    setPassword(password).
+                    tryBuild();
             userRepository.save(user);
 
             String accessJws = jwsService.generateAccessJws(user);

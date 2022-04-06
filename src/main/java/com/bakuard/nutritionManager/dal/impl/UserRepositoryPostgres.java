@@ -78,13 +78,13 @@ public class UserRepositoryPostgres implements UserRepository {
                 (PreparedStatement ps) -> ps.setObject(1, name),
                 (ResultSet rs) -> {
                     if(rs.next()) {
-                        return new User(
-                                (UUID) rs.getObject("userId"),
-                                name,
-                                rs.getString("passwordHash"),
-                                rs.getString("email"),
-                                rs.getString("salt")
-                        );
+                        return new User.LoadBuilder().
+                                setId((UUID) rs.getObject("userId")).
+                                setName(name).
+                                setEmail(rs.getString("email")).
+                                setPasswordHash(rs.getString("passwordHash")).
+                                setSalt(rs.getString("salt")).
+                                tryBuild();
                     }
                     throw new ValidateException("Fail to get user by name=" + name).
                             addReason(Rule.of("UserRepositoryPostgres.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
@@ -107,13 +107,13 @@ public class UserRepositoryPostgres implements UserRepository {
                 (PreparedStatement ps) -> ps.setObject(1, email),
                 (ResultSet rs) -> {
                     if(rs.next()) {
-                        return new User(
-                                (UUID) rs.getObject("userId"),
-                                rs.getString("name"),
-                                rs.getString("passwordHash"),
-                                email,
-                                rs.getString("salt")
-                        );
+                        return new User.LoadBuilder().
+                                setId((UUID) rs.getObject("userId")).
+                                setName(rs.getString("name")).
+                                setEmail(email).
+                                setPasswordHash(rs.getString("passwordHash")).
+                                setSalt(rs.getString("salt")).
+                                tryBuild();
                     }
                     throw new ValidateException("Fail to get user by email=" + email).
                             addReason(Rule.of("UserRepositoryPostgres.email").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
@@ -132,13 +132,13 @@ public class UserRepositoryPostgres implements UserRepository {
                 (PreparedStatement ps) -> ps.setObject(1, userId),
                 (ResultSet rs) -> {
                     if(rs.next()) {
-                        return new User(
-                                userId,
-                                rs.getString("name"),
-                                rs.getString("passwordHash"),
-                                rs.getString("email"),
-                                rs.getString("salt")
-                        );
+                        return new User.LoadBuilder().
+                                setId(userId).
+                                setName(rs.getString("name")).
+                                setEmail(rs.getString("email")).
+                                setPasswordHash(rs.getString("passwordHash")).
+                                setSalt(rs.getString("salt")).
+                                tryBuild();
                     }
                     return null;
                 }

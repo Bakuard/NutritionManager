@@ -2,7 +2,6 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.*;
-import com.bakuard.nutritionManager.model.util.AbstractBuilder;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
@@ -512,7 +511,7 @@ public class ProductContext {
     }
 
 
-    public static class Builder implements AbstractBuilder<ProductContext> {
+    public static class Builder implements Entity.Builder<ProductContext> {
 
         private String category;
         private String shop;

@@ -476,12 +476,12 @@ class ImageRepositoryPostgresTest {
     }
 
     private User createAndSaveUser(int userId) {
-        User user = new User(
-                toUUID(userId),
-                "User" + userId,
-                "password" + userId,
-                "user" + userId + "@mail.com"
-        );
+        User user = new User.Builder().
+                setId(toUUID(userId)).
+                setName("User" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
         commit(() -> userRepository.save(user));
         return user;
     }
