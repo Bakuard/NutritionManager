@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.util.Page;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -33,6 +34,23 @@ public interface DishRepository {
      *         2. если dishId равен null.
      */
     public Dish tryRemove(UUID dishId);
+
+    /**
+     * Возвращает блюдо по его идентификатору. Если в БД нет блюда с таким идентификатором -
+     * возвращает пустой Optional.
+     * @param dishId идентификатор блюда.
+     * @return объект Dish.
+     * @throws ValidateException если dishId равен null.
+     */
+    public Optional<Dish> getById(UUID dishId);
+
+    /**
+     * Возвращает блюдо по его имени. Если в БД нет блюда с таким именем - возвращает пустой Optional.
+     * @param name уникальное имя блюда.
+     * @return объект Dish.
+     * @throws ValidateException если name равен null.
+     */
+    public Optional<Dish> getByName(String name);
 
     /**
      * Возвращает блюдо по его идентификатору. Если в БД нет блюда с таким идентификатором -

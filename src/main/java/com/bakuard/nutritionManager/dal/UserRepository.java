@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository {
@@ -18,6 +19,30 @@ public interface UserRepository {
      *         2. если пользователь с таким именем уже есть в БД.
      */
     public boolean save(User user);
+
+    /**
+     * Возвращает пользователя по его ID. Если пользователя с таким ID не существует - возвращает пустой Optional.
+     * @param userId уникальный идентификатор пользователя.
+     * @return пользователя по его ID.
+     * @throws ValidateException если userId равен null.
+     */
+    public Optional<User> getById(UUID userId);
+
+    /**
+     * Возвращает пользователя по его имени. Если пользователя с таким именем не сущестует  - возвращает пустой Optional.
+     * @param name уникальное имя пользователя.
+     * @return пользователя по его имени.
+     * @throws ValidateException если name равен null.
+     */
+    public Optional<User> getByName(String name);
+
+    /**
+     * Возвращает пользователя по его почте. Если пользователя с такой почтой не сущестует  - возвращает пустой Optional.
+     * @param email уникальная почта пользователя.
+     * @return пользователя по его почте.
+     * @throws ValidateException если email равен null.
+     */
+    public Optional<User> getByEmail(String email);
 
     /**
      * Возвращает пользователя по его ID. Если пользователя с таким ID не существует - выбрасывет исключение.

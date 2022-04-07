@@ -48,6 +48,26 @@ public class AssertUtil {
     }
 
     public static void assertValidateException(Action action,
+                                               String userMessageKey) {
+        try {
+            action.act();
+            Assertions.fail("Expected exception, but nothing be thrown");
+        } catch(Exception e) {
+            if(!(e instanceof ValidateException)) {
+                Assertions.fail("Unexpected exception type " + e.getClass().getName() + "\n" + e.getMessage());
+            }
+
+            ValidateException ex = (ValidateException) e;
+
+            if(!userMessageKey.equals(ex.getUserMessageKey())) {
+                Assertions.fail("Unexpected user message key. Expected: " + userMessageKey +
+                        ". Actual: " + ex.getUserMessageKey()
+                );
+            }
+        }
+    }
+
+    public static void assertValidateException(Action action,
                                                Constraint... expectedConstraints) {
         try {
             action.act();

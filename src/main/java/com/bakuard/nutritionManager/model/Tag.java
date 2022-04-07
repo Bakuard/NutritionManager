@@ -9,7 +9,7 @@ import com.bakuard.nutritionManager.validation.Validator;
  * фильтрации по заданным тегам.<br/>
  * Объекты данного класса являются не изменяемыми.
  */
-public final class Tag implements Comparable<Tag> {
+public class Tag implements Comparable<Tag> {
 
     private final String value;
 

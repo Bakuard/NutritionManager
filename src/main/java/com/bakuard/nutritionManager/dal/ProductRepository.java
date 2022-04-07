@@ -40,6 +40,15 @@ public interface ProductRepository {
 
     /**
      * Возвращает продукт по его идентификатору. Если в БД нет продукта с таким идентификатором -
+     * возвращает пустой Optional.
+     * @param productId идентификатор продукта.
+     * @return объект Product.
+     * @throws ValidateException если productId равен null.
+     */
+    public Optional<Product> getById(UUID productId);
+
+    /**
+     * Возвращает продукт по его идентификатору. Если в БД нет продукта с таким идентификатором -
      * выбрасывает исключение.
      * @param productId идентификатор продукта.
      * @return объект Product.

@@ -370,8 +370,7 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(toUUID(1))),
-                "ProductRepositoryPostgres.tryGetById",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
+                "ProductRepositoryPostgres.tryGetById"
         );
     }
 
@@ -388,11 +387,40 @@ class ProductRepositoryTest {
     }
 
     @Test
+    @DisplayName("getById(productId): productId is null => exception")
+    void getById1() {
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.getById(null)),
+                "ProductRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("getById(productId): not exists product with such id => return empty Optional")
+    void getById2() {
+        Optional<Product> actual = repository.getById(toUUID(256));
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("getById(productId): exists product with such id => return product")
+    void getById3() {
+        User user = createAndSaveUser(1);
+        Product expected = createProduct(1, user).tryBuild();
+        commit(() -> repository.save(expected));
+
+        Product actual = commit(() -> repository.getById(toUUID(1))).orElseThrow();
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
     @DisplayName("tryGetById(productId): productId is null => exception")
     void tryGetById1() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(null)),
-                "ProductRepositoryPostgres.tryGetById",
+                "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -402,8 +430,7 @@ class ProductRepositoryTest {
     void tryGetById2() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(toUUID(256))),
-                "ProductRepositoryPostgres.tryGetById",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
+                "ProductRepositoryPostgres.tryGetById"
         );
     }
 

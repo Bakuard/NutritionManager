@@ -52,7 +52,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 Rule.of("ProductRepository.product").notNull(product)
         );
 
-        Product oldProduct = getByIdOrReturnNull(product.getId());
+        Product oldProduct = getById(product.getId()).orElse(null);
 
         boolean newData = false;
         try {
@@ -77,12 +77,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 Rule.of("ProductRepository.productId").notNull(productId)
         );
 
-        Product product = getByIdOrReturnNull(productId);
-
-        if(product == null) {
-            throw new ValidateException("Fail to remove product. Unknown product with id=" + productId).
-                    addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-        }
+        Product product = getById(productId).
+                orElseThrow(
+                        () -> new ValidateException("Unknown product with id=" + productId).
+                                addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                );
 
         statement.update(
                 "DELETE FROM Products WHERE productId = ?;",
@@ -93,18 +92,69 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Product tryGetById(UUID productId) {
+    public Optional<Product> getById(UUID productId) {
         Validator.check(
                 Rule.of("ProductRepository.productId").notNull(productId)
         );
 
-        Product product = getByIdOrReturnNull(productId);
-        if(product == null) {
-            throw new ValidateException("Fail to get product by id").
-                    addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-        }
+        return statement.query(
+                (Connection con) -> con.prepareStatement("""
+                    SELECT Products.*, Users.*, ProductTags.*
+                        FROM Products
+                        LEFT JOIN Users
+                          ON Products.userId = Users.userId
+                        LEFT JOIN ProductTags
+                          ON Products.productId = ProductTags.productId
+                        WHERE Products.productId = ?
+                        ORDER BY ProductTags.index;
+                    """),
+                (PreparedStatement ps) -> ps.setObject(1, productId),
+                (ResultSet rs) -> {
+                    Product.Builder builder = null;
 
-        return product;
+                    while(rs.next()) {
+                        if(builder == null) {
+                            builder = new Product.Builder().
+                                    setAppConfiguration(appConfig).
+                                    setId(productId).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("name")).
+                                                    setEmail(rs.getString("email")).
+                                                    setPasswordHash(rs.getString("passwordHash")).
+                                                    setSalt(rs.getString("salt")).
+                                                    tryBuild()
+                                    ).
+                                    setCategory(rs.getString("category")).
+                                    setShop(rs.getString("shop")).
+                                    setGrade(rs.getString("grade")).
+                                    setManufacturer(rs.getString("manufacturer")).
+                                    setUnit(rs.getString("unit")).
+                                    setPrice(rs.getBigDecimal("price")).
+                                    setPackingSize(rs.getBigDecimal("packingSize")).
+                                    setQuantity(rs.getBigDecimal("quantity")).
+                                    setDescription(rs.getString("description")).
+                                    setImageUrl(rs.getString("imagePath"));
+                        }
+
+                        String tagValue = rs.getString("tagValue");
+                        if(!rs.wasNull()) builder.addTag(tagValue);
+                    }
+
+                    return builder == null ?
+                            Optional.empty() :
+                            Optional.ofNullable(builder.tryBuild());
+                }
+        );
+    }
+
+    @Override
+    public Product tryGetById(UUID productId) {
+        return getById(productId).
+                orElseThrow(
+                        () -> new ValidateException("Unknown product with id = " + productId)
+                );
     }
 
     @Override
@@ -644,58 +694,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     public int getBatchSize() {
                         return newVersion.getContext().getTags().size();
                     }
-                }
-        );
-    }
-
-
-    private Product getByIdOrReturnNull(UUID productId) {
-        return statement.query(
-                (Connection con) -> con.prepareStatement("""
-                    SELECT Products.*, Users.*, ProductTags.*
-                        FROM Products
-                        LEFT JOIN Users
-                          ON Products.userId = Users.userId
-                        LEFT JOIN ProductTags
-                          ON Products.productId = ProductTags.productId
-                        WHERE Products.productId = ?
-                        ORDER BY ProductTags.index;
-                    """),
-                (PreparedStatement ps) -> ps.setObject(1, productId),
-                (ResultSet rs) -> {
-                    Product.Builder builder = null;
-
-                    while(rs.next()) {
-                        if(builder == null) {
-                            builder = new Product.Builder().
-                                    setAppConfiguration(appConfig).
-                                    setId(productId).
-                                    setUser(
-                                            new User.LoadBuilder().
-                                                    setId((UUID) rs.getObject("userId")).
-                                                    setName(rs.getString("name")).
-                                                    setEmail(rs.getString("email")).
-                                                    setPasswordHash(rs.getString("passwordHash")).
-                                                    setSalt(rs.getString("salt")).
-                                                    tryBuild()
-                                    ).
-                                    setCategory(rs.getString("category")).
-                                    setShop(rs.getString("shop")).
-                                    setGrade(rs.getString("grade")).
-                                    setManufacturer(rs.getString("manufacturer")).
-                                    setUnit(rs.getString("unit")).
-                                    setPrice(rs.getBigDecimal("price")).
-                                    setPackingSize(rs.getBigDecimal("packingSize")).
-                                    setQuantity(rs.getBigDecimal("quantity")).
-                                    setDescription(rs.getString("description")).
-                                    setImageUrl(rs.getString("imagePath"));
-                        }
-
-                        String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull()) builder.addTag(tagValue);
-                    }
-
-                    return builder == null ? null : builder.tryBuild();
                 }
         );
     }

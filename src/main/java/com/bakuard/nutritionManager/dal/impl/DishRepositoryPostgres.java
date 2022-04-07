@@ -36,9 +36,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
 import static org.jooq.impl.DSL.*;
 
 public class DishRepositoryPostgres implements DishRepository {
@@ -63,7 +64,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 Rule.of("DishRepository.dish").notNull(dish)
         );
 
-        Dish oldDish = getByIdOrReturnNull(dish.getId());
+        Dish oldDish = getById(dish.getId()).orElse(null);
 
         boolean newData = false;
         try {
@@ -83,43 +84,81 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Dish tryRemove(UUID dishId) {
+    public Optional<Dish> getById(UUID dishId) {
         Validator.check(
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
-        Dish dish = getByIdOrReturnNull(dishId);
+        return statement.query(
+                (Connection con) -> con.prepareStatement(
+                        """
+                                SELECT Dishes.*, DishTags.*,
+                                       Users.userId,
+                                       Users.name as userName,
+                                       Users.passwordHash as userPassHash,
+                                       Users.email as userEmail,
+                                       Users.salt as userSalt,
+                                       DishIngredients.name as ingredientName,
+                                       DishIngredients.quantity as ingredientQuantity,
+                                       DishIngredients.filter as ingredientFilter
+                                    FROM Dishes
+                                    LEFT JOIN Users
+                                        ON Dishes.userId = Users.userId
+                                    LEFT JOIN DishTags
+                                        ON Dishes.dishId = DishTags.dishId
+                                    LEFT JOIN DishIngredients
+                                        ON Dishes.dishId = DishIngredients.dishId
+                                    WHERE Dishes.dishId = ?
+                                    ORDER BY DishTags.index, DishIngredients.index;
+                                """
+                ),
+                (PreparedStatement ps) -> ps.setObject(1, dishId),
+                (ResultSet rs) -> {
+                    Dish.Builder builder = null;
 
-        if(dish == null) {
-            throw new ValidateException("Fail to remove dish. Unknown dish with id=" + dishId).
-                    addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-        }
+                    while(rs.next()) {
+                        if(builder == null) {
+                            builder = new Dish.Builder().
+                                    setId(dishId).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("userName")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setPasswordHash(rs.getString("userPassHash")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
+                                    setName(rs.getString("name")).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
+                                    setUnit(rs.getString("unit")).
+                                    setDescription(rs.getString("description")).
+                                    setImagePath(rs.getString("imagePath")).
+                                    setConfig(appConfig).
+                                    setRepository(productRepository);
+                        }
 
-        statement.update(
-                "DELETE FROM Dishes WHERE dishId = ?;",
-                (PreparedStatement ps) -> ps.setObject(1, dishId)
+                        String tagValue = rs.getString("tagValue");
+                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+
+                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+                        if(!rs.wasNull()) {
+                            String ingredientName = rs.getString("ingredientName");
+                            Filter filter = toFilter(rs.getString("ingredientFilter"));
+                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
+                        }
+                    }
+
+                    return builder == null ?
+                            Optional.empty() :
+                            Optional.ofNullable(builder.tryBuild());
+                }
         );
-
-        return dish;
     }
 
     @Override
-    public Dish tryGetById(UUID dishId) {
-        Validator.check(
-                Rule.of("DishRepository.dishId").notNull(dishId)
-        );
-
-        Dish dish = getByIdOrReturnNull(dishId);
-        if(dish == null) {
-            throw new ValidateException("Fail to get dish by id=" + dishId).
-                    addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-        }
-
-        return dish;
-    }
-
-    @Override
-    public Dish tryGetByName(String name) {
+    public Optional<Dish> getByName(String name) {
         Validator.check(
                 Rule.of("DishRepository.name").notNull(name)
         );
@@ -185,14 +224,47 @@ public class DishRepositoryPostgres implements DishRepository {
                         }
                     }
 
-                    if(builder != null) {
-                        return builder.tryBuild();
-                    } else {
-                        throw new ValidateException("Fail to get dish by name=" + name).
-                                addReason(Rule.of("DishRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-                    }
+                    return builder == null ?
+                            Optional.empty() :
+                            Optional.ofNullable(builder.tryBuild());
                 }
         );
+    }
+
+    @Override
+    public Dish tryRemove(UUID dishId) {
+        Validator.check(
+                Rule.of("DishRepository.dishId").notNull(dishId)
+        );
+
+        Dish dish = getById(dishId).
+                orElseThrow(
+                        () -> new ValidateException("Unknown dish with id=" + dishId).
+                                addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                );
+
+        statement.update(
+                "DELETE FROM Dishes WHERE dishId = ?;",
+                (PreparedStatement ps) -> ps.setObject(1, dishId)
+        );
+
+        return dish;
+    }
+
+    @Override
+    public Dish tryGetById(UUID dishId) {
+        return getById(dishId).
+                orElseThrow(
+                        () -> new ValidateException("Unknown dish with id=" + dishId)
+                );
+    }
+
+    @Override
+    public Dish tryGetByName(String name) {
+        return getByName(name).
+                orElseThrow(
+                        () -> new ValidateException("Unknown dish with name=" + name)
+                );
     }
 
     @Override
@@ -587,74 +659,6 @@ public class DishRepositoryPostgres implements DishRepository {
                         return newVersion.getIngredients().size();
                     }
 
-                }
-        );
-    }
-
-
-    private Dish getByIdOrReturnNull(UUID dishId) {
-        return statement.query(
-                (Connection con) -> con.prepareStatement(
-                        """
-                                SELECT Dishes.*, DishTags.*,
-                                       Users.userId,
-                                       Users.name as userName,
-                                       Users.passwordHash as userPassHash,
-                                       Users.email as userEmail,
-                                       Users.salt as userSalt,
-                                       DishIngredients.name as ingredientName,
-                                       DishIngredients.quantity as ingredientQuantity,
-                                       DishIngredients.filter as ingredientFilter
-                                    FROM Dishes
-                                    LEFT JOIN Users
-                                        ON Dishes.userId = Users.userId
-                                    LEFT JOIN DishTags
-                                        ON Dishes.dishId = DishTags.dishId
-                                    LEFT JOIN DishIngredients
-                                        ON Dishes.dishId = DishIngredients.dishId
-                                    WHERE Dishes.dishId = ?
-                                    ORDER BY DishTags.index, DishIngredients.index;
-                                """
-                ),
-                (PreparedStatement ps) -> ps.setObject(1, dishId),
-                (ResultSet rs) -> {
-                    Dish.Builder builder = null;
-
-                    while(rs.next()) {
-                        if(builder == null) {
-                            builder = new Dish.Builder().
-                                    setId(dishId).
-                                    setUser(
-                                            new User.LoadBuilder().
-                                                    setId((UUID) rs.getObject("userId")).
-                                                    setName(rs.getString("userName")).
-                                                    setEmail(rs.getString("userEmail")).
-                                                    setPasswordHash(rs.getString("userPassHash")).
-                                                    setSalt(rs.getString("userSalt")).
-                                                    tryBuild()
-                                    ).
-                                    setName(rs.getString("name")).
-                                    setServingSize(rs.getBigDecimal("servingSize")).
-                                    setUnit(rs.getString("unit")).
-                                    setDescription(rs.getString("description")).
-                                    setImagePath(rs.getString("imagePath")).
-                                    setConfig(appConfig).
-                                    setRepository(productRepository);
-                        }
-
-                        String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
-
-                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
-                        if(!rs.wasNull()) {
-                            String ingredientName = rs.getString("ingredientName");
-                            Filter filter = toFilter(rs.getString("ingredientFilter"));
-                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
-                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
-                        }
-                    }
-
-                    return builder == null ? null : builder.tryBuild();
                 }
         );
     }
