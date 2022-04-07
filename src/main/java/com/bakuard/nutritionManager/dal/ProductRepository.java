@@ -36,7 +36,7 @@ public interface ProductRepository {
      *         1. если не удалось найти продукт с таким ID.<br/>
      *         2. если productId равен null.
      */
-    public Product remove(UUID productId);
+    public Product tryRemove(UUID productId);
 
     /**
      * Возвращает продукт по его идентификатору. Если в БД нет продукта с таким идентификатором -
@@ -47,7 +47,7 @@ public interface ProductRepository {
      *         1. если не удалось найти продукт с таким ID.<br/>
      *         2. если productId равен null.
      */
-    public Product getById(UUID productId);
+    public Product tryGetById(UUID productId);
 
     /**
      * Возвращает упорядоченную выборку продуктов из множества всех продуктов с учетом заданных ограничений

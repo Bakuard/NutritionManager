@@ -27,7 +27,7 @@ public interface UserRepository {
      *         1. если не удалось найти пользователя с таким ID.<br/>
      *         2. если userId равен null.
      */
-    public User getById(UUID userId);
+    public User tryGetById(UUID userId);
 
     /**
      * Возвращает пользователя по его имени. Если пользователя с таким именем не сущестует  - выбрасывает исключение.
@@ -37,7 +37,7 @@ public interface UserRepository {
      *         1. если не удалось найти пользователя с таким name.<br/>
      *         2. если name равен null.
      */
-    public User getByName(String name);
+    public User tryGetByName(String name);
 
     /**
      * Возвращает пользователя по его почте. Если пользователя с такой почтой не сущестует  - выбрасывает исключение.
@@ -47,6 +47,6 @@ public interface UserRepository {
      *         1. если не удалось найти пользователя с таким email.<br/>
      *         2. если email равен null.
      */
-    public User getByEmail(String email);
+    public User tryGetByEmail(String email);
 
 }

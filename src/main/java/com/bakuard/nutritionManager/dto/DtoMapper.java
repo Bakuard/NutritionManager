@@ -66,7 +66,7 @@ public class DtoMapper {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 setId(dto.getId()).
-                setUser(userRepository.getById(userId)).
+                setUser(userRepository.tryGetById(userId)).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
                 setGrade(dto.getGrade()).
@@ -87,7 +87,7 @@ public class DtoMapper {
         Product.Builder builder = new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 generateId().
-                setUser(userRepository.getById(userId)).
+                setUser(userRepository.tryGetById(userId)).
                 setCategory(dto.getCategory()).
                 setShop(dto.getShop()).
                 setGrade(dto.getGrade()).
@@ -130,7 +130,7 @@ public class DtoMapper {
     }
 
     public Dish toDish(UUID userId, DishAddRequest dto) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.tryGetById(userId);
 
         Dish.Builder builder = new Dish.Builder().
                 generateId().
@@ -156,7 +156,7 @@ public class DtoMapper {
     }
 
     public Dish toDish(UUID userId, DishUpdateRequest dto) {
-        User user = userRepository.getById(userId);
+        User user = userRepository.tryGetById(userId);
 
         Dish.Builder builder = new Dish.Builder().
                 setId(dto.getId()).
@@ -186,7 +186,7 @@ public class DtoMapper {
     }
 
     public DishProductsListResponse toDishProductsListResponse(DishProductsListRequest dto) {
-        Dish dish = dishRepository.getById(dto.getDishId());
+        Dish dish = dishRepository.tryGetById(dto.getDishId());
 
         List<ProductAsDishIngredientResponse> ingredientsResponse =
                 dto.getIngredients().entrySet().stream().

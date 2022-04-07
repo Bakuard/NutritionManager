@@ -32,7 +32,7 @@ public interface DishRepository {
      *         1. если не удалось найти блюдо с таким ID.<br/>
      *         2. если dishId равен null.
      */
-    public Dish remove(UUID dishId);
+    public Dish tryRemove(UUID dishId);
 
     /**
      * Возвращает блюдо по его идентификатору. Если в БД нет блюда с таким идентификатором -
@@ -43,7 +43,7 @@ public interface DishRepository {
      *         1. если не удалось найти блюдо с таким ID.<br/>
      *         2. если dishId равен null.
      */
-    public Dish getById(UUID dishId);
+    public Dish tryGetById(UUID dishId);
 
     /**
      * Возвращает блюдо по его имени. Если в БД нет блюда с таким именем - выбрасывает исключение.
@@ -53,7 +53,7 @@ public interface DishRepository {
      *         1. если не удалось найти блюдо с таким name.<br/>
      *         2. если name равен null.
      */
-    public Dish getByName(String name);
+    public Dish tryGetByName(String name);
 
     /**
      * Возвращает упорядоченную выборку блюд из множества всех блюд с учетом заданных ограничений

@@ -8,9 +8,7 @@ import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.model.Dish;
-import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
 
 import com.bakuard.nutritionManager.services.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Tag(name = "Контроллер блюд")
@@ -150,7 +147,7 @@ public class DishController {
                 UUID id) {
         logger.info("Delete dish by id={}", id);
 
-        Dish dish = dishRepository.remove(id);
+        Dish dish = dishRepository.tryRemove(id);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(mapper.toSuccessResponse("dish.delete", response));
@@ -177,7 +174,7 @@ public class DishController {
             UUID id) {
         logger.info("Get dish by id = {}", id);
 
-        Dish dish = dishRepository.getById(id);
+        Dish dish = dishRepository.tryGetById(id);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(response);
@@ -204,7 +201,7 @@ public class DishController {
             String name) {
         logger.info("Get dish by name={}", name);
 
-        Dish dish = dishRepository.getByName(name);
+        Dish dish = dishRepository.tryGetByName(name);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(response);

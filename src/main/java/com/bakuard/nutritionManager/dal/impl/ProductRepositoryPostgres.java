@@ -72,7 +72,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Product remove(UUID productId) {
+    public Product tryRemove(UUID productId) {
         Validator.check(
                 Rule.of("ProductRepository.productId").notNull(productId)
         );
@@ -93,7 +93,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Product getById(UUID productId) {
+    public Product tryGetById(UUID productId) {
         Validator.check(
                 Rule.of("ProductRepository.productId").notNull(productId)
         );

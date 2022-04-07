@@ -151,7 +151,7 @@ public class ProductController {
             UUID id) {
         logger.info("Delete product with id={}", id);
 
-        Product product = productRepository.remove(id);
+        Product product = productRepository.tryRemove(id);
 
         ProductResponse response = mapper.toProductResponse(product);
         return ResponseEntity.ok(mapper.toSuccessResponse("product.delete", response));
@@ -179,7 +179,7 @@ public class ProductController {
     public ResponseEntity<SuccessResponse<ProductResponse>> addQuantity(@RequestBody ProductAddedQuantityRequest dto) {
         logger.info("Add quantity to product. dto={}", dto);
 
-        Product product = productRepository.getById(dto.getProductId());
+        Product product = productRepository.tryGetById(dto.getProductId());
         product.addQuantity(dto.getAddedQuantity());
         productRepository.save(product);
 
@@ -209,7 +209,7 @@ public class ProductController {
     public ResponseEntity<SuccessResponse<ProductResponse>> takeQuantity(@RequestBody ProductTakeQuantityRequest dto) {
         logger.info("Take quantity from product. dto={}", dto);
 
-        Product product = productRepository.getById(dto.getProductId());
+        Product product = productRepository.tryGetById(dto.getProductId());
         product.take(dto.getTakeQuantity());
         productRepository.save(product);
 
@@ -237,7 +237,7 @@ public class ProductController {
                                                     UUID id) {
         logger.info("Get product with id={}", id);
 
-        Product product = productRepository.getById(id);
+        Product product = productRepository.tryGetById(id);
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 

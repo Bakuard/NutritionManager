@@ -125,7 +125,7 @@ class UserRepositoryTest {
 
         commit(() -> repository.save(expected));
 
-        User actual = repository.getById(toUUID(1));
+        User actual = repository.tryGetById(toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -152,7 +152,7 @@ class UserRepositoryTest {
 
         commit(() -> repository.save(expected));
 
-        User actual = repository.getById(toUUID(3));
+        User actual = repository.tryGetById(toUUID(3));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -251,7 +251,7 @@ class UserRepositoryTest {
         expected.setEmail("new email");
         commit(() -> repository.save(expected));
 
-        User actual =  repository.getById(toUUID(1));
+        User actual =  repository.tryGetById(toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -365,133 +365,133 @@ class UserRepositoryTest {
 
         commit(() -> repository.save(user));
 
-        User actual = repository.getById(toUUID(1));
+        User actual = repository.tryGetById(toUUID(1));
         Assertions.assertEquals(expected, actual);
     }
 
     @Test
-    @DisplayName("getById(userId): userId is null => exception")
-    public void getById1() {
+    @DisplayName("tryGetById(userId): userId is null => exception")
+    public void tryGetById1() {
         AssertUtil.assertValidateException(
-                () -> repository.getById(null),
-                "UserRepositoryPostgres.getById",
+                () -> repository.tryGetById(null),
+                "UserRepositoryPostgres.tryGetById",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
-    @DisplayName("getById(userId): not exists user with such id => exception")
-    public void getById2() {
+    @DisplayName("tryGetById(userId): not exists user with such id => exception")
+    public void tryGetById2() {
         User user = createUser(1);
         repository.save(user);
 
         AssertUtil.assertValidateException(
-                () -> repository.getById(toUUID(2)),
-                "UserRepositoryPostgres.getById",
+                () -> repository.tryGetById(toUUID(2)),
+                "UserRepositoryPostgres.tryGetById",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
-    @DisplayName("getById(userId): exists user with such id => return user")
-    public void getById3() {
+    @DisplayName("tryGetById(userId): exists user with such id => return user")
+    public void tryGetById3() {
         User user = createUser(1);
         User expected = new User(user);
         commit(() -> repository.save(user));
 
-        User actual = repository.getById(toUUID(1));
+        User actual = repository.tryGetById(toUUID(1));
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            getByName(name):
+            tryGetByName(name):
              name is null
              => exception
             """)
-    public void getByName1() {
+    public void tryGetByName1() {
         AssertUtil.assertValidateException(
-                () -> repository.getByName(null),
-                "UserRepositoryPostgres.getByName",
+                () -> repository.tryGetByName(null),
+                "UserRepositoryPostgres.tryGetByName",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getByName(name):
+            tryGetByName(name):
              not exists user with such name
              => exception
             """)
-    public void getByName2() {
+    public void tryGetByName2() {
         User user = createUser(1);
         commit(() -> repository.save(user));
 
         AssertUtil.assertValidateException(
-                () -> repository.getByName("some user"),
-                "UserRepositoryPostgres.getByName",
+                () -> repository.tryGetByName("some user"),
+                "UserRepositoryPostgres.tryGetByName",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            getByName(name):
+            tryGetByName(name):
              exists user with such name
              => return user
             """)
-    public void getByName3() {
+    public void tryGetByName3() {
         User expected = createUser(1);
         commit(() -> repository.save(expected));
 
-        User actual = repository.getByName("User1");
+        User actual = repository.tryGetByName("User1");
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            getByEmail(email):
+            tryGetByEmail(email):
              email is null
              => exception
             """)
-    public void getByEmail1() {
+    public void tryGetByEmail1() {
         AssertUtil.assertValidateException(
-                () -> repository.getByEmail(null),
-                "UserRepositoryPostgres.getByEmail",
+                () -> repository.tryGetByEmail(null),
+                "UserRepositoryPostgres.tryGetByEmail",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getByEmail(email):
+            tryGetByEmail(email):
              not exists uer with such email
              => exception
             """)
-    public void getByEmail2() {
+    public void tryGetByEmail2() {
         User user = createUser(1);
         commit(() -> repository.save(user));
 
         AssertUtil.assertValidateException(
-                () -> repository.getByEmail("newEmail@mail.com"),
-                "UserRepositoryPostgres.getByEmail",
+                () -> repository.tryGetByEmail("newEmail@mail.com"),
+                "UserRepositoryPostgres.tryGetByEmail",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            getByEmail(email):
+            tryGetByEmail(email):
              exists user with such email
              => return user
             """)
-    public void getByEmail3() {
+    public void tryGetByEmail3() {
         User expected = createUser(1);
         commit(() -> repository.save(expected));
 
-        User actual = repository.getByEmail("user1@mail.com");
+        User actual = repository.tryGetByEmail("user1@mail.com");
 
         AssertUtil.assertEquals(expected, actual);
     }

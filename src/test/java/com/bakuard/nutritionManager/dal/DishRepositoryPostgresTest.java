@@ -151,7 +151,7 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(1, user);
 
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.getById(toUUID(1));
+        Dish actual = dishRepository.tryGetById(toUUID(1));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -186,7 +186,7 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(7, user);
 
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.getById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(toUUID(7));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -270,7 +270,7 @@ class DishRepositoryPostgresTest {
         expected.removeTag(new Tag("tag A"));
         expected.addTag(new Tag("tag Z"));
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.getById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(toUUID(7));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -335,161 +335,161 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(expected));
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(toUUID(7));
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            trytryRemove(dishId):
              dishId is null
              => exception
             """)
-    public void remove1() {
+    public void tryRemove1() {
         AssertUtil.assertValidateException(
-                () -> dishRepository.remove(null),
-                "DishRepositoryPostgres.remove",
+                () -> dishRepository.tryRemove(null),
+                "DishRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            tryRemove(dishId):
              dish with such id not exists
              => exception
             """)
-    public void remove2() {
+    public void tryRemove2() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
         AssertUtil.assertValidateException(
-                () -> dishRepository.remove(toUUID(100)),
-                "DishRepositoryPostgres.remove",
+                () -> dishRepository.tryRemove(toUUID(100)),
+                "DishRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            tryRemove(dishId):
              dish with such id exists
              => remove dish
             """)
-    public void remove3() {
+    public void tryRemove3() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        commit(() -> dishRepository.remove(toUUID(100)));
+        commit(() -> dishRepository.tryRemove(toUUID(100)));
 
         AssertUtil.assertValidateException(
-                () -> dishRepository.getById(toUUID(100)),
-                "DishRepositoryPostgres.getById",
+                () -> dishRepository.tryGetById(toUUID(100)),
+                "DishRepositoryPostgres.tryGetById",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            tryRemove(dishId):
              dish with such id exists
              => return removed dish
             """)
-    public void remove4() {
+    public void tryRemove4() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.remove(toUUID(100));
+        Dish actual = dishRepository.tryRemove(toUUID(100));
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            getById(dishId):
+            tryGetById(dishId):
              dishId is null
              => exception
             """)
-    public void getById1() {
+    public void tryGetById1() {
         AssertUtil.assertValidateException(
-                () -> dishRepository.getById(null),
-                "DishRepositoryPostgres.getById",
+                () -> dishRepository.tryGetById(null),
+                "DishRepositoryPostgres.tryGetById",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getById(dishId):
+            tryGetById(dishId):
              not exists dish with such id
              => exception
             """)
-    public void getById2() {
+    public void tryGetById2() {
         AssertUtil.assertValidateException(
-                () -> dishRepository.getById(toUUID(100)),
-                "DishRepositoryPostgres.getById",
+                () -> dishRepository.tryGetById(toUUID(100)),
+                "DishRepositoryPostgres.tryGetById",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            getById(dishId):
+            tryGetById(dishId):
              exists dish with such id
              => return dish
             """)
-    public void getById3() {
+    public void tryGetById3() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getById(toUUID(100));
+        Dish actual = dishRepository.tryGetById(toUUID(100));
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            getByName(name):
+            tryGetByName(name):
              name is null
              => exception
             """)
-    public void getByName1() {
+    public void tryGetByName1() {
         AssertUtil.assertValidateException(
-                () -> dishRepository.getByName(null),
-                "DishRepositoryPostgres.getByName",
+                () -> dishRepository.tryGetByName(null),
+                "DishRepositoryPostgres.tryGetByName",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getByName(name):
+            tryGetByName(name):
              not exists dish with such name
              => exception
             """)
-    public void getByName2() {
+    public void tryGetByName2() {
         AssertUtil.assertValidateException(
-                () -> dishRepository.getByName("unknown dish"),
-                "DishRepositoryPostgres.getByName",
+                () -> dishRepository.tryGetByName("unknown dish"),
+                "DishRepositoryPostgres.tryGetByName",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            getByName(name):
+            tryGetByName(name):
              exists dish with such name
              => exception
             """)
-    public void getByName3() {
+    public void tryGetByName3() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getByName("dish A");
+        Dish actual = dishRepository.tryGetByName("dish A");
 
         AssertUtil.assertEquals(expected, actual);
     }

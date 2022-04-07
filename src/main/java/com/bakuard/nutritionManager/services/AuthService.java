@@ -22,7 +22,7 @@ public class AuthService {
     public Pair<String, User> enter(String name, String password) {
         User user = null;
         try {
-            user = userRepository.getByName(name);
+            user = userRepository.tryGetByName(name);
         } catch(ValidateException e) {
             throw new ValidateException("Incorrect credentials").addReason(e);
         }
@@ -68,7 +68,7 @@ public class AuthService {
         try {
             String email = jwsService.parseChangeCredentialsJws(jws);
 
-            User user = userRepository.getByEmail(email);
+            User user = userRepository.tryGetByEmail(email);
             user.setPassword(password);
             user.setName(name);
             userRepository.save(user);
@@ -84,7 +84,7 @@ public class AuthService {
         try {
             UUID userId = jwsService.parseAccessJws(jws);
 
-            User user = userRepository.getById(userId);
+            User user = userRepository.tryGetById(userId);
             if(!user.isCorrectPassword(currentPassword)) {
                 throw new ValidateException("Incorrect password");
             }
@@ -103,7 +103,7 @@ public class AuthService {
         try {
             UUID userId = jwsService.parseAccessJws(jws);
 
-            User user = userRepository.getById(userId);
+            User user = userRepository.tryGetById(userId);
             if(!user.isCorrectPassword(currentPassword)) {
                 throw new ValidateException("Incorrect password");
             }
@@ -119,7 +119,7 @@ public class AuthService {
 
     public User getUserByJws(String jws) {
         UUID userId = jwsService.parseAccessJws(jws);
-        return userRepository.getById(userId);
+        return userRepository.tryGetById(userId);
     }
 
     public void logout(String jws) {

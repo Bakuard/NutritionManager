@@ -83,7 +83,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Dish remove(UUID dishId) {
+    public Dish tryRemove(UUID dishId) {
         Validator.check(
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
@@ -104,7 +104,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Dish getById(UUID dishId) {
+    public Dish tryGetById(UUID dishId) {
         Validator.check(
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
@@ -119,7 +119,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Dish getByName(String name) {
+    public Dish tryGetByName(String name) {
         Validator.check(
                 Rule.of("DishRepository.name").notNull(name)
         );

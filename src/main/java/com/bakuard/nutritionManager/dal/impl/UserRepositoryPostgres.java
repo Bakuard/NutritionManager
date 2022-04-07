@@ -50,7 +50,7 @@ public class UserRepositoryPostgres implements UserRepository {
     }
 
     @Override
-    public User getById(UUID userId) {
+    public User tryGetById(UUID userId) {
         Validator.check(
                 Rule.of("UserRepositoryPostgres.userId").notNull(userId)
         );
@@ -65,7 +65,7 @@ public class UserRepositoryPostgres implements UserRepository {
     }
 
     @Override
-    public User getByName(String name) {
+    public User tryGetByName(String name) {
         Validator.check(
                 Rule.of("UserRepositoryPostgres.name").notNull(name)
         );
@@ -94,7 +94,7 @@ public class UserRepositoryPostgres implements UserRepository {
     }
 
     @Override
-    public User getByEmail(String email) {
+    public User tryGetByEmail(String email) {
         Validator.check(
                 Rule.of("UserRepositoryPostgres.email").notNull(email)
         );
