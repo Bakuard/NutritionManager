@@ -1075,9 +1075,6 @@ class DishRepositoryPostgresTest {
              => return 0
             """)
     public void getTagsNumber2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         int actual = dishRepository.getTagsNumber(
@@ -1125,9 +1122,6 @@ class DishRepositoryPostgresTest {
              => return empty page
             """)
     public void getTags2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         Page<Tag> actual = dishRepository.getTags(
@@ -1184,9 +1178,6 @@ class DishRepositoryPostgresTest {
              => return 0
             """)
     public void getUnitsNumber2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         int actual = dishRepository.getUnitsNumber(
@@ -1234,9 +1225,6 @@ class DishRepositoryPostgresTest {
              => return empty page
             """)
     public void getUnits2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         Page<String> actual = dishRepository.getUnits(
@@ -1269,6 +1257,109 @@ class DishRepositoryPostgresTest {
         Page<String> expected = Pageable.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(getAllUnits(dishes).subList(2, 3));
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getNamesNumber1() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getNamesNumber(null),
+                "DishRepositoryPostgres.getNamesNumber",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             user haven't any dishes
+             => return 0
+            """)
+    public void getNamesNumber2() {
+        User actualUser = createAndSaveUser(100);
+
+        int actual = dishRepository.getNamesNumber(
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             user have dishes
+             => return correct result
+            """)
+    public void getNamesNumber3() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        int actual = dishRepository.getNamesNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+
+        Assertions.assertEquals(4, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getNames1() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getNames(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             user haven't any dishes
+             => return empty page
+            """)
+    public void getNames2() {
+        User actualUser = createAndSaveUser(100);
+
+        Page<String> actual = dishRepository.getNames(
+                new Criteria().
+                        setFilter(Filter.user(actualUser.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Page<String> expected = Pageable.firstEmptyPage();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             user have dishes
+             => return correct result
+            """)
+    public void getNames3() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        Page<String> actual = dishRepository.getNames(
+                new Criteria().
+                        setFilter(Filter.user(user.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Page<String> expected = Pageable.of(2, 1).
+                createPageMetadata(4, 200).
+                createPage(getAllNames(dishes).subList(2, 4));
         Assertions.assertEquals(expected, actual);
     }
 
@@ -1708,6 +1799,14 @@ class DishRepositoryPostgresTest {
     private List<String> getAllUnits(List<Dish> allDishes) {
         return allDishes.stream().
                 map(Dish::getUnit).
+                distinct().
+                sorted().
+                toList();
+    }
+
+    private List<String> getAllNames(List<Dish> allDishes) {
+        return allDishes.stream().
+                map(Dish::getName).
                 distinct().
                 sorted().
                 toList();

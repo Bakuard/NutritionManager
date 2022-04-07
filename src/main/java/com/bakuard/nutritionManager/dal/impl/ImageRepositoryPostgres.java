@@ -68,8 +68,8 @@ public class ImageRepositoryPostgres implements ImageRepository {
     }
 
     @Override
-    public List<String> getAndRemoveUnusedImages() {
-        List<String> result = statement.query(
+    public List<String> getUnusedImages() {
+        return statement.query(
                 """
                         SELECT * FROM UsedImages
                             WHERE imageUrl NOT IN (
@@ -90,23 +90,22 @@ public class ImageRepositoryPostgres implements ImageRepository {
                     return userImages;
                 }
         );
+    }
 
-        if(!result.isEmpty()) {
-            statement.update(
-                    """
-                            DELETE FROM UsedImages
-                                WHERE imageUrl NOT IN (
-                                    SELECT imagePath FROM Products
-                                    UNION
-                                    SELECT imagePath FROM Dishes
-                                    UNION
-                                    SELECT imagePath FROM Menus
-                                );
-                            """
-            );
-        }
-
-        return result;
+    @Override
+    public void removeUnusedImages() {
+        statement.update(
+                """
+                        DELETE FROM UsedImages
+                            WHERE imageUrl NOT IN (
+                                SELECT imagePath FROM Products
+                                UNION
+                                SELECT imagePath FROM Dishes
+                                UNION
+                                SELECT imagePath FROM Menus
+                            );
+                        """
+        );
     }
 
 }

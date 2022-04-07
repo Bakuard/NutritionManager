@@ -27,10 +27,15 @@ public interface ImageRepository {
     public URL getImageUrl(UUID userId, String imageHash);
 
     /**
-     * Удаляет и возвращает хеш-суммы всех изображений, которые больше не используются своими
-     * пользователями.
+     * Возвращает хеш-суммы всех изображений, которые больше не используются своими пользователями.
+     * Если таких изображений нет - возвращает пустой список.
      * @return список хеш-сумм всех изображений.
      */
-    public List<String> getAndRemoveUnusedImages();
+    public List<String> getUnusedImages();
+
+    /**
+     * Удаляет хеш-суммы всех изображений, которые больше не используются своими пользователями.
+     */
+    public void removeUnusedImages();
 
 }

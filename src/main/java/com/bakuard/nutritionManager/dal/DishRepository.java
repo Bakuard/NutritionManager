@@ -102,6 +102,15 @@ public interface DishRepository {
     public Page<String> getUnits(Criteria criteria);
 
     /**
+     * Возвращает выборку из наименований всех блюд удовлетворяющих ограничению criteria
+     * (см. {@link Criteria}).
+     * @param criteria критерий формирования выборки наименований блюд.
+     * @return выборку из наименований блюд удовлетворяющую ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
+    public Page<String> getNames(Criteria criteria);
+
+    /**
      * Возвращает кол-во всех блюд удовлетворяющих ограничению criteria (см. {@link Criteria}).
      * @param criteria критерий указывающий какие единицы измерения блюд подсчитывать.
      * @return  кол-во всех блюд удовлетворяющих ограничению criteria.
@@ -125,5 +134,14 @@ public interface DishRepository {
      * @throws ValidateException если criteria является null.
      */
     public int getUnitsNumber(Criteria criteria);
+
+    /**
+     * Возвращает общее число всех наименований блюд удовлетворяющих ограничению criteria
+     * (см. {@link Criteria}).
+     * @param criteria критерий указывающий какие наименования блюд подсчитывать.
+     * @return общее число всех наименований блюд удовлетворяющих ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
+    public int getNamesNumber(Criteria criteria);
 
 }

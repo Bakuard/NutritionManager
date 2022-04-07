@@ -296,10 +296,12 @@ public class DtoMapper {
 
         Page<Tag> tags = dishRepository.getTags(criteria);
         Page<String> units = dishRepository.getUnits(criteria);
+        Page<String> names = dishRepository.getNames(criteria);
 
         DishFieldsResponse response = new DishFieldsResponse();
         response.setTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
         response.setUnits(units.getContent().stream().map(FieldResponse::new).toList());
+        response.setNames(names.getContent().stream().map(FieldResponse::new).toList());
 
         return response;
     }

@@ -425,6 +425,38 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
+    public Page<String> getNames(Criteria criteria) {
+        int unitsNumber = getNamesNumber(criteria);
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(unitsNumber, 200);
+
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
+
+        String query = selectDistinct(field("Dishes.name")).
+                from("Dishes").
+                where(switchFilter(criteria.getFilter())).
+                orderBy(field("Dishes.name").asc()).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
+                getSQL();
+
+        List<String> units = statement.query(
+                query,
+                (ResultSet rs) -> {
+                    List<String> result = new ArrayList<>();
+
+                    while(rs.next()) {
+                        result.add(rs.getString(1));
+                    }
+
+                    return result;
+                }
+        );
+
+        return metadata.createPage(units);
+    }
+
+    @Override
     public int getDishesNumber(Criteria criteria) {
         Validator.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
@@ -473,6 +505,28 @@ public class DishRepositoryPostgres implements DishRepository {
         );
 
         String query = select(countDistinct(field("Dishes.unit"))).
+                from("Dishes").
+                where(switchFilter(criteria.getFilter())).
+                getSQL();
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
+    }
+
+    @Override
+    public int getNamesNumber(Criteria criteria) {
+        Validator.check(
+                Rule.of("DishRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+        );
+
+        String query = select(countDistinct(field("Dishes.name"))).
                 from("Dishes").
                 where(switchFilter(criteria.getFilter())).
                 getSQL();
