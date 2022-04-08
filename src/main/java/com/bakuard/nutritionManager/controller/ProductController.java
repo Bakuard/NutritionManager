@@ -147,7 +147,7 @@ public class ProductController {
     @DeleteMapping("/delete")
     public ResponseEntity<SuccessResponse<ProductResponse>> delete(
             @RequestParam("id")
-            @Parameter(description = "Уникальный идентификатор продукта в формате UUID", required = true)
+            @Parameter(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.", required = true)
             UUID id) {
         logger.info("Delete product with id={}", id);
 
@@ -232,9 +232,10 @@ public class ProductController {
     )
     @Transactional
     @GetMapping("/getById")
-    public ResponseEntity<ProductResponse> getById(@RequestParam("id")
-                                                   @Parameter(description = "Уникальный идентификатор продукта в формате UUID", required = true)
-                                                    UUID id) {
+    public ResponseEntity<ProductResponse> getById(
+            @RequestParam("id")
+            @Parameter(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.", required = true)
+            UUID id) {
         logger.info("Get product with id={}", id);
 
         Product product = productRepository.tryGetById(id);
@@ -258,10 +259,10 @@ public class ProductController {
     @GetMapping("/getByFilter")
     public ResponseEntity<Page<ProductResponse>> getByFilter(
             @RequestParam("page")
-            @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
+            @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
             int page,
             @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
+            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
@@ -270,14 +271,8 @@ public class ProductController {
                              allowableValues = {
                                      "category_asc",
                                      "price_asc",
-                                     "variety_asc",
-                                     "shop_asc",
-                                     "manufacturer_asc",
                                      "category_desc",
-                                     "price_desc",
-                                     "variety_desc",
-                                     "shop_desc",
-                                     "manufacturer_desc"
+                                     "price_desc"
                              }
                      ))
             String sortRule,
@@ -291,7 +286,10 @@ public class ProductController {
                      schema = @Schema(defaultValue = "false"))
             boolean onlyFridge,
             @RequestParam(value = "category", required = false)
-            @Parameter(description = "Категория продуктов",
+            @Parameter(description = """
+                    Категория продуктов. В выборку попадут только продукты имеющие указанную категорию.
+                     Если имеет значение null - в выборку попадут продукты любых категорий.
+                    """,
                     schema = @Schema(defaultValue = "null"))
             String category,
             @RequestParam(value = "shops", required = false)
@@ -363,8 +361,8 @@ public class ProductController {
     }
 
     @Operation(summary = """
-            Возвращает производителей, торговые точки, сорта, категории и теги всех продуктов указанного
-            пользователя.
+            Возвращает производителей, торговые точки, сорта, категории и теги всех продуктов пользователя
+             сделавшего запрос.
             """,
             responses = {
                     @ApiResponse(responseCode = "200"),

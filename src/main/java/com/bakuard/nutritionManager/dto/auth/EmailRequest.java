@@ -7,7 +7,7 @@ import java.util.Objects;
 @Schema(description = "Почта пользователя")
 public class EmailRequest {
 
-    @Schema(description = "Почта пользователя")
+    @Schema(description = "Почта пользователя. Не может быть null.")
     private String email;
 
     public EmailRequest() {
