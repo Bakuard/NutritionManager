@@ -8,9 +8,7 @@ import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.model.Dish;
-import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
 
 import com.bakuard.nutritionManager.services.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,10 +29,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-@Tag(name = "Контроллер блюд")
+@Tag(
+        name = "Контроллер блюд",
+        description = "Предоставляет CRUD операции для блюд."
+)
 @RestController
 @RequestMapping("/dishes")
 public class DishController {
@@ -146,11 +146,11 @@ public class DishController {
     @DeleteMapping("/delete")
     public ResponseEntity<SuccessResponse<DishResponse>> delete(
                 @RequestParam("id")
-                @Parameter(description = "Уникальный идентификатор блюда в формате UUID", required = true)
+                @Parameter(description = "Уникальный идентификатор блюда в формате UUID. Не может быть null.", required = true)
                 UUID id) {
         logger.info("Delete dish by id={}", id);
 
-        Dish dish = dishRepository.remove(id);
+        Dish dish = dishRepository.tryRemove(id);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(mapper.toSuccessResponse("dish.delete", response));
@@ -173,11 +173,11 @@ public class DishController {
     @GetMapping("/getById")
     public ResponseEntity<DishResponse> getById(
             @RequestParam("id")
-            @Parameter(description = "Уникальный идентификатор блюда в формате UUID", required = true)
+            @Parameter(description = "Уникальный идентификатор блюда в формате UUID. Не может быть null.", required = true)
             UUID id) {
         logger.info("Get dish by id = {}", id);
 
-        Dish dish = dishRepository.getById(id);
+        Dish dish = dishRepository.tryGetById(id);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(response);
@@ -200,11 +200,11 @@ public class DishController {
     @GetMapping("/getByName")
     public ResponseEntity<DishResponse> getByName(
             @RequestParam("name")
-            @Parameter(description = "Наименование блюда", required = true)
+            @Parameter(description = "Наименование блюда. Не может быть null.", required = true)
             String name) {
         logger.info("Get dish by name={}", name);
 
-        Dish dish = dishRepository.getByName(name);
+        Dish dish = dishRepository.tryGetByName(name);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(response);
@@ -231,15 +231,15 @@ public class DishController {
     @GetMapping("/getByFilter")
     public ResponseEntity<Page<DishForListResponse>> getByFilter(
             @RequestParam("page")
-            @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля.", required = true)
+            @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
             int page,
             @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]", required = true)
+            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
                 schema = @Schema(
-                    defaultValue = "category_asc (Сортировка по категориям в порядке возрастания).",
+                    defaultValue = "name_asc (Сортировка по наименованию в порядке возрастания).",
                     allowableValues = {
                             "name_asc",
                             "unit_asc",
@@ -253,7 +253,7 @@ public class DishController {
                      Массив категорий продуктов. В выборку попадут только те блюда, которые имеют в своем
                       составе продукты соответствующие хотя бы одной из перечисленных категорий. Если параметр
                       имеет значение null - в выборку попадут блюда имеющие с своем составе продукты любых категорий.
-                      Если массив задается - он должен содержать как минимум один элемент, все эелементы должны 
+                      Если массив задается - он должен содержать как минимум один элемент, все эелементы должны
                       содержать как минимум один отображаемый символ.
                      """,
                     schema = @Schema(defaultValue = "null"))
@@ -289,7 +289,7 @@ public class DishController {
     }
 
     @Operation(summary = """
-            Возвращает теги и единицы измерения кол-ва всех блюд указанного пользователя.
+            Возвращает теги, единицы измерения кол-ва и наименования всех блюд указанного пользователя.
             """,
             responses = {
                     @ApiResponse(responseCode = "200"),

@@ -9,10 +9,10 @@ import java.util.Objects;
         """)
 public class CredentialsForEnterRequest {
 
-    @Schema(description = "Имя пользователя")
+    @Schema(description = "Имя пользователя. Не может быть null.")
     private String userName;
 
-    @Schema(description = "Пароль пользователя")
+    @Schema(description = "Пароль пользователя. Не может быть null.")
     private String userPassword;
 
     public CredentialsForEnterRequest() {

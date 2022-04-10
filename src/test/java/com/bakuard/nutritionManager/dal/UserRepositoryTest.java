@@ -4,8 +4,8 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.User;
-
 import com.bakuard.nutritionManager.validation.Constraint;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -20,10 +20,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.*;
+
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -104,8 +106,7 @@ class UserRepositoryTest {
     public void save1() {
         AssertUtil.assertValidateException(
                 () -> repository.save(null),
-                UserRepositoryPostgres.class,
-                "save",
+                "UserRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -125,7 +126,7 @@ class UserRepositoryTest {
 
         commit(() -> repository.save(expected));
 
-        User actual = repository.getById(toUUID(1));
+        User actual = repository.tryGetById(toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -152,7 +153,7 @@ class UserRepositoryTest {
 
         commit(() -> repository.save(expected));
 
-        User actual = repository.getById(toUUID(3));
+        User actual = repository.tryGetById(toUUID(3));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -167,8 +168,7 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
-                UserRepositoryPostgres.class,
-                "save",
+                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -179,18 +179,17 @@ class UserRepositoryTest {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
-        User addedUser = new User(
-                toUUID(2),
-                "user2",
-                user1.getPasswordHash(),
-                "email",
-                user1.getSalt()
-        );
+        User addedUser = new User.LoadBuilder().
+                setId(toUUID(2)).
+                setName("user2").
+                setEmail("email").
+                setPasswordHash(user1.getPasswordHash()).
+                setSalt(user1.getSalt()).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
-                UserRepositoryPostgres.class,
-                "save",
+                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -201,18 +200,17 @@ class UserRepositoryTest {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
-        User addedUser = new User(
-                toUUID(2),
-                "user2",
-                "passwordHash",
-                user1.getEmail(),
-                user1.getSalt()
-        );
+        User addedUser = new User.LoadBuilder().
+                setId(toUUID(2)).
+                setName("user2").
+                setEmail(user1.getEmail()).
+                setSalt(user1.getSalt()).
+                setPasswordHash("passwordHash").
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
-                UserRepositoryPostgres.class,
-                "save",
+                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -254,7 +252,7 @@ class UserRepositoryTest {
         expected.setEmail("new email");
         commit(() -> repository.save(expected));
 
-        User actual =  repository.getById(toUUID(1));
+        User actual =  repository.tryGetById(toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -277,8 +275,7 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
-                UserRepositoryPostgres.class,
-                "save",
+                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -297,18 +294,17 @@ class UserRepositoryTest {
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
-        User expected = new User(
-                toUUID(3),
-                "user3",
-                user1.getPasswordHash(),
-                "email",
-                user1.getSalt()
-        );
+        User expected = new User.LoadBuilder().
+                setId(toUUID(3)).
+                setName("user3").
+                setEmail("email").
+                setSalt(user1.getSalt()).
+                setPasswordHash(user1.getPasswordHash()).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
-                UserRepositoryPostgres.class,
-                "save",
+                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -327,18 +323,17 @@ class UserRepositoryTest {
         commit(() -> repository.save(user1));
         commit(() -> repository.save(user2));
 
-        User expected = new User(
-                toUUID(3),
-                "user3",
-                "passwordHash",
-                user1.getEmail(),
-                user1.getSalt()
-        );
+        User expected = new User.LoadBuilder().
+                setId(toUUID(3)).
+                setName("user3").
+                setEmail(user1.getEmail()).
+                setPasswordHash("passwordHash").
+                setSalt(user1.getSalt()).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
-                UserRepositoryPostgres.class,
-                "save",
+                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -371,7 +366,7 @@ class UserRepositoryTest {
 
         commit(() -> repository.save(user));
 
-        User actual = repository.getById(toUUID(1));
+        User actual = repository.tryGetById(toUUID(1));
         Assertions.assertEquals(expected, actual);
     }
 
@@ -380,24 +375,19 @@ class UserRepositoryTest {
     public void getById1() {
         AssertUtil.assertValidateException(
                 () -> repository.getById(null),
-                UserRepositoryPostgres.class,
-                "getById",
+                "UserRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
-    @DisplayName("getById(userId): not exists user with such id => exception")
+    @DisplayName("getById(userId): not exists user with such id => empty optional")
     public void getById2() {
         User user = createUser(1);
         repository.save(user);
 
-        AssertUtil.assertValidateException(
-                () -> repository.getById(toUUID(2)),
-                UserRepositoryPostgres.class,
-                "getById",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
-        );
+        Optional<User> actual = repository.getById(toUUID(2));
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -407,103 +397,195 @@ class UserRepositoryTest {
         User expected = new User(user);
         commit(() -> repository.save(user));
 
-        User actual = repository.getById(toUUID(1));
+        User actual = repository.getById(toUUID(1)).orElseThrow();
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
-    @DisplayName("""
-            getByName(name):
-             name is null
-             => exception
-            """)
+    @DisplayName("tryGetById(userId): userId is null => exception")
+    public void tryGetById1() {
+        AssertUtil.assertValidateException(
+                () -> repository.tryGetById(null),
+                "UserRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("tryGetById(userId): not exists user with such id => exception")
+    public void tryGetById2() {
+        User user = createUser(1);
+        repository.save(user);
+
+        AssertUtil.assertValidateException(
+                () -> repository.tryGetById(toUUID(2)),
+                "UserRepositoryPostgres.tryGetById"
+        );
+    }
+
+    @Test
+    @DisplayName("tryGetById(userId): exists user with such id => return user")
+    public void tryGetById3() {
+        User user = createUser(1);
+        User expected = new User(user);
+        commit(() -> repository.save(user));
+
+        User actual = repository.tryGetById(toUUID(1));
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("getByName(name): name is null => exception")
     public void getByName1() {
         AssertUtil.assertValidateException(
                 () -> repository.getByName(null),
-                UserRepositoryPostgres.class,
-                "getByName",
+                "UserRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
-    @DisplayName("""
-            getByName(name):
-             not exists user with such name
-             => exception
-            """)
+    @DisplayName("getByName(name): not exists user with such name => empty optional")
     public void getByName2() {
         User user = createUser(1);
-        commit(() -> repository.save(user));
+        repository.save(user);
 
-        AssertUtil.assertValidateException(
-                () -> repository.getByName("some user"),
-                UserRepositoryPostgres.class,
-                "getByName",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
-        );
+        Optional<User> actual = repository.getByName("unknown name");
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
-    @DisplayName("""
-            getByName(name):
-             exists user with such name
-             => return user
-            """)
+    @DisplayName("getByName(name): exists user with such name => return user")
     public void getByName3() {
-        User expected = createUser(1);
-        commit(() -> repository.save(expected));
+        User user = createUser(1);
+        User expected = new User(user);
+        commit(() -> repository.save(user));
 
-        User actual = repository.getByName("User1");
+        User actual = repository.getByName("User1").orElseThrow();
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            getByEmail(email):
-             email is null
+            tryGetByName(name):
+             name is null
              => exception
             """)
-    public void getByEmail1() {
+    public void tryGetByName1() {
         AssertUtil.assertValidateException(
-                () -> repository.getByEmail(null),
-                UserRepositoryPostgres.class,
-                "getByEmail",
+                () -> repository.tryGetByName(null),
+                "UserRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getByEmail(email):
-             not exists uer with such email
+            tryGetByName(name):
+             not exists user with such name
              => exception
             """)
-    public void getByEmail2() {
+    public void tryGetByName2() {
         User user = createUser(1);
         commit(() -> repository.save(user));
 
         AssertUtil.assertValidateException(
-                () -> repository.getByEmail("newEmail@mail.com"),
-                UserRepositoryPostgres.class,
-                "getByEmail",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
+                () -> repository.tryGetByName("some user"),
+                "UserRepositoryPostgres.tryGetByName"
         );
     }
 
     @Test
     @DisplayName("""
-            getByEmail(email):
-             exists user with such email
+            tryGetByName(name):
+             exists user with such name
              => return user
             """)
-    public void getByEmail3() {
+    public void tryGetByName3() {
         User expected = createUser(1);
         commit(() -> repository.save(expected));
 
-        User actual = repository.getByEmail("user1@mail.com");
+        User actual = repository.tryGetByName("User1");
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("getByEmail(email): email is null => exception")
+    public void getByEmail1() {
+        AssertUtil.assertValidateException(
+                () -> repository.getByEmail(null),
+                "UserRepositoryPostgres.getByEmail",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("getByEmail(email): not exists user with such email => empty optional")
+    public void getByEmail2() {
+        User user = createUser(1);
+        repository.save(user);
+
+        Optional<User> actual = repository.getByEmail("unknownUser@gmail.com");
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("getByEmail(email): exists user with such email => return user")
+    public void getByEmail3() {
+        User user = createUser(1);
+        User expected = new User(user);
+        commit(() -> repository.save(user));
+
+        User actual = repository.getByEmail("user1@mail.com").orElseThrow();
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByEmail(email):
+             email is null
+             => exception
+            """)
+    public void tryGetByEmail1() {
+        AssertUtil.assertValidateException(
+                () -> repository.tryGetByEmail(null),
+                "UserRepositoryPostgres.getByEmail",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByEmail(email):
+             not exists uer with such email
+             => exception
+            """)
+    public void tryGetByEmail2() {
+        User user = createUser(1);
+        commit(() -> repository.save(user));
+
+        AssertUtil.assertValidateException(
+                () -> repository.tryGetByEmail("newEmail@mail.com"),
+                "UserRepositoryPostgres.tryGetByEmail"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByEmail(email):
+             exists user with such email
+             => return user
+            """)
+    public void tryGetByEmail3() {
+        User expected = createUser(1);
+        commit(() -> repository.save(expected));
+
+        User actual = repository.tryGetByEmail("user1@mail.com");
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -522,11 +604,13 @@ class UserRepositoryTest {
         }
     }
 
-    private User createUser(int id) {
-        return new User(toUUID(id),
-                "User" + id,
-                "password" + id,
-                "user" + id + "@mail.com");
+    private User createUser(int userId) {
+        return new User.Builder().
+                setId(toUUID(userId)).
+                setName("User" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
     }
 
     private UUID toUUID(int number) {

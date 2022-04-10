@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
+
 import com.google.common.collect.ImmutableList;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class QuantityFilter extends AbstractFilter {
     private final Relative relative;
 
     QuantityFilter(BigDecimal quantity, Relative relative) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Quantity.quantity").notNull(quantity).
                         and(r -> r.notNegative(quantity)),
                 Rule.of("Quantity.relative").notNull(relative)

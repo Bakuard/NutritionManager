@@ -9,10 +9,10 @@ import java.util.Objects;
         """)
 public class ChangePasswordRequest {
 
-    @Schema(description = "Новый пароль пользователя.")
+    @Schema(description = "Новый пароль пользователя. Не может быть null.")
     private String userNewPassword;
 
-    @Schema(description = "Текущий пароль пользователя.")
+    @Schema(description = "Текущий пароль пользователя. Не может быть null.")
     private String userCurrentPassword;
 
     public ChangePasswordRequest() {

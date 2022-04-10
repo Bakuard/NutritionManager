@@ -19,6 +19,8 @@ public interface MenuRepository {
 
     public Menu getById(UUID menuId);
 
+    public Menu tryGetById(UUID menuId);
+
     public List<Menu> getMenus(Pageable pageable,
                                User user,
                                Sort order);

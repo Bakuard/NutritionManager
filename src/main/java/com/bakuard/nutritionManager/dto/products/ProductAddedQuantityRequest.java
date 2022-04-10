@@ -12,9 +12,9 @@ import java.util.UUID;
         """)
 public class ProductAddedQuantityRequest {
 
-    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
+    @Schema(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.")
     private UUID productId;
-    @Schema(description = "Добавляемое кол-во продукта")
+    @Schema(description = "Добавляемое кол-во продукта. Не может быть null. Должно быть больше или равно нулю.")
     private BigDecimal addedQuantity;
 
     public ProductAddedQuantityRequest() {

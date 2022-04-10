@@ -8,7 +8,7 @@ import java.util.Objects;
 @Schema(description = "Фильтр задающий множество взаимозаменяемых продуктов для ингредиента блюда")
 public class DishIngredientFilterRequestResponse {
 
-    @Schema(description = "Категория продуктов")
+    @Schema(description = "Категория продуктов. Не может быть null")
     private String category;
     @Schema(description = """
             Список магазинов продуктов. Продукты соответствующие данному фильтру должны иметь один из
@@ -33,7 +33,7 @@ public class DishIngredientFilterRequestResponse {
     private List<String> manufacturers;
     @Schema(description = """
             Список магазинов продуктов. Продукты соответствующие данному фильтру должны имет как минимум
-             ВСЕ указанные теги в этом списке. Если нет ограничений на теги и подойдут любые, то данный параметр 
+             ВСЕ указанные теги в этом списке. Если нет ограничений на теги и подойдут любые, то данный параметр
              должен иметь значение null. Если список задается, он должен иметь как минимум
              один элемент.
             """)
@@ -103,7 +103,7 @@ public class DishIngredientFilterRequestResponse {
         return "DishIngredientFilterRequestResponse{" +
                 "category='" + category + '\'' +
                 ", shops=" + shops +
-                ", varieties=" + grades +
+                ", grades=" + grades +
                 ", manufacturers=" + manufacturers +
                 ", tags=" + tags +
                 '}';

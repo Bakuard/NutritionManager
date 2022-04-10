@@ -83,7 +83,7 @@ public class ImageUploaderService implements DisposableBean {
     public void removeUnusedImages() throws AmazonServiceException {
         logger.info("delete unused images");
 
-        List<String> unusedImages = imageRepository.getAndRemoveUnusedImages();
+        List<String> unusedImages = imageRepository.getUnusedImages();
 
         if(!unusedImages.isEmpty()) {
             logger.debug("There are {} unused images", unusedImages.size());
@@ -91,6 +91,8 @@ public class ImageUploaderService implements DisposableBean {
             DeleteObjectsRequest dor = new DeleteObjectsRequest("nutritionmanagerimages").
                     withKeys(unusedImages.toArray(String[]::new));
             s3.deleteObjects(dor);
+
+            imageRepository.removeUnusedImages();
         }
     }
 

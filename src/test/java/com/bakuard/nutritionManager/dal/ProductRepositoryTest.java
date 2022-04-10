@@ -110,8 +110,7 @@ class ProductRepositoryTest {
     void save1() {
         AssertUtil.assertValidateException(
                 () -> repository.save(null),
-                ProductRepositoryPostgres.class,
-                "save",
+                "ProductRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -132,7 +131,7 @@ class ProductRepositoryTest {
         Product expected = createProduct(1, user).tryBuild();
 
         commit(() -> repository.save(expected));
-        Product actual = repository.getById(expected.getId());
+        Product actual = repository.tryGetById(expected.getId());
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -165,7 +164,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
         commit(() -> repository.save(expected));
 
-        Product actual = repository.getById(toUUID(3));
+        Product actual = repository.tryGetById(toUUID(3));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -187,8 +186,7 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() ->repository.save(addedProduct)),
-                ProductRepositoryPostgres.class,
-                "save",
+                "ProductRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -216,7 +214,7 @@ class ProductRepositoryTest {
                 updatedProduct.getContext().
                         setCategory("new Category").
                         setShop("new Shop").
-                        setVariety("new Variety").
+                        setGrade("new Variety").
                         setManufacturer("new Manufacturer").
                         setUnit("new Unit").
                         setPrice(new BigDecimal("150")).
@@ -252,7 +250,7 @@ class ProductRepositoryTest {
                 expected.getContext().
                         setCategory("new Category").
                         setShop("new Shop").
-                        setVariety("new Variety").
+                        setGrade("new Variety").
                         setManufacturer("new Manufacturer").
                         setUnit("new Unit").
                         setPrice(new BigDecimal("150")).
@@ -262,7 +260,7 @@ class ProductRepositoryTest {
         );
         commit(() -> repository.save(expected));
 
-        Product actual = repository.getById(toUUID(1));
+        Product actual = repository.tryGetById(toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -293,8 +291,7 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.save(updatedProduct)),
-                ProductRepositoryPostgres.class,
-                "save",
+                "ProductRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -338,57 +335,53 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
         commit(() -> repository.save(product1));
 
-        Product actual = repository.getById(toUUID(1));
+        Product actual = repository.tryGetById(toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
-    @DisplayName("remove(productId): productId is null => exception")
-    void remove1() {
+    @DisplayName("tryRemove(productId): productId is null => exception")
+    void tryRemove1() {
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.remove(null)),
-                ProductRepositoryPostgres.class,
-                "remove",
+                () -> commit(() -> repository.tryRemove(null)),
+                "ProductRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
-    @DisplayName("remove(productId): product with such id not exists in DB => exception")
-    void remove2() {
+    @DisplayName("tryRemove(productId): product with such id not exists in DB => exception")
+    void tryRemove2() {
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.remove(toUUID(10))),
-                ProductRepositoryPostgres.class,
-                "remove",
+                () -> commit(() -> repository.tryRemove(toUUID(10))),
+                "ProductRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
-    @DisplayName("remove(productId): product with such id exists in DB => remove product")
-    void remove3() {
+    @DisplayName("tryRemove(productId): product with such id exists in DB => remove product")
+    void tryRemove3() {
         User user = createAndSaveUser(1);
         Product product = createProduct(1, user).tryBuild();
 
         commit(() -> repository.save(product));
-        commit(() -> repository.remove(toUUID(1)));
+        commit(() -> repository.tryRemove(toUUID(1)));
 
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.getById(toUUID(1))),
-                ProductRepositoryPostgres.class,
-                "getById",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
+                () -> commit(() -> repository.tryGetById(toUUID(1))),
+                "ProductRepositoryPostgres.tryGetById"
         );
     }
 
     @Test
-    @DisplayName("remove(productId): product with such id exists in DB => return removed product")
-    void remove4() {
+    @DisplayName("tryRemove(productId): product with such id exists in DB => return removed product")
+    void tryRemove4() {
         User user = createAndSaveUser(1);
         Product expected = createProduct(1, user).tryBuild();
 
         commit(() -> repository.save(expected));
-        Product actual = commit(() -> repository.remove(toUUID(1)));
+        Product actual = commit(() -> repository.tryRemove(toUUID(1)));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -398,21 +391,16 @@ class ProductRepositoryTest {
     void getById1() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(null)),
-                ProductRepositoryPostgres.class,
-                "getById",
+                "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
-    @DisplayName("getById(productId): not exists product with such id => exception")
+    @DisplayName("getById(productId): not exists product with such id => return empty Optional")
     void getById2() {
-        AssertUtil.assertValidateException(
-                () -> commit(() -> repository.getById(toUUID(256))),
-                ProductRepositoryPostgres.class,
-                "getById",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
-        );
+        Optional<Product> actual = repository.getById(toUUID(256));
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -422,7 +410,38 @@ class ProductRepositoryTest {
         Product expected = createProduct(1, user).tryBuild();
         commit(() -> repository.save(expected));
 
-        Product actual = commit(() -> repository.getById(toUUID(1)));
+        Product actual = commit(() -> repository.getById(toUUID(1))).orElseThrow();
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("tryGetById(productId): productId is null => exception")
+    void tryGetById1() {
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.tryGetById(null)),
+                "ProductRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("tryGetById(productId): not exists product with such id => exception")
+    void tryGetById2() {
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.tryGetById(toUUID(256))),
+                "ProductRepositoryPostgres.tryGetById"
+        );
+    }
+
+    @Test
+    @DisplayName("tryGetById(productId): exists product with such id => return product")
+    void tryGetById3() {
+        User user = createAndSaveUser(1);
+        Product expected = createProduct(1, user).tryBuild();
+        commit(() -> repository.save(expected));
+
+        Product actual = commit(() -> repository.tryGetById(toUUID(1)));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -436,8 +455,7 @@ class ProductRepositoryTest {
     void getProductsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getProductsNumber(null),
-                ProductRepositoryPostgres.class,
-                "getProductsNumber",
+                "ProductRepositoryPostgres.getProductsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -452,7 +470,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getProductsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -473,7 +491,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO)
                                 )
                         )
@@ -494,7 +512,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getProductsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(6, actual);
@@ -515,7 +533,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user2),
+                                        Filter.user(user2.getId()),
                                         Filter.minTags(new Tag("common tag"))
                                 )
                         )
@@ -533,7 +551,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches exist
             """)
     void getProductsNumber6() {
@@ -544,7 +562,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
@@ -573,7 +591,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(
                         Filter.and(
                                 Filter.minTags(new Tag("common tag")),
-                                Filter.user(user)
+                                Filter.user(user.getId())
                         )
                 )
         );
@@ -597,7 +615,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.anyShop("shop C")
                                 )
@@ -614,7 +632,7 @@ class ProductRepositoryTest {
              onlyFridge = false,
              filter is AndConstraint. Operands:
                 CategoryConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches exist
             """)
     void getProductsNumber9() {
@@ -625,7 +643,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name B"),
                                         Filter.anyGrade("variety C")
                                 )
@@ -644,7 +662,7 @@ class ProductRepositoryTest {
                 MinTags - matches not exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber10() {
@@ -655,7 +673,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("this tag not exists")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -676,7 +694,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches not exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber11() {
@@ -687,7 +705,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("this name not exists"),
                                         Filter.anyShop("shop C"),
@@ -708,7 +726,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches not exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber12() {
@@ -719,7 +737,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("this shop not exists"),
@@ -740,7 +758,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches not exist,
+                GradesConstraints - matches not exist,
              matches not exist
             """)
     void getProductsNumber13() {
@@ -751,7 +769,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -772,7 +790,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
              matches not exist
             """)
     void getProductsNumber14() {
@@ -783,7 +801,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -804,7 +822,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
                 ManufacturerConstraint - matches exists
              matches not exist
             """)
@@ -816,7 +834,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -838,7 +856,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
                 ManufacturerConstraint - matches exists
              matches exist
             """)
@@ -850,7 +868,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -872,7 +890,7 @@ class ProductRepositoryTest {
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
-                VarietiesConstraints - matches exist,
+                GradesConstraints - matches exist,
                 ManufacturerConstraint - matches not exists
             """)
     void getProductsNumber17() {
@@ -883,7 +901,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -906,13 +924,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return correct result
             """)
@@ -925,7 +943,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -933,7 +951,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -957,13 +975,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return correct result
             """)
@@ -976,7 +994,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
@@ -985,7 +1003,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
@@ -1009,13 +1027,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match not exists,
+                    GradesConstraints - match not exists,
                     ManufacturerConstraint - match not exists
              => return 0
             """)
@@ -1028,7 +1046,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -1036,7 +1054,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1079,10 +1097,10 @@ class ProductRepositoryTest {
         Page<Product> actual = repository.getProducts(
                 new Criteria().
                         setPageable(Pageable.of(6, 0)).
-                        setFilter(Filter.user(user2))
+                        setFilter(Filter.user(user2.getId()))
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1104,11 +1122,11 @@ class ProductRepositoryTest {
         Page<Product> actual = repository.getProducts(
                 new Criteria().
                         setPageable(Pageable.of(5, 0)).
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1130,11 +1148,11 @@ class ProductRepositoryTest {
         Page<Product> actual = repository.getProducts(
                 new Criteria().
                         setPageable(Pageable.of(5, 1)).
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1158,14 +1176,14 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO)
                                 )
                         ).
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1189,14 +1207,14 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 1)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO)
                                 )
                         ).
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1214,7 +1232,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(6, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"))
                                 )
                         )
@@ -1233,7 +1251,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts8() {
         User user = createAndSaveUser(1);
@@ -1248,7 +1266,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(1, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag B"), new Tag("common tag")),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C"),
@@ -1258,7 +1276,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1280,7 +1298,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(6, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("tag A"), new Tag("common tag")),
                                         Filter.anyCategory("name B"),
@@ -1290,7 +1308,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1303,7 +1321,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts10() {
         User user = createAndSaveUser(1);
@@ -1318,7 +1336,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1328,7 +1346,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1341,7 +1359,7 @@ class ProductRepositoryTest {
                 MinTags - match not exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts11() {
         User user = createAndSaveUser(1);
@@ -1354,7 +1372,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag Z"), new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop Z"),
@@ -1363,7 +1381,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1389,7 +1407,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.anyCategory("name B"),
                                         Filter.anyShop("shop C")
@@ -1398,7 +1416,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1410,7 +1428,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts13() {
         User user = createAndSaveUser(1);
@@ -1423,7 +1441,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop Z"),
@@ -1432,7 +1450,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1445,7 +1463,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraints - match not exists
             """)
     void getProducts14() {
         User user = createAndSaveUser(1);
@@ -1458,7 +1476,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
@@ -1468,7 +1486,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1480,7 +1498,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 MinTags - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraints - match exists
             """)
     void getProducts15() {
         User user = createAndSaveUser(1);
@@ -1495,7 +1513,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A")
@@ -1504,7 +1522,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1517,7 +1535,7 @@ class ProductRepositoryTest {
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraints - match not exists
             """)
     void getProducts16() {
         User user = createAndSaveUser(1);
@@ -1530,7 +1548,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(3, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common Z")),
                                         Filter.anyCategory("name Z"),
                                         Filter.anyShop("shop A"),
@@ -1539,7 +1557,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1552,7 +1570,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraints - match exists,
                 ManufacturerConstraint - match exists
              match not exists
             """)
@@ -1567,7 +1585,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(6, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop C"),
@@ -1577,7 +1595,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1590,7 +1608,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraints - match exists,
                 ManufacturerConstraint - match exists
              match exists
             """)
@@ -1607,7 +1625,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1618,7 +1636,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1631,7 +1649,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraints - match exists,
                 ManufacturerConstraint - match not exists
             """)
     void getProducts19() {
@@ -1645,7 +1663,7 @@ class ProductRepositoryTest {
                         setPageable(Pageable.of(2, 0)).
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1655,7 +1673,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1669,13 +1687,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return full page
             """)
@@ -1690,7 +1708,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown name"),
                                                 Filter.anyShop("unknown shop"),
@@ -1698,7 +1716,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1713,7 +1731,7 @@ class ProductRepositoryTest {
         Page<Product> expected = Pageable.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1727,13 +1745,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return full page
             """)
@@ -1748,7 +1766,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
@@ -1757,7 +1775,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
@@ -1773,7 +1791,7 @@ class ProductRepositoryTest {
         Page<Product> expected = Pageable.of(5, 0).
                 createPageMetadata(1, 200).
                 createPage(products.subList(3, 4));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1790,7 +1808,7 @@ class ProductRepositoryTest {
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
              => return full page
             """)
@@ -1805,12 +1823,12 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyManufacturer("manufacturer B")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1834,7 +1852,7 @@ class ProductRepositoryTest {
                                 products.get(0)
                         )
                 );
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1847,13 +1865,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraints - match exists,
                     ManufacturerConstraint - match exists
                 second operand is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match not exists,
+                    GradesConstraints - match not exists,
                     ManufacturerConstraint - match not exists
              => return empty page
             """)
@@ -1868,7 +1886,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -1876,7 +1894,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B")),
                                                 Filter.anyCategory("name B"),
                                                 Filter.anyShop("shop B"),
@@ -1888,7 +1906,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1900,8 +1918,7 @@ class ProductRepositoryTest {
     void getTagsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getTagsNumber(null),
-                ProductRepositoryPostgres.class,
-                "getTagsNumber",
+                "ProductRepositoryPostgres.getTagsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1916,7 +1933,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getTagsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -1933,7 +1950,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
-        int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user)));
+        int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
         Assertions.assertEquals(9, actual);
     }
@@ -1952,7 +1969,7 @@ class ProductRepositoryTest {
         int actual = repository.getTagsNumber(
                 new Criteria().setFilter(
                         Filter.and(
-                                Filter.user(user),
+                                Filter.user(user.getId()),
                                 Filter.anyCategory("name A")
                         )
                 )
@@ -1987,7 +2004,7 @@ class ProductRepositoryTest {
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2011,7 +2028,7 @@ class ProductRepositoryTest {
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2035,7 +2052,7 @@ class ProductRepositoryTest {
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(4, 2))
         );
 
@@ -2067,7 +2084,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2098,7 +2115,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2117,8 +2134,7 @@ class ProductRepositoryTest {
     void getShopsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getShopsNumber(null),
-                ProductRepositoryPostgres.class,
-                "getShopsNumber",
+                "ProductRepositoryPostgres.getShopsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2133,7 +2149,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getShopsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2151,7 +2167,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getShopsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(3, actual);
@@ -2172,7 +2188,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         )
@@ -2206,7 +2222,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2229,7 +2245,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(3, 0))
         );
 
@@ -2252,7 +2268,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -2277,7 +2293,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2305,7 +2321,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2317,30 +2333,29 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              criteria is null
              => exception
             """)
-    void getVarietiesNumber1() {
+    void getGradesNumber1() {
         AssertUtil.assertValidateException(
-                () -> repository.getVarietiesNumber(null),
-                ProductRepositoryPostgres.class,
-                "getVarietiesNumber",
+                () -> repository.getGradesNumber(null),
+                "ProductRepositoryPostgres.getGradesNumber",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              user haven't any products
              => return 0
             """)
-    void getVarietiesNumber2() {
+    void getGradesNumber2() {
         User user = createAndSaveUser(1);
 
-        int actual = repository.getVarietiesNumber(
-                new Criteria().setFilter(Filter.user(user))
+        int actual = repository.getGradesNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2348,17 +2363,17 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              user have some products,
              productName not specified
              => return correct result
             """)
-    void getVarietiesNumber3() {
+    void getGradesNumber3() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
-        int actual = repository.getVarietiesNumber(
-                new Criteria().setFilter(Filter.user(user))
+        int actual = repository.getGradesNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(4, actual);
@@ -2366,20 +2381,20 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarietiesNumber(criteria):
+            getGradesNumber(criteria):
              user have some products,
              productName specified
              => return correct result
             """)
-    void getVarietiesNumber4() {
+    void getGradesNumber4() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
-        int actual = repository.getVarietiesNumber(
+        int actual = repository.getGradesNumber(
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         )
@@ -2390,30 +2405,30 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              criteria is null
              => exception
             """)
-    void getVarieties1() {
+    void getGrades1() {
         AssertUtil.assertValidateException(
-                () -> repository.getVarieties(null),
+                () -> repository.getGrades(null),
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user haven't any products
              => return empty page
             """)
-    void getVarieties2() {
+    void getGrades2() {
         User user = createAndSaveUser(1);
         Page<String> expected = Pageable.firstEmptyPage();
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2422,21 +2437,21 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is full,
              productName not specified
             """)
-    void getVarieties3() {
+    void getGrades3() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(4, 0).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(4, 0))
         );
 
@@ -2445,21 +2460,21 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is partial,
              productName not specified
             """)
-    void getVarieties4() {
+    void getGrades4() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety D"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(3, 1))
         );
 
@@ -2468,23 +2483,23 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is full,
              productName specified
             """)
-    void getVarieties5() {
+    void getGrades5() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2496,23 +2511,23 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getGrades(criteria):
              user have some products,
              pageable is partial,
              productName specified
             """)
-    void getVarieties6() {
+    void getGrades6() {
         User user = createAndSaveUser(1);
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
         Page<String> expected = Pageable.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
-        Page<String> actual = repository.getVarieties(
+        Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2531,8 +2546,7 @@ class ProductRepositoryTest {
     void getCategoriesNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getCategoriesNumber(null),
-                ProductRepositoryPostgres.class,
-                "getCategoriesNumber",
+                "ProductRepositoryPostgres.getCategoriesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2547,7 +2561,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getCategoriesNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2564,7 +2578,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getCategoriesNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2595,7 +2609,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 0))
         );
 
@@ -2618,7 +2632,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2641,7 +2655,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(1, 1))
         );
 
@@ -2657,8 +2671,7 @@ class ProductRepositoryTest {
     void getManufacturersNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getManufacturersNumber(null),
-                ProductRepositoryPostgres.class,
-                "getManufacturersNumber",
+                "ProductRepositoryPostgres.getManufacturersNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2673,7 +2686,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         int actual = repository.getManufacturersNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -2691,7 +2704,7 @@ class ProductRepositoryTest {
         commit(() -> createProducts(user).forEach(p -> repository.save(p)));
 
         int actual = repository.getManufacturersNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(2, actual);
@@ -2712,7 +2725,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name B")
                                 )
                         )
@@ -2746,7 +2759,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2769,7 +2782,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 0))
         );
 
@@ -2792,7 +2805,7 @@ class ProductRepositoryTest {
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(5, 0))
         );
 
@@ -2801,7 +2814,7 @@ class ProductRepositoryTest {
 
     @Test
     @DisplayName("""
-            getVarieties(criteria):
+            getManufacturers(criteria):
              user have some products,
              pageable is full,
              productName specified
@@ -2817,7 +2830,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name B")
                                 )
                         ).
@@ -2845,7 +2858,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A")
                                 )
                         ).
@@ -2864,8 +2877,7 @@ class ProductRepositoryTest {
     void getProductsSum1() {
         AssertUtil.assertValidateException(
                 () -> repository.getProductsSum(null),
-                ProductRepositoryPostgres.class,
-                "getProductsSum",
+                "ProductRepositoryPostgres.getProductsSum",
                 Constraint.NOT_NULL
         );
     }
@@ -2887,7 +2899,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyShop("unknown shop"),
                                         Filter.anyManufacturer("manufacturer A")
@@ -2904,7 +2916,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists,
+                GradesConstraint - match exists,
                 ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -2916,7 +2928,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A"),
@@ -2934,7 +2946,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraint - match not exists
              => return empty Optional
             """)
     void getProductsSum4() {
@@ -2945,7 +2957,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyGrade("variety A")
@@ -2963,7 +2975,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match not exists,
+                GradesConstraint - match not exists,
                 ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -2975,7 +2987,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("unknown shop"),
@@ -2994,7 +3006,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 MinTags - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists
+                GradesConstraint - match not exists
              => return empty Optional
             """)
     void getProductsSum6() {
@@ -3005,7 +3017,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("unknown variety")
@@ -3032,7 +3044,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("unknown name")
                                 )
@@ -3047,7 +3059,7 @@ class ProductRepositoryTest {
             getProductsSum(criteria):
              filter is AndConstraint. Operands:
                 MinTags - match not exists,
-                VarietiesConstraint - match exists,
+                GradesConstraint - match exists,
                 ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -3059,7 +3071,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("unknown manufacturer")
@@ -3076,7 +3088,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match exists
+                GradesConstraint - match exists
              => return Optional with correct result
             """)
     void getProductsSum9() {
@@ -3087,7 +3099,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A")
@@ -3106,7 +3118,7 @@ class ProductRepositoryTest {
                 MinTags - match exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match exists
+                GradesConstraint - match exists
              => return empty Optional
             """)
     void getProductsSum10() {
@@ -3117,7 +3129,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("unknown shop"),
@@ -3136,7 +3148,7 @@ class ProductRepositoryTest {
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
-                VarietiesConstraint - match not exists,
+                GradesConstraint - match not exists,
                 ManufacturerConstraint - match exists
              => return empty Optional
             """)
@@ -3148,7 +3160,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("shop A"),
@@ -3178,7 +3190,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag A")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyManufacturer("manufacturer A")
@@ -3194,7 +3206,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsSum(criteria):
              filter is AndConstraint. Operands:
-                VarietiesConstraint - match exists,
+                GradesConstraint - match exists,
                 ManufacturerConstraint - match exists
              => return Optional with correct result
             """)
@@ -3206,7 +3218,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyGrade("variety A"),
                                         Filter.anyManufacturer("manufacturer A")
                                 )
@@ -3223,7 +3235,7 @@ class ProductRepositoryTest {
              filter is AndConstraint. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
-                VarietiesConstraint - match not exists,
+                GradesConstraint - match not exists,
                 ManufacturerConstraint - match exists
              => return empty Optional
             """)
@@ -3235,7 +3247,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("unknown shop"),
                                         Filter.anyGrade("unknown variety"),
@@ -3261,7 +3273,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyShop("shop A")
                                 )
                         )
@@ -3289,7 +3301,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag")),
                                         Filter.anyCategory("unknown name"),
                                         Filter.anyShop("unknown shop"),
@@ -3309,13 +3321,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraint - match exists,
                     ManufacturerConstraint - match exists
                 second operands is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraint - match exists,
                     ManufacturerConstraint - match exists
              => return Optional with correct result
             """)
@@ -3328,7 +3340,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -3336,7 +3348,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -3359,13 +3371,13 @@ class ProductRepositoryTest {
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
                     ShopsConstraint - match not exists,
-                    VarietiesConstraint - match exists,
+                    GradesConstraint - match exists,
                     ManufacturerConstraint - match exists
                 second operands is AndConstraint. Operands:
                     MinTags - match exists,
                     CategoryConstraint - match exists,
                     ShopsConstraint - match exists,
-                    VarietiesConstraint - match not exists,
+                    GradesConstraint - match not exists,
                     ManufacturerConstraint - match not exists
              => return empty Optional
             """)
@@ -3378,7 +3390,7 @@ class ProductRepositoryTest {
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
                                                 Filter.anyCategory("unknown category"),
                                                 Filter.anyShop("unknown shops"),
@@ -3386,7 +3398,7 @@ class ProductRepositoryTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag A")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -3427,12 +3439,12 @@ class ProductRepositoryTest {
     }
 
     private User createAndSaveUser(int userId) {
-        User user = new User(
-                toUUID(userId),
-                "User#" + userId,
-                "password" + userId,
-                "user" + userId + "@mail.com"
-        );
+        User user = new User.Builder().
+                setId(toUUID(userId)).
+                setName("User#" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
         commit(() -> userRepository.save(user));
         return user;
     }
@@ -3444,7 +3456,7 @@ class ProductRepositoryTest {
                 setUser(user).
                 setCategory("name#" + user.getName()).
                 setShop("shop#" + user.getName()).
-                setVariety("variety#" + user.getName()).
+                setGrade("variety#" + user.getName()).
                 setManufacturer("manufacturer#" + user.getName()).
                 setUnit("unitA").
                 setPrice(BigDecimal.ZERO).
@@ -3475,7 +3487,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(25)).
@@ -3496,7 +3508,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(37)).
@@ -3517,7 +3529,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop B").
-                        setVariety("variety B").
+                        setGrade("variety B").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(45)).
@@ -3538,7 +3550,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop B").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(60)).
@@ -3559,7 +3571,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(95)).
@@ -3580,7 +3592,7 @@ class ProductRepositoryTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety D").
+                        setGrade("variety D").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(140)).

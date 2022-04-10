@@ -1,12 +1,15 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.validation.*;
-import com.bakuard.nutritionManager.model.util.AbstractBuilder;
+import com.bakuard.nutritionManager.validation.Container;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.*;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Представляет данные об одном конкретном типе продуктов в сочетании с уточняющей информацией ({@link ProductContext});
@@ -43,14 +46,14 @@ public class Product implements Entity<Product> {
         Container<ProductContext> context = new Container<>();
         Container<URL> url = new Container<>();
 
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.id").notNull(id),
                 Rule.of("Product.user").notNull(user),
                 Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity)),
                 Rule.of("Product.config").notNull(config),
                 Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url)),
                 Rule.of("Product.context").notNull(contextBuilder).
-                        and(v -> v.doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context))
+                        and(v -> v.doesNotThrow(contextBuilder, Entity.Builder::tryBuild, context))
         );
 
         this.id = id;
@@ -67,7 +70,7 @@ public class Product implements Entity<Product> {
      * @throws ValidateException если указанное значение равняется null
      */
     public void setContext(ProductContext context) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.context").notNull(context)
         );
 
@@ -83,7 +86,7 @@ public class Product implements Entity<Product> {
      *         2. если указанное значение меньше нуля.
      */
     public void addQuantity(BigDecimal quantity) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity))
         );
 
@@ -103,7 +106,7 @@ public class Product implements Entity<Product> {
      *         2. если указанное значение меньше нуля.
      */
     public BigDecimal take(BigDecimal quantity) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity))
         );
 
@@ -128,7 +131,7 @@ public class Product implements Entity<Product> {
     public void setImageUrl(String imageUrl) {
         Container<URL> url = new Container<>();
 
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url))
         );
 
@@ -233,7 +236,7 @@ public class Product implements Entity<Product> {
      * Объекты данного класса не устанавливают никаких значений по умолчанию для конструирования объектов
      * Product.
      */
-    public static class Builder implements AbstractBuilder<Product> {
+    public static class Builder implements Entity.Builder<Product> {
 
         private UUID id;
         private User user;
@@ -272,8 +275,8 @@ public class Product implements Entity<Product> {
             return this;
         }
 
-        public Builder setVariety(String variety) {
-            contextBuilder.setVariety(variety);
+        public Builder setGrade(String variety) {
+            contextBuilder.setGrade(variety);
             return this;
         }
 

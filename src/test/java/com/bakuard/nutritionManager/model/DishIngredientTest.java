@@ -3,24 +3,19 @@ package com.bakuard.nutritionManager.model;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
-import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 class DishIngredientTest {
@@ -50,7 +45,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -58,8 +53,7 @@ class DishIngredientTest {
 
         AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(new BigDecimal("-1.7")),
-                DishIngredient.class,
-                "getNecessaryQuantity",
+                "DishIngredient.getNecessaryQuantity",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -75,7 +69,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -83,8 +77,7 @@ class DishIngredientTest {
 
         AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(BigDecimal.ZERO),
-                DishIngredient.class,
-                "getNecessaryQuantity",
+                "DishIngredient.getNecessaryQuantity",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -100,7 +93,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -123,7 +116,7 @@ class DishIngredientTest {
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
-                        Filter.user(createUser(1))
+                        Filter.user(toUUID(1))
                 ),
                 BigDecimal.TEN,
                 conf
@@ -131,18 +124,19 @@ class DishIngredientTest {
 
         AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(null),
-                DishIngredient.class,
-                "getNecessaryQuantity",
+                "DishIngredient.getNecessaryQuantity",
                 Constraint.NOT_NULL
         );
     }
 
 
-    private User createUser(int id) {
-        return new User(toUUID(id),
-                "User" + id,
-                "password" + id,
-                "user" + id + "@mail.com");
+    private User createUser(int userId) {
+        return new User.Builder().
+                setId(toUUID(userId)).
+                setName("User" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
     }
 
     private UUID toUUID(int number) {
@@ -166,7 +160,7 @@ class DishIngredientTest {
                 setUser(createUser(userId)).
                 setCategory("name " + id).
                 setShop("shop " + id).
-                setVariety("variety " + id).
+                setGrade("variety " + id).
                 setManufacturer("manufacturer " + id).
                 setUnit("unitA").
                 setPrice(new BigDecimal(id * 10).abs()).
@@ -184,7 +178,7 @@ class DishIngredientTest {
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),
-                                Filter.user(createUser(1))
+                                Filter.user(toUUID(1))
                         )
                 ).
                 setSort(Sort.products().asc("price"));

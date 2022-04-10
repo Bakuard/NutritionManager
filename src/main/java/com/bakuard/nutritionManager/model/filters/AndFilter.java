@@ -1,8 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
-
+import com.bakuard.nutritionManager.validation.Validator;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
@@ -13,7 +12,7 @@ public class AndFilter extends AbstractFilter {
     private final ImmutableList<Filter> operands;
 
     AndFilter(List<Filter> operands) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("AndFilter.operands").notNull(operands).
                         and(v -> v.notContainsNull(operands)).
                         and(v -> v.min(operands.size(), 2))

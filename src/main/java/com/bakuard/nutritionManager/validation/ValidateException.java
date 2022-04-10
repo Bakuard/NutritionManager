@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 /**
  * Обобщенный тип исключений, все наследники которого указывают, что было нарушенно один или несколько
- * инвариантов при констрировании бизнес сущности.
+ * инвариантов при констрировании или изменении бизнес сущности.
  */
 public class ValidateException extends RuntimeException implements Iterable<RuleException> {
 
@@ -14,114 +14,35 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
             4
     );
 
-    public static void check(String userMessageKey, String logMessage, Result... results) {
-        List<RuleException> failedResults = Arrays.stream(results).
-                map(Result::check).
-                filter(Objects::nonNull).
-                toList();
 
-        if(!failedResults.isEmpty()) {
-            StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-
-            ValidateException exception = new ValidateException(
-                    frame.getDeclaringClass(),
-                    frame.getMethodName(),
-                    logMessage
-            );
-            failedResults.forEach(exception::addReason);
-            exception.setUserMessageKey(userMessageKey);
-            throw exception;
-        }
-    }
-
-    public static void check(String userMessageKey, Result... results) {
-        List<RuleException> failedResults = Arrays.stream(results).
-                map(Result::check).
-                filter(Objects::nonNull).
-                toList();
-
-        if(!failedResults.isEmpty()) {
-            StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-
-            ValidateException exception = new ValidateException(frame.getDeclaringClass(), frame.getMethodName());
-            failedResults.forEach(exception::addReason);
-            exception.setUserMessageKey(userMessageKey);
-            throw exception;
-        }
-    }
-
-    public static void check(Result... results) {
-        List<RuleException> failedResults = Arrays.stream(results).
-                map(Result::check).
-                filter(Objects::nonNull).
-                toList();
-
-        if(!failedResults.isEmpty()) {
-            StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-
-            ValidateException exception = new ValidateException(frame.getDeclaringClass(), frame.getMethodName());
-            failedResults.forEach(exception::addReason);
-            throw exception;
-        }
-    }
-
-
-    private final Class<?> checkedClass;
-    private final String methodName;
-    private final List<RuleException> ruleExceptions;
-    private final List<ValidateException> validateExceptions;
     private String userMessageKey;
 
     public ValidateException() {
         StackWalker.StackFrame frame = getFrame();
-        this.checkedClass = frame.getDeclaringClass();
-        this.methodName = frame.getMethodName();
-        ruleExceptions = new ArrayList<>();
-        validateExceptions = new ArrayList<>();
+        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
     }
 
     public ValidateException(String message) {
         super(message);
         StackWalker.StackFrame frame = getFrame();
-        this.checkedClass = frame.getDeclaringClass();
-        this.methodName = frame.getMethodName();
-        ruleExceptions = new ArrayList<>();
-        validateExceptions = new ArrayList<>();
+        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
     }
 
     public ValidateException(String message, Throwable cause) {
         super(message, cause);
         StackWalker.StackFrame frame = getFrame();
-        this.checkedClass = frame.getDeclaringClass();
-        this.methodName = frame.getMethodName();
-        ruleExceptions = new ArrayList<>();
-        validateExceptions = new ArrayList<>();
+        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
     }
 
     public ValidateException(Throwable cause) {
         super(cause);
         StackWalker.StackFrame frame = getFrame();
-        this.checkedClass = frame.getDeclaringClass();
-        this.methodName = frame.getMethodName();
-        ruleExceptions = new ArrayList<>();
-        validateExceptions = new ArrayList<>();
+        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
     }
 
-    private ValidateException(Class<?> checkedClass, String methodName) {
-        StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-        this.checkedClass = checkedClass;
-        this.methodName = methodName;
-        ruleExceptions = new ArrayList<>();
-        validateExceptions = new ArrayList<>();
-    }
-
-    private ValidateException(Class<?> checkedClass, String methodName, String logMessage) {
-        super(logMessage);
-        StackWalker.StackFrame frame = walker.walk(stream -> stream.skip(1).findFirst().orElseThrow());
-        this.checkedClass = checkedClass;
-        this.methodName = methodName;
-        ruleExceptions = new ArrayList<>();
-        validateExceptions = new ArrayList<>();
+    public ValidateException setUserMessageKey(Class<?> checkedClass, String methodName) {
+        userMessageKey = checkedClass.getSimpleName() + "." + methodName;
+        return this;
     }
 
     public ValidateException setUserMessageKey(String key) {
@@ -130,16 +51,7 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
     }
 
     public ValidateException addReason(Exception e) {
-        if(e instanceof ValidateException validateException) {
-            validateExceptions.add(validateException);
-            addSuppressed(validateException);
-        } else if(e instanceof RuleException ruleException) {
-            ruleExceptions.add(ruleException);
-            addSuppressed(e);
-        } else if(e != null) {
-            addReason(e);
-        }
-
+        if(e != null) addSuppressed(e);
         return this;
     }
 
@@ -148,55 +60,55 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
         return this;
     }
 
-    public boolean isOriginate(Class<?> checkedClass, String methodName) {
-        return this.checkedClass == checkedClass && this.methodName.equals(methodName);
-    }
-
-    public Class<?> getCheckedClass() {
-        return checkedClass;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
     public String getUserMessageKey() {
-        return userMessageKey != null ? userMessageKey : checkedClass.getSimpleName() + "." + methodName;
+        return userMessageKey;
     }
 
     public boolean containsConstraint(Constraint constraint) {
-        return ruleExceptions.stream().anyMatch(e -> e.contains(constraint));
+        return Arrays.stream(getSuppressed()).
+                filter(e -> e instanceof RuleException).
+                anyMatch(e -> ((RuleException)e).contains(constraint));
     }
 
     @Override
     public Iterator<RuleException> iterator() {
         return new Iterator<>() {
 
-            private final Iterator<RuleException> inner;
+            private final Deque<Throwable> stack;
+            private RuleException current;
 
             {
-                Deque<ValidateException> stack = new ArrayDeque<>();
-                List<RuleException> all = new ArrayList<>();
-
-                stack.addFirst(ValidateException.this);
-                while(!stack.isEmpty()) {
-                    ValidateException current = stack.removeFirst();
-                    all.addAll(current.ruleExceptions);
-                    for(int i = current.validateExceptions.size() - 1; i >= 0; --i)
-                        stack.addFirst(current.validateExceptions.get(i));
-                }
-
-                inner = all.iterator();
+                stack = new ArrayDeque<>();
+                stack.addLast(ValidateException.this);
+                current = findNext();
             }
 
             @Override
             public boolean hasNext() {
-                return inner.hasNext();
+                return current != null;
             }
 
             @Override
             public RuleException next() {
-                return inner.next();
+                if(hasNext()) {
+                    RuleException result = current;
+                    current = findNext();
+                    return result;
+                }
+                throw new NoSuchElementException();
+            }
+
+            private RuleException findNext() {
+                RuleException result = null;
+
+                while(result == null && !stack.isEmpty()) {
+                    Throwable current = stack.removeFirst();
+                    if(current instanceof RuleException ruleException) result = ruleException;
+                    Throwable[] suppressed = current.getSuppressed();
+                    for(int i = suppressed.length - 1; i >= 0; --i) stack.addFirst(suppressed[i]);
+                }
+
+                return result;
             }
 
         };
@@ -204,25 +116,21 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
 
     @Override
     public void forEach(Consumer<? super RuleException> action) {
-        Deque<ValidateException> stack = new ArrayDeque<>();
+        Deque<Throwable> stack = new ArrayDeque<>();
 
-        stack.addFirst(this);
+        stack.addLast(this);
         while(!stack.isEmpty()) {
-            ValidateException current = stack.removeFirst();
-            for(RuleException e : current.ruleExceptions) {
-                action.accept(e);
-            }
-            for(int i = current.validateExceptions.size() - 1; i >= 0; --i)
-                stack.addFirst(current.validateExceptions.get(i));
+            Throwable current = stack.removeFirst();
+            if(current instanceof RuleException ruleException) action.accept(ruleException);
+            Throwable[] suppressed = current.getSuppressed();
+            for(int i = suppressed.length - 1; i >= 0; --i) stack.addFirst(suppressed[i]);
         }
     }
 
     @Override
     public String getMessage() {
-        StringBuilder result = new StringBuilder("Fail to ").
-                append(checkedClass.getName()).
-                append('.').
-                append(methodName).append("()");
+        StringBuilder result = new StringBuilder("Key = ").
+                append(userMessageKey);
 
         if(super.getMessage() != null) result.append(". ").append(super.getMessage());
 

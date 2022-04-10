@@ -11,19 +11,23 @@ import java.util.Objects;
         """)
 public class DishAddRequest {
 
-    @Schema(description = "Наименование блюда")
+    @Schema(description = "Наименование блюда. Не может быть null.")
     private String name;
-    @Schema(description = "Размер одной порции блюда")
+    @Schema(description = "Размер одной порции блюда. Не может быть null.")
     private BigDecimal servingSize;
-    @Schema(description = "Единица измерения кол-ва блюда")
+    @Schema(description = "Единица измерения кол-ва блюда. Не может быть null.")
     private String unit;
     @Schema(description = "Описание блюда")
     private String description;
     @Schema(description = "Путь к изображению данного блюда")
     private String imageUrl;
-    @Schema(description = "Ингредиенты блюда")
+    @Schema(description = "Ингредиенты блюда. Не может быть null. Допускается пустой список ингредиентов.")
     private List<DishIngredientRequestResponse> ingredients;
-    @Schema(description = "Теги блюда")
+    @Schema(description = """
+            Теги указаныне для данного блюда. Не может быть null. Допускается пустой список тегов.
+             Ограничения для тегов: все теги должны быть уникальны, теги не могут иметь значение null и
+             обязаны содержать как минимум один отображаемый символ.
+            """)
     private List<String> tags;
 
     public DishAddRequest() {

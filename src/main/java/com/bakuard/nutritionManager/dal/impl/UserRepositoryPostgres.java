@@ -2,10 +2,11 @@ package com.bakuard.nutritionManager.dal.impl;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Constraint;
-
+import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -13,6 +14,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Optional;
 import java.util.UUID;
 
 public class UserRepositoryPostgres implements UserRepository {
@@ -25,11 +27,11 @@ public class UserRepositoryPostgres implements UserRepository {
 
     @Override
     public boolean save(User user) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.user").notNull(user)
         );
 
-        User oldUser = getByIdOrReturnNull(user.getId());
+        User oldUser = getById(user.getId()).orElse(null);
 
         boolean wasSaved = false;
         try {
@@ -49,23 +51,39 @@ public class UserRepositoryPostgres implements UserRepository {
     }
 
     @Override
-    public User getById(UUID userId) {
-        ValidateException.check(
+    public Optional<User> getById(UUID userId) {
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.userId").notNull(userId)
         );
 
-        User user = getByIdOrReturnNull(userId);
+        return statement.query(
+                (Connection conn) -> conn.prepareStatement("""
+                        SELECT Users.*
+                            FROM Users
+                            WHERE Users.userId = ?
+                        """),
+                (PreparedStatement ps) -> ps.setObject(1, userId),
+                (ResultSet rs) -> {
+                    User user = null;
 
-        if(user == null) {
-            throw new ValidateException("Fail to get user by id").
-                    addReason(Rule.of("UserRepositoryPostgres.userId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-        }
-        return user;
+                    if(rs.next()) {
+                        user = new User.LoadBuilder().
+                                setId(userId).
+                                setName(rs.getString("name")).
+                                setEmail(rs.getString("email")).
+                                setPasswordHash(rs.getString("passwordHash")).
+                                setSalt(rs.getString("salt")).
+                                tryBuild();
+                    }
+
+                    return Optional.ofNullable(user);
+                }
+        );
     }
 
     @Override
-    public User getByName(String name) {
-        ValidateException.check(
+    public Optional<User> getByName(String name) {
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.name").notNull(name)
         );
 
@@ -77,24 +95,26 @@ public class UserRepositoryPostgres implements UserRepository {
                         """),
                 (PreparedStatement ps) -> ps.setObject(1, name),
                 (ResultSet rs) -> {
+                    User user = null;
+
                     if(rs.next()) {
-                        return new User(
-                                (UUID) rs.getObject("userId"),
-                                name,
-                                rs.getString("passwordHash"),
-                                rs.getString("email"),
-                                rs.getString("salt")
-                        );
+                        user = new User.LoadBuilder().
+                                setId((UUID) rs.getObject("userId")).
+                                setName(name).
+                                setEmail(rs.getString("email")).
+                                setPasswordHash(rs.getString("passwordHash")).
+                                setSalt(rs.getString("salt")).
+                                tryBuild();
                     }
-                    throw new ValidateException("Fail to get user by name=" + name).
-                            addReason(Rule.of("UserRepositoryPostgres.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+
+                    return Optional.ofNullable(user);
                 }
         );
     }
 
     @Override
-    public User getByEmail(String email) {
-        ValidateException.check(
+    public Optional<User> getByEmail(String email) {
+        Validator.check(
                 Rule.of("UserRepositoryPostgres.email").notNull(email)
         );
 
@@ -106,44 +126,47 @@ public class UserRepositoryPostgres implements UserRepository {
                         """),
                 (PreparedStatement ps) -> ps.setObject(1, email),
                 (ResultSet rs) -> {
+                    User user = null;
+
                     if(rs.next()) {
-                        return new User(
-                                (UUID) rs.getObject("userId"),
-                                rs.getString("name"),
-                                rs.getString("passwordHash"),
-                                email,
-                                rs.getString("salt")
-                        );
+                        user = new User.LoadBuilder().
+                                setId((UUID) rs.getObject("userId")).
+                                setName(rs.getString("name")).
+                                setEmail(email).
+                                setPasswordHash(rs.getString("passwordHash")).
+                                setSalt(rs.getString("salt")).
+                                tryBuild();
                     }
-                    throw new ValidateException("Fail to get user by email=" + email).
-                            addReason(Rule.of("UserRepositoryPostgres.email").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+
+                    return Optional.ofNullable(user);
                 }
         );
     }
 
-
-    private User getByIdOrReturnNull(UUID userId) {
-        return statement.query(
-                (Connection conn) -> conn.prepareStatement("""
-                        SELECT Users.*
-                            FROM Users
-                            WHERE Users.userId = ?
-                        """),
-                (PreparedStatement ps) -> ps.setObject(1, userId),
-                (ResultSet rs) -> {
-                    if(rs.next()) {
-                        return new User(
-                                userId,
-                                rs.getString("name"),
-                                rs.getString("passwordHash"),
-                                rs.getString("email"),
-                                rs.getString("salt")
-                        );
-                    }
-                    return null;
-                }
-        );
+    @Override
+    public User tryGetById(UUID userId) {
+        return getById(userId).
+                orElseThrow(
+                       () -> new ValidateException("Unknown user with id = " + userId)
+                );
     }
+
+    @Override
+    public User tryGetByName(String name) {
+        return getByName(name).
+                orElseThrow(
+                        () -> new ValidateException("Unknown user with name = " + name)
+                );
+    }
+
+    @Override
+    public User tryGetByEmail(String email) {
+        return getByEmail(email).
+                orElseThrow(
+                        () -> new ValidateException("Unknown user with email = " + email)
+                );
+    }
+
 
     private void addNewUser(User user) {
         statement.update(

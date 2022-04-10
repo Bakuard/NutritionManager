@@ -36,6 +36,11 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
+    public Menu tryGetById(UUID menuId) {
+        return null;
+    }
+
+    @Override
     public List<Menu> getMenus(Pageable pageable, User user, Sort order) {
         return null;
     }

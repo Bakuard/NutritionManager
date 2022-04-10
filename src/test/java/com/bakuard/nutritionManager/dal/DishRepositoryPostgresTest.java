@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -120,8 +121,7 @@ class DishRepositoryPostgresTest {
     public void save1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.save(null),
-                DishRepositoryPostgres.class,
-                "save",
+                "DishRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -152,7 +152,7 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(1, user);
 
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.getById(toUUID(1));
+        Dish actual = dishRepository.tryGetById(toUUID(1));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -187,7 +187,7 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(7, user);
 
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.getById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(toUUID(7));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -208,8 +208,7 @@ class DishRepositoryPostgresTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> dishRepository.save(dish)),
-                DishRepositoryPostgres.class,
-                "save",
+                "DishRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -266,13 +265,13 @@ class DishRepositoryPostgresTest {
         expected.removeIngredient("ingredient 1");
         expected.putIngredient(
                 "ingredient 4",
-                Filter.and(Filter.user(user), Filter.anyCategory("category Z")),
+                Filter.and(Filter.user(user.getId()), Filter.anyCategory("category Z")),
                 BigDecimal.TEN
         );
         expected.removeTag(new Tag("tag A"));
         expected.addTag(new Tag("tag Z"));
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.getById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(toUUID(7));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -297,8 +296,7 @@ class DishRepositoryPostgresTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.save(updatedDish),
-                DishRepositoryPostgres.class,
-                "save",
+                "DishRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -338,76 +336,72 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(expected));
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(toUUID(7));
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            tryRemove(dishId):
              dishId is null
              => exception
             """)
-    public void remove1() {
+    public void tryRemove1() {
         AssertUtil.assertValidateException(
-                () -> dishRepository.remove(null),
-                DishRepositoryPostgres.class,
-                "remove",
+                () -> dishRepository.tryRemove(null),
+                "DishRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            tryRemove(dishId):
              dish with such id not exists
              => exception
             """)
-    public void remove2() {
+    public void tryRemove2() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
         AssertUtil.assertValidateException(
-                () -> dishRepository.remove(toUUID(100)),
-                DishRepositoryPostgres.class,
-                "remove",
+                () -> dishRepository.tryRemove(toUUID(100)),
+                "DishRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            tryRemove(dishId):
              dish with such id exists
              => remove dish
             """)
-    public void remove3() {
+    public void tryRemove3() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        commit(() -> dishRepository.remove(toUUID(100)));
+        commit(() -> dishRepository.tryRemove(toUUID(100)));
 
         AssertUtil.assertValidateException(
-                () -> dishRepository.getById(toUUID(100)),
-                DishRepositoryPostgres.class,
-                "getById",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
+                () -> dishRepository.tryGetById(toUUID(100)),
+                "DishRepositoryPostgres.tryGetById"
         );
     }
 
     @Test
     @DisplayName("""
-            remove(dishId):
+            tryRemove(dishId):
              dish with such id exists
              => return removed dish
             """)
-    public void remove4() {
+    public void tryRemove4() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.remove(toUUID(100));
+        Dish actual = dishRepository.tryRemove(toUUID(100));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -421,8 +415,7 @@ class DishRepositoryPostgresTest {
     public void getById1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getById(null),
-                DishRepositoryPostgres.class,
-                "getById",
+                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -431,15 +424,12 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             getById(dishId):
              not exists dish with such id
-             => exception
+             => return empty Optional
             """)
     public void getById2() {
-        AssertUtil.assertValidateException(
-                () -> dishRepository.getById(toUUID(100)),
-                DishRepositoryPostgres.class,
-                "getById",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
-        );
+        Optional<Dish> actual = dishRepository.getById(toUUID(100));
+
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -453,7 +443,50 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getById(toUUID(100));
+        Dish actual = dishRepository.getById(toUUID(100)).orElseThrow();
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(dishId):
+             dishId is null
+             => exception
+            """)
+    public void tryGetById1() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetById(null),
+                "DishRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(dishId):
+             not exists dish with such id
+             => exception
+            """)
+    public void tryGetById2() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetById(toUUID(100)),
+                "DishRepositoryPostgres.tryGetById"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(dishId):
+             exists dish with such id
+             => return dish
+            """)
+    public void tryGetById3() {
+        User user = createAndSaveUser(1);
+        Dish expected = createDish(100, user);
+        commit(() -> dishRepository.save(expected));
+
+        Dish actual = dishRepository.tryGetById(toUUID(100));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -467,8 +500,7 @@ class DishRepositoryPostgresTest {
     public void getByName1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getByName(null),
-                DishRepositoryPostgres.class,
-                "getByName",
+                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -477,15 +509,12 @@ class DishRepositoryPostgresTest {
     @DisplayName("""
             getByName(name):
              not exists dish with such name
-             => exception
+             => return empty Optional
             """)
     public void getByName2() {
-        AssertUtil.assertValidateException(
-                () -> dishRepository.getByName("unknown dish"),
-                DishRepositoryPostgres.class,
-                "getByName",
-                Constraint.ENTITY_MUST_EXISTS_IN_DB
-        );
+        Optional<Dish> actual =  dishRepository.getByName("unknown dish");
+
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -499,7 +528,50 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getByName("dish A");
+        Dish actual = dishRepository.getByName("dish A").orElseThrow();
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(name):
+             name is null
+             => exception
+            """)
+    public void tryGetByName1() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetByName(null),
+                "DishRepositoryPostgres.getByName",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(name):
+             not exists dish with such name
+             => exception
+            """)
+    public void tryGetByName2() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetByName("unknown dish"),
+                "DishRepositoryPostgres.tryGetByName"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(name):
+             exists dish with such name
+             => exception
+            """)
+    public void tryGetByName3() {
+        User user = createAndSaveUser(1);
+        Dish expected = createDish(100, user);
+        commit(() -> dishRepository.save(expected));
+
+        Dish actual = dishRepository.tryGetByName("dish A");
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -513,8 +585,7 @@ class DishRepositoryPostgresTest {
     public void getDishesNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getDishesNumber(null),
-                DishRepositoryPostgres.class,
-                "getDishesNumber",
+                "DishRepositoryPostgres.getDishesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -532,7 +603,7 @@ class DishRepositoryPostgresTest {
         User actualUser = createAndSaveUser(2);
 
         int actual = dishRepository.getDishesNumber(
-                new Criteria().setFilter(Filter.user(actualUser))
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -549,7 +620,7 @@ class DishRepositoryPostgresTest {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
-        int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user)));
+        int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
         Assertions.assertEquals(4, actual);
     }
@@ -569,7 +640,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("unknown tag"))
                                 )
                         )
@@ -593,7 +664,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag A"))
                                 )
                         )
@@ -618,7 +689,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name A", "name Z")
                                 )
                         )
@@ -643,7 +714,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name C", "name D")
                                 )
                         )
@@ -670,7 +741,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B")),
                                         Filter.anyIngredient("name B", "name Z")
                                 )
@@ -698,7 +769,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B")),
                                         Filter.anyIngredient("name C", "name D")
                                 )
@@ -735,13 +806,13 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
-                        setFilter(Filter.user(actualUser)).
+                        setFilter(Filter.user(actualUser.getId())).
                         setPageable(Pageable.of(2, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -758,7 +829,7 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(4, 0)).
                         setSort(Sort.dishDefaultSort())
         );
@@ -784,7 +855,7 @@ class DishRepositoryPostgresTest {
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(3, 1)).
                         setSort(Sort.dishDefaultSort())
         );
@@ -792,7 +863,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(dishes.subList(3, 4));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -811,7 +882,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("unknown tag"))
                                 )
                         ).
@@ -820,7 +891,7 @@ class DishRepositoryPostgresTest {
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -839,7 +910,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B"))
                                 )
                         ).
@@ -850,7 +921,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -871,7 +942,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name A", "name C", "name D")
                                 )
                         ).
@@ -882,7 +953,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(4, 0).
                 createPageMetadata(3, 200).
                 createPage(dishes.subList(0, 3));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -903,7 +974,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyIngredient("name C", "name D", "name E")
                                 )
                         ).
@@ -912,7 +983,7 @@ class DishRepositoryPostgresTest {
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -935,7 +1006,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag A")),
                                         Filter.anyIngredient("name A", "name Z")
                                 )
@@ -947,7 +1018,7 @@ class DishRepositoryPostgresTest {
         Page<Dish> expected = Pageable.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(0, 2));
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -970,7 +1041,7 @@ class DishRepositoryPostgresTest {
                 new Criteria().
                         setFilter(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B")),
                                         Filter.anyIngredient("name C", "name D")
                                 )
@@ -980,7 +1051,7 @@ class DishRepositoryPostgresTest {
         );
 
         Page<Dish> expected = Pageable.firstEmptyPage();
-        Assertions.assertEquals(expected, actual);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -992,8 +1063,7 @@ class DishRepositoryPostgresTest {
     public void getTagsNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getTagsNumber(null),
-                DishRepositoryPostgres.class,
-                "getTagsNumber",
+                "DishRepositoryPostgres.getTagsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1005,13 +1075,10 @@ class DishRepositoryPostgresTest {
              => return 0
             """)
     public void getTagsNumber2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         int actual = dishRepository.getTagsNumber(
-                new Criteria().setFilter(Filter.user(actualUser))
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -1029,7 +1096,7 @@ class DishRepositoryPostgresTest {
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
 
         int actual = dishRepository.getTagsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(7, actual);
@@ -1055,14 +1122,11 @@ class DishRepositoryPostgresTest {
              => return empty page
             """)
     public void getTags2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(actualUser)).
+                        setFilter(Filter.user(actualUser.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -1083,7 +1147,7 @@ class DishRepositoryPostgresTest {
 
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -1102,8 +1166,7 @@ class DishRepositoryPostgresTest {
     public void getUnitsNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getUnitsNumber(null),
-                DishRepositoryPostgres.class,
-                "getUnitsNumber",
+                "DishRepositoryPostgres.getUnitsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1115,13 +1178,10 @@ class DishRepositoryPostgresTest {
              => return 0
             """)
     public void getUnitsNumber2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         int actual = dishRepository.getUnitsNumber(
-                new Criteria().setFilter(Filter.user(actualUser))
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
         Assertions.assertEquals(0, actual);
@@ -1139,7 +1199,7 @@ class DishRepositoryPostgresTest {
         commit(() -> dishes.forEach(d -> dishRepository.save(d)));
 
         int actual = dishRepository.getUnitsNumber(
-                new Criteria().setFilter(Filter.user(user))
+                new Criteria().setFilter(Filter.user(user.getId()))
         );
 
         Assertions.assertEquals(3, actual);
@@ -1165,14 +1225,11 @@ class DishRepositoryPostgresTest {
              => return empty page
             """)
     public void getUnits2() {
-        User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
         User actualUser = createAndSaveUser(100);
 
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
-                        setFilter(Filter.user(actualUser)).
+                        setFilter(Filter.user(actualUser.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
@@ -1193,13 +1250,116 @@ class DishRepositoryPostgresTest {
 
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
-                        setFilter(Filter.user(user)).
+                        setFilter(Filter.user(user.getId())).
                         setPageable(Pageable.of(2, 1))
         );
 
         Page<String> expected = Pageable.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(getAllUnits(dishes).subList(2, 3));
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getNamesNumber1() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getNamesNumber(null),
+                "DishRepositoryPostgres.getNamesNumber",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             user haven't any dishes
+             => return 0
+            """)
+    public void getNamesNumber2() {
+        User actualUser = createAndSaveUser(100);
+
+        int actual = dishRepository.getNamesNumber(
+                new Criteria().setFilter(Filter.user(actualUser.getId()))
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             user have dishes
+             => return correct result
+            """)
+    public void getNamesNumber3() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        int actual = dishRepository.getNamesNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+
+        Assertions.assertEquals(4, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getNames1() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getNames(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             user haven't any dishes
+             => return empty page
+            """)
+    public void getNames2() {
+        User actualUser = createAndSaveUser(100);
+
+        Page<String> actual = dishRepository.getNames(
+                new Criteria().
+                        setFilter(Filter.user(actualUser.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Page<String> expected = Pageable.firstEmptyPage();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             user have dishes
+             => return correct result
+            """)
+    public void getNames3() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createDishes(user);
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+
+        Page<String> actual = dishRepository.getNames(
+                new Criteria().
+                        setFilter(Filter.user(user.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Page<String> expected = Pageable.of(2, 1).
+                createPageMetadata(4, 200).
+                createPage(getAllNames(dishes).subList(2, 4));
         Assertions.assertEquals(expected, actual);
     }
 
@@ -1234,12 +1394,12 @@ class DishRepositoryPostgresTest {
     }
 
     private User createAndSaveUser(int userId) {
-        User user = new User(
-                toUUID(userId),
-                "User#" + userId,
-                "password" + userId,
-                "user" + userId + "@mail.com"
-        );
+        User user = new User.Builder().
+                setId(toUUID(userId)).
+                setName("User#" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
         commit(() -> userRepository.save(user));
         return user;
     }
@@ -1254,7 +1414,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(25)).
@@ -1275,7 +1435,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop A").
-                        setVariety("variety A").
+                        setGrade("variety A").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(37)).
@@ -1296,7 +1456,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name A").
                         setShop("shop B").
-                        setVariety("variety B").
+                        setGrade("variety B").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(45)).
@@ -1317,7 +1477,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop B").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer A").
                         setUnit("unitA").
                         setPrice(new BigDecimal(60)).
@@ -1338,7 +1498,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety C").
+                        setGrade("variety C").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(95)).
@@ -1359,7 +1519,7 @@ class DishRepositoryPostgresTest {
                         setUser(user).
                         setCategory("name B").
                         setShop("shop C").
-                        setVariety("variety D").
+                        setGrade("variety D").
                         setManufacturer("manufacturer B").
                         setUnit("unitA").
                         setPrice(new BigDecimal(140)).
@@ -1396,7 +1556,7 @@ class DishRepositoryPostgresTest {
                 addIngredient("ingredient 1",
                         Filter.orElse(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
@@ -1404,7 +1564,7 @@ class DishRepositoryPostgresTest {
                                         Filter.anyManufacturer("manufacturer A")
                                 ),
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag B"))
                                 )
                         ),
@@ -1412,21 +1572,21 @@ class DishRepositoryPostgresTest {
                 addIngredient("ingredient 2",
                         Filter.orElse(
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 1")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop A"),
                                         Filter.anyGrade("variety A")
                                 ),
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.anyManufacturer("manufacturer B")
                                 )
                         ),
                         new BigDecimal("2.5")).
                 addIngredient("ingredient 3",
                         Filter.and(
-                                Filter.user(user),
+                                Filter.user(user.getId()),
                                 Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                 Filter.anyCategory("name A"),
                                 Filter.anyShop("shop B"),
@@ -1456,7 +1616,7 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1464,7 +1624,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         )
                                 ),
@@ -1472,21 +1632,21 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 2",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("value 1")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
                                                 Filter.anyGrade("variety A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyManufacturer("manufacturer B")
                                         )
                                 ),
                                 new BigDecimal("2.5")).
                         addIngredient("ingredient 3",
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop B"),
@@ -1513,7 +1673,7 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1521,7 +1681,7 @@ class DishRepositoryPostgresTest {
                                                 Filter.anyManufacturer("manufacturer A")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         )
                                 ),
@@ -1546,11 +1706,11 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("common tag")),
                                                 Filter.anyCategory("name A"),
                                                 Filter.anyShop("shop A"),
@@ -1562,18 +1722,18 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 2",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyShop("shop B")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyManufacturer("manufacturer B")
                                         )
                                 ),
                                 new BigDecimal("2.5")).
                         addIngredient("ingredient 3",
                                 Filter.and(
-                                        Filter.user(user),
+                                        Filter.user(user.getId()),
                                         Filter.minTags(new Tag("value 1"), new Tag("value 2")),
                                         Filter.anyCategory("name A"),
                                         Filter.anyShop("shop B"),
@@ -1600,11 +1760,11 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 1",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("tag B"))
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyShop("shop C"),
                                                 Filter.anyGrade("variety D")
                                         )
@@ -1613,11 +1773,11 @@ class DishRepositoryPostgresTest {
                         addIngredient("ingredient 2",
                                 Filter.orElse(
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyShop("variety C")
                                         ),
                                         Filter.and(
-                                                Filter.user(user),
+                                                Filter.user(user.getId()),
                                                 Filter.anyManufacturer("manufacturer B")
                                         )
                                 ),
@@ -1639,6 +1799,14 @@ class DishRepositoryPostgresTest {
     private List<String> getAllUnits(List<Dish> allDishes) {
         return allDishes.stream().
                 map(Dish::getUnit).
+                distinct().
+                sorted().
+                toList();
+    }
+
+    private List<String> getAllNames(List<Dish> allDishes) {
+        return allDishes.stream().
+                map(Dish::getName).
                 distinct().
                 sorted().
                 toList();

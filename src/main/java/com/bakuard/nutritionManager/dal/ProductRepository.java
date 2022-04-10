@@ -36,7 +36,16 @@ public interface ProductRepository {
      *         1. если не удалось найти продукт с таким ID.<br/>
      *         2. если productId равен null.
      */
-    public Product remove(UUID productId);
+    public Product tryRemove(UUID productId);
+
+    /**
+     * Возвращает продукт по его идентификатору. Если в БД нет продукта с таким идентификатором -
+     * возвращает пустой Optional.
+     * @param productId идентификатор продукта.
+     * @return объект Product.
+     * @throws ValidateException если productId равен null.
+     */
+    public Optional<Product> getById(UUID productId);
 
     /**
      * Возвращает продукт по его идентификатору. Если в БД нет продукта с таким идентификатором -
@@ -47,7 +56,7 @@ public interface ProductRepository {
      *         1. если не удалось найти продукт с таким ID.<br/>
      *         2. если productId равен null.
      */
-    public Product getById(UUID productId);
+    public Product tryGetById(UUID productId);
 
     /**
      * Возвращает упорядоченную выборку продуктов из множества всех продуктов с учетом заданных ограничений
@@ -83,7 +92,7 @@ public interface ProductRepository {
      * @return выборку из сортов продуктов удовлетворяющую ограничению criteria.
      * @throws ValidateException если criteria является null.
      */
-    public Page<String> getVarieties(Criteria criteria);
+    public Page<String> getGrades(Criteria criteria);
 
     /**
      * Возвращает выборку категорий продуктов удовлетворяющую ограничению criteria упорядоченную в порядке
@@ -133,7 +142,7 @@ public interface ProductRepository {
      * @return выборку из сортов продуктов.
      * @throws ValidateException если criteria является null.
      */
-    public int getVarietiesNumber(Criteria criteria);
+    public int getGradesNumber(Criteria criteria);
 
     /**
      * Возвращает кол-во категорий продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Schema(description = """
-        Данные о тегах и единицах измерения кол-ва всех блюд конкретного пользователя (без дубликатов).
+        Данные о тегах, единицах измерения кол-ва и наименованиях всех блюд конкретного пользователя
+         (без дубликатов).
         """)
 public class DishFieldsResponse {
 
@@ -16,6 +17,8 @@ public class DishFieldsResponse {
     private List<FieldResponse> units;
     @Schema(description = "Все теги всех блюд пользователя")
     private List<FieldResponse> tags;
+    @Schema(description = "Наименования всех блюд пользователя")
+    private List<FieldResponse> names;
 
     public DishFieldsResponse() {
 
@@ -37,18 +40,27 @@ public class DishFieldsResponse {
         this.tags = tags;
     }
 
+    public List<FieldResponse> getNames() {
+        return names;
+    }
+
+    public void setNames(List<FieldResponse> names) {
+        this.names = names;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishFieldsResponse that = (DishFieldsResponse) o;
-        return Objects.equals(units, that.units) &&
-                Objects.equals(tags, that.tags);
+        DishFieldsResponse response = (DishFieldsResponse) o;
+        return Objects.equals(units, response.units) &&
+                Objects.equals(tags, response.tags) &&
+                Objects.equals(names, response.names);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(units, tags);
+        return Objects.hash(units, tags, names);
     }
 
     @Override
@@ -56,6 +68,7 @@ public class DishFieldsResponse {
         return "DishFieldsResponse{" +
                 "units=" + units +
                 ", tags=" + tags +
+                ", names=" + names +
                 '}';
     }
 

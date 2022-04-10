@@ -1,8 +1,10 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.validation.*;
-import com.bakuard.nutritionManager.model.util.AbstractBuilder;
+import com.bakuard.nutritionManager.validation.Container;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
@@ -28,7 +30,7 @@ public class ProductContext {
     private final String hashKey;
     private final String category;
     private final String shop;
-    private final String variety;
+    private final String grade;
     private final String manufacturer;
     private final String unit;
     private final BigDecimal price;
@@ -38,7 +40,7 @@ public class ProductContext {
 
     private ProductContext(String category,
                            String shop,
-                           String variety,
+                           String grade,
                            String manufacturer,
                            String unit,
                            BigDecimal price,
@@ -47,7 +49,7 @@ public class ProductContext {
                            AppConfigData config) {
         this.category = category;
         this.shop = shop;
-        this.variety = variety;
+        this.grade = grade;
         this.manufacturer = manufacturer;
         this.unit = unit;
         this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
@@ -59,7 +61,7 @@ public class ProductContext {
 
     private ProductContext(String category,
                            String shop,
-                           String variety,
+                           String grade,
                            String manufacturer,
                            String unit,
                            BigDecimal price,
@@ -68,10 +70,10 @@ public class ProductContext {
                            AppConfigData config) {
         Container<List<Tag>> container = new Container<>();
 
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category)),
                 Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop)),
-                Rule.of("Product.variety").notNull(variety).and(v -> v.notBlank(variety)),
+                Rule.of("Product.grade").notNull(grade).and(v -> v.notBlank(grade)),
                 Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)),
                 Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit)),
                 Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price)),
@@ -82,7 +84,7 @@ public class ProductContext {
 
         this.category = category;
         this.shop = shop;
-        this.variety = variety;
+        this.grade = grade;
         this.manufacturer = manufacturer;
         this.unit = unit;
         this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
@@ -103,7 +105,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setCategory(String category) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category))
         );
 
@@ -113,7 +115,7 @@ public class ProductContext {
         return new ProductContext(
                 resultCategory,
                 shop,
-                variety,
+                grade,
                 manufacturer,
                 unit,
                 price,
@@ -134,7 +136,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setShop(String shop) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop))
         );
 
@@ -144,7 +146,7 @@ public class ProductContext {
         return new ProductContext(
                 category,
                 resultShop,
-                variety,
+                grade,
                 manufacturer,
                 unit,
                 price,
@@ -157,21 +159,21 @@ public class ProductContext {
     /**
      * Создает и возвращает новый объект отличающийся от текущего указанным сортом. Задаваемое значение будет
      * сохраненно без начальных и конечных пробельных символов.
-     * @param variety задаваемое наименование сорта продукта.
+     * @param grade задаваемое наименование сорта продукта.
      * @return новый объект, если задаваемое значение сорта продукта отличается от текущего, иначе возвращает
      *         этот же объект.
      * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
-    public ProductContext setVariety(String variety) {
-        ValidateException.check(
-                Rule.of("Product.variety").notNull(variety).and(v -> v.notBlank(variety))
+    public ProductContext setGrade(String grade) {
+        Validator.check(
+                Rule.of("Product.variety").notNull(grade).and(v -> v.notBlank(grade))
         );
 
-        String resultVariety = variety.trim();
+        String resultVariety = grade.trim();
 
-        if(this.variety.equals(resultVariety)) return this;
+        if(this.grade.equals(resultVariety)) return this;
         return new ProductContext(
                 category,
                 shop,
@@ -196,7 +198,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setManufacturer(String manufacturer) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer))
         );
 
@@ -206,7 +208,7 @@ public class ProductContext {
         return new ProductContext(
                 category,
                 shop,
-                variety,
+                grade,
                 resultManufacturer,
                 unit,
                 price,
@@ -227,7 +229,7 @@ public class ProductContext {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public ProductContext setUnit(String unit) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit))
         );
 
@@ -238,7 +240,7 @@ public class ProductContext {
         return new ProductContext(
                 category,
                 shop,
-                variety,
+                grade,
                 manufacturer,
                 resultUnit,
                 price,
@@ -258,7 +260,7 @@ public class ProductContext {
      *         2. если указанное значение цены меньше нуля.
      */
     public ProductContext setPrice(BigDecimal price) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price))
         );
 
@@ -267,7 +269,7 @@ public class ProductContext {
         return new ProductContext(
                 category,
                 shop,
-                variety,
+                grade,
                 manufacturer,
                 unit,
                 price,
@@ -287,7 +289,7 @@ public class ProductContext {
      *         2. если packingSize меньше или равен нулю.
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize))
         );
 
@@ -296,7 +298,7 @@ public class ProductContext {
         return new ProductContext(
                 category,
                 shop,
-                variety,
+                grade,
                 manufacturer,
                 unit,
                 price,
@@ -315,7 +317,7 @@ public class ProductContext {
      *         2. если указанный тег уже содержится в данном объекте.
      */
     public ProductContext addTag(Tag tag) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Product.tag").notNull(tag),
                 Rule.of("Product.tags").notContainsItem(tags, tag)
         );
@@ -326,7 +328,7 @@ public class ProductContext {
         return new ProductContext(
                 category,
                 shop,
-                variety,
+                grade,
                 manufacturer,
                 unit,
                 price,
@@ -348,7 +350,7 @@ public class ProductContext {
         return new ProductContext(
                 category,
                 shop,
-                variety,
+                grade,
                 manufacturer,
                 unit,
                 price,
@@ -388,8 +390,8 @@ public class ProductContext {
      * Возвращает сорт продукта.
      * @return сорт продукта.
      */
-    public String getVariety() {
-        return variety;
+    public String getGrade() {
+        return grade;
     }
 
     /**
@@ -459,7 +461,7 @@ public class ProductContext {
         ProductContext context = (ProductContext) o;
         return category.equals(context.category) &&
                 shop.equals(context.shop) &&
-                variety.equals(context.variety) &&
+                grade.equals(context.grade) &&
                 manufacturer.equals(context.manufacturer) &&
                 unit.equals(context.unit) &&
                 price.equals(context.price) &&
@@ -469,7 +471,7 @@ public class ProductContext {
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, shop, variety, manufacturer, unit, price, packingSize, tags);
+        return Objects.hash(category, shop, grade, manufacturer, unit, price, packingSize, tags);
     }
 
     @Override
@@ -478,7 +480,7 @@ public class ProductContext {
                 "hashKey='" + hashKey + '\'' +
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
-                ", variety='" + variety + '\'' +
+                ", grade='" + grade + '\'' +
                 ", manufacturer='" + manufacturer + '\'' +
                 ", unit='" + unit + '\'' +
                 ", price=" + price +
@@ -495,7 +497,7 @@ public class ProductContext {
 
             writer.writeObject(category);
             writer.writeObject(shop);
-            writer.writeObject(variety);
+            writer.writeObject(grade);
             writer.writeObject(unit);
             writer.writeObject(price);
             writer.writeObject(packingSize);
@@ -512,11 +514,11 @@ public class ProductContext {
     }
 
 
-    public static class Builder implements AbstractBuilder<ProductContext> {
+    public static class Builder implements Entity.Builder<ProductContext> {
 
         private String category;
         private String shop;
-        private String variety;
+        private String grade;
         private String manufacturer;
         private String unit;
         private BigDecimal price;
@@ -538,8 +540,8 @@ public class ProductContext {
             return this;
         }
 
-        public Builder setVariety(String variety) {
-            this.variety = variety;
+        public Builder setGrade(String grade) {
+            this.grade = grade;
             return this;
         }
 
@@ -575,7 +577,7 @@ public class ProductContext {
 
         @Override
         public ProductContext tryBuild() throws ValidateException {
-            return new ProductContext(category, shop, variety, manufacturer, unit,
+            return new ProductContext(category, shop, grade, manufacturer, unit,
                     price, packingSize, tags, appConfigData);
         }
 

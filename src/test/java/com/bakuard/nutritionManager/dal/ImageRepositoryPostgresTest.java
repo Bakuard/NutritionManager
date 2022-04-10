@@ -2,15 +2,11 @@ package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.impl.DishRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.ImageRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
-import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.Product;
-import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.Filter;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -41,8 +37,6 @@ class ImageRepositoryPostgresTest {
     private static ImageRepository imageRepository;
     private static UserRepository userRepository;
     private static ProductRepository productRepository;
-    private static DishRepository dishRepository;
-    //private static MenuRepository menuRepository;
     private static DataSourceTransactionManager transactionManager;
     private static AppConfigData appConfiguration;
 
@@ -77,7 +71,6 @@ class ImageRepositoryPostgresTest {
         imageRepository = new ImageRepositoryPostgres(dataSource);
         userRepository = new UserRepositoryPostgres(dataSource);
         productRepository = new ProductRepositoryPostgres(dataSource, appConfiguration);
-        dishRepository = new DishRepositoryPostgres(dataSource, appConfiguration, (ProductRepositoryPostgres) productRepository);
     }
 
     @BeforeEach
@@ -200,24 +193,24 @@ class ImageRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
-            getAndRemoveUnusedImages():
+            getUnusedImages():
              there are not images in DB
              => return empty list
             """)
-    void getAndRemoveUnusedImages1() {
-        List<String> actual = imageRepository.getAndRemoveUnusedImages();
+    void getUnusedImages1() {
+        List<String> actual = imageRepository.getUnusedImages();
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getAndRemoveUnusedImages():
+            getUnusedImages():
              there are images in DB,
              there are not unused images
-             => return empty list, don't remove anything
+             => return empty list
             """)
-    void getAndRemoveUnusedImages2() {
+    void getUnusedImages2() {
         User user = createAndSaveUser(1);
         commit(() -> imageRepository.addImageUrl(
                 user.getId(),
@@ -242,19 +235,19 @@ class ImageRepositoryPostgresTest {
                         forEach(p -> productRepository.save(p))
         );
 
-        List<String> actual = imageRepository.getAndRemoveUnusedImages();
+        List<String> actual = imageRepository.getUnusedImages();
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getAndRemoveUnusedImages():
+            getUnusedImages():
              there are images used for products,
              there are unused images
-             => return all unused images, remove all unused images
+             => return all unused images
             """)
-    void getAndRemoveUnusedImages3() {
+    void getUnusedImages3() {
         User user = createAndSaveUser(1);
         commit(() -> imageRepository.addImageUrl(
                 user.getId(),
@@ -283,39 +276,69 @@ class ImageRepositoryPostgresTest {
                         forEach(p -> productRepository.save(p))
         );
 
-        List<String> actual = commit(() -> imageRepository.getAndRemoveUnusedImages());
+        List<String> actual = commit(() -> imageRepository.getUnusedImages());
+
+        Assertions.assertEquals(
+                List.of("622ed5d9d4c45a0ce5b4dd9a7b80fd74", "6e209648b5cce6ebd95561788d1cbfb8"),
+                actual
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            removeUnusedImages():
+             there are images in DB,
+             there are not unused images
+             => don't remove anything
+            """)
+    void removeUnusedImages1() {
+        User user = createAndSaveUser(1);
+        commit(() -> imageRepository.addImageUrl(
+                user.getId(),
+                "d1921aa0ca3c1146a01520c04e6caa9e",
+                createUrl("https://somepath1"))
+        );
+        commit(() -> imageRepository.addImageUrl(
+                user.getId(),
+                "889b88c75a5b0236e6fa67848fdce656",
+                createUrl("https://somepath2"))
+        );
+        commit(() -> imageRepository.addImageUrl(
+                user.getId(),
+                "622ed5d9d4c45a0ce5b4dd9a7b80fd74",
+                createUrl("https://somepath3"))
+        );
+        commit(() ->
+                createProducts(user,
+                        "https://somepath1",
+                        "https://somepath2",
+                        "https://somepath3").
+                        forEach(p -> productRepository.save(p))
+        );
+
+        imageRepository.removeUnusedImages();
 
         Assertions.assertAll(
-                () -> Assertions.assertEquals(
-                        List.of("622ed5d9d4c45a0ce5b4dd9a7b80fd74",
-                                "6e209648b5cce6ebd95561788d1cbfb8"),
-                        actual
-                ),
-                () -> Assertions.assertNull(
-                        imageRepository.getImageUrl(user.getId(), "622ed5d9d4c45a0ce5b4dd9a7b80fd74")
-                ),
-                () -> Assertions.assertNull(
-                        imageRepository.getImageUrl(user.getId(), "6e209648b5cce6ebd95561788d1cbfb8")
-                ),
-                () -> Assertions.assertEquals(
-                        createUrl("https://somepath1"),
+                () -> Assertions.assertNotNull(
                         imageRepository.getImageUrl(user.getId(), "d1921aa0ca3c1146a01520c04e6caa9e")
                 ),
-                () -> Assertions.assertEquals(
-                        createUrl("https://somepath2"),
+                () -> Assertions.assertNotNull(
                         imageRepository.getImageUrl(user.getId(), "889b88c75a5b0236e6fa67848fdce656")
+                ),
+                () -> Assertions.assertNotNull(
+                        imageRepository.getImageUrl(user.getId(), "622ed5d9d4c45a0ce5b4dd9a7b80fd74")
                 )
         );
     }
 
     @Test
     @DisplayName("""
-            getAndRemoveUnusedImages():
-             there are images used for dishes,
+            removeUnusedImages():
+             there are images used for products,
              there are unused images
-             => return all unused images, remove all unused images
+             => remove all unused images
             """)
-    void getAndRemoveUnusedImages4() {
+    void removeUnusedImages2() {
         User user = createAndSaveUser(1);
         commit(() -> imageRepository.addImageUrl(
                 user.getId(),
@@ -338,47 +361,17 @@ class ImageRepositoryPostgresTest {
                 createUrl("https://somepath4"))
         );
         commit(() ->
-                createDishes(user,
+                createProducts(user,
                         "https://somepath1",
                         "https://somepath2").
-                        forEach(d -> dishRepository.save(d))
+                        forEach(p -> productRepository.save(p))
         );
 
-        List<String> actual = commit(() -> imageRepository.getAndRemoveUnusedImages());
+        commit(() -> imageRepository.removeUnusedImages());
 
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(
-                        List.of("622ed5d9d4c45a0ce5b4dd9a7b80fd74",
-                                "6e209648b5cce6ebd95561788d1cbfb8"),
-                        actual
-                ),
-                () -> Assertions.assertNull(
-                        imageRepository.getImageUrl(user.getId(), "622ed5d9d4c45a0ce5b4dd9a7b80fd74")
-                ),
-                () -> Assertions.assertNull(
-                        imageRepository.getImageUrl(user.getId(), "6e209648b5cce6ebd95561788d1cbfb8")
-                ),
-                () -> Assertions.assertEquals(
-                        createUrl("https://somepath1"),
-                        imageRepository.getImageUrl(user.getId(), "d1921aa0ca3c1146a01520c04e6caa9e")
-                ),
-                () -> Assertions.assertEquals(
-                        createUrl("https://somepath2"),
-                        imageRepository.getImageUrl(user.getId(), "889b88c75a5b0236e6fa67848fdce656")
-                )
-        );
+        List<String> actual = commit(() -> imageRepository.getUnusedImages());
+        Assertions.assertTrue(actual.isEmpty());
     }
-
-    /*@Test
-    @DisplayName("""
-            getAndRemoveUnusedImages():
-             there are images used for menus,
-             there are unused images
-             => return all unused images, remove all unused images
-            """)
-    void getAndRemoveUnusedImages5() {
-
-    }*/
 
 
     private void commit(Action action) {
@@ -417,7 +410,7 @@ class ImageRepositoryPostgresTest {
                             setUser(user).
                             setCategory("name#" + i).
                             setShop("shop#" + i).
-                            setVariety("variety#" + i).
+                            setGrade("variety#" + i).
                             setManufacturer("manufacturer#" + i).
                             setUnit("unitA").
                             setPrice(BigDecimal.ZERO).
@@ -435,53 +428,13 @@ class ImageRepositoryPostgresTest {
         return products;
     }
 
-    private List<Dish> createDishes(User user, String... imageUrls) {
-        List<Dish> dishes = new ArrayList<>();
-
-        for(int i = 0; i < imageUrls.length; i++) {
-            dishes.add(
-                    new Dish.Builder().
-                            setId(toUUID(i)).
-                            setUser(user).
-                            setName("dish#" + i).
-                            setServingSize(BigDecimal.ONE).
-                            setUnit("unit A").
-                            setDescription("description A").
-                            setImagePath(imageUrls[i]).
-                            setConfig(appConfiguration).
-                            setRepository(productRepository).
-                            addTag("tag A").
-                            addTag("common tag").
-                            addIngredient("ingredient 1",
-                                    Filter.orElse(
-                                            Filter.and(
-                                                    Filter.user(user),
-                                                    Filter.minTags(new Tag("common tag")),
-                                                    Filter.anyCategory("name A"),
-                                                    Filter.anyShop("shop A"),
-                                                    Filter.anyGrade("variety A"),
-                                                    Filter.anyManufacturer("manufacturer A")
-                                            ),
-                                            Filter.and(
-                                                    Filter.user(user),
-                                                    Filter.minTags(new Tag("tag B"))
-                                            )
-                                    ),
-                                    BigDecimal.TEN).
-                            tryBuild()
-            );
-        }
-
-        return dishes;
-    }
-
     private User createAndSaveUser(int userId) {
-        User user = new User(
-                toUUID(userId),
-                "User" + userId,
-                "password" + userId,
-                "user" + userId + "@mail.com"
-        );
+        User user = new User.Builder().
+                setId(toUUID(userId)).
+                setName("User" + userId).
+                setPassword("password" + userId).
+                setEmail("user" + userId + "@mail.com").
+                tryBuild();
         commit(() -> userRepository.save(user));
         return user;
     }

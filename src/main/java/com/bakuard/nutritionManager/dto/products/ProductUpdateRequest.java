@@ -12,29 +12,33 @@ import java.util.UUID;
         """)
 public class ProductUpdateRequest {
 
-    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
+    @Schema(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.")
     private UUID id;
-    @Schema(description = "Категория к которой относится продукт", example = "Помидор")
+    @Schema(description = "Категория к которой относится продукт. Не может быть null.", example = "Помидор")
     private String category;
-    @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
+    @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории. Не может быть null.")
     private String shop;
-    @Schema(description = "Один из сортов продуктов указанной категории")
+    @Schema(description = "Один из сортов продуктов указанной категории. Не может быть null.")
     private String grade;
-    @Schema(description = "Один из производителей продуктов указанной категории")
+    @Schema(description = "Один из производителей продуктов указанной категории. Не может быть null.")
     private String manufacturer;
-    @Schema(description = "Цена прдукта указанной категории, сорта, производителя и продающегося в указанном магазине")
+    @Schema(description = "Цена продукта указанной категории, сорта, производителя и продающегося в указанном магазине. Не может быть null.")
     private BigDecimal price;
-    @Schema(description = "Размер упаковки")
+    @Schema(description = "Размер упаковки. Не может быть null.")
     private BigDecimal packingSize;
-    @Schema(description = "Единица измерения кол-ва продукта")
+    @Schema(description = "Единица измерения кол-ва продукта. Не может быть null.")
     private String unit;
-    @Schema(description = "Кол-во продукта имеющегося в наличии у пользователя")
+    @Schema(description = "Кол-во продукта имеющегося в наличии у пользователя. Не может быть null.")
     private BigDecimal quantity;
     @Schema(description = "Описание продукта")
     private String description;
     @Schema(description = "Путь к изображению данного продукта")
     private String imageUrl;
-    @Schema(description = "Теги указаныне для данного продукта")
+    @Schema(description = """
+            Теги указаныне для данного продукта. Не может быть null. Допускается пустой список тегов.
+             Ограничения для тегов: все теги должны быть уникальны, теги не могут иметь значение null и
+             обязаны содержать как минимум один отображаемый символ.
+            """)
     private List<String> tags;
 
     public ProductUpdateRequest() {

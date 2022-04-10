@@ -4,10 +4,9 @@ import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Pageable;
 import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class Criteria {
 
@@ -47,7 +46,7 @@ public class Criteria {
     }
 
     public Pageable tryGetPageable() {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Criteria.pageable").notNull(pageable)
         );
 
@@ -55,7 +54,7 @@ public class Criteria {
     }
 
     public Sort tryGetSort() {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Criteria.sort").notNull(sort)
         );
 
@@ -63,7 +62,7 @@ public class Criteria {
     }
 
     public Filter tryGetFilter() {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("Criteria.filter").notNull(filter)
         );
 

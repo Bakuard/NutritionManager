@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.util.Page;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -32,7 +33,24 @@ public interface DishRepository {
      *         1. если не удалось найти блюдо с таким ID.<br/>
      *         2. если dishId равен null.
      */
-    public Dish remove(UUID dishId);
+    public Dish tryRemove(UUID dishId);
+
+    /**
+     * Возвращает блюдо по его идентификатору. Если в БД нет блюда с таким идентификатором -
+     * возвращает пустой Optional.
+     * @param dishId идентификатор блюда.
+     * @return объект Dish.
+     * @throws ValidateException если dishId равен null.
+     */
+    public Optional<Dish> getById(UUID dishId);
+
+    /**
+     * Возвращает блюдо по его имени. Если в БД нет блюда с таким именем - возвращает пустой Optional.
+     * @param name уникальное имя блюда.
+     * @return объект Dish.
+     * @throws ValidateException если name равен null.
+     */
+    public Optional<Dish> getByName(String name);
 
     /**
      * Возвращает блюдо по его идентификатору. Если в БД нет блюда с таким идентификатором -
@@ -43,7 +61,7 @@ public interface DishRepository {
      *         1. если не удалось найти блюдо с таким ID.<br/>
      *         2. если dishId равен null.
      */
-    public Dish getById(UUID dishId);
+    public Dish tryGetById(UUID dishId);
 
     /**
      * Возвращает блюдо по его имени. Если в БД нет блюда с таким именем - выбрасывает исключение.
@@ -53,7 +71,7 @@ public interface DishRepository {
      *         1. если не удалось найти блюдо с таким name.<br/>
      *         2. если name равен null.
      */
-    public Dish getByName(String name);
+    public Dish tryGetByName(String name);
 
     /**
      * Возвращает упорядоченную выборку блюд из множества всех блюд с учетом заданных ограничений
@@ -84,6 +102,15 @@ public interface DishRepository {
     public Page<String> getUnits(Criteria criteria);
 
     /**
+     * Возвращает выборку из наименований всех блюд удовлетворяющих ограничению criteria
+     * (см. {@link Criteria}).
+     * @param criteria критерий формирования выборки наименований блюд.
+     * @return выборку из наименований блюд удовлетворяющую ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
+    public Page<String> getNames(Criteria criteria);
+
+    /**
      * Возвращает кол-во всех блюд удовлетворяющих ограничению criteria (см. {@link Criteria}).
      * @param criteria критерий указывающий какие единицы измерения блюд подсчитывать.
      * @return  кол-во всех блюд удовлетворяющих ограничению criteria.
@@ -107,5 +134,14 @@ public interface DishRepository {
      * @throws ValidateException если criteria является null.
      */
     public int getUnitsNumber(Criteria criteria);
+
+    /**
+     * Возвращает общее число всех наименований блюд удовлетворяющих ограничению criteria
+     * (см. {@link Criteria}).
+     * @param criteria критерий указывающий какие наименования блюд подсчитывать.
+     * @return общее число всех наименований блюд удовлетворяющих ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
+    public int getNamesNumber(Criteria criteria);
 
 }

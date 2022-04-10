@@ -1,9 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Constraint;
-import com.bakuard.nutritionManager.validation.Container;
-import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +24,48 @@ public class Sort {
         return new Sort(List.of("category", "price"));
     }
 
+    public static Sort products(List<String> sortRules) {
+        if(sortRules == null || sortRules.isEmpty()) {
+            return productDefaultSort();
+        } else {
+            Sort sort = products();
+            sortRules.stream().
+                    map(sortRule -> sortRule.split("_")).
+                    forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
+            return sort;
+        }
+    }
+
     public static Sort dishes() {
         return new Sort(List.of("name"));
     }
 
+    public static Sort dishes(List<String> sortRules) {
+        if(sortRules == null || sortRules.isEmpty()) {
+            return dishDefaultSort();
+        } else {
+            Sort sort = dishes();
+            sortRules.stream().
+                    map(sortRule -> sortRule.split("_")).
+                    forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
+            return sort;
+        }
+    }
+
     public static Sort menus() {
         return new Sort(List.of("name"));
+    }
+
+    public static Sort menus(List<String> sortRules) {
+        if(sortRules == null || sortRules.isEmpty()) {
+            return menuDefaultSort();
+        } else {
+            Sort sort = menus();
+            sortRules.stream().
+                    map(sortRule -> sortRule.split("_")).
+                    forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
+            return sort;
+        }
     }
 
 
@@ -44,37 +77,6 @@ public class Sort {
         this.validParameters = validParameters;
         parameters = new ArrayList<>();
         directions = new ArrayList<>();
-    }
-
-    public Sort put(String parameter, String direction) {
-        Container<Boolean> d = new Container<>();
-
-        ValidateException.check(
-                Rule.of("Sort.direction").notNull(direction).
-                        and(r -> {
-                            switch(direction) {
-                                case "asc": d.set(true);
-                                case "desc": d.set(false);
-                            }
-
-                            if(d.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
-                            else return r.success(Constraint.CONTAINS_ITEM);
-                        })
-        );
-
-        return put(parameter, d.get());
-    }
-
-    public Sort put(String parameter, boolean isAscending) {
-        ValidateException.check(
-                Rule.of("Sort.parameter").notNull(parameter).
-                        and(r -> r.containsItem(validParameters, parameter))
-        );
-
-        parameters.add(parameter);
-        directions.add(isAscending);
-
-        return this;
     }
 
     public Sort asc(String parameter) {
@@ -122,6 +124,40 @@ public class Sort {
                 ", directions=" + directions +
                 ", validParameters=" + validParameters +
                 '}';
+    }
+
+
+    private boolean toDirection(String direction) {
+        Container<Boolean> d = new Container<>();
+
+        Validator.check(
+                () -> new ValidateException("Unknown sort direction").
+                        setUserMessageKey("Sort.put"),
+                Rule.of("Sort.direction").notNull(direction).
+                        and(r -> {
+                            switch(direction) {
+                                case "asc": d.set(true);
+                                case "desc": d.set(false);
+                            }
+
+                            if(d.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
+                            else return r.success(Constraint.CONTAINS_ITEM);
+                        })
+        );
+
+        return d.get();
+    }
+
+    private Sort put(String parameter, boolean isAscending) {
+        Validator.check(
+                Rule.of("Sort.parameter").notNull(parameter).
+                        and(r -> r.containsItem(validParameters, parameter))
+        );
+
+        parameters.add(parameter);
+        directions.add(isAscending);
+
+        return this;
     }
 
 }

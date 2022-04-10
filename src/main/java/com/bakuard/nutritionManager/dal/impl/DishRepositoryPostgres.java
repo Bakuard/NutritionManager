@@ -7,12 +7,13 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.Constraint;
-import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.validation.Constraint;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
+import com.bakuard.nutritionManager.validation.Validator;
 
 import com.fasterxml.jackson.core.*;
 
@@ -35,6 +36,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
@@ -58,11 +60,11 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public boolean save(Dish dish) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.dish").notNull(dish)
         );
 
-        Dish oldDish = getByIdOrReturnNull(dish.getId());
+        Dish oldDish = getById(dish.getId()).orElse(null);
 
         boolean newData = false;
         try {
@@ -82,44 +84,82 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Dish remove(UUID dishId) {
-        ValidateException.check(
+    public Optional<Dish> getById(UUID dishId) {
+        Validator.check(
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
-        Dish dish = getByIdOrReturnNull(dishId);
+        return statement.query(
+                (Connection con) -> con.prepareStatement(
+                        """
+                                SELECT Dishes.*, DishTags.*,
+                                       Users.userId,
+                                       Users.name as userName,
+                                       Users.passwordHash as userPassHash,
+                                       Users.email as userEmail,
+                                       Users.salt as userSalt,
+                                       DishIngredients.name as ingredientName,
+                                       DishIngredients.quantity as ingredientQuantity,
+                                       DishIngredients.filter as ingredientFilter
+                                    FROM Dishes
+                                    LEFT JOIN Users
+                                        ON Dishes.userId = Users.userId
+                                    LEFT JOIN DishTags
+                                        ON Dishes.dishId = DishTags.dishId
+                                    LEFT JOIN DishIngredients
+                                        ON Dishes.dishId = DishIngredients.dishId
+                                    WHERE Dishes.dishId = ?
+                                    ORDER BY DishTags.index, DishIngredients.index;
+                                """
+                ),
+                (PreparedStatement ps) -> ps.setObject(1, dishId),
+                (ResultSet rs) -> {
+                    Dish.Builder builder = null;
 
-        if(dish == null) {
-            throw new ValidateException("Fail to remove dish. Unknown dish with id=" + dishId).
-                    addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-        }
+                    while(rs.next()) {
+                        if(builder == null) {
+                            builder = new Dish.Builder().
+                                    setId(dishId).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("userName")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setPasswordHash(rs.getString("userPassHash")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
+                                    setName(rs.getString("name")).
+                                    setServingSize(rs.getBigDecimal("servingSize")).
+                                    setUnit(rs.getString("unit")).
+                                    setDescription(rs.getString("description")).
+                                    setImagePath(rs.getString("imagePath")).
+                                    setConfig(appConfig).
+                                    setRepository(productRepository);
+                        }
 
-        statement.update(
-                "DELETE FROM Dishes WHERE dishId = ?;",
-                (PreparedStatement ps) -> ps.setObject(1, dishId)
+                        String tagValue = rs.getString("tagValue");
+                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+
+                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+                        if(!rs.wasNull()) {
+                            String ingredientName = rs.getString("ingredientName");
+                            Filter filter = toFilter(rs.getString("ingredientFilter"));
+                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
+                        }
+                    }
+
+                    return builder == null ?
+                            Optional.empty() :
+                            Optional.ofNullable(builder.tryBuild());
+                }
         );
-
-        return dish;
     }
 
     @Override
-    public Dish getById(UUID dishId) {
-        ValidateException.check(
-                Rule.of("DishRepository.dishId").notNull(dishId)
-        );
-
-        Dish dish = getByIdOrReturnNull(dishId);
-        if(dish == null) {
-            throw new ValidateException("Fail to get dish by id=" + dishId).
-                    addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-        }
-
-        return dish;
-    }
-
-    @Override
-    public Dish getByName(String name) {
-        ValidateException.check(
+    public Optional<Dish> getByName(String name) {
+        Validator.check(
                 Rule.of("DishRepository.name").notNull(name)
         );
 
@@ -154,13 +194,15 @@ public class DishRepositoryPostgres implements DishRepository {
                         if(builder == null) {
                             builder = new Dish.Builder().
                                     setId((UUID) rs.getObject("dishId")).
-                                    setUser(new User(
-                                            (UUID) rs.getObject("userId"),
-                                            rs.getString("userName"),
-                                            rs.getString("userPassHash"),
-                                            rs.getString("userEmail"),
-                                            rs.getString("userSalt")
-                                    )).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("userName")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setPasswordHash(rs.getString("userPassHash")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
                                     setName(name).
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
@@ -182,14 +224,47 @@ public class DishRepositoryPostgres implements DishRepository {
                         }
                     }
 
-                    if(builder != null) {
-                        return builder.tryBuild();
-                    } else {
-                        throw new ValidateException("Fail to get dish by name=" + name).
-                                addReason(Rule.of("DishRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
-                    }
+                    return builder == null ?
+                            Optional.empty() :
+                            Optional.ofNullable(builder.tryBuild());
                 }
         );
+    }
+
+    @Override
+    public Dish tryRemove(UUID dishId) {
+        Validator.check(
+                Rule.of("DishRepository.dishId").notNull(dishId)
+        );
+
+        Dish dish = getById(dishId).
+                orElseThrow(
+                        () -> new ValidateException("Unknown dish with id=" + dishId).
+                                addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                );
+
+        statement.update(
+                "DELETE FROM Dishes WHERE dishId = ?;",
+                (PreparedStatement ps) -> ps.setObject(1, dishId)
+        );
+
+        return dish;
+    }
+
+    @Override
+    public Dish tryGetById(UUID dishId) {
+        return getById(dishId).
+                orElseThrow(
+                        () -> new ValidateException("Unknown dish with id=" + dishId)
+                );
+    }
+
+    @Override
+    public Dish tryGetByName(String name) {
+        return getByName(name).
+                orElseThrow(
+                        () -> new ValidateException("Unknown dish with name=" + name)
+                );
     }
 
     @Override
@@ -205,7 +280,12 @@ public class DishRepositoryPostgres implements DishRepository {
                         field("DishIngredients.name as ingredientName"),
                         field("DishIngredients.quantity as ingredientQuantity"),
                         field("DishIngredients.filter as ingredientFilter"),
-                        field("DishTags.tagValue as tagValue")).
+                        field("DishTags.tagValue as tagValue"),
+                        field("Users.userId as userId"),
+                        field("Users.name as userName"),
+                        field("Users.email as userEmail"),
+                        field("Users.passwordHash as userPasswordHash"),
+                        field("Users.salt as userSalt")).
                         from(
                             select(field("*")).
                                 from("Dishes").
@@ -219,6 +299,8 @@ public class DishRepositoryPostgres implements DishRepository {
                             on(field("D.dishId").eq(field("DishTags.dishId"))).
                         leftJoin("DishIngredients").
                             on(field("D.dishId").eq(field("DishIngredients.dishId"))).
+                        leftJoin("Users").
+                            on(field("D.userId").eq(field("Users.userId"))).
                         orderBy(getOrderFields(criteria.getSort(), "D")).
                         getSQL().
                         replace("\"{D}\"", "as D");
@@ -236,7 +318,15 @@ public class DishRepositoryPostgres implements DishRepository {
                             if (builder != null) result.add(builder.tryBuild());
                             builder = new Dish.Builder().
                                     setId(dishId).
-                                    setUser(criteria.getFilter().<UserFilter>findAny(USER).getUser()).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userId")).
+                                                    setName(rs.getString("userName")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setPasswordHash(rs.getString("userPasswordHash")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
                                     setName(rs.getString("name")).
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
@@ -335,8 +425,40 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
+    public Page<String> getNames(Criteria criteria) {
+        int unitsNumber = getNamesNumber(criteria);
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(unitsNumber, 200);
+
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
+
+        String query = selectDistinct(field("Dishes.name")).
+                from("Dishes").
+                where(switchFilter(criteria.getFilter())).
+                orderBy(field("Dishes.name").asc()).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
+                getSQL();
+
+        List<String> units = statement.query(
+                query,
+                (ResultSet rs) -> {
+                    List<String> result = new ArrayList<>();
+
+                    while(rs.next()) {
+                        result.add(rs.getString(1));
+                    }
+
+                    return result;
+                }
+        );
+
+        return metadata.createPage(units);
+    }
+
+    @Override
     public int getDishesNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -352,7 +474,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getTagsNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
@@ -376,13 +498,35 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public int getUnitsNumber(Criteria criteria) {
-        ValidateException.check(
+        Validator.check(
                 Rule.of("DishRepository.criteria").notNull(criteria).
                         and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Dishes.unit"))).
+                from("Dishes").
+                where(switchFilter(criteria.getFilter())).
+                getSQL();
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
+    }
+
+    @Override
+    public int getNamesNumber(Criteria criteria) {
+        Validator.check(
+                Rule.of("DishRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+        );
+
+        String query = select(countDistinct(field("Dishes.name"))).
                 from("Dishes").
                 where(switchFilter(criteria.getFilter())).
                 getSQL();
@@ -574,72 +718,6 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
 
-    private Dish getByIdOrReturnNull(UUID dishId) {
-        return statement.query(
-                (Connection con) -> con.prepareStatement(
-                        """
-                                SELECT Dishes.*, DishTags.*,
-                                       Users.userId,
-                                       Users.name as userName,
-                                       Users.passwordHash as userPassHash,
-                                       Users.email as userEmail,
-                                       Users.salt as userSalt,
-                                       DishIngredients.name as ingredientName,
-                                       DishIngredients.quantity as ingredientQuantity,
-                                       DishIngredients.filter as ingredientFilter
-                                    FROM Dishes
-                                    LEFT JOIN Users
-                                        ON Dishes.userId = Users.userId
-                                    LEFT JOIN DishTags
-                                        ON Dishes.dishId = DishTags.dishId
-                                    LEFT JOIN DishIngredients
-                                        ON Dishes.dishId = DishIngredients.dishId
-                                    WHERE Dishes.dishId = ?
-                                    ORDER BY DishTags.index, DishIngredients.index;
-                                """
-                ),
-                (PreparedStatement ps) -> ps.setObject(1, dishId),
-                (ResultSet rs) -> {
-                    Dish.Builder builder = null;
-
-                    while(rs.next()) {
-                        if(builder == null) {
-                            builder = new Dish.Builder().
-                                    setId(dishId).
-                                    setUser(new User(
-                                            (UUID) rs.getObject("userId"),
-                                            rs.getString("userName"),
-                                            rs.getString("userPassHash"),
-                                            rs.getString("userEmail"),
-                                            rs.getString("userSalt")
-                                    )).
-                                    setName(rs.getString("name")).
-                                    setServingSize(rs.getBigDecimal("servingSize")).
-                                    setUnit(rs.getString("unit")).
-                                    setDescription(rs.getString("description")).
-                                    setImagePath(rs.getString("imagePath")).
-                                    setConfig(appConfig).
-                                    setRepository(productRepository);
-                        }
-
-                        String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
-
-                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
-                        if(!rs.wasNull()) {
-                            String ingredientName = rs.getString("ingredientName");
-                            Filter filter = toFilter(rs.getString("ingredientFilter"));
-                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
-                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
-                        }
-                    }
-
-                    return builder == null ? null : builder.tryBuild();
-                }
-        );
-    }
-
-
     private Condition switchFilter(Filter filter) {
         switch(filter.getType()) {
             case AND -> {
@@ -668,7 +746,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     private Condition userFilter(UserFilter filter) {
-        return field("userId").eq(inline(filter.getUser().getId()));
+        return field("userId").eq(inline(filter.getUserId()));
     }
 
     private Condition minTagsFilter(MinTagsFilter filter) {
@@ -729,7 +807,7 @@ public class DishRepositoryPostgres implements DishRepository {
                     case MIN_TAGS -> result = toMinTagsFilter(parser);
                     case CATEGORY -> result = toCategoryFilter(parser);
                     case SHOPS -> result = toShopsFilter(parser);
-                    case GRADES -> result = toVarietiesFilter(parser);
+                    case GRADES -> result = toGradesFilter(parser);
                     case MANUFACTURER -> result = toManufacturerFilter(parser);
                     case USER -> result = toUserFilter(parser);
                 }
@@ -794,7 +872,7 @@ public class DishRepositoryPostgres implements DishRepository {
         return Filter.anyShop(values);
     }
 
-    private AnyFilter toVarietiesFilter(JsonParser parser) throws IOException {
+    private AnyFilter toGradesFilter(JsonParser parser) throws IOException {
         List<String> values = new ArrayList<>();
 
         parser.nextToken(); //BEGIN_ARRAY
@@ -817,23 +895,11 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     private UserFilter toUserFilter(JsonParser parser) throws IOException {
-        User.Builder builder = new User.Builder();
-
         parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            if(parser.currentToken() == JsonToken.FIELD_NAME) {
-                String fieldName = parser.getCurrentName();
-                switch(fieldName) {
-                    case "id" -> builder.setId(UUID.fromString(parser.nextTextValue()));
-                    case "name" -> builder.setName(parser.nextTextValue());
-                    case "email" -> builder.setEmail(parser.nextTextValue());
-                    case "passwordHash" -> builder.setPasswordHash(parser.nextTextValue());
-                    case "salt" -> builder.setSalt(parser.nextTextValue());
-                }
-            }
-        }
+        UUID userId = UUID.fromString(parser.nextTextValue());
+        parser.nextToken(); //END_ARRAY
 
-        return Filter.user(builder.tryBuild());
+        return Filter.user(userId);
     }
 
 
@@ -922,15 +988,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         writer.writeFieldName("values");
         writer.writeStartArray();
-
-        writer.writeStartObject();
-        writer.writeStringField("id", filter.getUser().getId().toString());
-        writer.writeStringField("name", filter.getUser().getName());
-        writer.writeStringField("email", filter.getUser().getEmail());
-        writer.writeStringField("passwordHash", filter.getUser().getPasswordHash());
-        writer.writeStringField("salt", filter.getUser().getSalt());
-        writer.writeEndObject();
-
+        writer.writeString(filter.getUserId().toString());
         writer.writeEndArray();
 
         writer.writeEndObject();
