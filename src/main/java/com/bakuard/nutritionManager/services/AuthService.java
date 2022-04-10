@@ -36,6 +36,10 @@ public class AuthService {
     }
 
     public void verifyEmailForRegistration(String email) {
+        if(userRepository.getByEmail(email).isPresent()) {
+            throw new ValidateException();
+        }
+
         String jws = jwsService.generateRegistrationJws(email);
         emailService.confirmEmailForRegistration(jws, email);
     }

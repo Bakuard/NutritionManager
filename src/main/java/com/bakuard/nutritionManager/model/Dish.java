@@ -374,7 +374,7 @@ public class Dish implements Entity<Dish> {
      */
     public Optional<Product> getProduct(int ingredientIndex, int productIndex) {
         Validator.check(
-                Rule.of("DishIngredient.productIndex").notNegative(productIndex)
+                Rule.of("Dish.productIndex").notNegative(productIndex)
         );
 
         DishIngredient ingredient = tryGetIngredient(ingredientIndex);
@@ -430,7 +430,7 @@ public class Dish implements Entity<Dish> {
                                                 int productIndex,
                                                 BigDecimal servingNumber) {
         Validator.check(
-                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
+                Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(v -> v.positiveValue(servingNumber))
         );
 
@@ -455,7 +455,7 @@ public class Dish implements Entity<Dish> {
                                                      int productIndex,
                                                      BigDecimal servingNumber) {
         Validator.check(
-                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
+                Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(v -> v.positiveValue(servingNumber))
         );
 
