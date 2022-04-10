@@ -143,7 +143,7 @@ public class Rule {
             state = checkedValue.stream().
                     map(function).
                     reduce(Result.State::and).
-                    orElse(Result.State.UNKNOWN);
+                    orElse(Result.State.SUCCESS);
 
             List<T> invalidItems = checkedValue.stream().
                     filter(v -> function.apply(v) == Result.State.FAIL).

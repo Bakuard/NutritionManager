@@ -188,29 +188,17 @@ public class DtoMapper {
     public DishProductsListResponse toDishProductsListResponse(DishProductsListRequest dto) {
         Dish dish = dishRepository.tryGetById(dto.getDishId());
 
-        List<ProductAsDishIngredientResponse> ingredientsResponse =
-                dto.getIngredients().entrySet().stream().
-                        map(pair -> {
-                            DishIngredient ingredient = dish.getIngredients().get(pair.getKey());
-                            return toProductAsDishIngredientResponse(
-                                    dish,
-                                    ingredient,
-                                    pair.getValue(),
-                                    dto.getServingNumber()
-                            );
-                        }).
-                        toList();
-
-        BigDecimal totalPrice = ingredientsResponse.stream().
-                map(ProductAsDishIngredientResponse::getLackQuantityPrice).
-                reduce(BigDecimal::add).
-                orElse(null);
-
         DishProductsListResponse response = new DishProductsListResponse();
         response.setDishId(dish.getId());
         response.setServingNumber(dto.getServingNumber());
-        response.setTotalPrice(totalPrice);
-        response.setIngredients(ingredientsResponse);
+        response.setTotalPrice(dish.getPrice(dto.getServingNumber(), dto.getIngredients()).orElse(null));
+        response.setIngredients(
+                dto.getIngredients().entrySet().stream().
+                        map(pair -> toProductAsDishIngredientResponse(
+                                dish, pair.getKey(), pair.getValue(), dto.getServingNumber()
+                        )).
+                        toList()
+        );
 
         return response;
     }
@@ -380,10 +368,10 @@ public class DtoMapper {
     }
 
     private ProductAsDishIngredientResponse toProductAsDishIngredientResponse(Dish dish,
-                                                                              DishIngredient ingredient,
+                                                                              int ingredientIndex,
                                                                               int productIndex,
                                                                               BigDecimal servingNumber) {
-        return dish.getProduct(ingredient, productIndex).
+        return dish.getProduct(ingredientIndex, productIndex).
                 map(product -> {
                     ProductAsDishIngredientResponse response = new ProductAsDishIngredientResponse();
                     response.setId(product.getId());
@@ -397,15 +385,17 @@ public class DtoMapper {
                     response.setPackingSize(product.getContext().getPackingSize());
                     response.setUnit(product.getContext().getUnit());
                     response.setQuantity(product.getQuantity());
-                    response.setNecessaryQuantity(ingredient.getNecessaryQuantity(servingNumber));
+                    response.setNecessaryQuantity(
+                            dish.tryGetIngredient(ingredientIndex).getNecessaryQuantity(servingNumber)
+                    );
                     response.setLackQuantity(
-                            dish.getLackQuantity(ingredient, productIndex, servingNumber).orElseThrow()
+                            dish.getLackQuantity(ingredientIndex, productIndex, servingNumber).orElseThrow()
                     );
                     response.setLackQuantityPrice(
-                            dish.getLackQuantityPrice(ingredient, productIndex, servingNumber).orElseThrow()
+                            dish.getLackQuantityPrice(ingredientIndex, productIndex, servingNumber).orElseThrow()
                     );
                     response.setTags(toTagsResponse(product.getContext().getTags()));
-                    response.setProductsTotalNumber(dish.getProductsNumber(ingredient));
+                    response.setProductsTotalNumber(dish.getProductsNumber(ingredientIndex));
                     return response;
                 }).
                 orElse(null);

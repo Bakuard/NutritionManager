@@ -18,10 +18,10 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 class DishTest {
 
@@ -41,29 +41,18 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              productIndex < 0
              => exception
             """)
     public void getLackQuantity1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantity(ingredient, -1, new BigDecimal("1.5")),
+                () -> dish.getLackQuantity(0, -1, new BigDecimal("1.5")),
                 "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
@@ -71,29 +60,18 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              servingNumber is not positive
              => exception
             """)
     public void getLackQuantity2() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantity(ingredient, 0, BigDecimal.ZERO),
+                () -> dish.getLackQuantity(0, 0, BigDecimal.ZERO),
                 "Dish.getLackQuantity",
                 Constraint.POSITIVE_VALUE
         );
@@ -101,29 +79,18 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+           getLackQuantity(ingredient, productIndex, servingNumber):
              servingNumber = null
              => exception
             """)
     public void getLackQuantity3() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantity(ingredient, 0, null),
+                () -> dish.getLackQuantity(0, 0, null),
                 "Dish.getLackQuantity",
                 Constraint.NOT_NULL
         );
@@ -131,36 +98,25 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              productIndex = ingredient products set size
              => calculate result for last product
             """)
     public void getLackQuantity4() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
                                 createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ingredient, 5, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantity(0, 5, new BigDecimal("2"));
 
         BigDecimal expected = new BigDecimal("8");
         Assertions.assertTrue(actual.isPresent());
@@ -169,7 +125,7 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              productIndex = ingredient products set size,
              there are not products matching this ingredient
              => return empty Optional
@@ -177,63 +133,41 @@ class DishTest {
     public void getLackQuantity5() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ingredient, 5, BigDecimal.ONE);
+        Optional<BigDecimal> actual = dish.getLackQuantity(0, 5, BigDecimal.ONE);
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              productIndex > ingredient products set size
              => calculate result for last product
             """)
     public void getLackQuantity6() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
                                 createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ingredient, 6, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantity(0, 6, new BigDecimal("2"));
 
         BigDecimal expected = new BigDecimal("8");
         Assertions.assertTrue(actual.isPresent());
@@ -242,7 +176,7 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              productIndex > ingredient products set size,
              there are not products matching this ingredient
              => return empty Optional
@@ -250,34 +184,23 @@ class DishTest {
     public void getLackQuantity7() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ingredient, 6, BigDecimal.ONE);
+        Optional<BigDecimal> actual = dish.getLackQuantity(0, 6, BigDecimal.ONE);
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              productIndex belongs to interval [0, ingredient products set size - 1],
              servingNumber is positive value
              => return correct result
@@ -285,29 +208,18 @@ class DishTest {
     public void getLackQuantity8() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 16).
                                 createPageMetadata(20, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ingredient, 16, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantity(0, 16, new BigDecimal("2"));
 
         BigDecimal expected = new BigDecimal("20");
         Assertions.assertTrue(actual.isPresent());
@@ -316,7 +228,7 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(productIndex, servingNumber):
+            getLackQuantity(ingredient, productIndex, servingNumber):
              productIndex belongs to interval [0, ingredient products set size - 1],
              servingNumber is positive value,
              there are not products matching this ingredient
@@ -325,56 +237,34 @@ class DishTest {
     public void getLackQuantity9() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ingredient, 16, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantity(0, 16, new BigDecimal("2"));
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              productIndex < 0
              => exception
             """)
     public void getLackQuantityPrice1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantityPrice(ingredient, -1, new BigDecimal("1.5")),
+                () -> dish.getLackQuantityPrice(0, -1, new BigDecimal("1.5")),
                 "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
@@ -382,29 +272,18 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              servingNumber is not positive
              => exception
             """)
     public void getLackQuantityPrice2() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantityPrice(ingredient, 0, BigDecimal.ZERO),
+                () -> dish.getLackQuantityPrice(0, 0, BigDecimal.ZERO),
                 "Dish.getLackQuantityPrice",
                 Constraint.POSITIVE_VALUE
         );
@@ -412,29 +291,18 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              servingNumber = null
              => exception
             """)
     public void getLackQuantityPrice3() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantityPrice(ingredient, 0, null),
+                () -> dish.getLackQuantityPrice(0, 0, null),
                 "Dish.getLackQuantityPrice",
                 Constraint.NOT_NULL
         );
@@ -442,36 +310,25 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              productIndex = ingredient products set size
              => calculate result for last product
             """)
     public void getLackQuantityPrice4() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
                                 createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ingredient, 5, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantityPrice(0, 5, new BigDecimal("2"));
 
         BigDecimal expected = new BigDecimal("400");
         Assertions.assertTrue(actual.isPresent());
@@ -480,7 +337,7 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              productIndex = ingredient products set size,
              there are not products matching this ingredient
              => return empty Optional
@@ -488,63 +345,41 @@ class DishTest {
     public void getLackQuantityPrice5() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ingredient, 5, BigDecimal.ONE);
+        Optional<BigDecimal> actual = dish.getLackQuantityPrice(0, 5, BigDecimal.ONE);
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              productIndex > ingredient products set size
              => calculate result for last product
             """)
     public void getLackQuantityPrice6() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
                                 createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ingredient, 6, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantityPrice(0, 6, new BigDecimal("2"));
 
         BigDecimal expected = new BigDecimal("400");
         Assertions.assertTrue(actual.isPresent());
@@ -553,7 +388,7 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              productIndex > ingredient products set size,
              there are not products matching this ingredient
              => return empty Optional
@@ -561,34 +396,23 @@ class DishTest {
     public void getLackQuantityPrice7() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ingredient, 6, BigDecimal.ONE);
+        Optional<BigDecimal> actual = dish.getLackQuantityPrice(0, 6, BigDecimal.ONE);
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              productIndex belongs to interval [0, ingredient products set size - 1],
              servingNumber is positive value
              => return correct result
@@ -596,29 +420,18 @@ class DishTest {
     public void getLackQuantityPrice8() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 16).
                                 createPageMetadata(20, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ingredient, 16, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantityPrice(0, 16, new BigDecimal("2"));
 
         BigDecimal expected = new BigDecimal("400");
         Assertions.assertTrue(actual.isPresent());
@@ -627,7 +440,7 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(productIndex, servingNumber):
+            getLackQuantityPrice(ingredient, productIndex, servingNumber):
              productIndex belongs to interval [0, ingredient products set size - 1],
              servingNumber is positive value,
              there are not products matching this ingredient
@@ -636,207 +449,541 @@ class DishTest {
     public void getLackQuantityPrice9() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(16)))
+                        repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.firstEmptyPage()
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ingredient, 16, new BigDecimal("2"));
+        Optional<BigDecimal> actual = dish.getLackQuantityPrice(0, 16, new BigDecimal("2"));
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getProductByIndex(productIndex):
+            getProduct(ingredient, productIndex):
              there are not products matching this ingredient
              => return empty Optional
             """)
-    public void getProductByIndex1() {
+    public void getProduct1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Pageable.firstEmptyPage());
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<Product> actual = dish.getProduct(ingredient, 0);
+        Optional<Product> actual = dish.getProduct(0, 0);
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getProductByIndex(productIndex):
+            getProduct(ingredient, productIndex):
              there are products matching this ingredient,
              productIndex belongs to interval [0, ingredient products set size - 1]
              => return correct result
             """)
-    public void getProductByIndex2() {
+    public void getProduct2() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(4)))
+                        repository.getProducts(Mockito.eq(createCriteria(4, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 4).
                                 createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<Product> actual = dish.getProduct(ingredient, 4);
+        Optional<Product> actual = dish.getProduct(0, 4);
 
         Product expected = createProduct(5, 5).tryBuild();
-        Assertions.assertTrue(actual.isPresent());
-        Assertions.assertEquals(expected, actual.get());
+        Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
     @Test
     @DisplayName("""
-            getProductByIndex(productIndex):
+            getProduct(ingredient, productIndex):
              there are products matching this ingredient,
              productIndex = ingredient products number
              => return correct result
             """)
-    public void getProductByIndex3() {
+    public void getProduct3() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(5)))
+                        repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 5).
                                 createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<Product> actual = dish.getProduct(ingredient, 5);
+        Optional<Product> actual = dish.getProduct(0, 5);
 
         Product expected = createProduct(5, 5).tryBuild();
-        Assertions.assertTrue(actual.isPresent());
-        Assertions.assertEquals(expected, actual.get());
+        Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
     @Test
     @DisplayName("""
-            getProductByIndex(productIndex):
+            getProduct(ingredient, productIndex):
              there are products matching this ingredient,
              productIndex > ingredient products number
              => return correct result
             """)
-    public void getProductByIndex4() {
+    public void getProduct4() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(6)))
+                        repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
                 thenReturn(
                         Pageable.ofIndex(5, 6).
                                 createPageMetadata(5, 200).
                                 createPage(createProducts(1, 5))
                 );
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
-        Optional<Product> actual = dish.getProduct(ingredient, 6);
+        Optional<Product> actual = dish.getProduct(0, 6);
 
         Product expected = createProduct(5, 5).tryBuild();
-        Assertions.assertTrue(actual.isPresent());
-        Assertions.assertEquals(expected, actual.get());
+        Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
     @Test
     @DisplayName("""
-            getProductByIndex(productIndex):
+            getProduct(ingredient, productIndex):
              productIndex < 0
              => exception
             """)
-    public void getProductByIndex5() {
+    public void getProduct5() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        DishIngredient.Builder ingredientBuilder = new DishIngredient.Builder().
-                setName("some ingredient").
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setQuantity(BigDecimal.TEN).
-                setConfig(conf);
         Dish dish = createDish(1, createUser(1), repository).
-                addIngredient(ingredientBuilder).
+                addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
-        DishIngredient ingredient = ingredientBuilder.tryBuild();
 
         AssertUtil.assertValidateException(
-                () -> dish.getProduct(ingredient, -1),
+                () -> dish.getProduct(0, -1),
                 "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
     }
 
+    @Test
+    @DisplayName("""
+            getNumberIngredientCombinations():
+             dish haven't any ingredients
+             => return 0
+            """)
+    public void getNumberIngredientCombinations1() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).tryBuild();
+
+        BigInteger actual = dish.getNumberIngredientCombinations();
+
+        Assertions.assertEquals(BigInteger.ZERO, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberIngredientCombinations():
+             all dish ingredients haven't suitable products
+             => return 0
+            """)
+    public void getNumberIngredientCombinations2() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        BigInteger actual = dish.getNumberIngredientCombinations();
+
+        Assertions.assertEquals(BigInteger.ZERO, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberIngredientCombinations():
+             some dish ingredients have suitable products
+             => return correct result
+            """)
+    public void getNumberIngredientCombinations3() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
+                ).
+                thenReturn(0);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                        repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
+                ).
+                thenReturn(5);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        BigInteger actual = dish.getNumberIngredientCombinations();
+
+        Assertions.assertEquals(BigInteger.valueOf(50), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberIngredientCombinations():
+             all dish ingredients have suitable products
+             => return correct result
+            """)
+    public void getNumberIngredientCombinations4() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
+                ).
+                thenReturn(2);
+        Mockito.when(
+                        repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                        repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
+                ).
+                thenReturn(5);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        BigInteger actual = dish.getNumberIngredientCombinations();
+
+        Assertions.assertEquals(BigInteger.valueOf(100), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getAveragePrice():
+             dish haven't any ingredients
+             => return empty Optional
+            """)
+    public void getAveragePrice1() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).tryBuild();
+
+        Optional<BigDecimal> actual = dish.getAveragePrice();
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getAveragePrice():
+             all dish ingredients haven't suitable products
+             => return empty Optional
+            """)
+    public void getAveragePrice2() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getAveragePrice();
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getAveragePrice():
+             some dish ingredients have suitable products,
+             all products cost zero
+             => return 0
+            """)
+    public void getAveragePrice3() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
+                ).
+                thenReturn(0);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                    repository.getProductsSum(Mockito.eq(createCriteria(shopFilter())))
+                ).thenReturn(Optional.of(BigDecimal.valueOf(0)));
+        Mockito.when(
+                    repository.getProductsSum(Mockito.eq(createCriteria(gradeFilter())))
+                ).thenReturn(Optional.of(BigDecimal.valueOf(0)));
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getAveragePrice();
+
+        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getAveragePrice():
+             some dish ingredients have suitable products,
+             some products cost zero
+             => return correct result
+            """)
+    public void getAveragePrice4() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
+                ).
+                thenReturn(0);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                    repository.getProductsSum(Mockito.eq(createCriteria(shopFilter())))
+                 ).thenReturn(Optional.of(BigDecimal.valueOf(0)));
+        Mockito.when(
+                    repository.getProductsSum(Mockito.eq(createCriteria(gradeFilter())))
+                ).thenReturn(Optional.of(BigDecimal.valueOf(500)));
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getAveragePrice();
+
+        AssertUtil.assertEquals(new BigDecimal("25"), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getAveragePrice():
+             all dish ingredients have suitable products,
+             all products cost more than 0
+             => return correct result
+            """)
+    public void getAveragePrice5() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
+                ).
+                thenReturn(5);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                    repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
+                ).
+                thenReturn(10);
+        Mockito.when(
+                    repository.getProductsSum(Mockito.eq(createCriteria(categoryFilter())))
+                ).thenReturn(Optional.of(BigDecimal.valueOf(310)));
+        Mockito.when(
+                    repository.getProductsSum(Mockito.eq(createCriteria(shopFilter())))
+                ).thenReturn(Optional.of(BigDecimal.valueOf(207)));
+        Mockito.when(
+                    repository.getProductsSum(Mockito.eq(createCriteria(gradeFilter())))
+                ).thenReturn(Optional.of(BigDecimal.valueOf(500)));
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getAveragePrice();
+
+        AssertUtil.assertEquals(new BigDecimal("40.68"), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getPrice(servingNumber, ingredients):
+             dish haven't any ingredients
+             => return empty Optional
+            """)
+    public void getPrice1() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).tryBuild();
+
+        Optional<BigDecimal> actual = dish.getPrice(BigDecimal.TEN, Map.of());
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getPrice(servingNumber, ingredients):
+             all dish ingredients haven't suitable products
+             => return empty Optional
+            """)
+    public void getPrice2() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProducts(Mockito.any())
+                ).
+                thenReturn(
+                        Pageable.firstEmptyPage()
+                );
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getPrice(
+                BigDecimal.TEN,
+                Map.of(0, 0,
+                        1, 0,
+                        2, 0)
+        );
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getPrice(servingNumber, ingredients):
+             some dish ingredients have suitable products
+             => return correct result
+            """)
+    public void getPrice3() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
+                ).
+                thenReturn(
+                        Pageable.firstEmptyPage()
+                );
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(createCriteria(1, shopFilter())))
+                ).
+                thenReturn(
+                        Pageable.ofIndex(5, 1).
+                                createPageMetadata(5, 200).
+                                createPage(createProducts(1, 5))
+                );
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+                ).
+                thenReturn(
+                        Pageable.ofIndex(5, 0).
+                                createPageMetadata(5, 200).
+                                createPage(createProducts(1, 5))
+                );
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getPrice(
+                BigDecimal.TEN,
+                Map.of(0, 0,
+                        1, 1,
+                        2, 0)
+        );
+
+        AssertUtil.assertEquals(new BigDecimal("4000"), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getPrice(servingNumber, ingredients):
+             all dish ingredients have suitable products
+             => return correct result
+            """)
+    public void getPrice4() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(createCriteria(4, categoryFilter())))
+                ).
+                thenReturn(
+                        Pageable.ofIndex(5, 4).
+                                createPageMetadata(5, 200).
+                                createPage(createProducts(1, 5))
+                );
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(createCriteria(1, shopFilter())))
+                ).
+                thenReturn(
+                        Pageable.ofIndex(5, 1).
+                                createPageMetadata(5, 200).
+                                createPage(createProducts(1, 5))
+                );
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+                ).
+                thenReturn(
+                        Pageable.ofIndex(5, 0).
+                                createPageMetadata(5, 200).
+                                createPage(createProducts(1, 5))
+                );
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getPrice(
+                BigDecimal.TEN,
+                Map.of(0, 4,
+                        1, 1,
+                        2, 0)
+        );
+
+        AssertUtil.assertEquals(new BigDecimal("6000"), actual.orElseThrow());
+    }
+
+
+    private UUID toUUID(int number) {
+        return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
+    }
 
     private User createUser(int userId) {
         return new User.Builder().
@@ -847,26 +994,12 @@ class DishTest {
                 tryBuild();
     }
 
-    private UUID toUUID(int number) {
-        return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
-    }
-
-    private List<Product> createProducts(int userId, int productNumber) {
-        ArrayList<Product> products = new ArrayList<>();
-
-        for(int i = 1; i <= productNumber; i++) {
-            products.add(createProduct(userId, i).tryBuild());
-        }
-
-        return products;
-    }
-
     private Product.Builder createProduct(int userId, int id) {
         return new Product.Builder().
                 setAppConfiguration(conf).
                 setId(toUUID(id)).
                 setUser(createUser(userId)).
-                setCategory("name " + id).
+                setCategory("category " + id).
                 setShop("shop " + id).
                 setGrade("variety " + id).
                 setManufacturer("manufacturer " + id).
@@ -880,9 +1013,15 @@ class DishTest {
                 addTag("common tag");
     }
 
+    private List<Product> createProducts(int userId, int productsNumber) {
+        return IntStream.rangeClosed(1, productsNumber).
+                mapToObj(i -> createProduct(userId, i).tryBuild()).
+                collect(Collectors.toCollection(ArrayList::new));
+    }
+
     private Dish.Builder createDish(int dishId,
-                            User user,
-                            ProductRepository repository) {
+                                    User user,
+                                    ProductRepository repository) {
         return new Dish.Builder().
                 setId(toUUID(dishId)).
                 setUser(user).
@@ -897,16 +1036,44 @@ class DishTest {
                 addTag("common tag");
     }
 
-    private Criteria createCriteria(int expectedPageNumber) {
+    private DishIngredient.Builder createIngredient(Filter filter) {
+        return new DishIngredient.Builder().
+                setName("some ingredient").
+                setFilter(filter).
+                setQuantity(BigDecimal.TEN).
+                setConfig(conf);
+    }
+    
+    private Criteria createCriteria(int itemIndex, Filter filter) {
         return new Criteria().
-                setPageable(Pageable.ofIndex(5, expectedPageNumber)).
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
+                setPageable(Pageable.ofIndex(5, itemIndex)).
+                setFilter(filter).
                 setSort(Sort.products().asc("price"));
     }
 
+    private Criteria createCriteria(Filter filter) {
+        return new Criteria().setFilter(filter);
+    }
+
+    private Filter categoryFilter() {
+        return Filter.and(
+                Filter.anyCategory("categoryA"),
+                Filter.user(toUUID(1))
+        );
+    }
+
+    private Filter shopFilter() {
+        return Filter.and(
+                Filter.anyShop("shopA"),
+                Filter.user(toUUID(1))
+        );
+    }
+
+    private Filter gradeFilter() {
+        return Filter.and(
+                Filter.anyGrade("gradeA"),
+                Filter.user(toUUID(1))
+        );
+    }
+    
 }

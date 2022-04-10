@@ -42,13 +42,4 @@ public class RuleException extends RuntimeException {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "RuleException{" +
-                "userMessageKey='" + userMessageKey + '\'' +
-                ", constraints=" + Arrays.toString(constraints) +
-                ", message=" + super.toString() +
-                '}';
-    }
-
 }
