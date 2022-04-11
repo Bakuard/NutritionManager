@@ -52,7 +52,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 Rule.of("ProductRepository.product").notNull(product)
         );
 
-        Product oldProduct = getById(product.getId()).orElse(null);
+        Product oldProduct = getById(product.getUser().getId(), product.getId()).orElse(null);
 
         boolean newData = false;
         try {
@@ -72,28 +72,33 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Product tryRemove(UUID productId) {
+    public Product tryRemove(UUID userId, UUID productId) {
         Validator.check(
+                Rule.of("ProductRepository.userId").notNull(userId),
                 Rule.of("ProductRepository.productId").notNull(productId)
         );
 
-        Product product = getById(productId).
+        Product product = getById(userId, productId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown product with id=" + productId).
+                        () -> new ValidateException("Unknown product with id=" + productId + " for userId=" + userId).
                                 addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
 
         statement.update(
-                "DELETE FROM Products WHERE productId = ?;",
-                (PreparedStatement ps) -> ps.setObject(1, productId)
+                "DELETE FROM Products WHERE productId = ? AND userId = ?;",
+                (PreparedStatement ps) -> {
+                    ps.setObject(1, productId);
+                    ps.setObject(2, userId);
+                }
         );
 
         return product;
     }
 
     @Override
-    public Optional<Product> getById(UUID productId) {
+    public Optional<Product> getById(UUID userId, UUID productId) {
         Validator.check(
+                Rule.of("ProductRepository.userId").notNull(userId),
                 Rule.of("ProductRepository.productId").notNull(productId)
         );
 
@@ -105,10 +110,13 @@ public class ProductRepositoryPostgres implements ProductRepository {
                           ON Products.userId = Users.userId
                         LEFT JOIN ProductTags
                           ON Products.productId = ProductTags.productId
-                        WHERE Products.productId = ?
+                        WHERE Products.productId = ? AND Products.userId = ?
                         ORDER BY ProductTags.index;
                     """),
-                (PreparedStatement ps) -> ps.setObject(1, productId),
+                (PreparedStatement ps) -> {
+                    ps.setObject(1, productId);
+                    ps.setObject(2, userId);
+                },
                 (ResultSet rs) -> {
                     Product.Builder builder = null;
 
@@ -150,8 +158,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public Product tryGetById(UUID productId) {
-        return getById(productId).
+    public Product tryGetById(UUID userId, UUID productId) {
+        return getById(userId, productId).
                 orElseThrow(
                         () -> new ValidateException("Unknown product with id = " + productId)
                 );
