@@ -429,16 +429,20 @@ public class DtoMapper {
         List<Filter> filters = new ArrayList<>();
         filters.add(Filter.user(userId));
         filters.add(Filter.anyCategory(dto.getCategory()));
-        if(dto.getGrades() != null) filters.add(Filter.anyGrade(dto.getGrades()));
-        if(dto.getShops() != null) filters.add(Filter.anyShop(dto.getShops()));
-        if(dto.getManufacturers() != null) filters.add(Filter.anyManufacturer(dto.getManufacturers()));
-        if(dto.getTags() != null) filters.add(Filter.minTags(toTags(dto.getTags())));
+        if(dto.getGrades() != null && !dto.getGrades().isEmpty()) {
+            filters.add(Filter.anyGrade(dto.getGrades()));
+        }
+        if(dto.getShops() != null && !dto.getShops().isEmpty()) {
+            filters.add(Filter.anyShop(dto.getShops()));
+        }
+        if(dto.getManufacturers() != null && !dto.getManufacturers().isEmpty()) {
+            filters.add(Filter.anyManufacturer(dto.getManufacturers()));
+        }
+        if(dto.getTags() != null && !dto.getTags().isEmpty()) {
+            filters.add(Filter.minTags(toTags(dto.getTags())));
+        }
 
-        Filter result = null;
-        if(filters.size() == 1) result = filters.get(0);
-        else if(filters.size() > 1) result = Filter.and(filters);
-
-        return result;
+        return Filter.and(filters);
     }
 
     private DishIngredientRequestResponse toDishIngredientRequestResponse(DishIngredient ingredient, int index) {
