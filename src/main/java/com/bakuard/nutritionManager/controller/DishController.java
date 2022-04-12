@@ -150,7 +150,7 @@ public class DishController {
                 UUID id) {
         logger.info("Delete dish by id={}", id);
 
-        Dish dish = dishRepository.tryRemove(id);
+        Dish dish = dishRepository.tryRemove(JwsAuthenticationProvider.getAndClearUserId(), id);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(mapper.toSuccessResponse("dish.delete", response));
@@ -177,7 +177,7 @@ public class DishController {
             UUID id) {
         logger.info("Get dish by id = {}", id);
 
-        Dish dish = dishRepository.tryGetById(id);
+        Dish dish = dishRepository.tryGetById(JwsAuthenticationProvider.getAndClearUserId(), id);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(response);
@@ -204,7 +204,7 @@ public class DishController {
             String name) {
         logger.info("Get dish by name={}", name);
 
-        Dish dish = dishRepository.tryGetByName(name);
+        Dish dish = dishRepository.tryGetByName(JwsAuthenticationProvider.getAndClearUserId(), name);
 
         DishResponse response = mapper.toDishResponse(dish);
         return ResponseEntity.ok(response);
@@ -333,7 +333,9 @@ public class DishController {
     public ResponseEntity<DishProductsListResponse> pickProductsList(@RequestBody DishProductsListRequest dto) {
         logger.info("Pick products list for dish. dto={}", dto);
 
-        DishProductsListResponse response = mapper.toDishProductsListResponse(dto);
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, dto);
+
         return ResponseEntity.ok(response);
     }
 

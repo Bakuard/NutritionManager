@@ -185,8 +185,8 @@ public class DtoMapper {
         return dishes.map(this::toDishForListResponse);
     }
 
-    public DishProductsListResponse toDishProductsListResponse(DishProductsListRequest dto) {
-        Dish dish = dishRepository.tryGetById(dto.getDishId());
+    public DishProductsListResponse toDishProductsListResponse(UUID userId, DishProductsListRequest dto) {
+        Dish dish = dishRepository.tryGetById(userId, dto.getDishId());
 
         DishProductsListResponse response = new DishProductsListResponse();
         response.setDishId(dish.getId());

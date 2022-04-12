@@ -131,7 +131,7 @@ class ProductRepositoryTest {
         Product expected = createProduct(1, user).tryBuild();
 
         commit(() -> repository.save(expected));
-        Product actual = repository.tryGetById(expected.getId());
+        Product actual = repository.tryGetById(user.getId(), expected.getId());
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -164,7 +164,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
         commit(() -> repository.save(expected));
 
-        Product actual = repository.tryGetById(toUUID(3));
+        Product actual = repository.tryGetById(user2.getId(), toUUID(3));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -260,7 +260,7 @@ class ProductRepositoryTest {
         );
         commit(() -> repository.save(expected));
 
-        Product actual = repository.tryGetById(toUUID(1));
+        Product actual = repository.tryGetById(user.getId(), toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -335,113 +335,243 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
         commit(() -> repository.save(product1));
 
-        Product actual = repository.tryGetById(toUUID(1));
+        Product actual = repository.tryGetById(user.getId(), toUUID(1));
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
-    @DisplayName("tryRemove(productId): productId is null => exception")
+    @DisplayName("tryRemove(userId, productId): productId is null => exception")
     void tryRemove1() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.tryRemove(null)),
+                () -> commit(() -> repository.tryRemove(user.getId(), null)),
                 "ProductRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
-    @DisplayName("tryRemove(productId): product with such id not exists in DB => exception")
+    @DisplayName("tryRemove(userId, productId): userId is null => exception")
     void tryRemove2() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.tryRemove(toUUID(10))),
+                () -> commit(() -> repository.tryRemove(null, toUUID(1))),
+                "ProductRepositoryPostgres.tryRemove",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryRemove(userId, productId):
+             product with such id not exists in DB
+             => exception
+            """)
+    void tryRemove3() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.tryRemove(user.getId(), toUUID(10))),
                 "ProductRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
-    @DisplayName("tryRemove(productId): product with such id exists in DB => remove product")
-    void tryRemove3() {
-        User user = createAndSaveUser(1);
-        Product product = createProduct(1, user).tryBuild();
-
-        commit(() -> repository.save(product));
-        commit(() -> repository.tryRemove(toUUID(1)));
-
-        AssertUtil.assertValidateException(
-                () -> commit(() -> repository.tryGetById(toUUID(1))),
-                "ProductRepositoryPostgres.tryGetById"
-        );
-    }
-
-    @Test
-    @DisplayName("tryRemove(productId): product with such id exists in DB => return removed product")
+    @DisplayName("""
+            tryRemove(userId, productId):
+             product with such id exists in DB,
+             user is not owner of this product
+             => exception
+            """)
     void tryRemove4() {
         User user = createAndSaveUser(1);
-        Product expected = createProduct(1, user).tryBuild();
+        commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
 
-        commit(() -> repository.save(expected));
-        Product actual = commit(() -> repository.tryRemove(toUUID(1)));
-
-        AssertUtil.assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("getById(productId): productId is null => exception")
-    void getById1() {
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.getById(null)),
-                "ProductRepositoryPostgres.getById",
-                Constraint.NOT_NULL
+                () -> commit(() -> repository.tryRemove(user.getId(), toUUID(1))),
+                "ProductRepositoryPostgres.tryRemove",
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
-    @DisplayName("getById(productId): not exists product with such id => return empty Optional")
-    void getById2() {
-        Optional<Product> actual = repository.getById(toUUID(256));
+    @DisplayName("""
+            tryRemove(userId, productId):
+             product with such id exists in DB,
+             user is owner of this product
+             => remove product
+            """)
+    void tryRemove5() {
+        User user = createAndSaveUser(1);
+        Product product = createProduct(1, user).tryBuild();
+        commit(() -> repository.save(product));
+
+        commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
+        Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
+
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
-    @DisplayName("getById(productId): exists product with such id => return product")
-    void getById3() {
+    @DisplayName("""
+            tryRemove(userId, productId):
+             product with such id exists in DB,
+             user is owner of this product
+             => return removed product
+            """)
+    void tryRemove6() {
         User user = createAndSaveUser(1);
         Product expected = createProduct(1, user).tryBuild();
         commit(() -> repository.save(expected));
 
-        Product actual = commit(() -> repository.getById(toUUID(1))).orElseThrow();
+        Product actual = commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
-    @DisplayName("tryGetById(productId): productId is null => exception")
-    void tryGetById1() {
+    @DisplayName("getById(userId, productId): productId is null => exception")
+    void getById1() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.tryGetById(null)),
+                () -> commit(() -> repository.getById(user.getId(), null)),
                 "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
 
     @Test
-    @DisplayName("tryGetById(productId): not exists product with such id => exception")
-    void tryGetById2() {
+    @DisplayName("getById(userId, productId): userId is null => exception")
+    void getById2() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.tryGetById(toUUID(256))),
+                () -> commit(() -> repository.getById(null, toUUID(1))),
+                "ProductRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, productId):
+             product with such id not exists in DB
+             => return empty Optional
+            """)
+    void getById3() {
+        User user = createAndSaveUser(1);
+
+        Optional<Product> actual = repository.getById(user.getId(), toUUID(256));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, productId):
+             product with such id exists in DB,
+             user is not owner of this product
+             => return empty Optional
+            """)
+    void getById4() {
+        User user = createAndSaveUser(1);
+        commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
+
+        Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, productId):
+             product with such id exists in DB,
+             user is owner of this product
+             => return correct result
+            """)
+    void getById5() {
+        User user = createAndSaveUser(1);
+        Product expected = createProduct(1, user).tryBuild();
+        commit(() -> repository.save(expected));
+
+        Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
+
+        AssertUtil.assertEquals(expected, actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("tryGetById(userId, productId): productId is null => exception")
+    void tryGetById1() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.tryGetById(user.getId(), null)),
+                "ProductRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("tryGetById(userId, productId): userId is null => exception")
+    void tryGetById2() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.tryGetById(null, toUUID(1))),
+                "ProductRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, productId):
+             product with such id not exists in DB
+             => exception
+            """)
+    void tryGetById3() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.tryGetById(user.getId(), toUUID(256))),
                 "ProductRepositoryPostgres.tryGetById"
         );
     }
 
     @Test
-    @DisplayName("tryGetById(productId): exists product with such id => return product")
-    void tryGetById3() {
+    @DisplayName("""
+            tryGetById(userId, productId):
+             product with such id exists in DB,
+             user is not owner of this product
+             => exception
+            """)
+    void tryGetById4() {
+        User user = createAndSaveUser(1);
+        commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
+
+        AssertUtil.assertValidateException(
+                () -> commit(() -> repository.tryGetById(user.getId(), toUUID(1))),
+                "ProductRepositoryPostgres.tryGetById"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, productId):
+             product with such id exists in DB,
+             user is owner of this product
+             => return correct result
+            """)
+    void tryGetById5() {
         User user = createAndSaveUser(1);
         Product expected = createProduct(1, user).tryBuild();
         commit(() -> repository.save(expected));
 
-        Product actual = commit(() -> repository.tryGetById(toUUID(1)));
+        Product actual = repository.tryGetById(user.getId(), toUUID(1));
 
         AssertUtil.assertEquals(expected, actual);
     }
