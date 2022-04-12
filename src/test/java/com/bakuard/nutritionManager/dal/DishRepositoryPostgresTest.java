@@ -10,10 +10,11 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.Constraint;
-import com.bakuard.nutritionManager.model.filters.*;
+import com.bakuard.nutritionManager.model.filters.Filter;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.validation.Constraint;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -152,7 +153,7 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(1, user);
 
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.tryGetById(toUUID(1));
+        Dish actual = dishRepository.tryGetById(user.getId(), toUUID(1));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -187,7 +188,7 @@ class DishRepositoryPostgresTest {
         Dish expected = createDish(7, user);
 
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.tryGetById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -271,7 +272,7 @@ class DishRepositoryPostgresTest {
         expected.removeTag(new Tag("tag A"));
         expected.addTag(new Tag("tag Z"));
         commit(() -> dishRepository.save(expected));
-        Dish actual = dishRepository.tryGetById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
         AssertUtil.assertEquals(expected, actual);
     }
@@ -336,19 +337,21 @@ class DishRepositoryPostgresTest {
         commit(() -> dishRepository.save(expected));
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.tryGetById(toUUID(7));
+        Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            tryRemove(dishId):
+            tryRemove(userId, dishId):
              dishId is null
              => exception
             """)
     public void tryRemove1() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> dishRepository.tryRemove(null),
+                () -> dishRepository.tryRemove(user.getId(), null),
                 "DishRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
@@ -356,16 +359,30 @@ class DishRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
-            tryRemove(dishId):
-             dish with such id not exists
+            tryRemove(userId, dishId):
+             userId is null
              => exception
             """)
     public void tryRemove2() {
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryRemove(null, toUUID(1)),
+                "DishRepositoryPostgres.tryRemove",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryRemove(userId, dishId):
+             dish with such id not exists in DB
+             => exception
+            """)
+    public void tryRemove3() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
 
         AssertUtil.assertValidateException(
-                () -> dishRepository.tryRemove(toUUID(100)),
+                () -> dishRepository.tryRemove(user.getId(), toUUID(100)),
                 "DishRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
@@ -373,48 +390,68 @@ class DishRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
-            tryRemove(dishId):
-             dish with such id exists
-             => remove dish
+            tryRemove(userId, dishId):
+             dish with such id exists in DB,
+             user is not owner of this dish
+             => exception
             """)
-    public void tryRemove3() {
+    public void tryRemove4() {
         User user = createAndSaveUser(1);
-        Dish expected = createDish(100, user);
-        commit(() -> dishRepository.save(expected));
-
-        commit(() -> dishRepository.tryRemove(toUUID(100)));
+        commit(() -> dishRepository.save(createDish(1, createAndSaveUser(2))));
 
         AssertUtil.assertValidateException(
-                () -> dishRepository.tryGetById(toUUID(100)),
-                "DishRepositoryPostgres.tryGetById"
+                () -> dishRepository.tryRemove(user.getId(), toUUID(1)),
+                "DishRepositoryPostgres.tryRemove",
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
     @Test
     @DisplayName("""
-            tryRemove(dishId):
-             dish with such id exists
-             => return removed dish
+            tryRemove(userId, dishId):
+             dish with such id exists in DB,
+             user is owner of this dish
+             => remove dish
             """)
-    public void tryRemove4() {
+    public void tryRemove5() {
         User user = createAndSaveUser(1);
-        Dish expected = createDish(100, user);
+        Dish expected = createDish(1, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.tryRemove(toUUID(100));
+        commit(() -> dishRepository.tryRemove(user.getId(), toUUID(1)));
+        Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(1));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            tryRemove(userId, dishId):
+             dish with such id exists in DB,
+             user is owner of this dish
+             => return removed dish
+            """)
+    public void tryRemove6() {
+        User user = createAndSaveUser(1);
+        Dish expected = createDish(1, user);
+        commit(() -> dishRepository.save(expected));
+
+        Dish actual = dishRepository.tryRemove(user.getId(), toUUID(1));
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            getById(dishId):
+            getById(userId, dishId):
              dishId is null
              => exception
             """)
     public void getById1() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> dishRepository.getById(null),
+                () -> dishRepository.getById(user.getId(), null),
                 "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
@@ -422,41 +459,78 @@ class DishRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
-            getById(dishId):
+            getById(userId, dishId):
+             userId is null
+             => exception
+            """)
+    public void getById2() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getById(null, toUUID(1)),
+                "DishRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, dishId):
              not exists dish with such id
              => return empty Optional
             """)
-    public void getById2() {
-        Optional<Dish> actual = dishRepository.getById(toUUID(100));
+    public void getById3() {
+        User user = createAndSaveUser(1);
+
+        Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(100));
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getById(dishId):
-             exists dish with such id
-             => return dish
+            getById(userId, dishId):
+             dish with such id exists in DB,
+             user is not owner of this dish
+             => return empty Optional
             """)
-    public void getById3() {
+    public void getById4() {
+        User user = createAndSaveUser(1);
+        commit(() -> dishRepository.save(createDish(1, createAndSaveUser(2))));
+
+        Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(1));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, dishId):
+             dish with such id exists in DB,
+             user is owner of this dish
+             => return correct result
+            """)
+    public void getById5() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getById(toUUID(100)).orElseThrow();
+        Dish actual = dishRepository.getById(user.getId(), toUUID(100)).orElseThrow();
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            tryGetById(dishId):
+            tryGetById(userId, dishId):
              dishId is null
              => exception
             """)
     public void tryGetById1() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> dishRepository.tryGetById(null),
+                () -> dishRepository.tryGetById(user.getId(), null),
                 "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
@@ -464,42 +538,80 @@ class DishRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
-            tryGetById(dishId):
-             not exists dish with such id
+            tryGetById(userId, dishId):
+             userId is null
              => exception
             """)
     public void tryGetById2() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> dishRepository.tryGetById(toUUID(100)),
+                () -> dishRepository.tryGetById(null, toUUID(1)),
+                "DishRepositoryPostgres.getById",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, dishId):
+             not exists dish with such id
+             => exception
+            """)
+    public void tryGetById3() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetById(user.getId(), toUUID(100)),
                 "DishRepositoryPostgres.tryGetById"
         );
     }
 
     @Test
     @DisplayName("""
-            tryGetById(dishId):
-             exists dish with such id
-             => return dish
+            tryGetById(userId, dishId):
+             exists dish with such id,
+             user is not owner of this dish
+             => exception
             """)
-    public void tryGetById3() {
+    public void tryGetById4() {
+        User user = createAndSaveUser(1);
+        commit(() -> dishRepository.save(createDish(1, createAndSaveUser(2))));
+
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetById(user.getId(), toUUID(1)),
+                "DishRepositoryPostgres.tryGetById"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, dishId):
+             exists dish with such id,
+             user is owner of this dish
+             => return correct result
+            """)
+    public void tryGetById5() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.tryGetById(toUUID(100));
+        Dish actual = dishRepository.tryGetById(user.getId(), toUUID(100));
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            getByName(name):
+            getByName(userId, name):
              name is null
              => exception
             """)
     public void getByName1() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> dishRepository.getByName(null),
+                () -> dishRepository.getByName(user.getId(), null),
                 "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
@@ -507,12 +619,30 @@ class DishRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
-            getByName(name):
+            getByName(userId, name):
+             userId is null
+             => exception
+            """)
+    public void getByName2() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> dishRepository.getByName(null, "dish A"),
+                "DishRepositoryPostgres.getByName",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(userId, name):
              not exists dish with such name
              => return empty Optional
             """)
-    public void getByName2() {
-        Optional<Dish> actual =  dishRepository.getByName("unknown dish");
+    public void getByName3() {
+        User user = createAndSaveUser(1);
+
+        Optional<Dish> actual =  dishRepository.getByName(user.getId(), "unknown dish");
 
         Assertions.assertTrue(actual.isEmpty());
     }
@@ -520,28 +650,47 @@ class DishRepositoryPostgresTest {
     @Test
     @DisplayName("""
             getByName(name):
-             exists dish with such name
-             => exception
+             exists dish with such name,
+             user is not owner of this dish
+             => return empty Optional
             """)
-    public void getByName3() {
+    public void getByName4() {
+        User user = createAndSaveUser(1);
+        commit(() -> dishRepository.save(createDish(1, createAndSaveUser(2))));
+
+        Optional<Dish> actual = dishRepository.getByName(user.getId(), "dish A");
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(name):
+             exists dish with such name,
+             user is owner of this dish
+             => return correct result
+            """)
+    public void getByName5() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.getByName("dish A").orElseThrow();
+        Dish actual = dishRepository.getByName(user.getId(), "dish A").orElseThrow();
 
         AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
-            tryGetByName(name):
+            tryGetByName(userId, name):
              name is null
              => exception
             """)
     public void tryGetByName1() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> dishRepository.tryGetByName(null),
+                () -> dishRepository.tryGetByName(user.getId(), null),
                 "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
@@ -549,29 +698,65 @@ class DishRepositoryPostgresTest {
 
     @Test
     @DisplayName("""
-            tryGetByName(name):
-             not exists dish with such name
+            tryGetByName(userId, name):
+             userId is null
              => exception
             """)
     public void tryGetByName2() {
+        User user = createAndSaveUser(1);
+
         AssertUtil.assertValidateException(
-                () -> dishRepository.tryGetByName("unknown dish"),
+                () -> dishRepository.tryGetByName(null, "dish A"),
+                "DishRepositoryPostgres.getByName",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(userId, name):
+             not exists dish with such name
+             => exception
+            """)
+    public void tryGetByName3() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetByName(user.getId(), "unknown dish"),
                 "DishRepositoryPostgres.tryGetByName"
         );
     }
 
     @Test
     @DisplayName("""
-            tryGetByName(name):
-             exists dish with such name
-             => exception
+            tryGetByName(userId, name):
+             exists dish with such name,
+             user is not owner of this dish
+             => return correct result
             """)
-    public void tryGetByName3() {
+    public void tryGetByName4() {
+        User user = createAndSaveUser(1);
+        commit(() -> dishRepository.save(createDish(1, createAndSaveUser(2))));
+
+        AssertUtil.assertValidateException(
+                () -> dishRepository.tryGetByName(user.getId(), "dish A"),
+                "DishRepositoryPostgres.tryGetByName"
+        );
+    }
+    
+    @Test
+    @DisplayName("""
+            tryGetByName(userId, name):
+             exists dish with such name,
+             user is owner of this dish
+             => return correct result
+            """)
+    public void tryGetByName5() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(100, user);
         commit(() -> dishRepository.save(expected));
 
-        Dish actual = dishRepository.tryGetByName("dish A");
+        Dish actual = dishRepository.tryGetByName(user.getId(), "dish A");
 
         AssertUtil.assertEquals(expected, actual);
     }

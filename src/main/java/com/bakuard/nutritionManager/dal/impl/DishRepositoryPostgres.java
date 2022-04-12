@@ -64,7 +64,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 Rule.of("DishRepository.dish").notNull(dish)
         );
 
-        Dish oldDish = getById(dish.getId()).orElse(null);
+        Dish oldDish = getById(dish.getUser().getId(), dish.getId()).orElse(null);
 
         boolean newData = false;
         try {
@@ -84,8 +84,9 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Optional<Dish> getById(UUID dishId) {
+    public Optional<Dish> getById(UUID userId, UUID dishId) {
         Validator.check(
+                Rule.of("DishRepository.userId").notNull(userId),
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
@@ -108,11 +109,14 @@ public class DishRepositoryPostgres implements DishRepository {
                                         ON Dishes.dishId = DishTags.dishId
                                     LEFT JOIN DishIngredients
                                         ON Dishes.dishId = DishIngredients.dishId
-                                    WHERE Dishes.dishId = ?
+                                    WHERE Dishes.dishId = ? AND Dishes.userId = ?
                                     ORDER BY DishTags.index, DishIngredients.index;
                                 """
                 ),
-                (PreparedStatement ps) -> ps.setObject(1, dishId),
+                (PreparedStatement ps) -> {
+                    ps.setObject(1, dishId);
+                    ps.setObject(2, userId);
+                },
                 (ResultSet rs) -> {
                     Dish.Builder builder = null;
 
@@ -158,8 +162,9 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Optional<Dish> getByName(String name) {
+    public Optional<Dish> getByName(UUID userId, String name) {
         Validator.check(
+                Rule.of("DishRepository.userId").notNull(userId),
                 Rule.of("DishRepository.name").notNull(name)
         );
 
@@ -182,11 +187,14 @@ public class DishRepositoryPostgres implements DishRepository {
                                         ON Dishes.dishId = DishTags.dishId
                                     LEFT JOIN DishIngredients
                                         ON Dishes.dishId = DishIngredients.dishId
-                                    WHERE Dishes.name = ?
+                                    WHERE Dishes.name = ? AND Dishes.userId = ?
                                     ORDER BY DishTags.index, DishIngredients.index;
                                 """
                 ),
-                (PreparedStatement ps) -> ps.setObject(1, name),
+                (PreparedStatement ps) -> {
+                    ps.setObject(1, name);
+                    ps.setObject(2, userId);
+                },
                 (ResultSet rs) -> {
                     Dish.Builder builder = null;
 
@@ -232,38 +240,42 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public Dish tryRemove(UUID dishId) {
+    public Dish tryRemove(UUID userId, UUID dishId) {
         Validator.check(
+                Rule.of("DishRepository.userId").notNull(userId),
                 Rule.of("DishRepository.dishId").notNull(dishId)
         );
 
-        Dish dish = getById(dishId).
+        Dish dish = getById(userId, dishId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown dish with id=" + dishId).
+                        () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId).
                                 addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
 
         statement.update(
-                "DELETE FROM Dishes WHERE dishId = ?;",
-                (PreparedStatement ps) -> ps.setObject(1, dishId)
+                "DELETE FROM Dishes WHERE dishId = ? AND userId = ?;",
+                (PreparedStatement ps) -> {
+                    ps.setObject(1, dishId);
+                    ps.setObject(2, userId);
+                }
         );
 
         return dish;
     }
 
     @Override
-    public Dish tryGetById(UUID dishId) {
-        return getById(dishId).
+    public Dish tryGetById(UUID userId, UUID dishId) {
+        return getById(userId, dishId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown dish with id=" + dishId)
+                        () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId)
                 );
     }
 
     @Override
-    public Dish tryGetByName(String name) {
-        return getByName(name).
+    public Dish tryGetByName(UUID userId, String name) {
+        return getByName(userId, name).
                 orElseThrow(
-                        () -> new ValidateException("Unknown dish with name=" + name)
+                        () -> new ValidateException("Unknown dish with name=" + name + " for userId=" + userId)
                 );
     }
 

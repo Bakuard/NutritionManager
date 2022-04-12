@@ -391,7 +391,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
 
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.tryRemove(user.getId(), toUUID(10))),
+                () -> commit(() -> repository.tryRemove(user.getId(), toUUID(1))),
                 "ProductRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
@@ -466,6 +466,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(256));
+
         Assertions.assertTrue(actual.isEmpty());
     }
 
@@ -481,6 +482,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
+
         Assertions.assertTrue(actual.isEmpty());
     }
 

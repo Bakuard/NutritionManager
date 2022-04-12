@@ -161,7 +161,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Product tryGetById(UUID userId, UUID productId) {
         return getById(userId, productId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown product with id = " + productId)
+                        () -> new ValidateException("Unknown product with id = " + productId + " for userId=" + userId)
                 );
     }
 
