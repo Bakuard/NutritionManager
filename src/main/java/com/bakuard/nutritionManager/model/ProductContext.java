@@ -71,15 +71,15 @@ public class ProductContext {
         Container<List<Tag>> container = new Container<>();
 
         Validator.check(
-                Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category)),
-                Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop)),
-                Rule.of("Product.grade").notNull(grade).and(v -> v.notBlank(grade)),
-                Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)),
-                Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit)),
-                Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price)),
-                Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)),
-                Rule.of("Product.config").notNull(config),
-                Rule.of("Product.tags").doesNotThrow(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container.get()))
+                Rule.of("ProductContext.category").notNull(category).and(r -> r.notBlank(category)),
+                Rule.of("ProductContext.shop").notNull(shop).and(v -> v.notBlank(shop)),
+                Rule.of("ProductContext.grade").notNull(grade).and(v -> v.notBlank(grade)),
+                Rule.of("ProductContext.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)),
+                Rule.of("ProductContext.unit").notNull(unit).and(v -> v.notBlank(unit)),
+                Rule.of("ProductContext.price").notNull(price).and(v -> v.notNegative(price)),
+                Rule.of("ProductContext.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)),
+                Rule.of("ProductContext.config").notNull(config),
+                Rule.of("ProductContext.tags").doesNotThrow(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container.get()))
         );
 
         this.category = category;
@@ -106,7 +106,7 @@ public class ProductContext {
      */
     public ProductContext setCategory(String category) {
         Validator.check(
-                Rule.of("Product.category").notNull(category).and(r -> r.notBlank(category))
+                Rule.of("ProductContext.category").notNull(category).and(r -> r.notBlank(category))
         );
 
         String resultCategory = category.trim();
@@ -137,7 +137,7 @@ public class ProductContext {
      */
     public ProductContext setShop(String shop) {
         Validator.check(
-                Rule.of("Product.shop").notNull(shop).and(v -> v.notBlank(shop))
+                Rule.of("ProductContext.shop").notNull(shop).and(v -> v.notBlank(shop))
         );
 
         String resultShop = shop.trim();
@@ -168,7 +168,7 @@ public class ProductContext {
      */
     public ProductContext setGrade(String grade) {
         Validator.check(
-                Rule.of("Product.variety").notNull(grade).and(v -> v.notBlank(grade))
+                Rule.of("ProductContext.grade").notNull(grade).and(v -> v.notBlank(grade))
         );
 
         String resultVariety = grade.trim();
@@ -199,7 +199,7 @@ public class ProductContext {
      */
     public ProductContext setManufacturer(String manufacturer) {
         Validator.check(
-                Rule.of("Product.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer))
+                Rule.of("ProductContext.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer))
         );
 
         String resultManufacturer = manufacturer.trim();
@@ -230,7 +230,7 @@ public class ProductContext {
      */
     public ProductContext setUnit(String unit) {
         Validator.check(
-                Rule.of("Product.unit").notNull(unit).and(v -> v.notBlank(unit))
+                Rule.of("ProductContext.unit").notNull(unit).and(v -> v.notBlank(unit))
         );
 
         String resultUnit = unit.trim();
@@ -261,7 +261,7 @@ public class ProductContext {
      */
     public ProductContext setPrice(BigDecimal price) {
         Validator.check(
-                Rule.of("Product.price").notNull(price).and(v -> v.notNegative(price))
+                Rule.of("ProductContext.price").notNull(price).and(v -> v.notNegative(price))
         );
 
         if(this.price.equals(price)) return this;
@@ -290,7 +290,7 @@ public class ProductContext {
      */
     public ProductContext setPackingSize(BigDecimal packingSize) {
         Validator.check(
-                Rule.of("Product.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize))
+                Rule.of("ProductContext.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize))
         );
 
         if(this.packingSize.equals(packingSize)) return this;
@@ -318,8 +318,8 @@ public class ProductContext {
      */
     public ProductContext addTag(Tag tag) {
         Validator.check(
-                Rule.of("Product.tag").notNull(tag),
-                Rule.of("Product.tags").notContainsItem(tags, tag)
+                Rule.of("ProductContext.tag").notNull(tag),
+                Rule.of("ProductContext.tags").notContainsItem(tags, tag)
         );
 
         List<Tag> tags = new ArrayList<>(this.tags);
