@@ -218,10 +218,10 @@ public class DtoMapper {
         filters.add(Filter.user(userId));
         if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
         if(category != null) filters.add(Filter.anyCategory(category));
-        if(shops != null) filters.add(Filter.anyShop(shops));
-        if(grades != null) filters.add(Filter.anyGrade(grades));
-        if(manufacturers != null) filters.add(Filter.anyManufacturer(manufacturers));
-        if(tags != null) filters.add(Filter.minTags(toTags(tags)));
+        if(shops != null && !shops.isEmpty()) filters.add(Filter.anyShop(shops));
+        if(grades != null && !grades.isEmpty()) filters.add(Filter.anyGrade(grades));
+        if(manufacturers != null && !manufacturers.isEmpty()) filters.add(Filter.anyManufacturer(manufacturers));
+        if(tags != null && !tags.isEmpty()) filters.add(Filter.minTags(toTags(tags)));
 
         Filter filter = null;
         if(filters.size() == 1) filter = filters.get(0);
@@ -229,7 +229,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(Pageable.of(size, page)).
-                setSort(Sort.products(List.of(sortRule))).
+                setSort(Sort.products(sortRule != null ? List.of(sortRule) : List.of())).
                 setFilter(filter);
     }
 
@@ -242,8 +242,12 @@ public class DtoMapper {
         List<Filter> filters = new ArrayList<>();
         filters.add(Filter.user(userId));
 
-        if(productCategories != null) filters.add(Filter.anyIngredient(productCategories));
-        if(tags != null) filters.add(Filter.minTags(toTags(tags)));
+        if(productCategories != null && !productCategories.isEmpty()) {
+            filters.add(Filter.anyIngredient(productCategories));
+        }
+        if(tags != null && !tags.isEmpty()) {
+            filters.add(Filter.minTags(toTags(tags)));
+        }
 
         Filter filter = null;
         if(filters.size() == 1) filter = filters.get(0);
@@ -251,7 +255,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(Pageable.of(size, page)).
-                setSort(Sort.dishes(List.of(sortRule))).
+                setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
                 setFilter(filter);
     }
 
@@ -425,16 +429,20 @@ public class DtoMapper {
         List<Filter> filters = new ArrayList<>();
         filters.add(Filter.user(userId));
         filters.add(Filter.anyCategory(dto.getCategory()));
-        if(dto.getGrades() != null) filters.add(Filter.anyGrade(dto.getGrades()));
-        if(dto.getShops() != null) filters.add(Filter.anyShop(dto.getShops()));
-        if(dto.getManufacturers() != null) filters.add(Filter.anyManufacturer(dto.getManufacturers()));
-        if(dto.getTags() != null) filters.add(Filter.minTags(toTags(dto.getTags())));
+        if(dto.getGrades() != null && !dto.getGrades().isEmpty()) {
+            filters.add(Filter.anyGrade(dto.getGrades()));
+        }
+        if(dto.getShops() != null && !dto.getShops().isEmpty()) {
+            filters.add(Filter.anyShop(dto.getShops()));
+        }
+        if(dto.getManufacturers() != null && !dto.getManufacturers().isEmpty()) {
+            filters.add(Filter.anyManufacturer(dto.getManufacturers()));
+        }
+        if(dto.getTags() != null && !dto.getTags().isEmpty()) {
+            filters.add(Filter.minTags(toTags(dto.getTags())));
+        }
 
-        Filter result = null;
-        if(filters.size() == 1) result = filters.get(0);
-        else if(filters.size() > 1) result = Filter.and(filters);
-
-        return result;
+        return Filter.and(filters);
     }
 
     private DishIngredientRequestResponse toDishIngredientRequestResponse(DishIngredient ingredient, int index) {
