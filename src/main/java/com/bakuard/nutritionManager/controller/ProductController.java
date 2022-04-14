@@ -31,10 +31,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(
-        name = "Котроллер продуктов",
-        description = "Предоставляет CRUD операции для продуктов."
-)
+@Tag(name = "Котроллер продуктов")
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -267,7 +264,7 @@ public class ProductController {
             @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
             int page,
             @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]. Не может быть null.", required = true)
+            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 30]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",

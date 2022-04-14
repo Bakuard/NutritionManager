@@ -1,43 +1,55 @@
 package com.bakuard.nutritionManager.dto.menus;
 
-import com.bakuard.nutritionManager.dto.dishes.DishForMenuProductsListRequest;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
+@Schema(description = "Данные запроса на получение списка продуктов для меню")
 public class MenuProductsListRequest {
 
-    private BigDecimal servingNumber;
-    private BigDecimal totalPrice;
-    private List<DishForMenuProductsListRequest> productIndexes;
+    @Schema(description = "Уникальный идентфикатор меню. Не может быть null.")
+    private UUID menuId;
+    @Schema(description = "Кол-во данного меню на которое рассчитывается список докупаемых продуктов. Не может быть null.")
+    private BigDecimal number;
+    @Schema(description = """
+            Каждый элемент этого списка указывает - какой продукт выбрать для конкретного ингредиента одного
+             из блюд меню. Если для одного из ингредиентов блюда не указан продукт, то в качестве значения по
+             умолчанию будет выбран самый дешевый из всех продуктов соответствующих данному ингредиенту данного
+             блюда. Если для одного и того же ингредиента данного блюда указанно несколько продуктов, то будет
+             выбран последний продукт указанный в данном списке. Данный список может быть пустым. Не должен
+             принимать значение null.
+            """)
+    private List<DishProductRequest> products;
 
     public MenuProductsListRequest() {
 
     }
 
-    public BigDecimal getServingNumber() {
-        return servingNumber;
+    public UUID getMenuId() {
+        return menuId;
     }
 
-    public void setServingNumber(BigDecimal servingNumber) {
-        this.servingNumber = servingNumber;
+    public void setMenuId(UUID menuId) {
+        this.menuId = menuId;
     }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
+    public BigDecimal getNumber() {
+        return number;
     }
 
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setNumber(BigDecimal number) {
+        this.number = number;
     }
 
-    public List<DishForMenuProductsListRequest> getProductIndexes() {
-        return productIndexes;
+    public List<DishProductRequest> getProducts() {
+        return products;
     }
 
-    public void setProductIndexes(List<DishForMenuProductsListRequest> productIndexes) {
-        this.productIndexes = productIndexes;
+    public void setProducts(List<DishProductRequest> products) {
+        this.products = products;
     }
 
     @Override
@@ -45,22 +57,22 @@ public class MenuProductsListRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MenuProductsListRequest that = (MenuProductsListRequest) o;
-        return Objects.equals(servingNumber, that.servingNumber) &&
-                Objects.equals(totalPrice, that.totalPrice) &&
-                Objects.equals(productIndexes, that.productIndexes);
+        return Objects.equals(menuId, that.menuId) &&
+                Objects.equals(number, that.number) &&
+                Objects.equals(products, that.products);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(servingNumber, totalPrice, productIndexes);
+        return Objects.hash(menuId, number, products);
     }
 
     @Override
     public String toString() {
         return "MenuProductsListRequest{" +
-                "servingNumber=" + servingNumber +
-                ", totalPrice=" + totalPrice +
-                ", productIndexes=" + productIndexes +
+                "menuId=" + menuId +
+                ", number=" + number +
+                ", products=" + products +
                 '}';
     }
 

@@ -3,7 +3,7 @@ package com.bakuard.nutritionManager.dto.dishes;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -15,14 +15,13 @@ public class DishProductsListRequest {
     @Schema(description = "Кол-во порций блюда на которое рассчитывается список докупаемых продуктов. Не может быть null.")
     private BigDecimal servingNumber;
     @Schema(description = """
-            Для каждого ингредиента блюда выбирается один из соответствующих ему продуктов для составления
-             списка докупаемых продуктов. Задаваемый здесь ассоциатвный массив указывает - для какого
-             ингредиента какой продукт отображать. Ключом в ассоциатвном массиве является порядковый номер
-             ингредиента (начинается с 0), а значением порядковый номер одного из продуктов соответствующего
-             ингредиента (начинается с 0). Параметр не может быть null. Необходимо задавать продукты для
-             всех ингредиентов.
+            Каждый элемент этого списка указывает - какой продукт выбрать для конкретного ингредиента блюда. Если
+             для одного из ингредиентов блюда не указан продукт, то в качестве значения по умолчанию будет выбран
+             самый дешевый из всех продуктов соответствующих данному ингредиенту. Если для одного и того же
+             ингредиента указанно несколько продуктов, то будет выбран последний продукт указанный в данном списке.
+             Данный список может быть пустым. Не должен принимать значение null.
             """)
-    private Map<Integer, Integer> ingredients;
+    private List<DishIngredientProductRequest> products;
 
     public DishProductsListRequest() {
 
@@ -44,12 +43,12 @@ public class DishProductsListRequest {
         this.servingNumber = servingNumber;
     }
 
-    public Map<Integer, Integer> getIngredients() {
-        return ingredients;
+    public List<DishIngredientProductRequest> getProducts() {
+        return products;
     }
 
-    public void setIngredients(Map<Integer, Integer> ingredients) {
-        this.ingredients = ingredients;
+    public void setProducts(List<DishIngredientProductRequest> products) {
+        this.products = products;
     }
 
     @Override
@@ -59,12 +58,12 @@ public class DishProductsListRequest {
         DishProductsListRequest that = (DishProductsListRequest) o;
         return Objects.equals(dishId, that.dishId) &&
                 Objects.equals(servingNumber, that.servingNumber) &&
-                Objects.equals(ingredients, that.ingredients);
+                Objects.equals(products, that.products);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishId, servingNumber, ingredients);
+        return Objects.hash(dishId, servingNumber, products);
     }
 
     @Override
@@ -72,7 +71,7 @@ public class DishProductsListRequest {
         return "DishProductListRequest{" +
                 "dishId=" + dishId +
                 ", servingNumber=" + servingNumber +
-                ", ingredients=" + ingredients +
+                ", ingredients=" + products +
                 '}';
     }
 

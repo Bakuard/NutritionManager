@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
-import com.bakuard.nutritionManager.dto.products.ProductAsDishIngredientResponse;
+import com.bakuard.nutritionManager.model.util.Page;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -18,17 +18,15 @@ public class DishProductsListResponse {
     private BigDecimal servingNumber;
     @Schema(description = """
             Общая стоимость всех докупаемых продуктов с учетом кол-ва порций блюда. Если блюдо не содержит ни
-             одного ингредиента или всем ингредиентам блюда не соответствует ни одни продукт - принимает значение
+             одного ингредиента или всем ингредиентам блюда не соответствует ни один продукт - принимает значение
              null.
             """)
     private BigDecimal totalPrice;
     @Schema(description = """
-            Список докупаемых продуктов блюда. Индекс каждого продукта в этом списке соответствует
-             ингредиенту блюда с таким же индексом. Если в запросе на получение списка докупаемых
-             продуктов не запрашивался продукт для некоторого ингредиента или этому ингредиенту не
-             соответствует ни один продукт - то в соответствующей позиции данного списка будет null.
+            Каждый элемент этого списка представляет собой все возможные докупаемые продукты для ингредиента блюда,
+             индекс которого равен порядковому номеру соответствующего элемента в списке.
             """)
-    private List<ProductAsDishIngredientResponse> ingredients;
+    private List<Page<ProductAsDishIngredientResponse>> products;
 
     public DishProductsListResponse() {
 
@@ -58,12 +56,12 @@ public class DishProductsListResponse {
         this.totalPrice = totalPrice;
     }
 
-    public List<ProductAsDishIngredientResponse> getIngredients() {
-        return ingredients;
+    public List<Page<ProductAsDishIngredientResponse>> getProducts() {
+        return products;
     }
 
-    public void setIngredients(List<ProductAsDishIngredientResponse> ingredients) {
-        this.ingredients = ingredients;
+    public void setProducts(List<Page<ProductAsDishIngredientResponse>> products) {
+        this.products = products;
     }
 
     @Override
@@ -74,12 +72,12 @@ public class DishProductsListResponse {
         return Objects.equals(dishId, that.dishId) &&
                 Objects.equals(servingNumber, that.servingNumber) &&
                 Objects.equals(totalPrice, that.totalPrice) &&
-                Objects.equals(ingredients, that.ingredients);
+                Objects.equals(products, that.products);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishId, servingNumber, totalPrice, ingredients);
+        return Objects.hash(dishId, servingNumber, totalPrice, products);
     }
 
     @Override
@@ -88,7 +86,7 @@ public class DishProductsListResponse {
                 "dishId=" + dishId +
                 ", servingNumber=" + servingNumber +
                 ", totalPrice=" + totalPrice +
-                ", ingredients=" + ingredients +
+                ", ingredients=" + products +
                 '}';
     }
 

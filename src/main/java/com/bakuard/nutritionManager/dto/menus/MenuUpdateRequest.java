@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.dto.menus;
 
-import com.bakuard.nutritionManager.dto.users.UserResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -8,33 +7,29 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Schema(description = """
-        Возвращаемые подробные данные о меню.
+        Данные используемые в запросе на обновление меню
         """)
-public class MenuResponse {
+public class MenuUpdateRequest {
 
-    @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Menu.")
-    private String type;
-    @Schema(description = "Уникальный идентификатор меню.")
+    @Schema(description = "Уникальный идентификатор меню. Не может быть null.")
     private UUID id;
-    @Schema(description = "Данные пользователя, которому принадлежит меню.")
-    private UserResponse user;
-    @Schema(description = "Наименование меню.")
+    @Schema(description = "Наименование данного меню. Не может быть null.")
     private String name;
-    @Schema(description = "Путь к изображению данного меню.")
+    @Schema(description = "Путь к изображению данного меню")
     private String imageUrl;
-    @Schema(description = "Описание данного меню.")
+    @Schema(description = "Описание данного меню")
     private String description;
-    @Schema(description = "Блюда входящие в состав данного меню.")
+    @Schema(description = "Блюда входящие в данное меню. Не может быть null. Допускается пустой список блюд.")
     private List<MenuItemRequestResponse> items;
-    @Schema(description = "Теги данного меню.")
+    @Schema(description = """
+            Теги указанные для данного меню. Не может быть null. Допускается пустой список тегов.
+             Ограничения для тегов: все теги должны быть уникальны, теги не могут иметь значение null и
+             обязаны содержать как минимум один отображаемый символ.
+            """)
     private List<String> tags;
 
-    public MenuResponse() {
-        type = "Menu";
-    }
+    public MenuUpdateRequest() {
 
-    public String getType() {
-        return type;
     }
 
     public UUID getId() {
@@ -43,14 +38,6 @@ public class MenuResponse {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public UserResponse getUser() {
-        return user;
-    }
-
-    public void setUser(UserResponse user) {
-        this.user = user;
     }
 
     public String getName() {
@@ -97,9 +84,8 @@ public class MenuResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MenuResponse that = (MenuResponse) o;
+        MenuUpdateRequest that = (MenuUpdateRequest) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(user, that.user) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(imageUrl, that.imageUrl) &&
                 Objects.equals(description, that.description) &&
@@ -109,14 +95,13 @@ public class MenuResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, name, imageUrl, description, items, tags);
+        return Objects.hash(id, name, imageUrl, description, items, tags);
     }
 
     @Override
     public String toString() {
-        return "MenuResponse{" +
+        return "MenuUpdateRequest{" +
                 "id=" + id +
-                ", user=" + user +
                 ", name='" + name + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", description='" + description + '\'' +
