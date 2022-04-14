@@ -31,10 +31,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(
-        name = "Контроллер блюд",
-        description = "Предоставляет CRUD операции для блюд."
-)
+@Tag(name = "Контроллер блюд")
 @RestController
 @RequestMapping("/dishes")
 public class DishController {
@@ -234,7 +231,7 @@ public class DishController {
             @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
             int page,
             @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 200]. Не может быть null.", required = true)
+            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 30]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
@@ -242,9 +239,7 @@ public class DishController {
                     defaultValue = "name_asc (Сортировка по наименованию в порядке возрастания).",
                     allowableValues = {
                             "name_asc",
-                            "unit_asc",
-                            "name_desc",
-                            "unit_desc"
+                            "name_desc"
                     }
             ))
             String sortRule,
@@ -299,7 +294,7 @@ public class DishController {
             }
     )
     @Transactional
-    @GetMapping("/getAllProductsFields")
+    @GetMapping("/getAllDishesFields")
     public ResponseEntity<DishFieldsResponse> getAllDishesFields() {
         logger.info("Get all dishes fields");
 
@@ -314,7 +309,7 @@ public class DishController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",

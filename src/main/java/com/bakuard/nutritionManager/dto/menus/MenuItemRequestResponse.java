@@ -1,25 +1,20 @@
 package com.bakuard.nutritionManager.dto.menus;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.util.Objects;
-import java.util.UUID;
 
-public class MenuIngredientResponse {
+@Schema(description = "Данные о блюде входящем в состав меню")
+public class MenuItemRequestResponse {
 
-    private UUID dishId;
+    @Schema(description = "Наименование блюда. Не может быть null.")
     private String dishName;
+    @Schema(description = "Кол-во порций указанного блюда. Не может быть null. Должно быть больше нуля.")
     private BigDecimal quantity;
 
-    public MenuIngredientResponse() {
+    public MenuItemRequestResponse() {
 
-    }
-
-    public UUID getDishId() {
-        return dishId;
-    }
-
-    public void setDishId(UUID dishId) {
-        this.dishId = dishId;
     }
 
     public String getDishName() {
@@ -42,22 +37,20 @@ public class MenuIngredientResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MenuIngredientResponse that = (MenuIngredientResponse) o;
-        return Objects.equals(dishId, that.dishId) &&
-                Objects.equals(dishName, that.dishName) &&
+        MenuItemRequestResponse that = (MenuItemRequestResponse) o;
+        return Objects.equals(dishName, that.dishName) &&
                 Objects.equals(quantity, that.quantity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishId, dishName, quantity);
+        return Objects.hash(dishName, quantity);
     }
 
     @Override
     public String toString() {
-        return "MenuIngredientResponse{" +
-                "dishId=" + dishId +
-                ", dishName='" + dishName + '\'' +
+        return "MenuItemRequest{" +
+                "dishName='" + dishName + '\'' +
                 ", quantity=" + quantity +
                 '}';
     }

@@ -1,29 +1,50 @@
 package com.bakuard.nutritionManager.dto.menus;
 
-import com.bakuard.nutritionManager.dto.dishes.DishForMenuProductsListResponse;
-import com.bakuard.nutritionManager.dto.products.ProductAsMenuIngredientResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class MenuProductsListResponse {
 
-    private BigDecimal servingNumber;
+    @Schema(description = "Уникальный идентфикатор меню. Не может быть null.")
+    private UUID menuId;
+    @Schema(description = "Кол-во данного меню на которое рассчитывается список докупаемых продуктов. Не может быть null.")
+    private BigDecimal number;
+    @Schema(description = """
+            Общая стоимость всех докупаемых продуктов с учетом кол-ва порций меню. Если все блюда меню не
+             содержат ни одного ингредиента или всем ингредиентам всех блюд не соответствует ни один продукт -
+             принимает значение null.
+            """)
     private BigDecimal totalPrice;
-    private List<DishForMenuProductsListResponse> dishes;
-    private List<ProductAsMenuIngredientResponse> ingredients;
+    @Schema(description = "Краткие данные о блюдах входящих в данное меню.")
+    private List<DishOfMenuProductListResponse> dishNames;
+    @Schema(description = """
+            Каждый элемент списка содержит подробные данные о продукте необходимом для приготовления
+             некоторых блюд из этого меню.
+            """)
+    private List<ProductAsMenuItemResponse> ingredients;
 
     public MenuProductsListResponse() {
 
     }
 
-    public BigDecimal getServingNumber() {
-        return servingNumber;
+    public UUID getMenuId() {
+        return menuId;
     }
 
-    public void setServingNumber(BigDecimal servingNumber) {
-        this.servingNumber = servingNumber;
+    public void setMenuId(UUID menuId) {
+        this.menuId = menuId;
+    }
+
+    public BigDecimal getNumber() {
+        return number;
+    }
+
+    public void setNumber(BigDecimal number) {
+        this.number = number;
     }
 
     public BigDecimal getTotalPrice() {
@@ -34,19 +55,19 @@ public class MenuProductsListResponse {
         this.totalPrice = totalPrice;
     }
 
-    public List<DishForMenuProductsListResponse> getDishes() {
-        return dishes;
+    public List<DishOfMenuProductListResponse> getDishNames() {
+        return dishNames;
     }
 
-    public void setDishes(List<DishForMenuProductsListResponse> dishes) {
-        this.dishes = dishes;
+    public void setDishNames(List<DishOfMenuProductListResponse> dishNames) {
+        this.dishNames = dishNames;
     }
 
-    public List<ProductAsMenuIngredientResponse> getIngredients() {
+    public List<ProductAsMenuItemResponse> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<ProductAsMenuIngredientResponse> ingredients) {
+    public void setIngredients(List<ProductAsMenuItemResponse> ingredients) {
         this.ingredients = ingredients;
     }
 
@@ -55,23 +76,25 @@ public class MenuProductsListResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MenuProductsListResponse that = (MenuProductsListResponse) o;
-        return Objects.equals(servingNumber, that.servingNumber) &&
+        return Objects.equals(menuId, that.menuId) &&
+                Objects.equals(number, that.number) &&
                 Objects.equals(totalPrice, that.totalPrice) &&
-                Objects.equals(dishes, that.dishes) &&
+                Objects.equals(dishNames, that.dishNames) &&
                 Objects.equals(ingredients, that.ingredients);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(servingNumber, totalPrice, dishes, ingredients);
+        return Objects.hash(menuId, number, totalPrice, dishNames, ingredients);
     }
 
     @Override
     public String toString() {
         return "MenuProductsListResponse{" +
-                "servingNumber=" + servingNumber +
+                "menuId=" + menuId +
+                ", number=" + number +
                 ", totalPrice=" + totalPrice +
-                ", dishes=" + dishes +
+                ", dishNames=" + dishNames +
                 ", ingredients=" + ingredients +
                 '}';
     }

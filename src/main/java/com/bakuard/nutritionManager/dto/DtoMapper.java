@@ -189,16 +189,16 @@ public class DtoMapper {
         Dish dish = dishRepository.tryGetById(userId, dto.getDishId());
 
         DishProductsListResponse response = new DishProductsListResponse();
-        response.setDishId(dish.getId());
+        /*response.setDishId(dish.getId());
         response.setServingNumber(dto.getServingNumber());
-        response.setTotalPrice(dish.getPrice(dto.getServingNumber(), dto.getIngredients()).orElse(null));
-        response.setIngredients(
-                dto.getIngredients().entrySet().stream().
-                        map(pair -> toProductAsDishIngredientResponse(
-                                dish, pair.getKey(), pair.getValue(), dto.getServingNumber()
+        response.setTotalPrice(dish.getPrice(dto.getServingNumber(), dto.getProducts()).orElse(null));
+        response.setProducts(
+                dto.getProducts().stream().
+                        map(p -> toProductAsDishIngredientResponse(
+                                dish, p.getIngredientIndex(), p.getProductIndex(), dto.getServingNumber()
                         )).
                         toList()
-        );
+        );*/
 
         return response;
     }
@@ -399,7 +399,7 @@ public class DtoMapper {
                             dish.getLackQuantityPrice(ingredientIndex, productIndex, servingNumber).orElseThrow()
                     );
                     response.setTags(toTagsResponse(product.getContext().getTags()));
-                    response.setProductsTotalNumber(dish.getProductsNumber(ingredientIndex));
+                    //response.setProductsTotalNumber(dish.getProductsNumber(ingredientIndex));
                     return response;
                 }).
                 orElse(null);
