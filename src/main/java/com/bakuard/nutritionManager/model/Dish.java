@@ -97,7 +97,7 @@ public class Dish implements Entity<Dish> {
         this.id = id;
         this.user = user;
         this.name = name.trim();
-        this.servingSize = servingSize;
+        this.servingSize = servingSize.setScale(config.getNumberScale(), config.getRoundingMode());
         this.unit = unit.trim();
         this.description = description;
         this.imageUrl = urlContainer.get();
@@ -137,7 +137,7 @@ public class Dish implements Entity<Dish> {
                         and(r -> r.positiveValue(servingSize))
         );
 
-        this.servingSize = servingSize;
+        this.servingSize = servingSize.setScale(config.getNumberScale(), config.getRoundingMode());
     }
 
     /**
