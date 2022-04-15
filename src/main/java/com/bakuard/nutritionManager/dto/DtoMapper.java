@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DtoMapper {
@@ -144,7 +145,7 @@ public class DtoMapper {
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
                     DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
+                    builder.addIngredient(toDishIngredient(userId, ingredient));
                 });
 
         dto.getTags().forEach(builder::addTag);
@@ -170,7 +171,7 @@ public class DtoMapper {
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
                     DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
+                    builder.addIngredient(toDishIngredient(userId, ingredient));
                 });
 
         dto.getTags().forEach(builder::addTag);
@@ -189,16 +190,52 @@ public class DtoMapper {
         Dish dish = dishRepository.tryGetById(userId, dto.getDishId());
 
         DishProductsListResponse response = new DishProductsListResponse();
-        /*response.setDishId(dish.getId());
+        response.setDishId(dish.getId());
         response.setServingNumber(dto.getServingNumber());
-        response.setTotalPrice(dish.getPrice(dto.getServingNumber(), dto.getProducts()).orElse(null));
+        response.setTotalPrice(
+                dish.getPrice(
+                        dto.getServingNumber(),
+                        dto.getProducts().stream().
+                                collect(Collectors.toMap(
+                                        DishIngredientProductRequest::getIngredientIndex,
+                                        DishIngredientProductRequest::getProductIndex
+                                ))
+                ).orElse(null)
+        );
         response.setProducts(
-                dto.getProducts().stream().
-                        map(p -> toProductAsDishIngredientResponse(
-                                dish, p.getIngredientIndex(), p.getProductIndex(), dto.getServingNumber()
-                        )).
+                IntStream.range(0, dish.getIngredientNumber()).
+                        mapToObj(ingredientIndex -> {
+                            DishIngredientProductRequest ingredientRequest =
+                                    dto.getProducts().stream().
+                                            filter(ingredient -> ingredient.getIngredientIndex() == ingredientIndex).
+                                            findFirst().
+                                            orElse(null);
+
+                            int productIndex = ingredientRequest != null ? ingredientRequest.getProductIndex() : 0;
+
+                            List<ProductAsDishIngredientResponse> products =
+                                    dish.getProducts(ingredientIndex, 0).
+                                    map(p -> toProductAsDishIngredientResponse(
+                                            dish,
+                                            ingredientIndex,
+                                            productIndex,
+                                            ingredientRequest != null,
+                                            dto.getServingNumber()
+                                    )).
+                                    getContent();
+
+                            DishIngredientForListResponse ingredient = new DishIngredientForListResponse();
+                            ingredient.setIngredientIndex(ingredientIndex);
+                            ingredient.setProductCategory(
+                                    dish.getIngredient(ingredientIndex).
+                                            orElseThrow().
+                                            getName()
+                            );
+                            ingredient.setProducts(products);
+                            return ingredient;
+                        }).
                         toList()
-        );*/
+        );
 
         return response;
     }
@@ -374,6 +411,7 @@ public class DtoMapper {
     private ProductAsDishIngredientResponse toProductAsDishIngredientResponse(Dish dish,
                                                                               int ingredientIndex,
                                                                               int productIndex,
+                                                                              boolean isChecked,
                                                                               BigDecimal servingNumber) {
         return dish.getProduct(ingredientIndex, productIndex).
                 map(product -> {
@@ -399,7 +437,8 @@ public class DtoMapper {
                             dish.getLackQuantityPrice(ingredientIndex, productIndex, servingNumber).orElseThrow()
                     );
                     response.setTags(toTagsResponse(product.getContext().getTags()));
-                    //response.setProductsTotalNumber(dish.getProductsNumber(ingredientIndex));
+                    response.setIngredientIndex(ingredientIndex);
+                    response.setChecked(isChecked);
                     return response;
                 }).
                 orElse(null);
@@ -417,10 +456,10 @@ public class DtoMapper {
         return response;
     }
 
-    private DishIngredient.Builder toDishIngredient(UUID userId, DishIngredientRequestResponse dto, int index) {
+    private DishIngredient.Builder toDishIngredient(UUID userId, DishIngredientRequestResponse dto) {
         return new DishIngredient.Builder().
                 setConfig(appConfiguration).
-                setName("ingredient" + index).
+                setName(dto.getFilter().getCategory()).
                 setQuantity(dto.getQuantity()).
                 setFilter(toDishIngredientFilter(userId, dto.getFilter()));
     }
