@@ -48,8 +48,6 @@ public class ProductAsDishIngredientResponse {
     private BigDecimal lackQuantityPrice;
     @Schema(description = "Теги указаныне для данного продукта")
     private List<String> tags;
-    @Schema(description = "Индекс ингредиента, к которому относится данный продукт.")
-    private int ingredientIndex;
     @Schema(description = """
             Показывает - был ли даный продукт выбран пользователем из всех других продуктов
              соответствующих указанному ингредиенту (указанному с помощью поля ingredientIndex).
@@ -189,14 +187,6 @@ public class ProductAsDishIngredientResponse {
         this.tags = tags;
     }
 
-    public int getIngredientIndex() {
-        return ingredientIndex;
-    }
-
-    public void setIngredientIndex(int ingredientIndex) {
-        this.ingredientIndex = ingredientIndex;
-    }
-
     public boolean isChecked() {
         return isChecked;
     }
@@ -210,8 +200,7 @@ public class ProductAsDishIngredientResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProductAsDishIngredientResponse that = (ProductAsDishIngredientResponse) o;
-        return ingredientIndex == that.ingredientIndex &&
-                Objects.equals(type, that.type) &&
+        return Objects.equals(type, that.type) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(user, that.user) &&
                 Objects.equals(imageUrl, that.imageUrl) &&
@@ -235,7 +224,7 @@ public class ProductAsDishIngredientResponse {
         return Objects.hash(type, id, user, imageUrl, category, shop,
                 grade, manufacturer, price, packingSize, unit, quantity,
                 necessaryQuantity, lackQuantity, lackQuantityPrice, tags,
-                ingredientIndex, isChecked);
+                isChecked);
     }
 
     @Override
@@ -257,7 +246,6 @@ public class ProductAsDishIngredientResponse {
                 ", lackQuantity=" + lackQuantity +
                 ", lackQuantityPrice=" + lackQuantityPrice +
                 ", tags=" + tags +
-                ", ingredientIndex=" + ingredientIndex +
                 ", isChecked=" + isChecked +
                 '}';
     }
