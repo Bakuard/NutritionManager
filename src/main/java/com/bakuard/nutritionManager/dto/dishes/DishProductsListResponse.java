@@ -1,7 +1,5 @@
 package com.bakuard.nutritionManager.dto.dishes;
 
-import com.bakuard.nutritionManager.model.util.Page;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -23,10 +21,9 @@ public class DishProductsListResponse {
             """)
     private BigDecimal totalPrice;
     @Schema(description = """
-            Каждый элемент этого списка представляет собой все возможные докупаемые продукты для ингредиента блюда,
-             индекс которого равен порядковому номеру соответствующего элемента в списке.
+            Каждый элемент списка - перечень всех продуктов для конкретного ингредиента блюда.
             """)
-    private List<Page<ProductAsDishIngredientResponse>> products;
+    private List<DishIngredientForListResponse> products;
 
     public DishProductsListResponse() {
 
@@ -56,11 +53,11 @@ public class DishProductsListResponse {
         this.totalPrice = totalPrice;
     }
 
-    public List<Page<ProductAsDishIngredientResponse>> getProducts() {
+    public List<DishIngredientForListResponse> getProducts() {
         return products;
     }
 
-    public void setProducts(List<Page<ProductAsDishIngredientResponse>> products) {
+    public void setProducts(List<DishIngredientForListResponse> products) {
         this.products = products;
     }
 

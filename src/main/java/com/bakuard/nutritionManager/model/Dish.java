@@ -317,20 +317,18 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает ингредиент по его индексу. Если индекс ингрдеиента больше или равен кол-ву всех
-     * ингредиентов блюда - возвращает пустой Optional.
+     * Возвращает ингредиент по его индексу. Особые случаи: <br/>
+     * 1. Если индекс ингредиента меньше 0 - возвращает пустой Optional. <br/>
+     * 2. Если индекс ингредиента больше или равен кол-ву ингредиентов блюда - возвращает пустой Optional. <br/>
      * @param ingredientIndex индекс искомого ингредиента.
      * @return ингредиент блюда или пустой Optional.
-     * @throws ValidateException если индекс меньше нуля.
      */
     public Optional<DishIngredient> getIngredient(int ingredientIndex) {
-        Validator.check(
-                Rule.of("Dish.ingredientIndex").notNegative(ingredientIndex)
-        );
-
         DishIngredient ingredient = null;
 
-        if(ingredientIndex < ingredients.size()) ingredient = ingredients.get(ingredientIndex);
+        if(ingredientIndex >= 0 && ingredientIndex < ingredients.size()) {
+            ingredient = ingredients.get(ingredientIndex);
+        }
 
         return Optional.ofNullable(ingredient);
     }
@@ -339,9 +337,9 @@ public class Dish implements Entity<Dish> {
      * Возвращает ингредиент по его индексу.
      * @param ingredientIndex индекс искомого ингредиента.
      * @return ингредиент блюда или пустой Optional.
-     * @throws ValidateException если выполняется хотя бы одноиз условий:<br/>
+     * @throws ValidateException если выполняется хотя бы одно из условий:<br/>
      *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равено кол-ву ингредиентов блюда.
+     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
      */
     public DishIngredient tryGetIngredient(int ingredientIndex) {
         Validator.check(
@@ -360,17 +358,28 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
+     * Возвращает кол-во ингредиентов данного блюда.
+     * @return кол-во ингредиентов данного блюда.
+     */
+    public int getIngredientNumber() {
+        return ingredients.size();
+    }
+
+    /**
      * Возвращает продукт из множества всех взаимозаменяемых продуктов для данного ингредиента по его
      * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
-     * ингредиента упорядоченно по цене. Особые случаи:<br/>
+     * ингредиента упорядоченно по цене в порядке возрастания. Особые случаи:<br/>
      * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
      *    данного ингредиента, то метод вернет пустой Optional.<br/>
      * 2. Если в БД есть продукты соответствующие данному ингредиенту и productIndex больше или равен их
      *    кол-ву, то метод вернет последний продукт из всего множества продуктов данного ингредиента.
      * @param ingredientIndex индекс ингредиента для которого возвращается один из возможных взаимозаменяемых продуктов.
-     * @param productIndex порядковому номер продукта.
+     * @param productIndex порядковый номер продукта.
      * @return продукт по его порядковому номеру.
-     * @throws ValidateException если productIndex < 0
+     * @throws ValidateException если выполняется хотя бы одноиз условий:<br/>
+     *                           1. ingredientIndex меньше нуля.<br/>
+     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.<br/>
+     *                           3. если productIndex < 0
      */
     public Optional<Product> getProduct(int ingredientIndex, int productIndex) {
         Validator.check(
@@ -380,7 +389,7 @@ public class Dish implements Entity<Dish> {
         DishIngredient ingredient = tryGetIngredient(ingredientIndex);
         Page<Product> page = productRepository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.ofIndex(5, productIndex)).
+                        setPageable(Pageable.ofIndex(30, productIndex)).
                         setSort(ingredientProductsSort).
                         setFilter(ingredient.getFilter())
         );
@@ -400,9 +409,32 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
+     * Возвращает часть выборки продуктов соответствующих указанному ингредиенту. Все продукты в выборке
+     * упорядоченны по цене в порядке возрастания.
+     * @param ingredientIndex индекс ингредиента.
+     * @param pageNumber номер страницы выборки.
+     * @return страницу из выборки продуктов соответствующих указанному ингредиенту.
+     * @throws ValidateException если выполняется хотя бы одно из условий:<br/>
+     *                           1. ingredientIndex меньше нуля.<br/>
+     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
+     */
+    public Page<Product> getProducts(int ingredientIndex, int pageNumber) {
+        DishIngredient ingredient = tryGetIngredient(ingredientIndex);
+        return productRepository.getProducts(
+                new Criteria().
+                        setPageable(Pageable.of(30, pageNumber)).
+                        setSort(ingredientProductsSort).
+                        setFilter(ingredient.getFilter())
+        );
+    }
+
+    /**
      * Возвращает кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
      * @param ingredientIndex индекс ингредиента для которого рассчитывается кол-во взаимозаменяемых продуктов.
      * @return кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
+     * @throws ValidateException если выполняется хотя бы одноиз условий:<br/>
+     *                           1. ingredientIndex меньше нуля.<br/>
+     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
      */
     public int getProductsNumber(int ingredientIndex) {
         DishIngredient ingredient = tryGetIngredient(ingredientIndex);
@@ -423,8 +455,10 @@ public class Dish implements Entity<Dish> {
      * @return кол-во "упаковок" докупаемого продукта.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. servingNumber является null.<br/>
-     *              2. productIndex < 0 <br/>
-     *              3. servingNumber <= 0
+     *              2. servingNumber <= 0 <br/>
+     *              3. productIndex < 0 <br/>
+     *              4. ingredientIndex меньше нуля.<br/>
+     *              5. ingredientIndex больше или равен кол-ву ингредиентов блюда.<br/>
      */
     public Optional<BigDecimal> getLackQuantity(int ingredientIndex,
                                                 int productIndex,
@@ -441,15 +475,19 @@ public class Dish implements Entity<Dish> {
     /**
      * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта.<br/>
      * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
-     * данного ингредиента, то метод вернет пустой Optional.
+     * данного ингредиента, то метод вернет пустой Optional.<br/>
+     * Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
+     * то метод вернет результат для последнего продукта.<br/>
      * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
      * @param ingredientIndex индекс ингредиента для которого рассчитывается общай цена недостающего кол-ва продуктов.
      * @param servingNumber кол-во порций блюда.
      * @return общую цену за недостающее кол-во докупаемого продукта.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. servingNumber является null.<br/>
-     *              2. productIndex < 0 <br/>
-     *              3. servingNumber <= 0
+     *              2. servingNumber <= 0 <br/>
+     *              3. productIndex < 0 <br/>
+     *              4. ingredientIndex меньше нуля.<br/>
+     *              5. ingredientIndex больше или равен кол-ву ингредиентов блюда.<br/>
      */
     public Optional<BigDecimal> getLackQuantityPrice(int ingredientIndex,
                                                      int productIndex,
@@ -507,12 +545,13 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает стоимость данного блюда с учетом выбранных продуктов (по одному для каждго ингредиента) и
+     * Возвращает стоимость данного блюда с учетом выбранных продуктов (по одному для каждого ингредиента) и
      * кол-ва порций. Особые случаи:<br/>
-     * 1. Если для данного блюда не было указанно ни одного ингредиента или любому ингредиенту
-     *    не соответсвует ни один продукт - возвращает пустой Optional.<br/>
+     * 1. Если любому ингредиенту не соответсвует ни один продукт - возвращает пустой Optional.<br/>
      * 2. Если для какого-либо ингредиента не соответствует ни один продукт - то он не принимает участия
-     *    в рассчете цены блюда.
+     *    в рассчете цены блюда.<br/>
+     * 3. Если для какого-либо ингредиента не выбран продукт - то в качестве значения по умолчанию будет
+     *    выбран самый дешевый продукт соответствующий данному ингредиенту.
      * @param servingNumber кол-во порций блюда для которых рассчитывается общая стоимость.
      * @param productsIndex набор пар - [индекс ингредиента, индекс продукта], где индекс продукта
      *                    это индекс из отсортированного в порядке возрастания по цене множества взаимозаменяемых
@@ -520,12 +559,13 @@ public class Dish implements Entity<Dish> {
      * @return цена данного блюда или пустой Optional.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
-     *              2. если servingNumber меньше или равен нулю.<br/>
-     *              3. если хотя бы одно из значений productsIndex отрицательное число.<br/>
-     *              4. если хотя бы одно из значений productsIndex имеет значение null.<br/>
-     *              5. если хотя бы один из ключей productsIndex меньше нуля.<br/>
-     *              6. если хотя бы один из ключей productsIndex больше или равен кол-ву ингредиентов.<br/>
-     *              7. если хотя бы один из ключей productsIndex имеет значение null.
+     *              2. если servingNumber меньше или равно нулю.<br/>
+     *              3. если productsIndex имеет значение null.<br/>
+     *              4. если хотя бы один из ключей productsIndex имеет значение null.<br/>
+     *              5. если хотя бы одно из значений productsIndex имеет значение null.<br/>
+     *              6. если хотя бы одно из значений productsIndex отрицательное число.<br/>
+     *              7. если хотя бы один из ключей productsIndex меньше нуля.<br/>
+     *              8. если хотя бы один из ключей productsIndex больше или равен кол-ву ингредиентов.<br/>
      */
     public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
                                          Map<Integer, Integer> productsIndex) {
@@ -533,7 +573,6 @@ public class Dish implements Entity<Dish> {
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(r -> r.positiveValue(servingNumber)),
                 Rule.of("Dish.productsIndex").notNull(productsIndex).
-                        and(r -> r.equal(ingredients.size(), productsIndex.size())).
                         and(r -> r.notContainsNull(productsIndex.keySet(), "keySet")).
                         and(r -> r.notContainsNull(productsIndex.values(), "values")).
                         and(r -> r.notContains(
@@ -549,7 +588,10 @@ public class Dish implements Entity<Dish> {
         );
 
         return IntStream.range(0, ingredients.size()).
-                mapToObj(i -> getLackQuantityPrice(i, productsIndex.get(i), servingNumber)).
+                mapToObj(i -> {
+                    int productIndex = productsIndex.get(i) != null ? productsIndex.get(i) : 0;
+                    return getLackQuantityPrice(i, productIndex, servingNumber);
+                }).
                 filter(Optional::isPresent).
                 map(Optional::get).
                 reduce(BigDecimal::add);
@@ -590,6 +632,7 @@ public class Dish implements Entity<Dish> {
         return id.equals(other.id) &&
                 user.equalsFullState(other.user) &&
                 name.equals(other.name) &&
+                servingSize.equals(other.servingSize) &&
                 unit.equals(other.unit) &&
                 Objects.equals(description, other.description) &&
                 Objects.equals(imageUrl, other.imageUrl) &&
@@ -624,11 +667,12 @@ public class Dish implements Entity<Dish> {
                 "id=" + id +
                 ", user=" + user +
                 ", name='" + name + '\'' +
+                ", servingSize=" + servingSize +
                 ", unit='" + unit + '\'' +
                 ", description='" + description + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", tags=" + tags +
+                ", imageUrl=" + imageUrl +
                 ", ingredients=" + ingredients +
+                ", tags=" + tags +
                 '}';
     }
 
