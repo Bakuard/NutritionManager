@@ -23,7 +23,7 @@ public class DishProductsListResponse {
     @Schema(description = """
             Каждый элемент списка - перечень всех продуктов для конкретного ингредиента блюда.
             """)
-    private List<DishIngredientForListResponse> products;
+    private List<DishIngredientForListResponse> categories;
 
     public DishProductsListResponse() {
 
@@ -53,12 +53,12 @@ public class DishProductsListResponse {
         this.totalPrice = totalPrice;
     }
 
-    public List<DishIngredientForListResponse> getProducts() {
-        return products;
+    public List<DishIngredientForListResponse> getCategories() {
+        return categories;
     }
 
-    public void setProducts(List<DishIngredientForListResponse> products) {
-        this.products = products;
+    public void setCategories(List<DishIngredientForListResponse> categories) {
+        this.categories = categories;
     }
 
     @Override
@@ -69,12 +69,12 @@ public class DishProductsListResponse {
         return Objects.equals(dishId, that.dishId) &&
                 Objects.equals(servingNumber, that.servingNumber) &&
                 Objects.equals(totalPrice, that.totalPrice) &&
-                Objects.equals(products, that.products);
+                Objects.equals(categories, that.categories);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishId, servingNumber, totalPrice, products);
+        return Objects.hash(dishId, servingNumber, totalPrice, categories);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class DishProductsListResponse {
                 "dishId=" + dishId +
                 ", servingNumber=" + servingNumber +
                 ", totalPrice=" + totalPrice +
-                ", ingredients=" + products +
+                ", ingredients=" + categories +
                 '}';
     }
 

@@ -202,7 +202,7 @@ public class DtoMapper {
                                 ))
                 ).orElse(null)
         );
-        response.setProducts(
+        response.setCategories(
                 IntStream.range(0, dish.getIngredientNumber()).
                         mapToObj(ingredientIndex -> {
                             DishIngredientProductRequest ingredientRequest =
@@ -437,7 +437,6 @@ public class DtoMapper {
                             dish.getLackQuantityPrice(ingredientIndex, productIndex, servingNumber).orElseThrow()
                     );
                     response.setTags(toTagsResponse(product.getContext().getTags()));
-                    response.setIngredientIndex(ingredientIndex);
                     response.setChecked(isChecked);
                     return response;
                 }).
