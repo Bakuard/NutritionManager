@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Rule {
@@ -261,6 +262,31 @@ public class Rule {
                 logMessage = "must contain " + item;
             } else if(state == Result.State.FAIL) {
                 logMessage = field + " must contain " + item;
+            }
+        }
+
+        return createResult(
+                Constraint.CONTAINS_ITEM,
+                logMessage,
+                state
+        );
+    }
+
+    public <T> Result containsItem(Collection<T> collection, Predicate<T> matcher) {
+        return containsItem(collection, matcher, null);
+    }
+
+    public <T> Result containsItem(Collection<T> collection, Predicate<T> matcher, String field) {
+        Result.State state = Result.State.UNKNOWN;
+        String logMessage = null;
+
+        if(collection != null) {
+            state = Result.State.of(collection.stream().anyMatch(matcher));
+
+            if(field == null && state == Result.State.FAIL) {
+                logMessage = "must contain item by predicate";
+            } else if(state == Result.State.FAIL) {
+                logMessage = field + " must contain item by predicate";
             }
         }
 

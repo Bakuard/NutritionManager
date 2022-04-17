@@ -1729,7 +1729,7 @@ class DishRepositoryPostgresTest {
                 setServingSize(BigDecimal.ONE).
                 setUnit("unit A").
                 setDescription("description A").
-                setImagePath("https://nutritionmanager.xyz/products/images?id=1").
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
                 setConfig(appConfiguration).
                 setRepository(productRepository).
                 addTag("tag A").
@@ -1792,7 +1792,7 @@ class DishRepositoryPostgresTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit A").
                         setDescription("description 1").
-                        setImagePath("https://nutritionmanager.xyz/products/images?id=1").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 1").
@@ -1849,7 +1849,7 @@ class DishRepositoryPostgresTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit A").
                         setDescription("description 2").
-                        setImagePath("https://nutritionmanager.xyz/products/images?id=2").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=2").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 2").
@@ -1882,7 +1882,7 @@ class DishRepositoryPostgresTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit B").
                         setDescription("description 3").
-                        setImagePath("https://nutritionmanager.xyz/products/images?id=3").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=3").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 3").
@@ -1936,7 +1936,7 @@ class DishRepositoryPostgresTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit C").
                         setDescription("description 4").
-                        setImagePath("https://nutritionmanager.xyz/products/images?id=4").
+                        setImageUrl("https://nutritionmanager.xyz/products/images?id=4").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 4").

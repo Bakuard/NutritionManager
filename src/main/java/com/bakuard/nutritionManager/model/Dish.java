@@ -15,7 +15,6 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -51,9 +50,7 @@ public class Dish implements Entity<Dish> {
         this.imageUrl = other.imageUrl;
         this.config = other.config;
         this.productRepository = other.productRepository;
-        this.ingredients = other.ingredients.stream().
-                map(DishIngredient::new).
-                collect(Collectors.toCollection(ArrayList::new));
+        this.ingredients = new ArrayList<>(other.ingredients);
         this.tags = new ArrayList<>(other.tags);
         this.ingredientProductsSort = other.ingredientProductsSort;
     }
@@ -547,16 +544,17 @@ public class Dish implements Entity<Dish> {
     /**
      * Возвращает стоимость данного блюда с учетом выбранных продуктов (по одному для каждого ингредиента) и
      * кол-ва порций. Особые случаи:<br/>
-     * 1. Если любому ингредиенту не соответсвует ни один продукт - возвращает пустой Optional.<br/>
-     * 2. Если для какого-либо ингредиента не соответствует ни один продукт - то он не принимает участия
+     * 1. Если блюдо не содержит ни одного ингредиента - возвращает пустой Optional.<br/>
+     * 2. Если любому ингредиенту не соответсвует ни один продукт - возвращает пустой Optional.<br/>
+     * 3. Если для какого-либо ингредиента не соответствует ни один продукт - то он не принимает участия
      *    в рассчете цены блюда.<br/>
-     * 3. Если для какого-либо ингредиента не выбран продукт - то в качестве значения по умолчанию будет
+     * 4. Если для какого-либо ингредиента не выбран продукт - то в качестве значения по умолчанию будет
      *    выбран самый дешевый продукт соответствующий данному ингредиенту.
      * @param servingNumber кол-во порций блюда для которых рассчитывается общая стоимость.
      * @param productsIndex набор пар - [индекс ингредиента, индекс продукта], где индекс продукта
      *                    это индекс из отсортированного в порядке возрастания по цене множества взаимозаменяемых
      *                    продуктов этого ингредиента.
-     * @return цена данного блюда или пустой Optional.
+     * @return стоиомость данного блюда или пустой Optional.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
      *              2. если servingNumber меньше или равно нулю.<br/>
@@ -599,10 +597,10 @@ public class Dish implements Entity<Dish> {
 
     /**
      * Возвращает среднеарифметическую цену для данного блюда. Особые случаи:<br/>
-     * 1. Если для данного блюда не было указанно ни одного ингредиента или любому ингредиенту
-     *    не соответсвует ни один продукт - возвращает пустой Optional.<br/>
-     * 2. Если для какого-либо ингредиента не соответствует ни одного продукта - то он не принимает участия
-     *    в рассчете средней арифметической цены блюда.
+     * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
+     * 2. Если любому ингредиенту блюда не соответствует ни один продукт - возвращает пустой Optional.<br/>
+     * 3. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
+     *    в рассчете среднеарифметической цены блюда.
      * @return среднеарифметическая цена данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
@@ -715,7 +713,7 @@ public class Dish implements Entity<Dish> {
         private BigDecimal servingSize;
         private String unit;
         private String description;
-        private String imagePath;
+        private String imageUrl;
         private List<DishIngredient.Builder> ingredients;
         private List<String> tags;
         private AppConfigData config;
@@ -761,8 +759,8 @@ public class Dish implements Entity<Dish> {
             return this;
         }
 
-        public Builder setImagePath(String imagePath) {
-            this.imagePath = imagePath;
+        public Builder setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
             return this;
         }
 
@@ -817,7 +815,7 @@ public class Dish implements Entity<Dish> {
                     servingSize,
                     unit,
                     description,
-                    imagePath,
+                    imageUrl,
                     ingredients,
                     tags,
                     config,
