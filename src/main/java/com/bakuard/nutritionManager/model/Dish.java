@@ -85,7 +85,8 @@ public class Dish implements Entity<Dish> {
                             if(b) return r.success(Constraint.IS_TRUE);
                             else return r.failure(Constraint.IS_TRUE,
                                     "All ingredients must have UserFilter and UserFilter.getUser() must be equal Dish.getUser()");
-                        }),
+                        }).
+                        and(r -> r.notContainsDuplicate(ingredientContainer.get(), DishIngredient::getName)),
                 Rule.of("Dish.tags").doesNotThrow(tags, Tag::new, tagContainer),
                 Rule.of("Dish.config").notNull(config),
                 Rule.of("Dish.repository").notNull(productRepository)

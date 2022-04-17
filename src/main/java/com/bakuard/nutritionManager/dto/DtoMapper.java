@@ -145,7 +145,7 @@ public class DtoMapper {
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
                     DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(userId, ingredient));
+                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
                 });
 
         dto.getTags().forEach(builder::addTag);
@@ -171,7 +171,7 @@ public class DtoMapper {
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
                     DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(userId, ingredient));
+                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
                 });
 
         dto.getTags().forEach(builder::addTag);
@@ -457,10 +457,10 @@ public class DtoMapper {
         return response;
     }
 
-    private DishIngredient.Builder toDishIngredient(UUID userId, DishIngredientRequestResponse dto) {
+    private DishIngredient.Builder toDishIngredient(UUID userId, DishIngredientRequestResponse dto, int index) {
         return new DishIngredient.Builder().
                 setConfig(appConfiguration).
-                setName(dto.getFilter().getCategory()).
+                setName("Ингредиент №" + index + " - " + dto.getFilter().getCategory()).
                 setQuantity(dto.getQuantity()).
                 setFilter(toDishIngredientFilter(userId, dto.getFilter()));
     }

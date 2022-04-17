@@ -76,7 +76,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 newData = true;
             }
         } catch(DuplicateKeyException e) {
-            throw new ValidateException("Fail to save dish").
+            throw new ValidateException("Fail to save dish", e).
                     addReason(Rule.of("DishRepository.dish").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
         }
 
