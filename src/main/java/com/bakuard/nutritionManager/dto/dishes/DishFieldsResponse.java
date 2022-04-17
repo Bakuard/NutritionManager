@@ -13,39 +13,49 @@ import java.util.Objects;
         """)
 public class DishFieldsResponse {
 
-    @Schema(description = "Единицы измерения кол-ва всех блюд пользователя")
-    private List<FieldResponse> units;
-    @Schema(description = "Все теги всех блюд пользователя")
-    private List<FieldResponse> tags;
-    @Schema(description = "Наименования всех блюд пользователя")
-    private List<FieldResponse> names;
+    @Schema(description = "Единицы измерения кол-ва всех блюд пользователя.")
+    private List<FieldResponse> dishUnits;
+    @Schema(description = "Все теги всех блюд пользователя.")
+    private List<FieldResponse> dishTags;
+    @Schema(description = "Наименования всех блюд пользователя.")
+    private List<FieldResponse> dishNames;
+    @Schema(description = "Категории всех продуктов пользователя.")
+    private List<FieldResponse> productCategories;
 
     public DishFieldsResponse() {
 
     }
 
-    public List<FieldResponse> getUnits() {
-        return units;
+    public List<FieldResponse> getDishUnits() {
+        return dishUnits;
     }
 
-    public void setUnits(List<FieldResponse> units) {
-        this.units = units;
+    public void setDishUnits(List<FieldResponse> dishUnits) {
+        this.dishUnits = dishUnits;
     }
 
-    public List<FieldResponse> getTags() {
-        return tags;
+    public List<FieldResponse> getDishTags() {
+        return dishTags;
     }
 
-    public void setTags(List<FieldResponse> tags) {
-        this.tags = tags;
+    public void setDishTags(List<FieldResponse> dishTags) {
+        this.dishTags = dishTags;
     }
 
-    public List<FieldResponse> getNames() {
-        return names;
+    public List<FieldResponse> getDishNames() {
+        return dishNames;
     }
 
-    public void setNames(List<FieldResponse> names) {
-        this.names = names;
+    public void setDishNames(List<FieldResponse> dishNames) {
+        this.dishNames = dishNames;
+    }
+
+    public List<FieldResponse> getProductCategories() {
+        return productCategories;
+    }
+
+    public void setProductCategories(List<FieldResponse> productCategories) {
+        this.productCategories = productCategories;
     }
 
     @Override
@@ -53,22 +63,24 @@ public class DishFieldsResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DishFieldsResponse response = (DishFieldsResponse) o;
-        return Objects.equals(units, response.units) &&
-                Objects.equals(tags, response.tags) &&
-                Objects.equals(names, response.names);
+        return Objects.equals(dishUnits, response.dishUnits) &&
+                Objects.equals(dishTags, response.dishTags) &&
+                Objects.equals(dishNames, response.dishNames) &&
+                Objects.equals(productCategories, response.productCategories);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(units, tags, names);
+        return Objects.hash(dishUnits, dishTags, dishNames, productCategories);
     }
 
     @Override
     public String toString() {
         return "DishFieldsResponse{" +
-                "units=" + units +
-                ", tags=" + tags +
-                ", names=" + names +
+                "dishUnits=" + dishUnits +
+                ", dishTags=" + dishTags +
+                ", dishNames=" + dishNames +
+                ", productCategories=" + productCategories +
                 '}';
     }
 
