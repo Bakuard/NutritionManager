@@ -1,15 +1,14 @@
 package com.bakuard.nutritionManager.dal.impl;
 
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.model.Menu;
-import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.Sort;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.Tag;
+import com.bakuard.nutritionManager.model.util.Page;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.util.List;
 import java.util.UUID;
 
 public class MenuRepositoryPostgres implements MenuRepository {
@@ -41,12 +40,32 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public List<Menu> getMenus(Pageable pageable, User user, Sort order) {
+    public Page<Menu> getMenus(Criteria criteria) {
         return null;
     }
 
     @Override
-    public int getNumberMenus(User user) {
+    public Page<Tag> getTags(Criteria criteria) {
+        return null;
+    }
+
+    @Override
+    public Page<String> getNames(Criteria criteria) {
+        return null;
+    }
+
+    @Override
+    public int getNumberMenus(Criteria criteria) {
+        return 0;
+    }
+
+    @Override
+    public int getTagsNumber(Criteria criteria) {
+        return 0;
+    }
+
+    @Override
+    public int getNamesNumber(Criteria criteria) {
         return 0;
     }
 

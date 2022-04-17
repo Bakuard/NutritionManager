@@ -1255,7 +1255,7 @@ class DishTest {
                 setServingSize(BigDecimal.TEN).
                 setUnit("unit A").
                 setDescription("description A").
-                setImagePath("https://nutritionmanager.xyz/products/images?id=1").
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
                 setConfig(conf).
                 setRepository(repository).
                 addTag("tag A").

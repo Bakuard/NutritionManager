@@ -137,7 +137,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
-                                    setImagePath(rs.getString("imagePath")).
+                                    setImageUrl(rs.getString("imagePath")).
                                     setConfig(appConfig).
                                     setRepository(productRepository);
                         }
@@ -215,7 +215,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
-                                    setImagePath(rs.getString("imagePath")).
+                                    setImageUrl(rs.getString("imagePath")).
                                     setConfig(appConfig).
                                     setRepository(productRepository);
                         }
@@ -343,7 +343,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setServingSize(rs.getBigDecimal("servingSize")).
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
-                                    setImagePath(rs.getString("imagePath")).
+                                    setImageUrl(rs.getString("imagePath")).
                                     setConfig(appConfig).
                                     setRepository(productRepository);
                             lastDishId = dishId;

@@ -1,8 +1,10 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.model.Menu;
+import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.Sort;
+import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 
 import java.util.List;
@@ -21,10 +23,16 @@ public interface MenuRepository {
 
     public Menu tryGetById(UUID menuId);
 
-    public List<Menu> getMenus(Pageable pageable,
-                               User user,
-                               Sort order);
+    public Page<Menu> getMenus(Criteria criteria);
 
-    public int getNumberMenus(User user);
+    public Page<Tag> getTags(Criteria criteria);
+
+    public Page<String> getNames(Criteria criteria);
+
+    public int getNumberMenus(Criteria criteria);
+
+    public int getTagsNumber(Criteria criteria);
+
+    public int getNamesNumber(Criteria criteria);
 
 }

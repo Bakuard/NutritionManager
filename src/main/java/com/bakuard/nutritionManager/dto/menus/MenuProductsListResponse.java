@@ -12,7 +12,7 @@ public class MenuProductsListResponse {
     @Schema(description = "Уникальный идентфикатор меню. Не может быть null.")
     private UUID menuId;
     @Schema(description = "Кол-во данного меню на которое рассчитывается список докупаемых продуктов. Не может быть null.")
-    private BigDecimal number;
+    private BigDecimal quantity;
     @Schema(description = """
             Общая стоимость всех докупаемых продуктов с учетом кол-ва порций меню. Если все блюда меню не
              содержат ни одного ингредиента или всем ингредиентам всех блюд не соответствует ни один продукт -
@@ -25,7 +25,7 @@ public class MenuProductsListResponse {
             Каждый элемент списка содержит подробные данные о продукте необходимом для приготовления
              некоторых блюд из этого меню.
             """)
-    private List<ProductAsMenuItemResponse> ingredients;
+    private List<ProductAsMenuItemResponse> products;
 
     public MenuProductsListResponse() {
 
@@ -39,12 +39,12 @@ public class MenuProductsListResponse {
         this.menuId = menuId;
     }
 
-    public BigDecimal getNumber() {
-        return number;
+    public BigDecimal getQuantity() {
+        return quantity;
     }
 
-    public void setNumber(BigDecimal number) {
-        this.number = number;
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
     }
 
     public BigDecimal getTotalPrice() {
@@ -63,12 +63,12 @@ public class MenuProductsListResponse {
         this.dishNames = dishNames;
     }
 
-    public List<ProductAsMenuItemResponse> getIngredients() {
-        return ingredients;
+    public List<ProductAsMenuItemResponse> getProducts() {
+        return products;
     }
 
-    public void setIngredients(List<ProductAsMenuItemResponse> ingredients) {
-        this.ingredients = ingredients;
+    public void setProducts(List<ProductAsMenuItemResponse> products) {
+        this.products = products;
     }
 
     @Override
@@ -77,25 +77,25 @@ public class MenuProductsListResponse {
         if (o == null || getClass() != o.getClass()) return false;
         MenuProductsListResponse that = (MenuProductsListResponse) o;
         return Objects.equals(menuId, that.menuId) &&
-                Objects.equals(number, that.number) &&
+                Objects.equals(quantity, that.quantity) &&
                 Objects.equals(totalPrice, that.totalPrice) &&
                 Objects.equals(dishNames, that.dishNames) &&
-                Objects.equals(ingredients, that.ingredients);
+                Objects.equals(products, that.products);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(menuId, number, totalPrice, dishNames, ingredients);
+        return Objects.hash(menuId, quantity, totalPrice, dishNames, products);
     }
 
     @Override
     public String toString() {
         return "MenuProductsListResponse{" +
                 "menuId=" + menuId +
-                ", number=" + number +
+                ", number=" + quantity +
                 ", totalPrice=" + totalPrice +
                 ", dishNames=" + dishNames +
-                ", ingredients=" + ingredients +
+                ", ingredients=" + products +
                 '}';
     }
 

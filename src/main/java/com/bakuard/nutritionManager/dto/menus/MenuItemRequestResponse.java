@@ -11,7 +11,7 @@ public class MenuItemRequestResponse {
     @Schema(description = "Наименование блюда. Не может быть null.")
     private String dishName;
     @Schema(description = "Кол-во порций указанного блюда. Не может быть null. Должно быть больше нуля.")
-    private BigDecimal quantity;
+    private BigDecimal servingNumber;
 
     public MenuItemRequestResponse() {
 
@@ -25,12 +25,12 @@ public class MenuItemRequestResponse {
         this.dishName = dishName;
     }
 
-    public BigDecimal getQuantity() {
-        return quantity;
+    public BigDecimal getServingNumber() {
+        return servingNumber;
     }
 
-    public void setQuantity(BigDecimal quantity) {
-        this.quantity = quantity;
+    public void setServingNumber(BigDecimal servingNumber) {
+        this.servingNumber = servingNumber;
     }
 
     @Override
@@ -39,19 +39,19 @@ public class MenuItemRequestResponse {
         if (o == null || getClass() != o.getClass()) return false;
         MenuItemRequestResponse that = (MenuItemRequestResponse) o;
         return Objects.equals(dishName, that.dishName) &&
-                Objects.equals(quantity, that.quantity);
+                Objects.equals(servingNumber, that.servingNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishName, quantity);
+        return Objects.hash(dishName, servingNumber);
     }
 
     @Override
     public String toString() {
         return "MenuItemRequest{" +
                 "dishName='" + dishName + '\'' +
-                ", quantity=" + quantity +
+                ", quantity=" + servingNumber +
                 '}';
     }
 

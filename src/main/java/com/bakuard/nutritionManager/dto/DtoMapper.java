@@ -140,7 +140,7 @@ public class DtoMapper {
                 setServingSize(dto.getServingSize()).
                 setUnit(dto.getUnit()).
                 setDescription(dto.getDescription()).
-                setImagePath(dto.getImageUrl());
+                setImageUrl(dto.getImageUrl());
 
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
@@ -166,7 +166,7 @@ public class DtoMapper {
                 setServingSize(dto.getServingSize()).
                 setUnit(dto.getUnit()).
                 setDescription(dto.getDescription()).
-                setImagePath(dto.getImageUrl());
+                setImageUrl(dto.getImageUrl());
 
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
