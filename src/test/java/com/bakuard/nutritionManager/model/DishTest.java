@@ -1264,7 +1264,7 @@ class DishTest {
 
     private DishIngredient.Builder createIngredient(Filter filter) {
         return new DishIngredient.Builder().
-                setName("some ingredient").
+                setName("some ingredient " + UUID.randomUUID()).
                 setFilter(filter).
                 setQuantity(BigDecimal.TEN).
                 setConfig(conf);

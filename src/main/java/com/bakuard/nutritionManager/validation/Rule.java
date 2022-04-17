@@ -193,7 +193,7 @@ public class Rule {
     }
 
     public <T> Result notContainsDuplicate(Collection<T> checkedValue) {
-        return notContainsDuplicate(checkedValue, null);
+        return notContainsDuplicate(checkedValue, (String) null);
     }
 
     public <T> Result notContainsDuplicate(Collection<T> checkedValue, String field) {
@@ -202,6 +202,35 @@ public class Rule {
         if(checkedValue != null) {
             List<T> duplicates = checkedValue.stream().
                     filter(v -> Collections.frequency(checkedValue, v) > 1).
+                    toList();
+            state = Result.State.of(duplicates.isEmpty());
+
+            if(field != null && state == Result.State.FAIL) {
+                logMessage = field + " cant' contains duplicate items. Duplicate items: " + duplicates;
+            } else if(state == Result.State.FAIL) {
+                logMessage = "Duplicate items: " + duplicates;
+            }
+        }
+
+        return createResult(
+                Constraint.NOT_CONTAINS_DUPLICATE,
+                logMessage,
+                state
+        );
+    }
+
+    public <T, R> Result notContainsDuplicate(Collection<T> checkedValue, Function<T, R> mapper) {
+        return notContainsDuplicate(checkedValue, mapper, null);
+    }
+
+    public <T, R> Result notContainsDuplicate(Collection<T> checkedValue, Function<T, R> mapper, String field) {
+        Result.State state = Result.State.UNKNOWN;
+        String logMessage = null;
+
+        if(checkedValue != null) {
+            Set<R> items = new HashSet<>();
+            List<T> duplicates = checkedValue.stream().
+                    filter(i -> !items.add(mapper.apply(i))).
                     toList();
             state = Result.State.of(duplicates.isEmpty());
 
