@@ -79,7 +79,7 @@ public class ProductContext {
                 Rule.of("ProductContext.price").notNull(price).and(v -> v.notNegative(price)),
                 Rule.of("ProductContext.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)),
                 Rule.of("ProductContext.config").notNull(config),
-                Rule.of("ProductContext.tags").doesNotThrow(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container.get()))
+                Rule.of("ProductContext.tags").doesNotThrows(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container.get()))
         );
 
         this.category = category;

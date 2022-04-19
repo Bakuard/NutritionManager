@@ -77,7 +77,7 @@ public class Dish implements Entity<Dish> {
                 Rule.of("Dish.unit").notNull(unit).and(r -> r.notBlank(unit)),
                 Rule.of("Dish.servingSize").notNull(servingSize).and(r -> r.positiveValue(servingSize)),
                 Rule.of("Dish.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, urlContainer)),
-                Rule.of("Dish.ingredients").doesNotThrow(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).
+                Rule.of("Dish.ingredients").doesNotThrows(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).
                         and(r -> {
                             boolean b = ingredientContainer.get().stream().
                                     map(i -> i.getFilter().<UserFilter>findAny(Filter.Type.USER)).
@@ -87,7 +87,7 @@ public class Dish implements Entity<Dish> {
                                     "All ingredients must have UserFilter and UserFilter.getUser() must be equal Dish.getUser()");
                         }).
                         and(r -> r.notContainsDuplicate(ingredientContainer.get(), DishIngredient::getName)),
-                Rule.of("Dish.tags").doesNotThrow(tags, Tag::new, tagContainer),
+                Rule.of("Dish.tags").doesNotThrows(tags, Tag::new, tagContainer),
                 Rule.of("Dish.config").notNull(config),
                 Rule.of("Dish.repository").notNull(productRepository)
         );

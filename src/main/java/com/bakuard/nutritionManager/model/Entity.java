@@ -4,10 +4,24 @@ import com.bakuard.nutritionManager.validation.ValidateException;
 
 import java.util.UUID;
 
+/**
+ * Общий интерфейс для всех бизнес сущностей.
+ * @param <T> конкретный тип бизнес сущности.
+ */
 public interface Entity<T> {
 
+    /**
+     * Возвращает уникальный идентификатор сущности. Идентификатор должен быть гарантированно уникальным
+     * среди всех сущностей того же класса.
+     * @return уникальный идентификатор сущности.
+     */
     public UUID getId();
 
+    /**
+     * Сравнивает полное состояние (значение всех полей) двух сущностей.
+     * @param other сущность, с которой выполняестя сравнение.
+     * @return true - если полное состояние сущностей равно, иначе - false.
+     */
     public boolean equalsFullState(T other);
 
 

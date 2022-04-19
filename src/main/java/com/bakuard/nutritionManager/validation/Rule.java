@@ -3,10 +3,8 @@ package com.bakuard.nutritionManager.validation;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class Rule {
 
@@ -850,16 +848,16 @@ public class Rule {
         );
     }
 
-    public <S, T> Result doesNotThrow(Collection<S> source,
-                                      Function<S, T> factory,
-                                      Container<List<T>> container) {
-        return doesNotThrow(source, factory, container, null);
+    public <S, T> Result doesNotThrows(Collection<S> source,
+                                       Function<S, T> factory,
+                                       Container<List<T>> container) {
+        return doesNotThrows(source, factory, container, null);
     }
 
-    public <S, T> Result doesNotThrow(Collection<S> source,
-                                      Function<S, T> factory,
-                                      Container<List<T>> container,
-                                      String field) {
+    public <S, T> Result doesNotThrows(Collection<S> source,
+                                       Function<S, T> factory,
+                                       Container<List<T>> container,
+                                       String field) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;

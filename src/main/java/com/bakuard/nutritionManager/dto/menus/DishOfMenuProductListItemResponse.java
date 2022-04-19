@@ -19,7 +19,7 @@ public class DishOfMenuProductListItemResponse {
     @Schema(description = "Уникальный идентификатор продукта в формате UUID")
     private UUID productId;
     @Schema(description = """
-            Необходимое кол-во указанного продукта для приготлвения указанного блюда
+            Необходимое кол-во указанного продукта для приготовления указанного блюда
              (с учетом кол-ва порций этого блюда).
             """)
     private BigDecimal necessaryProductQuantity;
