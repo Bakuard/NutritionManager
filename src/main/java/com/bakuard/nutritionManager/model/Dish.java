@@ -597,28 +597,64 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает среднеарифметическую цену для данного блюда. Особые случаи:<br/>
+     * Возвращает минимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
+     * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
+     * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
+     *    участия в рассчете минимальной стоимости блюда.
+     * @return минимально возможная стоимость данного блюда.
+     */
+    public Optional<BigDecimal> getMinPrice() {
+        return IntStream.range(0, getIngredientNumber()).
+                mapToObj(i -> {
+                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
+                    return getProduct(i, 0).
+                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
+                }).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add);
+    }
+
+    /**
+     * Возвращает максимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
+     * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
+     * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
+     *    участия в рассчете максимальной стоимости блюда.
+     * @return максимально возможная стоимость данного блюда.
+     */
+    public Optional<BigDecimal> getMaxPrice() {
+        return IntStream.range(0, getIngredientNumber()).
+                mapToObj(i -> {
+                    /*
+                    * Если в метод getProduct(ingredientIndex, productIndex) в качестве productIndex передать
+                    * значение, которое больше или равно кол-ву всех продуктов соответствующих указанному
+                    * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
+                    * значение для productIndex чтобы получить последний продукт.
+                     */
+                    int lastProductIndex = 100000;
+                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
+                    return getProduct(i, lastProductIndex).
+                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
+                }).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add);
+    }
+
+    /**
+     * Возвращает среднюю цену для данного блюда. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту блюда не соответствует ни один продукт - возвращает пустой Optional.<br/>
      * 3. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
-     *    в рассчете среднеарифметической цены блюда.
-     * @return среднеарифметическая цена данного блюда.
+     *    в рассчете средней цены блюда.
+     * @return средняя цена данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
-        return ingredients.stream().
-                map(this::getProductsPriceSum).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                reduce(BigDecimal::add).
-                map(totalPrice -> {
-                    BigDecimal totalNumber = IntStream.range(0, ingredients.size()).
-                            map(this::getProductsNumber).
-                            mapToObj(BigDecimal::valueOf).
-                            reduce(BigDecimal::add).
-                            orElseThrow();
-
-                    return totalPrice.divide(totalNumber, config.getMathContext());
-                });
+        return getMinPrice().
+                flatMap(min -> getMaxPrice().map(max -> max.add(min))).
+                map(sum -> sum.divide(new BigDecimal(2), config.getMathContext()));
     }
 
     /**
