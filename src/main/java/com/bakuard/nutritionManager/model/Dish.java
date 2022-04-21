@@ -443,10 +443,12 @@ public class Dish implements Entity<Dish> {
      * Для любого указанного продукта, из множества взаимозаменямых продуктов данного ингредиента, вычисляет
      * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
      * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
-     * Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
-     * то метод вернет результат для последнего продукта.<br/>
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
-     * данного ингредиента, то метод вернет пустой Optional.
+     * Недостающее кол-во рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой
+     * кол-во недостающих "упаковок" продукта. Особые случаи:<br/>
+     * 1. Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
+     *    то метод вернет результат для последнего продукта.<br/>
+     * 2. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
+     *    данного ингредиента, то метод вернет пустой Optional.
      * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
      * @param ingredientIndex индекс ингредиента для которого рассчитывается кол-во недостающих продуктов.
      * @param servingNumber кол-во порций блюда.
@@ -471,11 +473,12 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта.<br/>
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
-     * данного ингредиента, то метод вернет пустой Optional.<br/>
-     * Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
-     * то метод вернет результат для последнего продукта.<br/>
+     * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта. Стоимость недостающего
+     * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки). Особые случаи: <br/>
+     * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
+     *    данного ингредиента, то метод вернет пустой Optional.<br/>
+     * 2. Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
+     *    то метод вернет результат для последнего продукта.<br/>
      * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
      * @param ingredientIndex индекс ингредиента для которого рассчитывается общай цена недостающего кол-ва продуктов.
      * @param servingNumber кол-во порций блюда.
@@ -544,7 +547,7 @@ public class Dish implements Entity<Dish> {
 
     /**
      * Возвращает стоимость данного блюда с учетом выбранных продуктов (по одному для каждого ингредиента) и
-     * кол-ва порций. Особые случаи:<br/>
+     * кол-ва порций. При расчете стоимости учитывается только недостающее кол-во продукта. Особые случаи:<br/>
      * 1. Если блюдо не содержит ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту не соответсвует ни один продукт - возвращает пустой Optional.<br/>
      * 3. Если для какого-либо ингредиента не соответствует ни один продукт - то он не принимает участия
@@ -566,8 +569,8 @@ public class Dish implements Entity<Dish> {
      *              7. если хотя бы один из ключей productsIndex меньше нуля.<br/>
      *              8. если хотя бы один из ключей productsIndex больше или равен кол-ву ингредиентов.<br/>
      */
-    public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
-                                         Map<Integer, Integer> productsIndex) {
+    public Optional<BigDecimal> getLackProductPrice(BigDecimal servingNumber,
+                                                    Map<Integer, Integer> productsIndex) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(r -> r.positiveValue(servingNumber)),
@@ -597,28 +600,64 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает среднеарифметическую цену для данного блюда. Особые случаи:<br/>
+     * Возвращает минимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
+     * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
+     * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
+     *    участия в рассчете минимальной стоимости блюда.
+     * @return минимально возможная стоимость данного блюда.
+     */
+    public Optional<BigDecimal> getMinPrice() {
+        return IntStream.range(0, getIngredientNumber()).
+                mapToObj(i -> {
+                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
+                    return getProduct(i, 0).
+                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
+                }).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add);
+    }
+
+    /**
+     * Возвращает максимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
+     * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
+     * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
+     *    участия в рассчете максимальной стоимости блюда.
+     * @return максимально возможная стоимость данного блюда.
+     */
+    public Optional<BigDecimal> getMaxPrice() {
+        return IntStream.range(0, getIngredientNumber()).
+                mapToObj(i -> {
+                    /*
+                    * Если в метод getProduct(ingredientIndex, productIndex) в качестве productIndex передать
+                    * значение, которое больше или равно кол-ву всех продуктов соответствующих указанному
+                    * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
+                    * значение для productIndex чтобы получить последний продукт.
+                     */
+                    int lastProductIndex = 100000;
+                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
+                    return getProduct(i, lastProductIndex).
+                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
+                }).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add);
+    }
+
+    /**
+     * Возвращает среднюю стоимость для данного блюда. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту блюда не соответствует ни один продукт - возвращает пустой Optional.<br/>
      * 3. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
-     *    в рассчете среднеарифметической цены блюда.
-     * @return среднеарифметическая цена данного блюда.
+     *    в рассчете средней стоимости блюда.
+     * @return средняя стоимость данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
-        return ingredients.stream().
-                map(this::getProductsPriceSum).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                reduce(BigDecimal::add).
-                map(totalPrice -> {
-                    BigDecimal totalNumber = IntStream.range(0, ingredients.size()).
-                            map(this::getProductsNumber).
-                            mapToObj(BigDecimal::valueOf).
-                            reduce(BigDecimal::add).
-                            orElseThrow();
-
-                    return totalPrice.divide(totalNumber, config.getMathContext());
-                });
+        return getMinPrice().
+                flatMap(min -> getMaxPrice().map(max -> max.add(min))).
+                map(sum -> sum.divide(new BigDecimal(2), config.getMathContext()));
     }
 
     /**
@@ -675,16 +714,6 @@ public class Dish implements Entity<Dish> {
                 '}';
     }
 
-
-    /*
-     * Возвращает суммарную цену всех продуктов которые могут использоваться в качестве данного ингредиента.
-     * Используется при расчете средней арифметической цены блюда, в которое входит данный ингредиент.
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению DishIngredient#getFilter() данного ингредиента,
-     * то метод вернет пустой Optional.
-     */
-    private Optional<BigDecimal> getProductsPriceSum(DishIngredient ingredient) {
-        return productRepository.getProductsSum(new Criteria().setFilter(ingredient.getFilter()));
-    }
 
     private BigDecimal getLackQuantity(DishIngredient ingredient,
                                        Product product,

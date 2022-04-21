@@ -281,7 +281,7 @@ public class Menu implements Entity<Menu> {
      * @return стоимость данного меню или пустой Optional.
      * @throws ValidateException если menuItemProducts имеет значение null.
      */
-    public Optional<BigDecimal> getPrice(List<MenuItemProduct> menuItemProducts) {
+    public Optional<BigDecimal> getLackProductPrice(List<MenuItemProduct> menuItemProducts) {
         return menuItemProducts.stream().
                 map(item -> item.product().getContext().getPrice().multiply(item.necessaryQuantity())).
                 reduce(BigDecimal::add);
@@ -297,7 +297,11 @@ public class Menu implements Entity<Menu> {
      * @return минимально возможная стоимость данного меню.
      */
     public Optional<BigDecimal> getMinPrice() {
-        return Optional.empty();
+        return items.stream().
+                map(item -> item.getDish().getMinPrice()).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add);
     }
 
     /**
@@ -310,7 +314,11 @@ public class Menu implements Entity<Menu> {
      * @return максимально возможная стоимость данного меню.
      */
     public Optional<BigDecimal> getMaxPrice() {
-        return Optional.empty();
+        return items.stream().
+                map(item -> item.getDish().getMaxPrice()).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                reduce(BigDecimal::add);
     }
 
     /**

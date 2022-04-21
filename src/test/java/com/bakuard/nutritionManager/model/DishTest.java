@@ -6,6 +6,7 @@ import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
+import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pageable;
 import com.bakuard.nutritionManager.validation.Constraint;
 
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -157,16 +159,13 @@ class DishTest {
              => calculate result for last product
             """)
     public void getLackQuantity7() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 5).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
-        Dish dish = createDish(1, createUser(1), repository).
+                thenReturn(createProductPage(user, 5, this::createProduct));
+        Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
@@ -187,9 +186,7 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+                thenReturn(Pageable.firstEmptyPage());
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
@@ -206,16 +203,13 @@ class DishTest {
              => calculate result for last product
             """)
     public void getLackQuantity9() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 6).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
-        Dish dish = createDish(1, createUser(1), repository).
+                thenReturn(createProductPage(user, 6, this::createProduct));
+        Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
@@ -238,9 +232,7 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+                thenReturn(Pageable.firstEmptyPage());
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
@@ -258,22 +250,19 @@ class DishTest {
              => return correct result
             """)
     public void getLackQuantity11() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 16).
-                                createPageMetadata(20, 30).
-                                createPage(createProducts(1, 5))
-                );
-        Dish dish = createDish(1, createUser(1), repository).
+                thenReturn(createProductPage(user, 16, this::createProduct));
+        Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getLackQuantity(0, 16, new BigDecimal("2"));
 
-        BigDecimal expected = new BigDecimal("20");
+        BigDecimal expected = new BigDecimal(8);
         Assertions.assertTrue(actual.isPresent());
         AssertUtil.assertEquals(expected, actual.get());
     }
@@ -291,9 +280,7 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+                thenReturn(Pageable.firstEmptyPage());
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
@@ -421,16 +408,13 @@ class DishTest {
              => calculate result for last product
             """)
     public void getLackQuantityPrice7() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 5).
-                                createPageMetadata(30, 30).
-                                createPage(createProducts(1, 5))
-                );
-        Dish dish = createDish(1, createUser(1), repository).
+                thenReturn(createProductPage(user, 5, this::createProduct));
+        Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
@@ -453,9 +437,7 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+                thenReturn(Pageable.firstEmptyPage());
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
@@ -472,16 +454,13 @@ class DishTest {
              => calculate result for last product
             """)
     public void getLackQuantityPrice9() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 6).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
-        Dish dish = createDish(1, createUser(1), repository).
+                thenReturn(createProductPage(user, 6, this::createProduct));
+        Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
@@ -504,9 +483,7 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+                thenReturn( Pageable.firstEmptyPage());
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
@@ -524,16 +501,13 @@ class DishTest {
              => return correct result
             """)
     public void getLackQuantityPrice11() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 16).
-                                createPageMetadata(20, 30).
-                                createPage(createProducts(1, 5))
-                );
-        Dish dish = createDish(1, createUser(1), repository).
+                thenReturn(createProductPage(user, 16, this::createProduct));
+        Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
@@ -557,9 +531,7 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(16, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+                thenReturn(Pageable.firstEmptyPage());
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
@@ -667,22 +639,19 @@ class DishTest {
              => return correct result
             """)
     public void getProduct6() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(4, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 4).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
-        Dish dish = createDish(1, createUser(1), repository).
+                thenReturn(createProductPage(user, 4, this::createProduct));
+        Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
         Optional<Product> actual = dish.getProduct(0, 4);
 
-        Product expected = createProduct(5, 5).tryBuild();
+        Product expected = createProduct(user, 5).tryBuild();
         Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
@@ -694,22 +663,19 @@ class DishTest {
              => return correct result
             """)
     public void getProduct7() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(5, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 5).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
+                thenReturn(createProductPage(user, 5, this::createProduct));
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
         Optional<Product> actual = dish.getProduct(0, 5);
 
-        Product expected = createProduct(5, 5).tryBuild();
+        Product expected = createProduct(user, 5).tryBuild();
         Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
@@ -721,22 +687,19 @@ class DishTest {
              => return correct result
             """)
     public void getProduct8() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(6, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 6).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
+                thenReturn(createProductPage(user, 6, this::createProduct));
         Dish dish = createDish(1, createUser(1), repository).
                 addIngredient(createIngredient(categoryFilter())).
                 tryBuild();
 
         Optional<Product> actual = dish.getProduct(0, 6);
 
-        Product expected = createProduct(5, 5).tryBuild();
+        Product expected = createProduct(user, 5).tryBuild();
         Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
@@ -861,6 +824,286 @@ class DishTest {
 
     @Test
     @DisplayName("""
+            getMinPrice():
+             dish haven't any ingredients
+             => return empty Optional
+            """)
+    public void getMinPrice1() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMinPrice();
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getMinPrice():
+             all dish ingredients haven't suitable products
+             => return empty Optional
+            """)
+    public void getMinPrice2() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(repository.getProducts(Mockito.any())).
+                thenReturn(Pageable.firstEmptyPage());
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMinPrice();
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getMinPrice():
+             some dish ingredients have suitable products,
+             all products cost zero
+             => return 0
+            """)
+    public void getMinPrice3() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, shopFilter())))
+        ).thenReturn(
+                createProductPage(user, 0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+        ).thenReturn(
+                createProductPage(user, 0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMinPrice();
+
+        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getMinPrice():
+             some dish ingredients have suitable products,
+             some products cost zero
+             => return correct result
+            """)
+    public void getMinPrice4() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, shopFilter())))
+        ).thenReturn(
+                createProductPage(user, 0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMinPrice();
+
+        AssertUtil.assertEquals(new BigDecimal(100), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getMinPrice():
+             all dish ingredients have suitable products,
+             all products cost more than 0
+             => return correct result
+            """)
+    public void getMinPrice5() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, shopFilter())))
+        ).thenReturn(
+                createProductPage(user, 0,
+                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(i * 100)))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMinPrice();
+
+        AssertUtil.assertEquals(new BigDecimal(1200), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getMaxPrice():
+             dish haven't any ingredients
+             => return empty Optional
+            """)
+    public void getMaxPrice1() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Dish dish = createDish(1, user, repository).tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMaxPrice();
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getMaxPrice():
+             all dish ingredients haven't suitable products
+             => return empty Optional
+            """)
+    public void getMaxPrice2() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(repository.getProducts(Mockito.any())).
+                thenReturn(Pageable.firstEmptyPage());
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMaxPrice();
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getMaxPrice():
+             some dish ingredients have suitable products,
+             all products cost zero
+             => return 0
+            """)
+    public void getMaxPrice3() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, shopFilter())))
+        ).thenReturn(
+                createProductPage(user, 100000,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, gradeFilter())))
+        ).thenReturn(
+                createProductPage(user, 100000,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMaxPrice();
+
+        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getMaxPrice():
+             some dish ingredients have suitable products,
+             some products cost zero
+             => return correct result
+            """)
+    public void getMaxPrice4() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, shopFilter())))
+        ).thenReturn(
+                createProductPage(user, 100000,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, gradeFilter())))
+        ).thenReturn(createProductPage(user, 100000, this::createProduct));
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMaxPrice();
+
+        AssertUtil.assertEquals(new BigDecimal(500), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getMaxPrice():
+             all dish ingredients have suitable products,
+             all products cost more than 0
+             => return correct result
+            """)
+    public void getMaxPrice5() {
+        User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, categoryFilter())))
+        ).thenReturn(createProductPage(user, 100000, this::createProduct));
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, shopFilter())))
+        ).thenReturn(
+                createProductPage(user, 100000,
+                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(i * 100)))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(100000, gradeFilter())))
+        ).thenReturn(createProductPage(user, 100000, this::createProduct));
+        Dish dish = createDish(1, user, repository).
+                addIngredient(createIngredient(categoryFilter())).
+                addIngredient(createIngredient(shopFilter())).
+                addIngredient(createIngredient(gradeFilter())).
+                tryBuild();
+
+        Optional<BigDecimal> actual = dish.getMaxPrice();
+
+        AssertUtil.assertEquals(new BigDecimal(6000), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
             getAveragePrice():
              dish haven't any ingredients
              => return empty Optional
@@ -882,8 +1125,10 @@ class DishTest {
              => return empty Optional
             """)
     public void getAveragePrice2() {
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
         User user = createUser(1);
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(repository.getProducts(Mockito.any())).
+                thenReturn(Pageable.firstEmptyPage());
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 addIngredient(createIngredient(shopFilter())).
@@ -903,26 +1148,44 @@ class DishTest {
              => return 0
             """)
     public void getAveragePrice3() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
-                ).
-                thenReturn(0);
+                repository.getProducts(Mockito.eq(createCriteria(100000, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
-                ).
-                thenReturn(10);
+                repository.getProducts(Mockito.eq(createCriteria(100000, shopFilter())))
+        ).thenReturn(
+                createProductPage(user,
+                        0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
-                ).
-                thenReturn(10);
+                repository.getProducts(
+                        Mockito.eq(createCriteria(100000, gradeFilter()))
+                )
+        ).thenReturn(
+                createProductPage(user,
+                        0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
         Mockito.when(
-                    repository.getProductsSum(Mockito.eq(createCriteria(shopFilter())))
-                ).thenReturn(Optional.of(BigDecimal.valueOf(0)));
+                repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                    repository.getProductsSum(Mockito.eq(createCriteria(gradeFilter())))
-                ).thenReturn(Optional.of(BigDecimal.valueOf(0)));
-        User user = createUser(1);
+                repository.getProducts(Mockito.eq(createCriteria(0, shopFilter())))
+        ).thenReturn(
+                createProductPage(user,
+                        0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+        ).thenReturn(
+                createProductPage(user,
+                        0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 addIngredient(createIngredient(shopFilter())).
@@ -942,26 +1205,34 @@ class DishTest {
              => return correct result
             """)
     public void getAveragePrice4() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
-                ).
-                thenReturn(0);
+                repository.getProducts(Mockito.eq(createCriteria(100000, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
-                ).
-                thenReturn(10);
+                repository.getProducts(Mockito.eq(createCriteria(100000, shopFilter())))
+        ).thenReturn(
+                createProductPage(user,
+                0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
-                ).
-                thenReturn(10);
+                repository.getProducts(Mockito.eq(createCriteria(100000, gradeFilter())))
+        ).thenReturn(createProductPage(user, 0,  this::createProduct));
         Mockito.when(
-                    repository.getProductsSum(Mockito.eq(createCriteria(shopFilter())))
-                 ).thenReturn(Optional.of(BigDecimal.valueOf(0)));
+                repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
+        ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                    repository.getProductsSum(Mockito.eq(createCriteria(gradeFilter())))
-                ).thenReturn(Optional.of(BigDecimal.valueOf(500)));
-        User user = createUser(1);
+                repository.getProducts(Mockito.eq(createCriteria(0, shopFilter())))
+        ).thenReturn(
+                createProductPage(user,
+                        0,
+                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO))
+        );
+        Mockito.when(
+                repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 addIngredient(createIngredient(shopFilter())).
@@ -970,7 +1241,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal("25"), actual.orElseThrow());
+        AssertUtil.assertEquals(new BigDecimal(300), actual.orElseThrow());
     }
 
     @Test
@@ -981,29 +1252,34 @@ class DishTest {
              => return correct result
             """)
     public void getAveragePrice5() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(categoryFilter())))
-                ).
-                thenReturn(5);
+                repository.getProducts(Mockito.eq(createCriteria(100000, categoryFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(shopFilter())))
-                ).
-                thenReturn(10);
+                repository.getProducts(Mockito.eq(createCriteria(100000, shopFilter())))
+        ).thenReturn(
+                createProductPage(user,
+                        0,
+                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(i * 100)))
+        );
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(gradeFilter())))
-                ).
-                thenReturn(10);
+                repository.getProducts(Mockito.eq(createCriteria(100000, gradeFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
         Mockito.when(
-                    repository.getProductsSum(Mockito.eq(createCriteria(categoryFilter())))
-                ).thenReturn(Optional.of(BigDecimal.valueOf(310)));
+                repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
         Mockito.when(
-                    repository.getProductsSum(Mockito.eq(createCriteria(shopFilter())))
-                ).thenReturn(Optional.of(BigDecimal.valueOf(207)));
+                repository.getProducts(Mockito.eq(createCriteria(0, shopFilter())))
+        ).thenReturn(
+                createProductPage(user,
+                        0,
+                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(i * 100)))
+        );
         Mockito.when(
-                    repository.getProductsSum(Mockito.eq(createCriteria(gradeFilter())))
-                ).thenReturn(Optional.of(BigDecimal.valueOf(500)));
-        User user = createUser(1);
+                repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
+        ).thenReturn(createProductPage(user, 0, this::createProduct));
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 addIngredient(createIngredient(shopFilter())).
@@ -1012,39 +1288,35 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal("40.68"), actual.orElseThrow());
+        AssertUtil.assertEquals(new BigDecimal(3600), actual.orElseThrow());
     }
 
     @Test
     @DisplayName("""
-            getPrice(servingNumber, ingredients):
+            getLackProductPrice(servingNumber, ingredients):
              dish haven't any ingredients
              => return empty Optional
             """)
-    public void getPrice1() {
+    public void getLackProductPrice1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         User user = createUser(1);
         Dish dish = createDish(1, user, repository).tryBuild();
 
-        Optional<BigDecimal> actual = dish.getPrice(BigDecimal.TEN, Map.of());
+        Optional<BigDecimal> actual = dish.getLackProductPrice(BigDecimal.TEN, Map.of());
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getPrice(servingNumber, ingredients):
+            getLackProductPrice(servingNumber, ingredients):
              all dish ingredients haven't suitable products
              => return empty Optional
             """)
-    public void getPrice2() {
+    public void getLackProductPrice2() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(
-                        repository.getProducts(Mockito.any())
-                ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+        Mockito.when(repository.getProducts(Mockito.any())).
+                thenReturn(Pageable.firstEmptyPage());
         User user = createUser(1);
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
@@ -1052,7 +1324,7 @@ class DishTest {
                 addIngredient(createIngredient(gradeFilter())).
                 tryBuild();
 
-        Optional<BigDecimal> actual = dish.getPrice(
+        Optional<BigDecimal> actual = dish.getLackProductPrice(
                 BigDecimal.TEN,
                 Map.of(0, 0,
                         1, 0,
@@ -1064,42 +1336,32 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getPrice(servingNumber, ingredients):
+            getLackProductPrice(servingNumber, ingredients):
              some dish ingredients have suitable products
              => return correct result
             """)
-    public void getPrice3() {
+    public void getLackProductPrice3() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.firstEmptyPage()
-                );
+                thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(1, shopFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 1).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
+                thenReturn(createProductPage(user, 1, this::createProduct));
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 0).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
-        User user = createUser(1);
+                thenReturn(createProductPage(user, 0, this::createProduct));
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 addIngredient(createIngredient(shopFilter())).
                 addIngredient(createIngredient(gradeFilter())).
                 tryBuild();
 
-        Optional<BigDecimal> actual = dish.getPrice(
+        Optional<BigDecimal> actual = dish.getLackProductPrice(
                 BigDecimal.TEN,
                 Map.of(0, 0,
                         1, 1,
@@ -1111,44 +1373,32 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getPrice(servingNumber, ingredients):
+            getLackProductPrice(servingNumber, ingredients):
              all dish ingredients have suitable products
              => return correct result
             """)
-    public void getPrice4() {
+    public void getLackProductPrice4() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(4, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 4).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
+                thenReturn(createProductPage(user, 4, this::createProduct));
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(1, shopFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 1).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
+                thenReturn(createProductPage(user, 1, this::createProduct));
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(0, gradeFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 0).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
-        User user = createUser(1);
+                thenReturn(createProductPage(user, 0, this::createProduct));
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 addIngredient(createIngredient(shopFilter())).
                 addIngredient(createIngredient(gradeFilter())).
                 tryBuild();
 
-        Optional<BigDecimal> actual = dish.getPrice(
+        Optional<BigDecimal> actual = dish.getLackProductPrice(
                 BigDecimal.TEN,
                 Map.of(0, 4,
                         1, 1,
@@ -1160,45 +1410,33 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getPrice(servingNumber, ingredients):
+            getLackProductPrice(servingNumber, ingredients):
              all dish ingredients have suitable products,
              products not listed for some ingredients
              => return correct result
             """)
-    public void getPrice5() {
+    public void getLackProductPrice5() {
+        User user = createUser(1);
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(0, categoryFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 0).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
+                thenReturn(createProductPage(user, 0, this::createProduct));
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(0, shopFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 0).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
+                thenReturn(createProductPage(user, 0, this::createProduct));
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(2, gradeFilter())))
                 ).
-                thenReturn(
-                        Pageable.ofIndex(5, 2).
-                                createPageMetadata(5, 30).
-                                createPage(createProducts(1, 5))
-                );
-        User user = createUser(1);
+                thenReturn(createProductPage(user, 2, this::createProduct));
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(categoryFilter())).
                 addIngredient(createIngredient(shopFilter())).
                 addIngredient(createIngredient(gradeFilter())).
                 tryBuild();
 
-        Optional<BigDecimal> actual = dish.getPrice(
+        Optional<BigDecimal> actual = dish.getLackProductPrice(
                 BigDecimal.TEN,
                 Map.of(2, 2)
         );
@@ -1206,10 +1444,6 @@ class DishTest {
         AssertUtil.assertEquals(new BigDecimal("6010"), actual.orElseThrow());
     }
 
-
-    private UUID toUUID(int number) {
-        return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
-    }
 
     private User createUser(int userId) {
         return new User.Builder().
@@ -1220,11 +1454,11 @@ class DishTest {
                 tryBuild();
     }
 
-    private Product.Builder createProduct(int userId, int id) {
+    private Product.Builder createProduct(User user, int id) {
         return new Product.Builder().
                 setAppConfiguration(conf).
                 setId(toUUID(id)).
-                setUser(createUser(userId)).
+                setUser(user).
                 setCategory("category " + id).
                 setShop("shop " + id).
                 setGrade("variety " + id).
@@ -1237,12 +1471,6 @@ class DishTest {
                 setImageUrl("https://nutritionmanager.xyz/products/images?id=" + id).
                 addTag("tag " + id).
                 addTag("common tag");
-    }
-
-    private List<Product> createProducts(int userId, int productsNumber) {
-        return IntStream.rangeClosed(1, productsNumber).
-                mapToObj(i -> createProduct(userId, i).tryBuild()).
-                collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Dish.Builder createDish(int dishId,
@@ -1301,5 +1529,23 @@ class DishTest {
                 Filter.user(toUUID(1))
         );
     }
-    
+
+    private Page<Product> createProductPage(User user,
+                                            int itemIndex,
+                                            BiFunction<User, Integer, Product.Builder> productFactory) {
+        int productsNumber = 5;
+        List<Product> products = IntStream.rangeClosed(1, productsNumber).
+                mapToObj(i -> productFactory.apply(user ,i).tryBuild()).
+                toList();
+
+        return Pageable.ofIndex(30, itemIndex).
+                createPageMetadata(5, 30).
+                createPage(products);
+    }
+
+
+    private UUID toUUID(int number) {
+        return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
+    }
+
 }

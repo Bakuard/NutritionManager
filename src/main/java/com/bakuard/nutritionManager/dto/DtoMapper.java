@@ -193,7 +193,7 @@ public class DtoMapper {
         response.setDishId(dish.getId());
         response.setServingNumber(dto.getServingNumber());
         response.setTotalPrice(
-                dish.getPrice(
+                dish.getLackProductPrice(
                         dto.getServingNumber(),
                         dto.getProducts().stream().
                                 collect(Collectors.toMap(
