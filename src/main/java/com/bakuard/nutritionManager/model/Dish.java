@@ -569,8 +569,8 @@ public class Dish implements Entity<Dish> {
      *              7. если хотя бы один из ключей productsIndex меньше нуля.<br/>
      *              8. если хотя бы один из ключей productsIndex больше или равен кол-ву ингредиентов.<br/>
      */
-    public Optional<BigDecimal> getPrice(BigDecimal servingNumber,
-                                         Map<Integer, Integer> productsIndex) {
+    public Optional<BigDecimal> getLackProductPrice(BigDecimal servingNumber,
+                                                    Map<Integer, Integer> productsIndex) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(r -> r.positiveValue(servingNumber)),
@@ -713,17 +713,7 @@ public class Dish implements Entity<Dish> {
                 ", tags=" + tags +
                 '}';
     }
-
-
-    /*
-     * Возвращает суммарную цену всех продуктов которые могут использоваться в качестве данного ингредиента.
-     * Используется при расчете средней арифметической цены блюда, в которое входит данный ингредиент.
-     * Если в БД нет ни одного продукта удовлетворяющего ограничению DishIngredient#getFilter() данного ингредиента,
-     * то метод вернет пустой Optional.
-     */
-    private Optional<BigDecimal> getProductsPriceSum(DishIngredient ingredient) {
-        return productRepository.getProductsSum(new Criteria().setFilter(ingredient.getFilter()));
-    }
+    
 
     private BigDecimal getLackQuantity(DishIngredient ingredient,
                                        Product product,

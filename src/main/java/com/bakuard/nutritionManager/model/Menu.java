@@ -281,7 +281,7 @@ public class Menu implements Entity<Menu> {
      * @return стоимость данного меню или пустой Optional.
      * @throws ValidateException если menuItemProducts имеет значение null.
      */
-    public Optional<BigDecimal> getPrice(List<MenuItemProduct> menuItemProducts) {
+    public Optional<BigDecimal> getLackProductPrice(List<MenuItemProduct> menuItemProducts) {
         return menuItemProducts.stream().
                 map(item -> item.product().getContext().getPrice().multiply(item.necessaryQuantity())).
                 reduce(BigDecimal::add);
