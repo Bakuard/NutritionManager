@@ -713,7 +713,7 @@ public class Dish implements Entity<Dish> {
                 ", tags=" + tags +
                 '}';
     }
-    
+
 
     private BigDecimal getLackQuantity(DishIngredient ingredient,
                                        Product product,
