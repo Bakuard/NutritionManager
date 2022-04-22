@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -113,14 +112,19 @@ public class Menu implements Entity<Menu> {
     /**
      * Возвращает данные о конкретном продукте для каждого ингрдиента блюда этого меню. Для каждого ингредиента
      * каждого блюда можно указать. Особые случаи:<br/>
-     * 1. Если для одного и того же ингредиента одного и того же блюда указанно несколько продуктов - будет
-     *    выбран первый из указанных. <br/>
-     * 2. Если для некоторого ингредиента некоторого блюда не указанно ни одного продукта - будет выбран самый
-     *    дешевый из всех продуктов подходящих для данного ингредиента. <br/>
-     * 3. Если некоторому ингредиенту некоторого блюда не соответствует ни один продукт - то для данного ингредиента
+     * 1. Если для данного меню не задано ни одно блюдо - возвращает пустой список. <br/>
+     * 2. Если любое блюдо меню не имеет ни одноо ингредиента - возвращает пустой список. <br/>
+     * 3. Если всем ингредиентам любого блюда этого меню не соответствует ни одного продукта - возвращает пустой
+     *    список. <br/>
+     * 4. Если некоторому ингредиенту некоторого блюда не соответствует ни один продукт - то для данного ингредиента
      *    НЕ будет добавлен элемент {@link MenuItemProduct} в итоговый список. <br/>
-     * 4. Если всем ингредиентам любого блюда этого меню не соответствует ни одного продукта - возвращает пустой
-     *    список.
+     * 5. Если для одного и того же ингредиента одного и того же блюда указанно несколько продуктов - будет
+     *    выбран первый из указанных. <br/>
+     * 6. Если для некоторого ингредиента некоторого блюда не указанно ни одного продукта - будет выбран самый
+     *    дешевый из всех продуктов подходящих для данного ингредиента. <br/>
+     * 7. Если для некоторого ингредиента некоторого блюда задан индекс продукта, который больше или равен кол-ву
+     *    всех продуктов соответствующих данному ингредиенту - то для этого ингредиента будет выбран последний
+     *    из всех соответствующих ему продуктов (все продукты упорядочены по цене в порядке возрастания). <br/>
      * @param quantity кол-во данного меню.
      * @param constraints ограничения задающие конкретные продукты для ингредиентов блюд этого меню.
      * @return данные об одном конкретном продукте для каждого ингрдиента блюда этого меню.
@@ -161,7 +165,8 @@ public class Menu implements Entity<Menu> {
                     MenuItemProduct itemProduct = new MenuItemProduct(
                             item,
                             product.get(),
-                            necessaryQuantity
+                            necessaryQuantity,
+                            config
                     );
                     result.add(itemProduct);
                 }
@@ -181,7 +186,7 @@ public class Menu implements Entity<Menu> {
      */
     public Map<Product, List<MenuItemProduct>> groupByProduct(List<MenuItemProduct> menuItemProducts) {
         return menuItemProducts.stream().
-                collect(Collectors.groupingBy(MenuItemProduct::product));
+                collect(Collectors.groupingBy(MenuItemProduct::getProduct));
     }
 
     /**
@@ -205,7 +210,7 @@ public class Menu implements Entity<Menu> {
         List<MenuItemProduct> menuItems = products.get(product);
         if(menuItems == null) return Optional.empty();
         return menuItems.stream().
-                map(MenuItemProduct::necessaryQuantity).
+                map(MenuItemProduct::getNecessaryQuantity).
                 reduce(BigDecimal::add);
     }
 
@@ -283,7 +288,7 @@ public class Menu implements Entity<Menu> {
      */
     public Optional<BigDecimal> getLackProductPrice(List<MenuItemProduct> menuItemProducts) {
         return menuItemProducts.stream().
-                map(item -> item.product().getContext().getPrice().multiply(item.necessaryQuantity())).
+                map(item -> item.getProduct().getContext().getPrice().multiply(item.getNecessaryQuantity())).
                 reduce(BigDecimal::add);
     }
 
@@ -377,12 +382,64 @@ public class Menu implements Entity<Menu> {
     /**
      * Используется для предоставлении данных о конкретном продукте соответствующих одному из ингредиентов
      * блюда входящего в это меню.
-     * @param item элемент этого меню (блюдо и кол-во, в котором оно входит в состав этого меню).
-     * @param product один из продуктов соответствующих одному из ингредиентов этого элемента меню.
-     * @param necessaryQuantity кол-во этого продукта необходимого для приготовления всех порций блюда
-     *                          относящегося к указанному элементу (с учетом кол-ва меню).
      */
-    public record MenuItemProduct(MenuItem item, Product product, BigDecimal necessaryQuantity) {}
+    public static final class MenuItemProduct {
+
+        private final MenuItem item;
+        private final Product product;
+        private final BigDecimal necessaryQuantity;
+
+        /**
+         * Создает новый объект MenuItemProduct.
+         * @param item элемент этого меню (блюдо и кол-во, в котором оно входит в состав этого меню).
+         * @param product один из продуктов соответствующих одному из ингредиентов этого элемента меню.
+         * @param necessaryQuantity кол-во этого продукта необходимого для приготовления всех порций блюда
+         *                          относящегося к указанному элементу (с учетом кол-ва меню).
+         * @param config Общме настройки прилоежния.
+         */
+        public MenuItemProduct(MenuItem item, Product product, BigDecimal necessaryQuantity, AppConfigData config) {
+            this.item = item;
+            this.product = product;
+            this.necessaryQuantity = necessaryQuantity.setScale(config.getNumberScale(), config.getRoundingMode());
+        }
+
+        public MenuItem getItem() {
+            return item;
+        }
+
+        public Product getProduct() {
+            return product;
+        }
+
+        public BigDecimal getNecessaryQuantity() {
+            return necessaryQuantity;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MenuItemProduct that = (MenuItemProduct) o;
+            return item.equals(that.item) &&
+                    product.equals(that.product) &&
+                    necessaryQuantity.equals(that.necessaryQuantity);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(item, product, necessaryQuantity);
+        }
+
+        @Override
+        public String toString() {
+            return "MenuItemProduct{" +
+                    "item=" + item +
+                    ", product=" + product +
+                    ", necessaryQuantity=" + necessaryQuantity +
+                    '}';
+        }
+
+    }
 
 
     /**
@@ -446,16 +503,6 @@ public class Menu implements Entity<Menu> {
 
         public Builder addItem(Entity.Builder<MenuItem> item) {
             items.add(item);
-            return this;
-        }
-
-        public Builder addItem(String dishName, Supplier<Dish> dish, BigDecimal quantity) {
-            items.add(
-                    new MenuItem.Builder().
-                            setDishName(dishName).
-                            setDish(dish).
-                            setQuantity(quantity)
-            );
             return this;
         }
 
