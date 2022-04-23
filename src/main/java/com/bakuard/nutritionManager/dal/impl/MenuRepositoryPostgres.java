@@ -9,6 +9,7 @@ import com.bakuard.nutritionManager.model.util.Page;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.util.Optional;
 import java.util.UUID;
 
 public class MenuRepositoryPostgres implements MenuRepository {
@@ -25,17 +26,27 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public Menu remove(UUID menuId) {
+    public Menu tryRemove(UUID userId, UUID menuId) {
         return null;
     }
 
     @Override
-    public Menu getById(UUID menuId) {
+    public Optional<Menu> getById(UUID userId, UUID menuId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Menu> getByMenu(UUID userId, String name) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Menu tryGetById(UUID userId, UUID menuId) {
         return null;
     }
 
     @Override
-    public Menu tryGetById(UUID menuId) {
+    public Menu tryGetByName(UUID userId, String name) {
         return null;
     }
 

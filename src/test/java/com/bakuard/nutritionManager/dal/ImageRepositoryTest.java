@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-class ImageRepositoryPostgresTest {
+class ImageRepositoryTest {
 
     private static HikariDataSource dataSource;
     private static ImageRepository imageRepository;

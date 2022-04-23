@@ -2,12 +2,10 @@ package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.validation.ValidateException;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -15,24 +13,143 @@ import java.util.UUID;
  */
 public interface MenuRepository {
 
+    /**
+     * Сохраняет данные указанного меню в БД. Если в БД нет меню с таким идентификатором, то добавляет его.
+     * Если в БД есть меню с таким идентификатором - то обновляет его. В обоих случаях проверяется - есть ли
+     * в БД у пользователя {@link Menu#getUser()} меню с таким же именем как и у переданного объекта. Если
+     * ответ положительный - генерирует исключение.
+     * @param menu сохраняемое меню.
+     * @return true - если указанное меню отсутсвовало в БД или отличалось от переданного, иначе - false.
+     * @throws ValidateException если верно одно из следующих условий:<br/>
+     *         1. если menu имеет значение null. <br/>
+     *         2. если в БД нет меню с таким именем. <br/>
+     */
     public boolean save(Menu menu);
 
-    public Menu remove(UUID menuId);
+    /**
+     * Удаляет из БД меню, которое принадлежит пользователю с идентификатором userId и имеет идентификатор
+     * menuId. Если у указанного пользователя нет меню с таким идентификатором - выбрасывает исключение.<br/>
+     * (Для однозначного определения удаляемого меню достаточно только его ID, но необходимо проверять, что
+     * пользователь выполняющий удаление действительно является владельцем меню.)
+     * @param userId идентификатор пользователя, которому принадлежит меню.
+     * @param menuId идентификатор меню.
+     * @return возвращает удаленное меню.
+     * @throws ValidateException если верно одно из следующих условий: <br/>
+     *         1. если у указанного пользователя нет меню с таким идентификатором. <br/>
+     *         2. если menuId равен null. <br/>
+     *         3. если userId равен null. <br/>
+     */
+    public Menu tryRemove(UUID userId, UUID menuId);
 
-    public Menu getById(UUID menuId);
+    /**
+     * Возвращает меню указанного пользователя по идентификатору этого меню. Если у указанного
+     * пользователя нет меню с таким идентификатором - возвращает пустой Optional.<br/>
+     * (Для однозначного определения возвращаемого меню достаточно только его ID, но необходимо проверять, что
+     * пользователь запрашивающий меню действительно является его владельцем.)
+     * @param menuId идентификатор меню.
+     * @param userId идентификатор пользователя, которому принадлежит меню.
+     * @return объект Menu или пустой Optional.
+     * @throws ValidateException если верно одно из следующих условий: <br/>
+     *         1. если menuId равен null. <br/>
+     *         2. если userId равен null. <br/>
+     */
+    public Optional<Menu> getById(UUID userId, UUID menuId);
 
-    public Menu tryGetById(UUID menuId);
+    /**
+     * Возвращает меню указанного пользователя по имени этого меню. Если у указанного
+     * пользователя нет меню с таким именем - возвращает пустой Optional.<br/>
+     * (Для однозначного определения возвращаемого меню достаточно только его имя, но необходимо проверять, что
+     * пользователь запрашивающий меню действительно является его владельцем.)
+     * @param userId идентификатор пользователя, которому принадлежит меню.
+     * @param name наименование меню.
+     * @return объект Menu или пустой Optional.
+     * @throws ValidateException если верно одно из следующих условий: <br/>
+     *         1. если name равен null. <br/>
+     *         2. если userId равен null. <br/>
+     */
+    public Optional<Menu> getByMenu(UUID userId, String name);
 
+    /**
+     * Возвращает меню указанного пользователя по идентификатору этого меню. Если у указанного
+     * пользователя нет меню с таким идентификатором - выбрасывает исключение.<br/>
+     * (Для однозначного определения возвращаемого меню достаточно только его ID, но необходимо проверять, что
+     * пользователь запрашивающий меню действительно является его владельцем.)
+     * @param userId идентификатор пользователя, которому принадлежит блюдо.
+     * @param menuId идентификатор меню.
+     * @return объект Menu.
+     * @throws ValidateException если верно одно из следующих условий: <br/>
+     *         1. если у указанного пользователя нет меню с таким идентификатором. <br/>
+     *         2. если menuId равен null. <br/>
+     *         3. если userId равен null. <br/>
+     */
+    public Menu tryGetById(UUID userId, UUID menuId);
+
+    /**
+     * Возвращает меню указанного пользователя по имени этого меню. Если у указанного
+     * пользователя нет меню с таким именем - выбрасывает исключение.<br/>
+     * (Для однозначного определения возвращаемого меню достаточно только его имя, но необходимо проверять, что
+     * пользователь запрашивающий меню действительно является его владельцем.)
+     * @param userId идентификатор пользователя, которому принадлежит блюдо.
+     * @param name наименование меню.
+     * @return объект Menu.
+     * @throws ValidateException если верно одно из следующих условий: <br/>
+     *         1. если у указанного пользователя нет меню с таким именем. <br/>
+     *         2. если name равен null. <br/>
+     *         3. если userId равен null. <br/>
+     */
+    public Menu tryGetByName(UUID userId, String name);
+
+    /**
+     * Возвращает упорядоченную выборку меню из множества всех меню с учетом заданных ограничений
+     * в виде criteria (см. {@link Criteria}).
+     * @param criteria критерий формирования выборки меню.
+     * @return выборку меню удовлетворяющую ограничениям criteria.
+     * @throws ValidateException если criteria является null.
+     */
     public Page<Menu> getMenus(Criteria criteria);
 
+    /**
+     * Возвращает выборку тегов меню упорядоченную по значению в возрастающем порядке ({@link Tag#getValue()}).
+     * Выборка будет формироваться только из тех тегов, блюда которых удовлетворяют ограничению criteria
+     * (см. {@link Criteria}).
+     * @param criteria критерий формирования выборки тегов.
+     * @return выборку тегов удовлетворяющую ограничениям criteria.
+     * @throws ValidateException если criteria является null.
+     */
     public Page<Tag> getTags(Criteria criteria);
 
+    /**
+     * Возвращает выборку из наименований всех меню удовлетворяющих ограничению criteria
+     * (см. {@link Criteria}).
+     * @param criteria критерий формирования выборки наименований меню.
+     * @return выборку из наименований меню удовлетворяющую ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
     public Page<String> getNames(Criteria criteria);
 
+    /**
+     * Возвращает кол-во всех меню удовлетворяющих ограничению criteria (см. {@link Criteria}).
+     * @param criteria критерий указывающий какие единицы измерения меню подсчитывать.
+     * @return кол-во всех меню удовлетворяющих ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
     public int getNumberMenus(Criteria criteria);
 
+    /**
+     * Возвращает кол-во всех тегов меню удовлетворяющих ограничению criteria (см. {@link Criteria}).
+     * @param criteria критерий указывающий какие единицы измерения меню подсчитывать.
+     * @return  кол-во всех меню удовлетворяющих ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
     public int getTagsNumber(Criteria criteria);
 
+    /**
+     * Возвращает общее число всех наименований меню удовлетворяющих ограничению criteria
+     * (см. {@link Criteria}).
+     * @param criteria критерий указывающий какие наименования меню подсчитывать.
+     * @return общее число всех наименований меню удовлетворяющих ограничению criteria.
+     * @throws ValidateException если criteria является null.
+     */
     public int getNamesNumber(Criteria criteria);
 
 }

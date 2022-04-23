@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-class DishRepositoryPostgresTest {
+class DishRepositoryTest {
 
     private static HikariDataSource dataSource;
     private static ProductRepositoryPostgres productRepository;

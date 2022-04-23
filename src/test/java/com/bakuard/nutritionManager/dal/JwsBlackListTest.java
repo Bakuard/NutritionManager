@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-class JwsBlackListPostgresTest {
+class JwsBlackListTest {
 
     private static HikariDataSource dataSource;
     private static JwsBlackListRepository repository;
