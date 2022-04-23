@@ -17,10 +17,7 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.BiFunction;
+import java.util.*;
 import java.util.stream.IntStream;
 
 class MenuTest {
@@ -412,6 +409,456 @@ class MenuTest {
         Assertions.assertEquals(expected, actual);
     }
 
+    @Test
+    @DisplayName("""
+            getNecessaryQuantity(product, products):
+             product is null
+             => exception
+            """)
+    public void getNecessaryQuantity1() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getNecessaryQuantity(null, Map.of()),
+                "Menu.getNecessaryQuantity",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNecessaryQuantity(product, products):
+             products is null
+             => exception
+            """)
+    public void getNecessaryQuantity2() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getNecessaryQuantity(createProduct(user, 0).tryBuild(), null),
+                "Menu.getNecessaryQuantity",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNecessaryQuantity(product, products):
+             products is empty
+             => return empty Optional
+            """)
+    public void getNecessaryQuantity3() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        Optional<BigDecimal> actual = menu.getNecessaryQuantity(createProduct(user, 0).tryBuild(), Map.of());
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getNecessaryQuantity(product, products):
+             products not contains product
+             => return empty Optional
+            """)
+    public void getNecessaryQuantity4() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+        MenuItem[] items = createMenuItems(user);
+        Map<Product, List<Menu.MenuItemProduct>> products = Map.of(
+                createProduct(user, 10).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 10).tryBuild(), new BigDecimal(250)),
+                        createMenuItemProduct(items[2], createProduct(user, 10).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 3).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 3).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[1], createProduct(user, 3).tryBuild(), new BigDecimal(20))
+                ),
+                createProduct(user, 2).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 2).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 1).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 1).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[2], createProduct(user, 1).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 4).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 15).tryBuild(), List.of(
+                        createMenuItemProduct(items[2], createProduct(user, 15).tryBuild(), new BigDecimal(100))
+                )
+        );
+
+        Optional<BigDecimal> actual = menu.getNecessaryQuantity(createProduct(user, 0).tryBuild(), products);
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getNecessaryQuantity(product, products):
+             products contains product
+             => return correct result
+            """)
+    public void getNecessaryQuantity5() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+        MenuItem[] items = createMenuItems(user);
+        Map<Product, List<Menu.MenuItemProduct>> products = Map.of(
+                createProduct(user, 10).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 10).tryBuild(), new BigDecimal(250)),
+                        createMenuItemProduct(items[2], createProduct(user, 10).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 3).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 3).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[1], createProduct(user, 3).tryBuild(), new BigDecimal(20))
+                ),
+                createProduct(user, 2).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 2).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 1).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 1).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[2], createProduct(user, 1).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 4).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 15).tryBuild(), List.of(
+                        createMenuItemProduct(items[2], createProduct(user, 15).tryBuild(), new BigDecimal(100))
+                )
+        );
+
+        Optional<BigDecimal> actual = menu.getNecessaryQuantity(createProduct(user, 10).tryBuild(), products);
+
+        AssertUtil.assertEquals(new BigDecimal(350), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(product, products):
+             product is null
+             => exception
+            """)
+    public void getLackQuantity1() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getLackQuantity(null, Map.of()),
+                "Menu.getLackQuantity",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(product, products):
+             products is null
+             => exception
+            """)
+    public void getLackQuantity2() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getLackQuantity(createProduct(user, 0).tryBuild(), null),
+                "Menu.getLackQuantity",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(product, products):
+             products is empty
+             => return empty Optional
+            """)
+    public void getLackQuantity3() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        Optional<BigDecimal> actual = menu.getLackQuantity(createProduct(user, 0).tryBuild(), Map.of());
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(product, products):
+             products not contains product
+             => return empty Optional
+            """)
+    public void getLackQuantity4() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+        MenuItem[] items = createMenuItems(user);
+        Map<Product, List<Menu.MenuItemProduct>> products = Map.of(
+                createProduct(user, 10).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 10).tryBuild(), new BigDecimal(250)),
+                        createMenuItemProduct(items[2], createProduct(user, 10).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 3).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 3).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[1], createProduct(user, 3).tryBuild(), new BigDecimal(20))
+                ),
+                createProduct(user, 2).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 2).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 1).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 1).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[2], createProduct(user, 1).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 4).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 15).tryBuild(), List.of(
+                        createMenuItemProduct(items[2], createProduct(user, 15).tryBuild(), new BigDecimal(100))
+                )
+        );
+
+        Optional<BigDecimal> actual = menu.getLackQuantity(createProduct(user, 0).tryBuild(), products);
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantity(product, products):
+             products contains product
+             => return correct result
+            """)
+    public void getLackQuantity5() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+        MenuItem[] items = createMenuItems(user);
+        Map<Product, List<Menu.MenuItemProduct>> products = Map.of(
+                createProduct(user, 10).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 10).tryBuild(), new BigDecimal(250)),
+                        createMenuItemProduct(items[2], createProduct(user, 10).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 3).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 3).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[1], createProduct(user, 3).tryBuild(), new BigDecimal(20))
+                ),
+                createProduct(user, 2).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 2).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 1).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 1).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[2], createProduct(user, 1).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 4).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 15).tryBuild(), List.of(
+                        createMenuItemProduct(items[2], createProduct(user, 15).tryBuild(), new BigDecimal(100))
+                )
+        );
+
+        Optional<BigDecimal> actual = menu.getLackQuantity(createProduct(user, 10).tryBuild(), products);
+
+        AssertUtil.assertEquals(new BigDecimal(64), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantityPrice(product, products):
+             product is null
+             => exception
+            """)
+    public void getLackQuantityPrice1() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getLackQuantityPrice(null, Map.of()),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantityPrice(product, products):
+             products is null
+             => exception
+            """)
+    public void getLackQuantityPrice2() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getLackQuantityPrice(createProduct(user, 0).tryBuild(), null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantityPrice(product, products):
+             products is empty
+             => return empty Optional
+            """)
+    public void getLackQuantityPrice3() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        Optional<BigDecimal> actual = menu.getLackQuantityPrice(createProduct(user, 0).tryBuild(), Map.of());
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantityPrice(product, products):
+             products not contains product
+             => return empty Optional
+            """)
+    public void getLackQuantityPrice4() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+        MenuItem[] items = createMenuItems(user);
+        Map<Product, List<Menu.MenuItemProduct>> products = Map.of(
+                createProduct(user, 10).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 10).tryBuild(), new BigDecimal(250)),
+                        createMenuItemProduct(items[2], createProduct(user, 10).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 3).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 3).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[1], createProduct(user, 3).tryBuild(), new BigDecimal(20))
+                ),
+                createProduct(user, 2).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 2).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 1).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 1).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[2], createProduct(user, 1).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 4).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 15).tryBuild(), List.of(
+                        createMenuItemProduct(items[2], createProduct(user, 15).tryBuild(), new BigDecimal(100))
+                )
+        );
+
+        Optional<BigDecimal> actual = menu.getLackQuantityPrice(createProduct(user, 0).tryBuild(), products);
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackQuantityPrice(product, products):
+             products contains product
+             => return correct result
+            """)
+    public void getLackQuantityPrice5() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+        MenuItem[] items = createMenuItems(user);
+        Map<Product, List<Menu.MenuItemProduct>> products = Map.of(
+                createProduct(user, 10).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 10).tryBuild(), new BigDecimal(250)),
+                        createMenuItemProduct(items[2], createProduct(user, 10).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 3).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 3).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[1], createProduct(user, 3).tryBuild(), new BigDecimal(20))
+                ),
+                createProduct(user, 2).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 2).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 1).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 1).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[2], createProduct(user, 1).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 4).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 15).tryBuild(), List.of(
+                        createMenuItemProduct(items[2], createProduct(user, 15).tryBuild(), new BigDecimal(100))
+                )
+        );
+
+        Optional<BigDecimal> actual = menu.getLackQuantityPrice(createProduct(user, 10).tryBuild(), products);
+
+        AssertUtil.assertEquals(new BigDecimal(7040), actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackProductsPrice(products):
+             products is null
+             => exception
+            """)
+    public void getLackProductsPrice1() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getLackProductsPrice(null),
+                "Menu.getLackProductsPrice",
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getLackProductsPrice(products):
+             products is empty
+             => return empty Optional
+            """)
+    public void getLackProductsPrice2() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        Optional<BigDecimal> actual = menu.getLackProductsPrice(Map.of());
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getLackProductsPrice(products):
+             products is not empty
+             => return correct result
+            """)
+    public void getLackProductsPrice3() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+        MenuItem[] items = createMenuItems(user);
+        Map<Product, List<Menu.MenuItemProduct>> products = Map.of(
+                createProduct(user, 10).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 10).tryBuild(), new BigDecimal(250)),
+                        createMenuItemProduct(items[2], createProduct(user, 10).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 3).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 3).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[1], createProduct(user, 3).tryBuild(), new BigDecimal(20))
+                ),
+                createProduct(user, 2).tryBuild(), List.of(
+                        createMenuItemProduct(items[0], createProduct(user, 2).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 1).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 1).tryBuild(), new BigDecimal(100)),
+                        createMenuItemProduct(items[2], createProduct(user, 1).tryBuild(), new BigDecimal(300))
+                ),
+                createProduct(user, 4).tryBuild(), List.of(
+                        createMenuItemProduct(items[1], createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                ),
+                createProduct(user, 15).tryBuild(), List.of(
+                        createMenuItemProduct(items[2], createProduct(user, 15).tryBuild(), new BigDecimal(100))
+                )
+        );
+
+        Optional<BigDecimal> actual = menu.getLackProductsPrice(products);
+
+        AssertUtil.assertEquals(new BigDecimal(27520), actual.orElseThrow());
+    }
+
 
     private User createUser(int userId) {
         return new User.Builder().
@@ -486,12 +933,41 @@ class MenuTest {
                 addTag("tag#" + id);
     }
 
-    public MenuItem.Builder createMenuItem(Dish dish, BigDecimal quantity) {
+    private MenuItem.Builder createMenuItem(Dish dish, BigDecimal quantity) {
         return new MenuItem.Builder().
                 setDishName(dish.getName()).
                 setDish(() -> dish).
                 setQuantity(quantity).
                 setConfig(conf);
+    }
+
+    private MenuItem[] createMenuItems(User user) {
+        MenuItem[] result = new MenuItem[3];
+
+        result[0] = createMenuItem(
+                createDish(user, 1, mockProductRepository(user, 10, 3, 2),
+                        createIngredient(categoryFilter(user), new BigDecimal(5)),
+                        createIngredient(gradeFilter(user), new BigDecimal(2)),
+                        createIngredient(shopFilter(user), new BigDecimal(6))
+                ),
+                new BigDecimal(5)
+        ).tryBuild();
+        result[1] = createMenuItem(
+                createDish(user, 2, mockProductRepository(user, 1, 3, 4),
+                        createIngredient(categoryFilter(user), BigDecimal.TEN),
+                        createIngredient(gradeFilter(user), new BigDecimal(2)),
+                        createIngredient(shopFilter(user), BigDecimal.TEN)),
+                BigDecimal.ONE
+        ).tryBuild();
+        result[2] = createMenuItem(
+                createDish(user, 3, mockProductRepository(user, 10, 15, 1),
+                        createIngredient(categoryFilter(user), BigDecimal.ONE),
+                        createIngredient(shopFilter(user), BigDecimal.ONE),
+                        createIngredient(gradeFilter(user), new BigDecimal(3))),
+                BigDecimal.TEN
+        ).tryBuild();
+
+        return result;
     }
 
     public Menu.MenuItemProduct createMenuItemProduct(MenuItem item, Product product, BigDecimal necessaryQuantity) {

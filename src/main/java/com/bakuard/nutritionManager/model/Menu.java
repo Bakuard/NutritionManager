@@ -191,7 +191,9 @@ public class Menu implements Entity<Menu> {
 
     /**
      * Возвращает кол-во указанного продукта необходимого для приготовления всех блюд этого меню, в состав
-     * которых этот продукт входит. Если product не является ключом products - возвращает пустой Optional.<br/>
+     * которых входит этот продукт. Особые случаи: <br/>
+     * 1. Если product не является ключом products - возвращает пустой Optional. <br/>
+     * 2. Если products является пустым - возвращает пустой Optional. <br/>
      * Данный метод полагается, что передаваемый ассоциативный массив был корректно сформирован вызывающим кодом,
      * например, вызовом метода {@link #groupByProduct(List)}.
      * @param product продукт.
@@ -218,7 +220,9 @@ public class Menu implements Entity<Menu> {
      * Возвращает НЕДОСТАЮЩЕЕ кол-во указанного продукта (с учетом кол-ва, которое уже есть в наличии у пользователя)
      * необходимого для приготовления всех блюд этого меню, в состав которых этот продукт входит. Недостающее кол-во
      * рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой кол-во недостающих "упаковок"
-     * продукта. Если product не является ключом products - возвращает пустой Optional.<br/>
+     * продукта. Особые случаи:<br/>
+     * 1. Если product не является ключом products - возвращает пустой Optional. <br/>
+     * 2. Если products является пустым - возвращает пустой Optional. <br/>
      * Данный метод полагается, что передаваемый ассоциативный массив был корректно сформирован вызывающим кодом,
      * например, вызовом метода {@link #groupByProduct(List)}.
      * @param product продукт.
@@ -236,7 +240,6 @@ public class Menu implements Entity<Menu> {
 
         return getNecessaryQuantity(product, products).
                 map(v -> v.subtract(product.getQuantity()).max(BigDecimal.ZERO)).
-                filter(v -> v.signum() > 0).
                 map(lackQuantity ->
                         lackQuantity.divide(product.getContext().getPackingSize(), config.getMathContext()).
                                 setScale(0, RoundingMode.UP)
@@ -247,7 +250,9 @@ public class Menu implements Entity<Menu> {
      * Возвращает общую стоимость недостающего кол-ва указанного продукта (с учетом кол-ва, которое уже есть в
      * наличии у пользователя) необходимого для приготовления всех блюд этого меню, в состав которых этот
      * продукт входит. Стоимость недостающего кол-ва рассчитывается с учетом фасовки продукта (размера упаковки).
-     * Если product не является ключом products - возвращает пустой Optional.<br/><br/>
+     * Особые случаи:<br/>
+     * 1. Если product не является ключом products - возвращает пустой Optional. <br/>
+     * 2. Если products является пустым - возвращает пустой Optional. <br/>
      * Данный метод полагается, что передаваемый ассоциативный массив был корректно сформирован вызывающим кодом,
      * например, вызовом метода {@link #groupByProduct(List)}.
      * @param product продукт.
@@ -276,19 +281,25 @@ public class Menu implements Entity<Menu> {
 
     /**
      * Возвращает стоимость данного меню с учетом выбранных продуктов для каждого ингредиента блюда и
-     * кол-вом даного меню. При расчете стоимости учитывается только недостающее кол-во продукта. Допускается,
-     * что для некоторых ингредиентов некоторых блюд этого меню не указано ни одного продукта. Если переданный
-     * список пуст - возвращает пустой Optional.<br/>
-     * Данный метод полагается, что передаваемый список был корректно сформирован вызывающим кодом,
-     * например, вызовом метода {@link #getMenuItemProducts(BigDecimal, List)}.
-     * @param menuItemProducts список продуктов, где каждый продукт соответствует одному ингредиенту одного
-     *                         блюда этого меню.
+     * кол-вом даного меню. Расчет стоимости ведется только для недостающего кол-ва продукта. Допускается,
+     * что для некоторых ингредиентов некоторых блюд этого меню не указано ни одного продукта. Особые случаи:<br/>
+     * 1. Если products пуст - возвращает пустой Optional. <br/>
+     * Данный метод полагается, что передаваемый ассоциативный массив был корректно сформирован вызывающим кодом,
+     * например, вызовом метода {@link #groupByProduct(List)}.
+     * @param products ассоциативный массив продуктов, где каждый продукт соответствует одному ингредиенту одного
+     *                 блюда этого меню.
      * @return стоимость данного меню или пустой Optional.
-     * @throws ValidateException если menuItemProducts имеет значение null.
+     * @throws ValidateException если products имеет значение null.
      */
-    public Optional<BigDecimal> getLackProductPrice(List<MenuItemProduct> menuItemProducts) {
-        return menuItemProducts.stream().
-                map(item -> item.getProduct().getContext().getPrice().multiply(item.getNecessaryQuantity())).
+    public Optional<BigDecimal> getLackProductsPrice(Map<Product, List<MenuItemProduct>> products) {
+        Validator.check(
+                Rule.of("Menu.products").notNull(products)
+        );
+
+        return products.keySet().stream().
+                map(product -> getLackQuantityPrice(product, products)).
+                filter(Optional::isPresent).
+                map(Optional::get).
                 reduce(BigDecimal::add);
     }
 
