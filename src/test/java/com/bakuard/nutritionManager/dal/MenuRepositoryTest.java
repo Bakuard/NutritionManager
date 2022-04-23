@@ -3,15 +3,9 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.impl.DishRepositoryPostgres;
-import com.bakuard.nutritionManager.dal.impl.MenuRepositoryPostgres;
-import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
-import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
-import com.bakuard.nutritionManager.model.Dish;
-import com.bakuard.nutritionManager.model.Menu;
-import com.bakuard.nutritionManager.model.MenuItem;
+import com.bakuard.nutritionManager.dal.impl.*;
 import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.User;
+import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.validation.Constraint;
 
@@ -442,8 +436,6 @@ class MenuRepositoryTest {
              => exception
             """)
     public void tryRemove2() {
-        User user = createAndSaveUser(1);
-
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryRemove(null, toUUID(1)),
                 Constraint.NOT_NULL
@@ -519,6 +511,326 @@ class MenuRepositoryTest {
         Menu actual = commit(() -> menuRepository.tryRemove(user.getId(), toUUID(0)));
 
         Menu expected = menus.get(0);
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, menuId):
+             menuId is null
+             => exception
+            """)
+    public void getById1() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getById(user.getId(), null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, menuId):
+             userId is null
+             => exception
+            """)
+    public void getById2() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getById(null, toUUID(1)),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, menuId):
+             not exists menu with such id
+             => return empty Optional
+            """)
+    public void getById3() {
+        User user = createAndSaveUser(1);
+
+        Optional<Menu> actual = menuRepository.getById(user.getId(), toUUID(100));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, menuId):
+             menu with such id exists in DB,
+             user is not owner of this menu
+             => return empty Optional
+            """)
+    public void getById4() {
+        User user = createAndSaveUser(1);
+        User otherUser = createAndSaveUser(2);
+        List<Dish> dishes = createAndSaveDishes(user);
+        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+
+        Optional<Menu> actual = menuRepository.getById(otherUser.getId(), toUUID(1));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getById(userId, menuId):
+             menu with such id exists in DB,
+             user is owner of this menu
+             => return correct result
+            """)
+    public void getById5() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createAndSaveDishes(user);
+        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        commit(() -> menuRepository.save(expected));
+
+        Menu actual = menuRepository.getById(user.getId(), toUUID(100)).orElseThrow();
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, menuId):
+             menuId is null
+             => exception
+            """)
+    public void tryGetById1() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetById(user.getId(), null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, menuId):
+             userId is null
+             => exception
+            """)
+    public void tryGetById2() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetById(null, toUUID(1)),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, menuId):
+             not exists menu with such id
+             => exception
+            """)
+    public void tryGetById3() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetById(user.getId(), toUUID(100)),
+                "MenuRepositoryPostgres.tryGetById"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, menuId):
+             exists menu with such id,
+             user is not owner of this menu
+             => exception
+            """)
+    public void tryGetById4() {
+        User user = createAndSaveUser(1);
+        User otherUser = createAndSaveUser(2);
+        List<Dish> dishes = createAndSaveDishes(user);
+        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetById(otherUser.getId(), toUUID(1)),
+                "MenuRepositoryPostgres.tryGetById"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetById(userId, menuId):
+             exists menu with such id,
+             user is owner of this menu
+             => return correct result
+            """)
+    public void tryGetById5() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createAndSaveDishes(user);
+        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        commit(() -> menuRepository.save(expected));
+
+        Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(userId, name):
+             name is null
+             => exception
+            """)
+    public void getByName1() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getByName(user.getId(), null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(userId, name):
+             userId is null
+             => exception
+            """)
+    public void getByName2() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getByName(null, "some menu"),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(userId, name):
+             not exists menu with such name
+             => return empty Optional
+            """)
+    public void getByName3() {
+        User user = createAndSaveUser(1);
+
+        Optional<Menu> actual = menuRepository.getByName(user.getId(), "unknown menu");
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(userId, name):
+             menu with such name exists in DB,
+             user is not owner of this menu
+             => return empty Optional
+            """)
+    public void getByName4() {
+        User user = createAndSaveUser(1);
+        User otherUser = createAndSaveUser(2);
+        List<Dish> dishes = createAndSaveDishes(user);
+        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+
+        Optional<Menu> actual = menuRepository.getByName(otherUser.getId(), "Menu#1");
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getByName(userId, name):
+             menu with such name exists in DB,
+             user is owner of this menu
+             => return correct result
+            """)
+    public void getByName5() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createAndSaveDishes(user);
+        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        commit(() -> menuRepository.save(expected));
+
+        Menu actual = menuRepository.getByName(user.getId(), "Menu#100").orElseThrow();
+
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(userId, name):
+             name is null
+             => exception
+            """)
+    public void tryGetByName1() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetByName(user.getId(), null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(userId, name):
+             userId is null
+             => exception
+            """)
+    public void tryGetByName2() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetByName(null, "some menu"),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(userId, name):
+             not exists menu with such name
+             => exception
+            """)
+    public void tryGetByName3() {
+        User user = createAndSaveUser(1);
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetByName(user.getId(), "unknown menu"),
+                "MenuRepositoryPostgres.tryGetByName"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(userId, name):
+             exists menu with such name,
+             user is not owner of this menu
+             => exception
+            """)
+    public void tryGetByName4() {
+        User user = createAndSaveUser(1);
+        User otherUser = createAndSaveUser(2);
+        List<Dish> dishes = createAndSaveDishes(user);
+        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+
+        AssertUtil.assertValidateException(
+                () -> menuRepository.tryGetByName(otherUser.getId(), "Menu#1"),
+                "MenuRepositoryPostgres.tryGetByName"
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            tryGetByName(userId, name):
+             exists menu with such name,
+             user is owner of this menu
+             => return correct result
+            """)
+    public void tryGetByName5() {
+        User user = createAndSaveUser(1);
+        List<Dish> dishes = createAndSaveDishes(user);
+        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        commit(() -> menuRepository.save(expected));
+
+        Menu actual = menuRepository.tryGetByName(user.getId(), "Menu#100");
+
         AssertUtil.assertEquals(expected, actual);
     }
 

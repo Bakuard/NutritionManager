@@ -67,7 +67,7 @@ public interface MenuRepository {
      *         1. если name равен null. <br/>
      *         2. если userId равен null. <br/>
      */
-    public Optional<Menu> getByMenu(UUID userId, String name);
+    public Optional<Menu> getByName(UUID userId, String name);
 
     /**
      * Возвращает меню указанного пользователя по идентификатору этого меню. Если у указанного

@@ -44,7 +44,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public Optional<Menu> getByMenu(UUID userId, String name) {
+    public Optional<Menu> getByName(UUID userId, String name) {
         return Optional.empty();
     }
 
