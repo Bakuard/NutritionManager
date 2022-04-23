@@ -46,7 +46,7 @@ public class Menu implements Entity<Menu> {
                  List<Entity.Builder<MenuItem>> items,
                  List<String> tags,
                  AppConfigData config) {
-        Container<List<MenuItem>> menuItemContainer = new Container<>();
+        Container<List<MenuItem>> menuItemsContainer = new Container<>();
         Container<List<Tag>> tagContainer = new Container<>();
         Container<URL> imageURlContainer = new Container<>();
 
@@ -56,8 +56,8 @@ public class Menu implements Entity<Menu> {
                 Rule.of("Menu.name").notNull(name).and(r -> r.notBlank(name)),
                 Rule.of("Menu.description").notNull(description).and(r -> r.notBlank(description)),
                 Rule.of("Menu.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, imageURlContainer)),
-                Rule.of("Menu.items").doesNotThrows(items, Entity.Builder::tryBuild, menuItemContainer).
-                        and(r -> r.notContainsDuplicate(menuItemContainer.get(), MenuItem::getDishName)),
+                Rule.of("Menu.items").doesNotThrows(items, Entity.Builder::tryBuild, menuItemsContainer).
+                        and(r -> r.notContainsDuplicate(menuItemsContainer.get(), MenuItem::getDishName)),
                 Rule.of("Menu.tags").doesNotThrows(tags, Tag::new, tagContainer),
                 Rule.of("Menu.config").notNull(config)
         );
@@ -67,7 +67,7 @@ public class Menu implements Entity<Menu> {
         this.name = name.trim();
         this.description = description.trim();
         this.imageUrl = imageURlContainer.get();
-        this.items = menuItemContainer.get();
+        this.items = menuItemsContainer.get();
         this.tags = tagContainer.get();
         this.config = config;
     }
