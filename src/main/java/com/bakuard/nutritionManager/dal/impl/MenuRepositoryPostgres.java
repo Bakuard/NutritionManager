@@ -1,6 +1,8 @@
 package com.bakuard.nutritionManager.dal.impl;
 
+import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
+import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.Tag;
@@ -15,9 +17,15 @@ import java.util.UUID;
 public class MenuRepositoryPostgres implements MenuRepository {
 
     private JdbcTemplate statement;
+    private AppConfigData appConfig;
+    private DishRepository dishRepository;
 
-    public MenuRepositoryPostgres(DataSource dataSource) {
+    public MenuRepositoryPostgres(DataSource dataSource,
+                                  AppConfigData appConfig,
+                                  DishRepository dishRepository) {
         statement = new JdbcTemplate(dataSource);
+        this.dishRepository = dishRepository;
+        this.appConfig = appConfig;
     }
 
     @Override
@@ -36,7 +44,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public Optional<Menu> getByMenu(UUID userId, String name) {
+    public Optional<Menu> getByName(UUID userId, String name) {
         return Optional.empty();
     }
 
@@ -66,7 +74,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public int getNumberMenus(Criteria criteria) {
+    public int getMenusNumber(Criteria criteria) {
         return 0;
     }
 

@@ -98,8 +98,10 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public MenuRepository menuRepository(DataSource dataSource) {
-        return new MenuRepositoryPostgres(dataSource);
+    public MenuRepository menuRepository(DataSource dataSource,
+                                         AppConfigData appConfiguration,
+                                         DishRepository dishRepository) {
+        return new MenuRepositoryPostgres(dataSource, appConfiguration, dishRepository);
     }
 
     @Bean

@@ -226,8 +226,8 @@ class DishRepositoryTest {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
         Dish dish = createDish(7, user);
-
         commit(() -> dishRepository.save(dish));
+
         Dish updatedDish = new Dish(dish);
         updatedDish.setName("New name");
         updatedDish.setServingSize(new BigDecimal("0.75"));
@@ -1019,11 +1019,10 @@ class DishRepositoryTest {
                         setSort(Sort.dishDefaultSort())
         );
 
-        Assertions.assertAll(
-                () -> AssertUtil.assertEquals(dishes.get(0), actual.get(0)),
-                () -> AssertUtil.assertEquals(dishes.get(1), actual.get(1)),
-                () -> AssertUtil.assertEquals(dishes.get(2), actual.get(2))
-        );
+        Page<Dish> expected = Pageable.of(4, 0).
+                createPageMetadata(4, 30).
+                createPage(dishes);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test
@@ -1729,7 +1728,7 @@ class DishRepositoryTest {
                 setServingSize(BigDecimal.ONE).
                 setUnit("unit A").
                 setDescription("description A").
-                setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?id=1").
                 setConfig(appConfiguration).
                 setRepository(productRepository).
                 addTag("tag A").
@@ -1792,7 +1791,7 @@ class DishRepositoryTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit A").
                         setDescription("description 1").
-                        setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
+                        setImageUrl("https://nutritionmanager.xyz/dishes/images?id=1").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 1").
@@ -1849,7 +1848,7 @@ class DishRepositoryTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit A").
                         setDescription("description 2").
-                        setImageUrl("https://nutritionmanager.xyz/products/images?id=2").
+                        setImageUrl("https://nutritionmanager.xyz/dishes/images?id=2").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 2").
@@ -1882,7 +1881,7 @@ class DishRepositoryTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit B").
                         setDescription("description 3").
-                        setImageUrl("https://nutritionmanager.xyz/products/images?id=3").
+                        setImageUrl("https://nutritionmanager.xyz/dishes/images?id=3").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 3").
@@ -1936,7 +1935,7 @@ class DishRepositoryTest {
                         setServingSize(BigDecimal.ONE).
                         setUnit("unit C").
                         setDescription("description 4").
-                        setImageUrl("https://nutritionmanager.xyz/products/images?id=4").
+                        setImageUrl("https://nutritionmanager.xyz/dishes/images?id=4").
                         setConfig(appConfiguration).
                         setRepository(productRepository).
                         addTag("tag 4").
