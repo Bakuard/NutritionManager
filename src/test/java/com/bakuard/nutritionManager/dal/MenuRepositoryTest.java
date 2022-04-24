@@ -1300,7 +1300,203 @@ class MenuRepositoryTest {
         AssertUtil.assertEquals(expected, actual);
     }
 
-    
+    @Test
+    @DisplayName("""
+            getTagsNumber(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getTagsNumber1() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getTagsNumber(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getTagsNumber(criteria):
+             user haven't any menus
+             => return 0
+            """)
+    public void getTagsNumber2() {
+        User user = createAndSaveUser(1);
+
+        int actual = menuRepository.getTagsNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getTagsNumber(criteria):
+             user have menus
+             => return correct result
+            """)
+    public void getTagsNumber3() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getTagsNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+
+        Assertions.assertEquals(7, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getTags1() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getTags(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user haven't any menus
+             => return empty page
+            """)
+    public void getTags2() {
+        User user = createAndSaveUser(1);
+
+        Page<Tag> actual = menuRepository.getTags(
+                new Criteria().
+                        setFilter(Filter.user(user.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have menus
+             => return correct result
+            """)
+    public void getTags3() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Tag> actual = menuRepository.getTags(
+                new Criteria().
+                        setFilter(Filter.user(user.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Page<Tag> expected = Pageable.of(2, 1).
+                createPageMetadata(7, 1000).
+                createPage(getAllTags(menus).subList(2, 4));
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getNamesNumber1() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getNamesNumber(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             user haven't any menus
+             => return 0
+            """)
+    public void getNamesNumber2() {
+        User user = createAndSaveUser(1);
+
+        int actual = menuRepository.getNamesNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNamesNumber(criteria):
+             user have menus
+             => return correct result
+            """)
+    public void getNamesNumber3() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getNamesNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+
+        Assertions.assertEquals(4, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getNames() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getNames(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             user haven't any menus
+             => return empty page
+            """)
+    public void getNames2() {
+        User user = createAndSaveUser(1);
+
+        Page<String> actual = menuRepository.getNames(
+                new Criteria().
+                        setFilter(Filter.user(user.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNames(criteria):
+             user have menus
+             => return correct result
+            """)
+    public void getNames3() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<String> actual = menuRepository.getNames(
+                new Criteria().
+                        setFilter(Filter.user(user.getId())).
+                        setPageable(Pageable.of(2, 1))
+        );
+
+        Page<String> expected = Pageable.of(2, 1).
+                createPageMetadata(4, 1000).
+                createPage(getAllNames(menus).subList(2, 4));
+        Assertions.assertEquals(expected, actual);
+    }
 
 
     private <T>T commit(Supplier<T> supplier) {
@@ -1532,6 +1728,22 @@ class MenuRepositoryTest {
         });
 
         return menus;
+    }
+
+    private List<Tag> getAllTags(List<Menu> menus) {
+        return menus.stream().
+                flatMap(m -> m.getTags().stream()).
+                distinct().
+                sorted().
+                toList();
+    }
+
+    private List<String> getAllNames(List<Menu> menus) {
+        return menus.stream().
+                map(Menu::getName).
+                distinct().
+                sorted().
+                toList();
     }
 
 
