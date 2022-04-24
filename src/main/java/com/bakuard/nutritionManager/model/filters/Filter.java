@@ -24,7 +24,8 @@ public interface Filter {
         MANUFACTURER,
         INGREDIENTS,
         USER,
-        MIN_QUANTITY
+        MIN_QUANTITY,
+        DISHES
     }
 
     /**
@@ -119,6 +120,14 @@ public interface Filter {
 
     public static AnyFilter anyIngredient(List<String> productCategories) {
         return new AnyFilter(productCategories, 1, Type.INGREDIENTS);
+    }
+
+    public static AnyFilter anyDish(String dishName, String... other) {
+        return new AnyFilter(toList(dishName, other), 1, Type.DISHES);
+    }
+
+    public static AnyFilter anyDish(List<String> dishNames) {
+        return new AnyFilter(dishNames, 1, Type.DISHES);
     }
 
     public static MinTagsFilter minTags(Tag a, Tag... other) {

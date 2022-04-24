@@ -1019,11 +1019,10 @@ class DishRepositoryTest {
                         setSort(Sort.dishDefaultSort())
         );
 
-        Assertions.assertAll(
-                () -> AssertUtil.assertEquals(dishes.get(0), actual.get(0)),
-                () -> AssertUtil.assertEquals(dishes.get(1), actual.get(1)),
-                () -> AssertUtil.assertEquals(dishes.get(2), actual.get(2))
-        );
+        Page<Dish> expected = Pageable.of(4, 0).
+                createPageMetadata(4, 30).
+                createPage(dishes);
+        AssertUtil.assertEquals(expected, actual);
     }
 
     @Test

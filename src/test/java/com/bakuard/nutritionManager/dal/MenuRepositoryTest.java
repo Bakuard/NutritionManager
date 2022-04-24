@@ -3,19 +3,21 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.impl.*;
+import com.bakuard.nutritionManager.dal.impl.DishRepositoryPostgres;
+import com.bakuard.nutritionManager.dal.impl.MenuRepositoryPostgres;
+import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
+import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
+import com.bakuard.nutritionManager.model.filters.Sort;
+import com.bakuard.nutritionManager.model.util.Page;
+import com.bakuard.nutritionManager.model.util.Pageable;
 import com.bakuard.nutritionManager.validation.Constraint;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import org.flywaydb.core.Flyway;
-
 import org.junit.jupiter.api.*;
-
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -25,11 +27,11 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 class MenuRepositoryTest {
 
@@ -130,8 +132,7 @@ class MenuRepositoryTest {
             """)
     public void save2() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        Menu menu = createMenu(user, 1, dishes).tryBuild();
+        Menu menu = createMenu(user, 1);
 
         boolean actual = commit(() -> menuRepository.save(menu));
 
@@ -146,8 +147,7 @@ class MenuRepositoryTest {
             """)
     public void save3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        Menu expected = createMenu(user, 1, dishes).tryBuild();
+        Menu expected = createMenu(user, 1);
 
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(1));
@@ -164,9 +164,8 @@ class MenuRepositoryTest {
             """)
     public void save4() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu menu = createMenu(user, 100, dishes).tryBuild();
+        createAndSaveMenus(user);
+        Menu menu = createMenu(user, 100);
 
         boolean actual = commit(() -> menuRepository.save(menu));
 
@@ -182,9 +181,8 @@ class MenuRepositoryTest {
             """)
     public void save5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        createAndSaveMenus(user);
+        Menu expected = createMenu(user, 100);
 
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
@@ -202,10 +200,16 @@ class MenuRepositoryTest {
             """)
     public void save6() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu menu = createMenu(user, 100, dishes).
+        createAndSaveMenus(user);
+        Menu menu = new Menu.Builder().
+                setId(toUUID(100)).
+                setUser(user).
                 setName("Menu#0").
+                setDescription("Description for menu#100").
+                setImageUrl("https://nutritionmanager.xyz/menus/menuId=100").
+                setConfig(appConfiguration).
+                addTag("common tag").
+                addTag("tag#100").
                 tryBuild();
 
         AssertUtil.assertValidateException(
@@ -225,11 +229,13 @@ class MenuRepositoryTest {
             """)
     public void save7() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu menu = createMenu(user, 100, dishes).tryBuild();
+        createAndSaveMenus(user);
+        Menu menu = createMenu(user, 100);
         commit(() -> menuRepository.save(menu));
 
+        Dish dish0 = createDish(user, 0);
+        Dish dish1000 = createDish(user, 1000);
+        Dish dish10000 = createDish(user, 10000);
         Menu updatedMenu = new Menu.Builder().
                 setId(toUUID(100)).
                 setUser(user).
@@ -239,28 +245,15 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> createDish(user, 1000)).
-                                setDishName("dish#1000").
-                                setQuantity(new BigDecimal("550.7"))
-                ).
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> dishes.get(0)).
-                                setDishName(dishes.get(0).getName()).
-                                setQuantity(new BigDecimal(100))
-                ).
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> createDish(user, 10000)).
-                                setDishName("dish#10000").
-                                setQuantity(new BigDecimal("100.05"))
-                ).
+                addItem(createMenuItem(dish0, new BigDecimal(107))).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
+                addItem(createMenuItem(dish10000, new BigDecimal(7))).
                 tryBuild();
+        commit(() -> {
+            dishRepository.save(dish0);
+            dishRepository.save(dish1000);
+            dishRepository.save(dish10000);
+        });
         boolean actual = commit(() -> menuRepository.save(updatedMenu));
 
         Assertions.assertTrue(actual);
@@ -276,11 +269,13 @@ class MenuRepositoryTest {
              """)
     public void save8() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        createAndSaveMenus(user);
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
+        Dish dish0 = createDish(user, 0);
+        Dish dish1000 = createDish(user, 1000);
+        Dish dish10000 = createDish(user, 10000);
         Menu updatedMenu = new Menu.Builder().
                 setId(toUUID(100)).
                 setUser(user).
@@ -290,29 +285,16 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> createDish(user, 1000)).
-                                setDishName("dish#1000").
-                                setQuantity(new BigDecimal("550.7"))
-                ).
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> dishes.get(0)).
-                                setDishName(dishes.get(0).getName()).
-                                setQuantity(new BigDecimal(100))
-                ).
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> createDish(user, 10000)).
-                                setDishName("dish#10000").
-                                setQuantity(new BigDecimal("100.05"))
-                ).
+                addItem(createMenuItem(dish0, new BigDecimal(107))).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
+                addItem(createMenuItem(dish10000, new BigDecimal(7))).
                 tryBuild();
-        commit(() -> menuRepository.save(updatedMenu));
+        commit(() -> {
+            dishRepository.save(dish0);
+            dishRepository.save(dish1000);
+            dishRepository.save(dish10000);
+            menuRepository.save(updatedMenu);
+        });
         Menu actual = menuRepository.tryGetById(user.getId(), updatedMenu.getId());
 
         AssertUtil.assertEquals(expected, actual);
@@ -329,11 +311,13 @@ class MenuRepositoryTest {
             """)
     public void save9() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        createAndSaveMenus(user);
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
+        Dish dish0 = createDish(user, 0);
+        Dish dish1000 = createDish(user, 1000);
+        Dish dish10000 = createDish(user, 10000);
         Menu updatedMenu = new Menu.Builder().
                 setId(toUUID(100)).
                 setUser(user).
@@ -343,28 +327,15 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> createDish(user, 1000)).
-                                setDishName("dish#1000").
-                                setQuantity(new BigDecimal("550.7"))
-                ).
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> dishes.get(0)).
-                                setDishName(dishes.get(0).getName()).
-                                setQuantity(new BigDecimal(100))
-                ).
-                addItem(
-                        new MenuItem.Builder().
-                                setConfig(appConfiguration).
-                                setDish(() -> createDish(user, 10000)).
-                                setDishName("dish#10000").
-                                setQuantity(new BigDecimal("100.05"))
-                ).
+                addItem(createMenuItem(dish0, new BigDecimal(107))).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
+                addItem(createMenuItem(dish10000, new BigDecimal(7))).
                 tryBuild();
+        commit(() -> {
+            dishRepository.save(dish0);
+            dishRepository.save(dish1000);
+            dishRepository.save(dish10000);
+        });
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> menuRepository.save(updatedMenu)),
@@ -383,9 +354,8 @@ class MenuRepositoryTest {
             """)
     public void save10() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        createAndSaveMenus(user);
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
         boolean actual = commit(() -> menuRepository.save(expected));
@@ -403,9 +373,8 @@ class MenuRepositoryTest {
             """)
     public void save11() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        createAndSaveMenus(user);
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
         commit(() -> menuRepository.save(expected));
@@ -450,12 +419,11 @@ class MenuRepositoryTest {
             """)
     public void tryRemove3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
+        commit(() -> menuRepository.save(createMenu(user, 1)));
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryRemove(user.getId(), toUUID(100)),
-                Constraint.NOT_NULL
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -469,8 +437,7 @@ class MenuRepositoryTest {
     public void tryRemove4() {
         User user = createAndSaveUser(1);
         User otherUser = createAndSaveUser(2);
-        List<Dish> dishes = createAndSaveDishes(user);
-        createAndSaveMenus(user, dishes);
+        commit(() -> menuRepository.save(createMenu(user, 1)));
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryRemove(otherUser.getId(), toUUID(1)),
@@ -487,8 +454,7 @@ class MenuRepositoryTest {
             """)
     public void tryRemove5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        List<Menu> menus = createAndSaveMenus(user, dishes);
+        commit(() -> menuRepository.save(createMenu(user, 0)));
 
         commit(() -> menuRepository.tryRemove(user.getId(), toUUID(0)));
         Optional<Menu> actual = menuRepository.getById(user.getId(), toUUID(0));
@@ -505,12 +471,11 @@ class MenuRepositoryTest {
             """)
     public void tryRemove6() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        List<Menu> menus = createAndSaveMenus(user, dishes);
+        Menu expected = createMenu(user, 0);
+        commit(() -> menuRepository.save(expected));
 
         Menu actual = commit(() -> menuRepository.tryRemove(user.getId(), toUUID(0)));
 
-        Menu expected = menus.get(0);
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -566,8 +531,7 @@ class MenuRepositoryTest {
     public void getById4() {
         User user = createAndSaveUser(1);
         User otherUser = createAndSaveUser(2);
-        List<Dish> dishes = createAndSaveDishes(user);
-        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+        commit(() -> menuRepository.save(createMenu(user, 1)));
 
         Optional<Menu> actual = menuRepository.getById(otherUser.getId(), toUUID(1));
 
@@ -583,8 +547,7 @@ class MenuRepositoryTest {
             """)
     public void getById5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
         Menu actual = menuRepository.getById(user.getId(), toUUID(100)).orElseThrow();
@@ -647,8 +610,8 @@ class MenuRepositoryTest {
     public void tryGetById4() {
         User user = createAndSaveUser(1);
         User otherUser = createAndSaveUser(2);
-        List<Dish> dishes = createAndSaveDishes(user);
-        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+
+        commit(() -> menuRepository.save(createMenu(user, 1)));
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetById(otherUser.getId(), toUUID(1)),
@@ -665,8 +628,7 @@ class MenuRepositoryTest {
             """)
     public void tryGetById5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
@@ -726,8 +688,7 @@ class MenuRepositoryTest {
     public void getByName4() {
         User user = createAndSaveUser(1);
         User otherUser = createAndSaveUser(2);
-        List<Dish> dishes = createAndSaveDishes(user);
-        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+        commit(() -> menuRepository.save(createMenu(user, 1)));
 
         Optional<Menu> actual = menuRepository.getByName(otherUser.getId(), "Menu#1");
 
@@ -743,8 +704,7 @@ class MenuRepositoryTest {
             """)
     public void getByName5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
         Menu actual = menuRepository.getByName(user.getId(), "Menu#100").orElseThrow();
@@ -807,8 +767,7 @@ class MenuRepositoryTest {
     public void tryGetByName4() {
         User user = createAndSaveUser(1);
         User otherUser = createAndSaveUser(2);
-        List<Dish> dishes = createAndSaveDishes(user);
-        commit(() -> menuRepository.save(createMenu(user, 1, dishes).tryBuild()));
+        commit(() -> menuRepository.save(createMenu(user, 1)));
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetByName(otherUser.getId(), "Menu#1"),
@@ -825,14 +784,523 @@ class MenuRepositoryTest {
             """)
     public void tryGetByName5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createAndSaveDishes(user);
-        Menu expected = createMenu(user, 100, dishes).tryBuild();
+        Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
         Menu actual = menuRepository.tryGetByName(user.getId(), "Menu#100");
 
         AssertUtil.assertEquals(expected, actual);
     }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getNumberMenus1() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getMenusNumber(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user haven't any menus
+             => return 0
+            """)
+    public void getNumberMenus2() {
+        User user = createAndSaveUser(1);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+        
+        Assertions.assertEquals(0, actual);
+    }
+    
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             only user filter
+             => return all menus number
+            """)
+    public void getNumberMenus3() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+        
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(Filter.user(user.getId()))
+        );
+        
+        Assertions.assertEquals(4, actual);
+    }
+    
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             filter is MinTags - matching not exists
+             => return 0
+            """)
+    public void getNumberMenus4() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.minTags(new Tag("common tag"), new Tag("unknown tag"))
+                        )
+                )
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             filter is MinTags - matching exists
+             => return correct result
+            """)
+    public void getNumberMenus5() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.minTags(new Tag("common tag"), new Tag("tagA"))
+                        )
+                )
+        );
+
+        Assertions.assertEquals(2, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             filter is Dishes - matching not exists
+             => return 0
+            """)
+    public void getNumberMenus6() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyDish("unknown dish")
+                        )
+                )
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             filter is Dishes - matching exists
+             => return correct result
+            """)
+    public void getNumberMenus7() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyDish("dish#50")
+                        )
+                )
+        );
+
+        Assertions.assertEquals(2, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching not exists
+                MinTags - matching exists,
+                Dishes - matching not exists
+             => return 0
+            """)
+    public void getNumberMenus8() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.minTags(new Tag("common tag")),
+                                Filter.anyDish("unknown dish")
+                        )
+                )
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching not exists
+                MinTags - matching exists,
+                Dishes - matching exists
+             => return 0
+            """)
+    public void getNumberMenus9() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.minTags(new Tag("tagA")),
+                                Filter.anyDish("dish#2")
+                        )
+                )
+        );
+
+        Assertions.assertEquals(0, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getNumberMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching exists
+                MinTags - matching exists,
+                Dishes - matching exists
+             => return correct result
+            """)
+    public void getNumberMenus10() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+
+        int actual = menuRepository.getMenusNumber(
+                new Criteria().setFilter(
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.minTags(new Tag("tagA")),
+                                Filter.anyDish("dish#100")
+                        )
+                )
+        );
+
+        Assertions.assertEquals(2, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             criteria is null
+             => exception
+            """)
+    public void getMenus1() {
+        AssertUtil.assertValidateException(
+                () -> menuRepository.getMenus(null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user haven't any menus
+             => return empty page
+            """)
+    public void getMenus2() {
+        User user = createAndSaveUser(1);
+        createAndSaveMenus(user);
+        User otherUser = createAndSaveUser(2);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(Filter.user(otherUser.getId())).
+                        setPageable(Pageable.of(4, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Assertions.assertTrue(actual.getMetadata().isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             only user filter
+             => return all Menus
+            """)
+    public void getMenus3() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(Filter.user(user.getId())).
+                        setPageable(Pageable.of(4, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Page<Menu> expected = Pageable.of(4, 0).
+                createPageMetadata(4, 30).
+                createPage(menus);
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is MinTags - matching not exists
+             => return empty page
+            """)
+    public void getMenus4() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()), 
+                                        Filter.minTags(new Tag("unknown tag"))
+                                )
+                        ).
+                        setPageable(Pageable.of(4, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+        
+        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is MinTags - matching exists
+             => return correct result
+            """)
+    public void getMenus5() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()), 
+                                        Filter.minTags(new Tag("common tag"), new Tag("tagA"))
+                                )
+                        ).
+                        setPageable(Pageable.of(2, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Page<Menu> expected = Pageable.of(2, 0).
+                createPageMetadata(2, 30).
+                createPage(menus.subList(0, 2));
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is Dishes - matching not exists
+             => return empty page
+            """)
+    public void getMenus6() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()), 
+                                        Filter.anyDish("unknown dish")
+                                )
+                        ).
+                        setPageable(Pageable.of(4, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+    }
+    
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is Dishes - matching exists
+             => return correct result
+            """)
+    public void getMenus7() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()), 
+                                        Filter.anyDish("dish#50")
+                                )
+                        ).
+                        setPageable(Pageable.of(2, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Page<Menu> expected = Pageable.of(2, 0).
+                createPageMetadata(2, 30).
+                createPage(menus.subList(0, 2));
+        AssertUtil.assertEquals(expected, actual);
+    }
+    
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching not exists
+                MinTags - matching exists,
+                Dishes - matching not exists
+             => return empty page
+            """)
+    public void getMenus8() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyDish("unknown dish")
+                                )
+                        ).
+                        setPageable(Pageable.of(4, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+        
+        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+    }
+    
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching not exists
+                MinTags - matching exists,
+                Dishes - matching exists
+             => return empty page
+            """)
+    public void getMenus9() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tagA")),
+                                        Filter.anyDish("dish#2")
+                                )
+                        ).
+                        setPageable(Pageable.of(4, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+    }
+    
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching exists
+                MinTags - matching exists,
+                Dishes - matching exists
+             => return correct result
+            """)
+    public void getMenus10() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tagA")),
+                                        Filter.anyDish("dish#100")
+                                )
+                        ).
+                        setPageable(Pageable.of(4, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Page<Menu> expected = Pageable.of(4, 0).
+                createPageMetadata(2, 30).
+                createPage(menus.subList(0, 2));
+        AssertUtil.assertEquals(expected, actual);
+    }
+    
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching exists
+                MinTags - matching exists,
+                Dishes - matching exists,
+             not first page
+             => return correct result
+            """)
+    public void getMenus11() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyDish("dish#100")
+                                )
+                        ).
+                        setPageable(Pageable.of(2, 1)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Page<Menu> expected = Pageable.of(2, 1).
+                createPageMetadata(2, 30).
+                createPage(menus.subList(2, 4));
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    
 
 
     private <T>T commit(Supplier<T> supplier) {
@@ -875,18 +1343,16 @@ class MenuRepositoryTest {
         return user;
     }
 
-    private List<Dish> createAndSaveDishes(User user) {
-        List<Dish> result = IntStream.range(0, 5).
-                mapToObj(i -> createDish(user, i)).
-                toList();
+    private Menu createMenu(User user, int menuId) {
+        List<Dish> dishes = List.of(
+                createDish(user, 0),
+                createDish(user, 1),
+                createDish(user, 2),
+                createDish(user, 3),
+                createDish(user, 4)
+        );
 
-        commit(() -> result.forEach(dish -> dishRepository.save(dish)));
-
-        return result;
-    }
-
-    private Menu.Builder createMenu(User user, int menuId, List<Dish> dishes) {
-        Menu.Builder builder = new Menu.Builder().
+        Menu menu = new Menu.Builder().
                 setId(toUUID(menuId)).
                 setUser(user).
                 setName("Menu#" + menuId).
@@ -894,27 +1360,176 @@ class MenuRepositoryTest {
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=" + menuId).
                 setConfig(appConfiguration).
                 addTag("common tag").
-                addTag("tag#" + menuId);
+                addTag("tag#" + menuId).
+                addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"))).
+                addItem(createMenuItem(dishes.get(1), new BigDecimal("5"))).
+                addItem(createMenuItem(dishes.get(2), new BigDecimal("10.1"))).
+                addItem(createMenuItem(dishes.get(3), new BigDecimal("0.4"))).
+                addItem(createMenuItem(dishes.get(4), new BigDecimal("2"))).
+                tryBuild();
 
-        IntStream.range(0, dishes.size()).
-                forEach(i -> builder.addItem(
-                                new MenuItem.Builder().
-                                        setConfig(appConfiguration).
-                                        setDish(() -> dishes.get(i)).
-                                        setDishName(dishes.get(i).getName()).
-                                        setQuantity(new BigDecimal((i + 1) * 100))
-                        )
-                );
+        commit(() -> dishes.forEach(dish -> dishRepository.save(dish)));
 
-        return builder;
+        return menu;
     }
 
-    private List<Menu> createAndSaveMenus(User user, List<Dish> dishes) {
-        List<Menu> menus = IntStream.range(0, 5).
-                mapToObj(i -> createMenu(user, i, dishes).tryBuild()).
-                toList();
+    private List<Menu> createAndSaveMenus(User user) {
+        Dish dish0, dish1, dish2, dish3, dish50, dish60, dish100;
+        List<Dish> dishes = List.of(
+                dish0 = createDish(user, 0),
+                dish1 = createDish(user, 1),
+                dish2 = createDish(user, 2),
+                dish3 = createDish(user, 3),
+                dish50 = createDish(user, 50),
+                dish60 = createDish(user, 60),
+                dish100 = createDish(user, 100)
+        );
 
-        commit(() -> menus.forEach(menu -> menuRepository.save(menu)));
+        List<Menu> menus = new ArrayList<>();
+        menus.add(
+                new Menu.Builder().
+                        setId(toUUID(0)).
+                        setUser(user).
+                        setName("Menu#0").
+                        setDescription("Description for menu#0").
+                        setImageUrl("https://nutritionmanager.xyz/menus/menuId=0").
+                        setConfig(appConfiguration).
+                        addTag("common tag").
+                        addTag("tag#0").
+                        addTag("tagA").
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(BigDecimal.TEN).
+                                        setDishName("dish#0").
+                                        setDish(() -> dish0)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal("3.5")).
+                                        setDishName("dish#50").
+                                        setDish(() -> dish50)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal(2)).
+                                        setDishName("dish#100").
+                                        setDish(() -> dish100)
+                        ).
+                        tryBuild()
+        );
+
+        menus.add(
+                new Menu.Builder().
+                        setId(toUUID(1)).
+                        setUser(user).
+                        setName("Menu#1").
+                        setDescription("Description for menu#1").
+                        setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
+                        setConfig(appConfiguration).
+                        addTag("common tag").
+                        addTag("tag#1").
+                        addTag("tagA").
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(BigDecimal.TEN).
+                                        setDishName("dish#1").
+                                        setDish(() -> dish1)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal("3.5")).
+                                        setDishName("dish#50").
+                                        setDish(() -> dish50)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal(2)).
+                                        setDishName("dish#100").
+                                        setDish(() -> dish100)
+                        ).
+                        tryBuild()
+        );
+
+        menus.add(
+                new Menu.Builder().
+                        setId(toUUID(2)).
+                        setUser(user).
+                        setName("Menu#2").
+                        setDescription("Description for menu#2").
+                        setImageUrl("https://nutritionmanager.xyz/menus/menuId=2").
+                        setConfig(appConfiguration).
+                        addTag("common tag").
+                        addTag("tag#2").
+                        addTag("tagB").
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(BigDecimal.TEN).
+                                        setDishName("dish#2").
+                                        setDish(() -> dish2)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal("3.5")).
+                                        setDishName("dish#60").
+                                        setDish(() -> dish60)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal(2)).
+                                        setDishName("dish#100").
+                                        setDish(() -> dish100)
+                        ).
+                        tryBuild()
+        );
+
+        menus.add(
+                new Menu.Builder().
+                        setId(toUUID(3)).
+                        setUser(user).
+                        setName("Menu#3").
+                        setDescription("Description for menu#3").
+                        setImageUrl("https://nutritionmanager.xyz/menus/menuId=3").
+                        setConfig(appConfiguration).
+                        addTag("common tag").
+                        addTag("tag#3").
+                        addTag("tagB").
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(BigDecimal.TEN).
+                                        setDishName("dish#3").
+                                        setDish(() -> dish3)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal("3.5")).
+                                        setDishName("dish#60").
+                                        setDish(() -> dish60)
+                        ).
+                        addItem(
+                                new MenuItem.Builder().
+                                        setConfig(appConfiguration).
+                                        setQuantity(new BigDecimal(2)).
+                                        setDishName("dish#100").
+                                        setDish(() -> dish100)
+                        ).
+                        tryBuild()
+        );
+
+        commit(() -> {
+            dishes.forEach(dish -> dishRepository.save(dish));
+            menus.forEach(menu -> menuRepository.save(menu));
+        });
 
         return menus;
     }
@@ -978,6 +1593,14 @@ class MenuRepositoryTest {
                         ),
                         new BigDecimal("0.1")).
                 tryBuild();
+    }
+
+    private MenuItem.Builder createMenuItem(Dish dish, BigDecimal quantity) {
+        return new MenuItem.Builder().
+                setConfig(appConfiguration).
+                setDish(() -> dish).
+                setDishName(dish.getName()).
+                setQuantity(quantity);
     }
 
 }

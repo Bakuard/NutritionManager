@@ -133,7 +133,7 @@ public interface MenuRepository {
      * @return кол-во всех меню удовлетворяющих ограничению criteria.
      * @throws ValidateException если criteria является null.
      */
-    public int getNumberMenus(Criteria criteria);
+    public int getMenusNumber(Criteria criteria);
 
     /**
      * Возвращает кол-во всех тегов меню удовлетворяющих ограничению criteria (см. {@link Criteria}).

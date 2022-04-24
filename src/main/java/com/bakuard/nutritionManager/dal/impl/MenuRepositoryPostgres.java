@@ -74,7 +74,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public int getNumberMenus(Criteria criteria) {
+    public int getMenusNumber(Criteria criteria) {
         return 0;
     }
 
