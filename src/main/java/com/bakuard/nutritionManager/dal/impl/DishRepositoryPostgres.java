@@ -317,55 +317,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         getSQL().
                         replace("\"{D}\"", "as D");
 
-        List<Dish> dishes = statement.query(
-                query,
-                (ResultSet rs) -> {
-                    List<Dish> result = new ArrayList<>();
-
-                    Dish.Builder builder = null;
-                    UUID lastDishId = null;
-                    while(rs.next()) {
-                        UUID dishId = (UUID)rs.getObject("dishId");
-                        if(!dishId.equals(lastDishId)) {
-                            if (builder != null) result.add(builder.tryBuild());
-                            builder = new Dish.Builder().
-                                    setId(dishId).
-                                    setUser(
-                                            new User.LoadBuilder().
-                                                    setId((UUID) rs.getObject("userId")).
-                                                    setName(rs.getString("userName")).
-                                                    setEmail(rs.getString("userEmail")).
-                                                    setPasswordHash(rs.getString("userPasswordHash")).
-                                                    setSalt(rs.getString("userSalt")).
-                                                    tryBuild()
-                                    ).
-                                    setName(rs.getString("name")).
-                                    setServingSize(rs.getBigDecimal("servingSize")).
-                                    setUnit(rs.getString("unit")).
-                                    setDescription(rs.getString("description")).
-                                    setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig).
-                                    setRepository(productRepository);
-                            lastDishId = dishId;
-                        }
-
-                        String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
-
-                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
-                        if(!rs.wasNull()) {
-                            String ingredientName = rs.getString("ingredientName");
-                            Filter filter = toFilter(rs.getString("ingredientFilter"));
-                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
-                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
-                        }
-                    }
-
-                    if(builder != null) result.add(builder.tryBuild());
-
-                    return result;
-                }
-        );
+        List<Dish> dishes = statement.query(query, this::map);
 
         return metadata.createPage(dishes);
     }
@@ -550,6 +502,54 @@ public class DishRepositoryPostgres implements DishRepository {
                     return rs.getInt(1);
                 }
         );
+    }
+
+
+    List<Dish> map(ResultSet rs) throws SQLException {
+        List<Dish> result = new ArrayList<>();
+
+        Dish.Builder builder = null;
+        UUID lastDishId = null;
+        while(rs.next()) {
+            UUID dishId = (UUID)rs.getObject("dishId");
+            if(!dishId.equals(lastDishId)) {
+                if (builder != null) result.add(builder.tryBuild());
+                builder = new Dish.Builder().
+                        setId(dishId).
+                        setUser(
+                                new User.LoadBuilder().
+                                        setId((UUID) rs.getObject("userId")).
+                                        setName(rs.getString("userName")).
+                                        setEmail(rs.getString("userEmail")).
+                                        setPasswordHash(rs.getString("userPasswordHash")).
+                                        setSalt(rs.getString("userSalt")).
+                                        tryBuild()
+                        ).
+                        setName(rs.getString("name")).
+                        setServingSize(rs.getBigDecimal("servingSize")).
+                        setUnit(rs.getString("unit")).
+                        setDescription(rs.getString("description")).
+                        setImageUrl(rs.getString("imagePath")).
+                        setConfig(appConfig).
+                        setRepository(productRepository);
+                lastDishId = dishId;
+            }
+
+            String tagValue = rs.getString("tagValue");
+            if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+
+            BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+            if(!rs.wasNull()) {
+                String ingredientName = rs.getString("ingredientName");
+                Filter filter = toFilter(rs.getString("ingredientFilter"));
+                if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                    builder.addIngredient(ingredientName, filter, ingredientQuantity);
+            }
+        }
+
+        if(builder != null) result.add(builder.tryBuild());
+
+        return result;
     }
 
 

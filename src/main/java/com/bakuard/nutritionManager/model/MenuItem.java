@@ -108,6 +108,10 @@ public class MenuItem {
             return this;
         }
 
+        public boolean containsDish(String dishName) {
+            return dishName.equals(this.dishName);
+        }
+
         @Override
         public MenuItem tryBuild() throws ValidateException {
             return new MenuItem(dishName, dish, quantity, config);

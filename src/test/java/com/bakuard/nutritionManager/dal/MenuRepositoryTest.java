@@ -37,7 +37,7 @@ class MenuRepositoryTest {
 
     private static HikariDataSource dataSource;
     private static ProductRepositoryPostgres productRepository;
-    private static DishRepository dishRepository;
+    private static DishRepositoryPostgres dishRepository;
     private static MenuRepository menuRepository;
     private static UserRepository userRepository;
     private static DataSourceTransactionManager transactionManager;
@@ -74,7 +74,7 @@ class MenuRepositoryTest {
         userRepository = new UserRepositoryPostgres(dataSource);
         productRepository = new ProductRepositoryPostgres(dataSource, appConfiguration);
         dishRepository = new DishRepositoryPostgres(dataSource, appConfiguration, productRepository);
-        menuRepository = new MenuRepositoryPostgres(dataSource, appConfiguration, dishRepository);
+        menuRepository = new MenuRepositoryPostgres(dataSource, appConfiguration, dishRepository, productRepository);
     }
 
     @BeforeEach
@@ -297,7 +297,7 @@ class MenuRepositoryTest {
         });
         Menu actual = menuRepository.tryGetById(user.getId(), updatedMenu.getId());
 
-        AssertUtil.assertEquals(expected, actual);
+        AssertUtil.assertEquals(updatedMenu, actual);
     }
 
     @Test

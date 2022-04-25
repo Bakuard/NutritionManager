@@ -43,7 +43,7 @@ public class Menu implements Entity<Menu> {
                  String name,
                  String description,
                  String imageUrl,
-                 List<Entity.Builder<MenuItem>> items,
+                 List<MenuItem.Builder> items,
                  List<String> tags,
                  AppConfigData config) {
         Container<List<MenuItem>> menuItemsContainer = new Container<>();
@@ -107,6 +107,14 @@ public class Menu implements Entity<Menu> {
      */
     public List<Tag> getTags() {
         return Collections.unmodifiableList(tags);
+    }
+
+    /**
+     * Возвращает кол-во блюд входящих в данное меню.
+     * @return кол-во блюд входящих в данное меню.
+     */
+    public int getMenuItemNumbers() {
+        return items.size();
     }
 
     /**
@@ -473,7 +481,7 @@ public class Menu implements Entity<Menu> {
         private String name;
         private String description;
         private String imageUrl;
-        private List<Entity.Builder<MenuItem>> items;
+        private List<MenuItem.Builder> items;
         private List<String> tags;
         private AppConfigData config;
 
@@ -512,7 +520,7 @@ public class Menu implements Entity<Menu> {
             return this;
         }
 
-        public Builder addItem(Entity.Builder<MenuItem> item) {
+        public Builder addItem(MenuItem.Builder item) {
             items.add(item);
             return this;
         }
@@ -520,6 +528,41 @@ public class Menu implements Entity<Menu> {
         public Builder addTag(String tag) {
             tags.add(tag);
             return this;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public User getUser() {
+            return user;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getImageUrl() {
+            return imageUrl;
+        }
+
+        public MenuItem.Builder getItem(String dishName) {
+            return items.stream().
+                    filter(item -> item.containsDish(dishName)).
+                    findAny().
+                    orElse(null);
+        }
+
+        public boolean containsTag(String tag) {
+            return tags.contains(tag);
+        }
+
+        public boolean containsItem(String dishName) {
+            return items.stream().anyMatch(item -> item.containsDish(dishName));
         }
 
         @Override
