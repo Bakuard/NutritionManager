@@ -5,12 +5,18 @@ import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.*;
+import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
+import com.bakuard.nutritionManager.model.util.Pageable;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
+import org.jooq.Condition;
+import org.jooq.Param;
+import org.jooq.SortField;
+import org.jooq.impl.DSL;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,12 +24,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static org.jooq.impl.DSL.*;
+import static org.jooq.impl.DSL.count;
 
 public class MenuRepositoryPostgres implements MenuRepository {
 
@@ -101,7 +112,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                MenuTags.*,
                                Users.userId,
                                Users.name as userName,
-                               Users.passwordHash as userPassHash,
+                               Users.passwordHash as userPasswordHash,
                                Users.email as userEmail,
                                Users.salt as userSalt
                             FROM Menus
@@ -131,7 +142,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                             new User.LoadBuilder().
                                                     setId((UUID) rs.getObject("userID")).
                                                     setName(rs.getString("userName")).
-                                                    setPasswordHash(rs.getString("userPassHash")).
+                                                    setPasswordHash(rs.getString("userPasswordHash")).
                                                     setEmail(rs.getString("userEmail")).
                                                     setSalt(rs.getString("userSalt")).
                                                     tryBuild()
@@ -177,9 +188,9 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                 FROM MenuItems
                                 INNER JOIN Menus
                                     ON MenuItems.menuId = Menus.menuId
-                                LEFT JOIN Users
+                                INNER JOIN Users
                                     ON Menus.userId = Users.userId
-                                LEFT JOIN Dishes
+                                INNER JOIN Dishes
                                     ON MenuItems.dishId = Dishes.dishId
                                 LEFT JOIN DishTags
                                     ON MenuItems.dishId = DishTags.dishId
@@ -189,7 +200,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                 ORDER BY Dishes.dishId, DishTags.index, DishIngredients.index;
                             """),
                     ps -> ps.setObject(1, menuId),
-                    dishRepository::map
+                    dishRepository::mapToDishes
             );
 
             dishes.forEach(dish -> result.getItem(dish.getName()).setDish(() -> dish));
@@ -213,7 +224,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                MenuTags.*,
                                Users.userId,
                                Users.name as userName,
-                               Users.passwordHash as userPassHash,
+                               Users.passwordHash as userPasswordHash,
                                Users.email as userEmail,
                                Users.salt as userSalt
                             FROM Menus
@@ -243,7 +254,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                             new User.LoadBuilder().
                                                     setId((UUID) rs.getObject("userID")).
                                                     setName(rs.getString("userName")).
-                                                    setPasswordHash(rs.getString("userPassHash")).
+                                                    setPasswordHash(rs.getString("userPasswordHash")).
                                                     setEmail(rs.getString("userEmail")).
                                                     setSalt(rs.getString("userSalt")).
                                                     tryBuild()
@@ -275,8 +286,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
         if(result != null) {
             List<Dish> dishes = statement.query(
                     connection -> connection.prepareStatement("""
-                            SELECT Menus.name,
-                                   Dishes.*,
+                            SELECT Dishes.*,
                                    DishTags.*,
                                    Users.userId,
                                    Users.name as userName,
@@ -289,19 +299,22 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                 FROM MenuItems
                                 INNER JOIN Menus
                                     ON MenuItems.menuId = Menus.menuId
-                                LEFT JOIN Users
+                                INNER JOIN Users
                                     ON Menus.userId = Users.userId
-                                LEFT JOIN Dishes
+                                INNER JOIN Dishes
                                     ON MenuItems.dishId = Dishes.dishId
                                 LEFT JOIN DishTags
                                     ON MenuItems.dishId = DishTags.dishId
                                 LEFT JOIN DishIngredients
                                     ON MenuItems.dishId = DishIngredients.dishId
-                                WHERE Menus.name = ?
+                                WHERE Menus.name = ? AND Menus.userId = ?
                                 ORDER BY Dishes.dishId, DishTags.index, DishIngredients.index;
                             """),
-                    ps -> ps.setString(1, name),
-                    dishRepository::map
+                    ps -> {
+                        ps.setString(1, name);
+                        ps.setObject(2, userId);
+                    },
+                    dishRepository::mapToDishes
             );
 
             dishes.forEach(dish -> result.getItem(dish.getName()).setDish(() -> dish));
@@ -328,32 +341,224 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
     @Override
     public Page<Menu> getMenus(Criteria criteria) {
-        return null;
+        int menusNumber = getMenusNumber(criteria);
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(menusNumber, 30);
+
+        if(metadata.isEmpty()) return Pageable.firstEmptyPage();
+
+        String query =
+                select(field("M.*"),
+                        field("MenuItems.quantity as itemQuantity"),
+                        field("Dishes.name as dishName"),
+                        field("MenuTags.tagValue as tagValue"),
+                        field("Users.userId as userId"),
+                        field("Users.name as userName"),
+                        field("Users.email as userEmail"),
+                        field("Users.passwordHash as userPasswordHash"),
+                        field("Users.salt as userSalt")).
+                        from(
+                                select(field("*")).
+                                        from("Menus").
+                                        where(switchFilter(criteria.getFilter())).
+                                        orderBy(getOrderFields(criteria.getSort(), "Menus")).
+                                        limit(inline(metadata.getActualSize())).
+                                        offset(inline(metadata.getOffset())).
+                                        asTable("{M}")
+                        ).
+                        innerJoin("Users").
+                            on(field("M.userId").eq(field("Users.userId"))).
+                        leftJoin("MenuTags").
+                            on(field("M.menuId").eq(field("MenuTags.menuId"))).
+                        leftJoin("menuItems").
+                            on(field("M.menuId").eq(field("menuItems.menuId"))).
+                        orderBy(getOrderFields(criteria.getSort(), "M")).
+                        getSQL().
+                        replace("\"{M}\"", "as M");
+
+        List<Menu.Builder> result = statement.query(
+                query,
+                rs -> {
+                    ArrayList<Menu.Builder> builders = new ArrayList<>();
+
+                    Menu.Builder builder = null;
+                    UUID lastMenuId = null;
+                    while(rs.next()) {
+                        UUID menuId = (UUID)rs.getObject("menuId");
+                        if(!menuId.equals(lastMenuId)) {
+                            if(builder != null) builders.add(builder);
+                            builder = new Menu.Builder().
+                                    setId(menuId).
+                                    setUser(
+                                            new User.LoadBuilder().
+                                                    setId((UUID) rs.getObject("userID")).
+                                                    setName(rs.getString("userName")).
+                                                    setPasswordHash(rs.getString("userPasswordHash")).
+                                                    setEmail(rs.getString("userEmail")).
+                                                    setSalt(rs.getString("userSalt")).
+                                                    tryBuild()
+                                    ).
+                                    setName(rs.getString("name")).
+                                    setDescription(rs.getString("description")).
+                                    setImageUrl(rs.getString("imagePath")).
+                                    setConfig(appConfig);
+
+                            lastMenuId = menuId;
+                        }
+
+                        String tagValue = rs.getString("tagValue");
+                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+
+                        String dishName = rs.getString("dishName");
+                        if(!rs.wasNull() && !builder.containsItem(dishName)) {
+                            builder.addItem(
+                                    new MenuItem.Builder().
+                                            setConfig(appConfig).
+                                            setDishName(dishName).
+                                            setQuantity(rs.getBigDecimal("itemQuantity"))
+                            );
+                        }
+                    }
+
+                    if(builder != null) builders.add(builder);
+
+                    return builders;
+                }
+        );
+
+        
+
+        return metadata.createPage(
+                result.stream().map(Menu.Builder::tryBuild).toList()
+        );
     }
 
     @Override
     public Page<Tag> getTags(Criteria criteria) {
-        return null;
+        int tagsNumber = getTagsNumber(criteria);
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(tagsNumber, 1000);
+
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
+
+        String query = selectDistinct(field("MenuTags.tagValue")).
+                from("MenuTags").
+                join("Menus").
+                    on(field("MenuTags.menuId").eq(field("Menus.menuId"))).
+                where(switchFilter(criteria.getFilter())).
+                orderBy(field("MenuTags.tagValue").asc()).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
+                getSQL();
+
+        List<Tag> tags = statement.query(
+                query,
+                (ResultSet rs) -> {
+                    List<Tag> result = new ArrayList<>();
+
+                    while(rs.next()) {
+                        result.add(new Tag(rs.getString("tagValue")));
+                    }
+
+                    return result;
+                }
+        );
+
+        return metadata.createPage(tags);
     }
 
     @Override
     public Page<String> getNames(Criteria criteria) {
-        return null;
+        int namesNumber = getNamesNumber(criteria);
+        Page.Metadata metadata = criteria.getPageable().
+                createPageMetadata(namesNumber, 1000);
+
+        if(metadata.isEmpty()) return metadata.createPage(List.of());
+
+        String query = selectDistinct(field("Menus.name")).
+                from("Menus").
+                where(switchFilter(criteria.getFilter())).
+                orderBy(field("Menus.name").asc()).
+                limit(inline(metadata.getActualSize())).
+                offset(inline(metadata.getOffset())).
+                getSQL();
+
+        List<String> names = statement.query(
+                query,
+                (ResultSet rs) -> {
+                    List<String> result = new ArrayList<>();
+
+                    while(rs.next()) {
+                        result.add(rs.getString(1));
+                    }
+
+                    return result;
+                }
+        );
+
+        return metadata.createPage(names);
     }
 
     @Override
     public int getMenusNumber(Criteria criteria) {
-        return 0;
+        Validator.check(
+                Rule.of("MenuRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+        );
+
+        String query = selectCount().
+                from("Menus").
+                where(switchFilter(criteria.getFilter())).
+                getSQL();
+
+        return statement.queryForObject(query, Integer.class);
     }
 
     @Override
     public int getTagsNumber(Criteria criteria) {
-        return 0;
+        Validator.check(
+                Rule.of("MenuRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+        );
+
+        String query = select(countDistinct(field("MenuTags.tagValue"))).
+                from("MenuTags").
+                innerJoin("Menus").
+                    on(field("Menus.menuId").eq(field("MenuTags.menuId"))).
+                where(switchFilter(criteria.getFilter())).
+                getSQL();
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
     }
 
     @Override
     public int getNamesNumber(Criteria criteria) {
-        return 0;
+        Validator.check(
+                Rule.of("MenuRepository.criteria").notNull(criteria).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+        );
+
+        String query = select(countDistinct(field("Menus.name"))).
+                from("Menus").
+                where(switchFilter(criteria.getFilter())).
+                getSQL();
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
     }
 
 
@@ -521,6 +726,81 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
                 }
         );
+    }
+
+
+    private Condition switchFilter(Filter filter) {
+        Condition result = null;
+
+        switch(filter.getType()) {
+            case USER -> result = userFilter((UserFilter) filter);
+            case DISHES -> result = dishesFilter((AnyFilter) filter);
+            case MIN_TAGS -> result = minTagsFilter((MinTagsFilter) filter);
+            case AND -> result = andFilter((AndFilter) filter);
+            default -> throw new UnsupportedOperationException(
+                    "Unsupported operation for " + filter.getType() + " constraint");
+        }
+
+        return result;
+    }
+
+    private Condition userFilter(UserFilter filter) {
+        return field("userId").eq(inline(filter.getUserId()));
+    }
+
+    private Condition dishesFilter(AnyFilter filter) {
+        return field("menuId").in(
+                select(field("MenuItems.menuId")).
+                        from(table("MenuItems")).
+                        innerJoin(table("Dishes")).
+                            on(field("MenuItems.dishId").eq(field("Dishes.dishId"))).
+                        where(field("Dishes.name").in(
+                                filter.getValues().stream().map(DSL::inline).toList()
+                        ))
+        );
+    }
+
+    private Condition minTagsFilter(MinTagsFilter filter) {
+        return field("menuId").in(
+                select(field("MenuTags.menuId")).
+                        from("MenuTags").
+                        where(field("MenuTags.tagValue").in(
+                                filter.getTags().stream().map(t -> inline(t.getValue())).toList()
+                        )).
+                        groupBy(field("MenuTags.menuId")).
+                        having(count(field("MenuTags.menuId")).eq(inline(filter.getTags().size())))
+        );
+    }
+
+    private Condition andFilter(AndFilter filter) {
+        Condition condition = switchFilter(filter.getOperands().get(0));
+        for(int i = 1; i < filter.getOperands().size(); i++) {
+            condition = condition.and(switchFilter(filter.getOperands().get(i)));
+        }
+        return condition;
+    }
+
+
+    private List<SortField<?>> getOrderFields(Sort menuSort,
+                                              String tableName) {
+        ArrayList<SortField<?>> fields = new ArrayList<>();
+
+        for(int i = 0; i < menuSort.getParametersNumber(); i++) {
+            switch(menuSort.getParameter(i)) {
+                case "name" -> {
+                    if(menuSort.isAscending(i))
+                        fields.add(field(tableName + ".name").asc());
+                    else
+                        fields.add(field(tableName + ".name").desc());
+                }
+            }
+        }
+        fields.add(field(tableName + ".menuId").asc());
+        if("M".equals(tableName)) {
+            fields.add(field("MenuItems.index").asc());
+            fields.add(field("MenuTags.index").asc());
+        }
+        return fields;
     }
 
 }

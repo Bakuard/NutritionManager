@@ -317,7 +317,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         getSQL().
                         replace("\"{D}\"", "as D");
 
-        List<Dish> dishes = statement.query(query, this::map);
+        List<Dish> dishes = statement.query(query, this::mapToDishes);
 
         return metadata.createPage(dishes);
     }
@@ -326,7 +326,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable().
-                createPageMetadata(tagsNumber, 200);
+                createPageMetadata(tagsNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -360,7 +360,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<String> getUnits(Criteria criteria) {
         int unitsNumber = getUnitsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable().
-                createPageMetadata(unitsNumber, 200);
+                createPageMetadata(unitsNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -390,9 +390,9 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Page<String> getNames(Criteria criteria) {
-        int unitsNumber = getNamesNumber(criteria);
+        int namesNumber = getNamesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable().
-                createPageMetadata(unitsNumber, 200);
+                createPageMetadata(namesNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -404,7 +404,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 offset(inline(metadata.getOffset())).
                 getSQL();
 
-        List<String> units = statement.query(
+        List<String> names = statement.query(
                 query,
                 (ResultSet rs) -> {
                     List<String> result = new ArrayList<>();
@@ -417,7 +417,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 }
         );
 
-        return metadata.createPage(units);
+        return metadata.createPage(names);
     }
 
     @Override
@@ -505,7 +505,7 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
 
-    List<Dish> map(ResultSet rs) throws SQLException {
+    List<Dish> mapToDishes(ResultSet rs) throws SQLException {
         List<Dish> result = new ArrayList<>();
 
         Dish.Builder builder = null;
