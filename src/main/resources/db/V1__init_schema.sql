@@ -70,15 +70,6 @@ CREATE TABLE Menus (
     UNIQUE(name, userId)
 );
 
-CREATE TABLE MenusToDishes (
-    dishId UUID NOT NULL,
-    menuId UUID NOT NULL,
-    quantity NUMERIC(16, 6) NOT NULL,
-    FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY(menuId) REFERENCES Menus(menuId) ON DELETE CASCADE ON UPDATE CASCADE,
-    PRIMARY KEY(dishId, menuId)
-);
-
 CREATE TABLE ProductTags (
     productId UUID NOT NULL,
     tagValue VARCHAR(256) NOT NULL,
@@ -95,6 +86,14 @@ CREATE TABLE DishTags (
     PRIMARY KEY(dishId, tagValue)
 );
 
+CREATE TABLE MenuTags (
+    menuId UUID NOT NULL,
+    tagValue VARCHAR(256) NOT NULL,
+    index INT NOT NULL,
+    FOREIGN KEY(menuId) REFERENCES Menus(menuId) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY(menuId, tagValue)
+);
+
 CREATE TABLE DishIngredients (
     dishId UUID NOT NULL,
     name VARCHAR(256) NOT NULL,
@@ -104,6 +103,16 @@ CREATE TABLE DishIngredients (
     index INT NOT NULL,
     FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(dishId, name)
+);
+
+CREATE TABLE MenuItems (
+    menuId UUID NOT NULL,
+    dishId UUID NOT NULL,
+    quantity NUMERIC(16, 6) NOT NULL,
+    index INT NOT NULL,
+    FOREIGN KEY(menuId) REFERENCES Menus(menuId) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY(menuId, dishId)
 );
 
 CREATE TABLE JwsBlackList (

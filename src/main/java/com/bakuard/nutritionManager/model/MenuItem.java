@@ -58,13 +58,12 @@ public class MenuItem {
         if (o == null || getClass() != o.getClass()) return false;
         MenuItem menuItem = (MenuItem) o;
         return dishName.equals(menuItem.dishName) &&
-                getDish().equals(menuItem.getDish()) &&
                 quantity.equals(menuItem.quantity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishName, getDish(), quantity);
+        return Objects.hash(dishName, quantity);
     }
 
     @Override
@@ -106,6 +105,10 @@ public class MenuItem {
         public Builder setConfig(AppConfigData config) {
             this.config = config;
             return this;
+        }
+
+        public boolean containsDish(String dishName) {
+            return dishName.equals(this.dishName);
         }
 
         @Override
