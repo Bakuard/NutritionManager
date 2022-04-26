@@ -557,6 +557,14 @@ public class Menu implements Entity<Menu> {
                     orElse(null);
         }
 
+        public List<MenuItem.Builder> getItems() {
+            return items;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
         public boolean containsTag(String tag) {
             return tags.contains(tag);
         }

@@ -389,6 +389,67 @@ class MenuRepositoryTest {
 
     @Test
     @DisplayName("""
+            save(menu):
+             there are menus in DB,
+             menu id not exists,
+             user doesn't have some of menu item dishes
+             => exception
+            """)
+    public void save12() {
+        User otherUser = createAndSaveUser(1);
+        commit(() -> dishRepository.save(createDish(otherUser, 1000)));
+        User user = createAndSaveUser(2);
+        Menu menu = new Menu.Builder().
+                setId(toUUID(1)).
+                setUser(user).
+                setName("Menu#1").
+                setDescription("Description for menu#1").
+                setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
+                setConfig(appConfiguration).
+                addTag("common tag").
+                addTag("tag#1").
+                addItem(createMenuItem(createDish(user, 1000), new BigDecimal("10.1"))).
+                tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> commit(() -> menuRepository.save(menu)),
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            save(menu):
+             there are menus in DB,
+             menu id exists,
+             user doesn't have some of menu item dishes
+             => exception
+            """)
+    public void save13() {
+        User otherUser = createAndSaveUser(1);
+        commit(() -> dishRepository.save(createDish(otherUser, 1000)));
+        User user = createAndSaveUser(2);
+        commit(() -> menuRepository.save(createMenu(user, 1)));
+        Menu updatedMenu = new Menu.Builder().
+                setId(toUUID(1)).
+                setUser(user).
+                setName("Menu#1").
+                setDescription("Description for menu#1").
+                setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
+                setConfig(appConfiguration).
+                addTag("common tag").
+                addTag("tag#1").
+                addItem(createMenuItem(createDish(user, 1000), new BigDecimal("10.1"))).
+                tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> commit(() -> menuRepository.save(updatedMenu)),
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
+        );
+    }
+
+    @Test
+    @DisplayName("""
             tryRemove(userId, menuId):
              menuId is null
              => exception
@@ -1299,7 +1360,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = Pageable.of(2, 1).
-                createPageMetadata(2, 30).
+                createPageMetadata(4, 30).
                 createPage(menus.subList(2, 4));
         AssertUtil.assertEquals(expected, actual);
     }

@@ -12,9 +12,7 @@ import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-
 import org.jooq.Condition;
-import org.jooq.Param;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,11 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static org.jooq.impl.DSL.*;
-import static org.jooq.impl.DSL.count;
 
 public class MenuRepositoryPostgres implements MenuRepository {
 
@@ -370,8 +366,10 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             on(field("M.userId").eq(field("Users.userId"))).
                         leftJoin("MenuTags").
                             on(field("M.menuId").eq(field("MenuTags.menuId"))).
-                        leftJoin("menuItems").
-                            on(field("M.menuId").eq(field("menuItems.menuId"))).
+                        leftJoin("MenuItems").
+                            on(field("M.menuId").eq(field("MenuItems.menuId"))).
+                        leftJoin("Dishes").
+                            on(field("MenuItems.dishId").eq(field("Dishes.dishId"))).
                         orderBy(getOrderFields(criteria.getSort(), "M")).
                         getSQL().
                         replace("\"{M}\"", "as M");
@@ -426,7 +424,42 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 }
         );
 
-        
+        for(Menu.Builder builder : result) {
+            if(!builder.getItems().isEmpty()) {
+                List<Dish> dishes = statement.query(
+                        connection -> connection.prepareStatement("""
+                                SELECT MenuItems.menuId,
+                                       Dishes.*,
+                                       DishTags.*,
+                                       Users.userId,
+                                       Users.name as userName,
+                                       Users.passwordHash as userPasswordHash,
+                                       Users.email as userEmail,
+                                       Users.salt as userSalt,
+                                       DishIngredients.name as ingredientName,
+                                       DishIngredients.quantity as ingredientQuantity,
+                                       DishIngredients.filter as ingredientFilter
+                                    FROM MenuItems
+                                    INNER JOIN Menus
+                                        ON MenuItems.menuId = Menus.menuId
+                                    INNER JOIN Users
+                                        ON Menus.userId = Users.userId
+                                    INNER JOIN Dishes
+                                        ON MenuItems.dishId = Dishes.dishId
+                                    LEFT JOIN DishTags
+                                        ON MenuItems.dishId = DishTags.dishId
+                                    LEFT JOIN DishIngredients
+                                        ON MenuItems.dishId = DishIngredients.dishId
+                                    WHERE MenuItems.menuId = ?
+                                    ORDER BY Dishes.dishId, DishTags.index, DishIngredients.index;
+                                """),
+                        ps -> ps.setObject(1, builder.getId()),
+                        dishRepository::mapToDishes
+                );
+
+                dishes.forEach(dish -> builder.getItem(dish.getName()).setDish(() -> dish));
+            }
+        }
 
         return metadata.createPage(
                 result.stream().map(Menu.Builder::tryBuild).toList()
@@ -605,7 +638,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 }
         );
 
-        statement.batchUpdate(
+        int[] rows = statement.batchUpdate(
                 """
                         INSERT INTO MenuItems(menuId, dishId, quantity, index)
                             (
@@ -634,6 +667,12 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
                 }
         );
+
+        for(int i = 0; i < rows.length; i++) {
+            if(rows[i] == 0)
+                throw new ValidateException("User haven't dish with name=" + menu.getItems().get(i).getDishName()).
+                        addReason(Rule.of("MenuRepository.itemExists").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+        }
     }
 
     private void updateMenu(Menu newVersion) {
@@ -697,7 +736,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 }
         );
 
-        statement.batchUpdate(
+        int[] rows = statement.batchUpdate(
                 """
                         INSERT INTO MenuItems(menuId, dishId, quantity, index)
                             (
@@ -726,6 +765,12 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
                 }
         );
+
+        for(int i = 0; i < rows.length; i++) {
+            if(rows[i] == 0)
+                throw new ValidateException("User haven't dish with name=" + newVersion.getItems().get(i).getDishName()).
+                        addReason(Rule.of("MenuRepository.itemExists").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+        }
     }
 
 

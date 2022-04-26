@@ -34,10 +34,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
 import static org.jooq.impl.DSL.*;
