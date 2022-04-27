@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Schema(description = "Данные запроса на получение списка продуктов для блюда")
-public class DishProductsListRequest {
+public class DishPriceRequest {
 
     @Schema(description = "Уникальный идентфикатор блюда. Не может быть null.")
     private UUID dishId;
@@ -23,7 +23,7 @@ public class DishProductsListRequest {
             """)
     private List<DishIngredientProductRequest> products;
 
-    public DishProductsListRequest() {
+    public DishPriceRequest() {
 
     }
 
@@ -55,7 +55,7 @@ public class DishProductsListRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishProductsListRequest that = (DishProductsListRequest) o;
+        DishPriceRequest that = (DishPriceRequest) o;
         return Objects.equals(dishId, that.dishId) &&
                 Objects.equals(servingNumber, that.servingNumber) &&
                 Objects.equals(products, that.products);

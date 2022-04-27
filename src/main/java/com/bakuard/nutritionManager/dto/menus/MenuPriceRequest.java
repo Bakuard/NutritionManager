@@ -8,12 +8,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Schema(description = "Данные запроса на получение списка продуктов для меню")
-public class MenuProductsListRequest {
+public class MenuPriceRequest {
 
     @Schema(description = "Уникальный идентфикатор меню. Не может быть null.")
     private UUID menuId;
     @Schema(description = "Кол-во данного меню на которое рассчитывается список докупаемых продуктов. Не может быть null.")
-    private BigDecimal number;
+    private BigDecimal quantity;
     @Schema(description = """
             Каждый элемент этого списка указывает - какой продукт выбрать для конкретного ингредиента одного
              из блюд меню. Если для одного из ингредиентов блюда не указан продукт, то в качестве значения по
@@ -24,7 +24,7 @@ public class MenuProductsListRequest {
             """)
     private List<DishProductRequest> products;
 
-    public MenuProductsListRequest() {
+    public MenuPriceRequest() {
 
     }
 
@@ -36,12 +36,12 @@ public class MenuProductsListRequest {
         this.menuId = menuId;
     }
 
-    public BigDecimal getNumber() {
-        return number;
+    public BigDecimal getQuantity() {
+        return quantity;
     }
 
-    public void setNumber(BigDecimal number) {
-        this.number = number;
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
     }
 
     public List<DishProductRequest> getProducts() {
@@ -56,22 +56,22 @@ public class MenuProductsListRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MenuProductsListRequest that = (MenuProductsListRequest) o;
+        MenuPriceRequest that = (MenuPriceRequest) o;
         return Objects.equals(menuId, that.menuId) &&
-                Objects.equals(number, that.number) &&
+                Objects.equals(quantity, that.quantity) &&
                 Objects.equals(products, that.products);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(menuId, number, products);
+        return Objects.hash(menuId, quantity, products);
     }
 
     @Override
     public String toString() {
         return "MenuProductsListRequest{" +
                 "menuId=" + menuId +
-                ", number=" + number +
+                ", quantity=" + quantity +
                 ", products=" + products +
                 '}';
     }
