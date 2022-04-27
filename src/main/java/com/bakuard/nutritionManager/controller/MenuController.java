@@ -1,7 +1,6 @@
 package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
-import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.dishes.*;
@@ -9,7 +8,6 @@ import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,12 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.List;
 import java.util.UUID;
@@ -269,7 +267,10 @@ public class MenuController {
         return ResponseEntity.ok(null);
     }
 
-    @Operation(summary = "Подбирает и возвращает список продуктов для приготовления указанного меню.",
+    @Operation(summary = """
+            Возвращает список продуктов для каждого ингредиента указанного блюда. Необходимое кол-во
+             каждого продукта рассчитывается с учетом кол-ва блюда в указанном меню и кол-ва этого меню.
+            """,
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
@@ -281,18 +282,61 @@ public class MenuController {
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти меню с таким ID",
+                            description = "Если не удалось найти блюдо с таким ID",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class)))
             }
     )
     @Transactional
-    @PostMapping("/pickProductsList")
-    public ResponseEntity<MenuProductsListResponse> pickProductsList(
-            @RequestBody MenuProductsListRequest dto) {
-        logger.info("Pick products list for menu. dto={}", dto);
+    @GetMapping("/getAllDishIngredientProducts")
+    public ResponseEntity<DishProductsListResponse> getAllDishIngredientProducts(
+            @RequestParam("dishName")
+            @Parameter(description = "Уникальное наименование блюда. Не может быть null.", required = true)
+            String dishName,
+            @RequestParam("menuId")
+            @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
+            UUID menuId,
+            @RequestParam("menuQuantity")
+            @Parameter(description = "Кол-во меню. Не может быть null. Должно быть больше 0.", required = false)
+            BigDecimal menuQuantity) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        logger.info("Get all ingredient products for dishName={}, menuId={}, menuQuantity={}",
+                dishName, menuId, menuQuantity);
 
-        return ResponseEntity.ok(null);
+        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, menuId, dishName, menuQuantity);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = """
+            Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
+             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню.
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти блюдо с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PostMapping("/getMenuPrice")
+    public ResponseEntity<BigDecimal> getMenuPrice(@RequestBody MenuPriceRequest dto) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        logger.info("Pick products list for menu dishes: userId={}, dto={}", userId, dto);
+
+        BigDecimal response = mapper.toMenuPrice(userId, dto).orElse(null);
+
+        return ResponseEntity.ok(response);
     }
 
 }

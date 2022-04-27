@@ -1,10 +1,7 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.validation.Container;
-import com.bakuard.nutritionManager.validation.Rule;
-import com.bakuard.nutritionManager.validation.ValidateException;
-import com.bakuard.nutritionManager.validation.Validator;
+import com.bakuard.nutritionManager.validation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -273,6 +270,21 @@ public class Menu implements Entity<Menu> {
     public Optional<BigDecimal> getLackQuantityPrice(Product product, Map<Product, List<MenuItemProduct>> products) {
         return getLackQuantity(product, products).
                 map(v -> v.multiply(product.getContext().getPrice()));
+    }
+
+    /**
+     * Возвращает данные о блюде входящем в состав этого меню. Если среди блюд входящих в данное меню нет блюда
+     * с указанным именем - выбрасывает исключение.
+     * @param dishName имя искомого блюда.
+     * @return блюдо или пустой Optional.
+     * @throws ValidateException если среди блюд этого мею нет блюда с указанным именем.
+     */
+    public MenuItem tryGetMenuItem(String dishName) {
+        return getMenuItem(dishName).
+                orElseThrow(
+                        () -> new ValidateException().
+                                addReason(Rule.of("Menu.dishName").failure(Constraint.CONTAINS_ITEM))
+                );
     }
 
     /**

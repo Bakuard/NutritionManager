@@ -15,12 +15,6 @@ public class DishProductsListResponse {
     @Schema(description = "Кол-во порций блюда на которое рассчитывается список докупаемых продуктов")
     private BigDecimal servingNumber;
     @Schema(description = """
-            Общая стоимость всех докупаемых продуктов с учетом кол-ва порций блюда. Если блюдо не содержит ни
-             одного ингредиента или всем ингредиентам блюда не соответствует ни один продукт - принимает значение
-             null.
-            """)
-    private BigDecimal totalPrice;
-    @Schema(description = """
             Каждый элемент списка - перечень всех продуктов для конкретного ингредиента блюда.
             """)
     private List<DishIngredientForListResponse> categories;
@@ -45,14 +39,6 @@ public class DishProductsListResponse {
         this.servingNumber = servingNumber;
     }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
     public List<DishIngredientForListResponse> getCategories() {
         return categories;
     }
@@ -68,13 +54,12 @@ public class DishProductsListResponse {
         DishProductsListResponse that = (DishProductsListResponse) o;
         return Objects.equals(dishId, that.dishId) &&
                 Objects.equals(servingNumber, that.servingNumber) &&
-                Objects.equals(totalPrice, that.totalPrice) &&
                 Objects.equals(categories, that.categories);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishId, servingNumber, totalPrice, categories);
+        return Objects.hash(dishId, servingNumber, categories);
     }
 
     @Override
@@ -82,7 +67,6 @@ public class DishProductsListResponse {
         return "DishProductsListResponse{" +
                 "dishId=" + dishId +
                 ", servingNumber=" + servingNumber +
-                ", totalPrice=" + totalPrice +
                 ", ingredients=" + categories +
                 '}';
     }

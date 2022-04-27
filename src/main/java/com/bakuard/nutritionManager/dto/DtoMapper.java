@@ -1,13 +1,11 @@
 package com.bakuard.nutritionManager.dto;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.Criteria;
-import com.bakuard.nutritionManager.dal.DishRepository;
-import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.dal.UserRepository;
+import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.dto.exceptions.*;
+import com.bakuard.nutritionManager.dto.menus.MenuPriceRequest;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.*;
@@ -30,17 +28,20 @@ public class DtoMapper {
     private UserRepository userRepository;
     private ProductRepository productRepository;
     private DishRepository dishRepository;
+    private MenuRepository menuRepository;
     private AppConfigData appConfiguration;
     private MessageSource messageSource;
 
     public DtoMapper(UserRepository userRepository,
                      ProductRepository productRepository,
                      DishRepository dishRepository,
+                     MenuRepository menuRepository,
                      MessageSource messageSource,
                      AppConfigData appConfiguration) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.dishRepository = dishRepository;
+        this.menuRepository = menuRepository;
         this.messageSource = messageSource;
         this.appConfiguration = appConfiguration;
     }
@@ -186,58 +187,39 @@ public class DtoMapper {
         return dishes.map(this::toDishForListResponse);
     }
 
-    public DishProductsListResponse toDishProductsListResponse(UUID userId, DishProductsListRequest dto) {
+    public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID dishId, BigDecimal servingNumber) {
+        Dish dish = dishRepository.tryGetById(userId, dishId);
+        return toDishProductsListResponse(dish, servingNumber);
+    }
+
+    public Optional<BigDecimal> toDishPrice(UUID userId, DishPriceRequest dto) {
         Dish dish = dishRepository.tryGetById(userId, dto.getDishId());
 
-        DishProductsListResponse response = new DishProductsListResponse();
-        response.setDishId(dish.getId());
-        response.setServingNumber(dto.getServingNumber());
-        response.setTotalPrice(
-                dish.getLackProductPrice(
-                        dto.getServingNumber(),
-                        dto.getProducts().stream().
-                                collect(Collectors.toMap(
-                                        DishIngredientProductRequest::getIngredientIndex,
-                                        DishIngredientProductRequest::getProductIndex
-                                ))
-                ).orElse(null)
-        );
-        response.setCategories(
-                IntStream.range(0, dish.getIngredientNumber()).
-                        mapToObj(ingredientIndex -> {
-                            DishIngredientProductRequest ingredientRequest =
-                                    dto.getProducts().stream().
-                                            filter(ingredient -> ingredient.getIngredientIndex() == ingredientIndex).
-                                            findFirst().
-                                            orElse(null);
+        Map<Integer, Integer> indexes = dto.getProducts().stream().
+                collect(Collectors.toMap(
+                        DishIngredientProductRequest::getIngredientIndex,
+                        DishIngredientProductRequest::getProductIndex)
+                );
 
-                            int productIndex = ingredientRequest != null ? ingredientRequest.getProductIndex() : 0;
+        return dish.getLackProductPrice(dto.getServingNumber(), indexes);
+    }
 
-                            List<ProductAsDishIngredientResponse> products =
-                                    dish.getProducts(ingredientIndex, 0).
-                                    map(p -> toProductAsDishIngredientResponse(
-                                            dish,
-                                            ingredientIndex,
-                                            productIndex,
-                                            ingredientRequest != null,
-                                            dto.getServingNumber()
-                                    )).
-                                    getContent();
+    public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID menuId, String dishName, BigDecimal quantity) {
+        Menu menu = menuRepository.tryGetById(userId, menuId);
+        MenuItem menuItem = menu.tryGetMenuItem(dishName);
 
-                            DishIngredientForListResponse ingredient = new DishIngredientForListResponse();
-                            ingredient.setIngredientIndex(ingredientIndex);
-                            ingredient.setProductCategory(
-                                    dish.getIngredient(ingredientIndex).
-                                            orElseThrow().
-                                            getName()
-                            );
-                            ingredient.setProducts(products);
-                            return ingredient;
-                        }).
-                        toList()
-        );
+        return toDishProductsListResponse(menuItem.getDish(), menuItem.getNecessaryQuantity(quantity));
+    }
 
-        return response;
+    public Optional<BigDecimal> toMenuPrice(UUID userId, MenuPriceRequest dto) {
+        Menu menu = menuRepository.tryGetById(userId, dto.getMenuId());
+
+        List<Menu.ProductConstraint> constraints = dto.getProducts().stream().
+                map(d -> new Menu.ProductConstraint(d.getDishName(), d.getIngredientIndex(), d.getProductIndex())).
+                toList();
+        List<Menu.MenuItemProduct> items = menu.getMenuItemProducts(dto.getQuantity(), constraints);
+        Map<Product, List<Menu.MenuItemProduct>> products = menu.groupByProduct(items);
+        return menu.getLackProductsPrice(products);
     }
 
 
@@ -411,38 +393,70 @@ public class DtoMapper {
     }
 
     private ProductAsDishIngredientResponse toProductAsDishIngredientResponse(Dish dish,
+                                                                              Product product,
                                                                               int ingredientIndex,
                                                                               int productIndex,
                                                                               boolean isChecked,
                                                                               BigDecimal servingNumber) {
-        return dish.getProduct(ingredientIndex, productIndex).
-                map(product -> {
-                    ProductAsDishIngredientResponse response = new ProductAsDishIngredientResponse();
-                    response.setId(product.getId());
-                    response.setUser(toUserResponse(product.getUser()));
-                    response.setImageUrl(product.getImageUrl());
-                    response.setCategory(product.getContext().getCategory());
-                    response.setShop(product.getContext().getShop());
-                    response.setGrade(product.getContext().getGrade());
-                    response.setManufacturer(product.getContext().getManufacturer());
-                    response.setPrice(product.getContext().getPrice());
-                    response.setPackingSize(product.getContext().getPackingSize());
-                    response.setUnit(product.getContext().getUnit());
-                    response.setQuantity(product.getQuantity());
-                    response.setNecessaryQuantity(
-                            dish.tryGetIngredient(ingredientIndex).getNecessaryQuantity(servingNumber)
-                    );
-                    response.setLackQuantity(
-                            dish.getLackQuantity(ingredientIndex, productIndex, servingNumber).orElseThrow()
-                    );
-                    response.setLackQuantityPrice(
-                            dish.getLackQuantityPrice(ingredientIndex, productIndex, servingNumber).orElseThrow()
-                    );
-                    response.setTags(toTagsResponse(product.getContext().getTags()));
-                    response.setChecked(isChecked);
-                    return response;
-                }).
-                orElse(null);
+        ProductAsDishIngredientResponse response = new ProductAsDishIngredientResponse();
+        response.setId(product.getId());
+        response.setUser(toUserResponse(product.getUser()));
+        response.setImageUrl(product.getImageUrl());
+        response.setCategory(product.getContext().getCategory());
+        response.setShop(product.getContext().getShop());
+        response.setGrade(product.getContext().getGrade());
+        response.setManufacturer(product.getContext().getManufacturer());
+        response.setPrice(product.getContext().getPrice());
+        response.setPackingSize(product.getContext().getPackingSize());
+        response.setUnit(product.getContext().getUnit());
+        response.setQuantity(product.getQuantity());
+        response.setNecessaryQuantity(
+                dish.tryGetIngredient(ingredientIndex).getNecessaryQuantity(servingNumber)
+        );
+        response.setLackQuantity(
+                dish.getLackQuantity(ingredientIndex, productIndex, servingNumber).orElseThrow()
+        );
+        response.setLackQuantityPrice(
+                dish.getLackQuantityPrice(ingredientIndex, productIndex, servingNumber).orElseThrow()
+        );
+        response.setTags(toTagsResponse(product.getContext().getTags()));
+        response.setChecked(isChecked);
+        return response;
+    }
+
+    private DishProductsListResponse toDishProductsListResponse(Dish dish, BigDecimal servingNumber) {
+        DishProductsListResponse response = new DishProductsListResponse();
+        response.setDishId(dish.getId());
+        response.setServingNumber(servingNumber);
+        response.setCategories(
+                IntStream.range(0, dish.getIngredientNumber()).
+                        mapToObj(ingredientIndex -> {
+                            DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
+
+                            List<Product> products = dish.getProducts(ingredientIndex, 0).getContent();
+
+                            DishIngredientForListResponse ir = new DishIngredientForListResponse();
+                            ir.setIngredientIndex(ingredientIndex);
+                            ir.setProductCategory(ingredient.getName());
+                            ir.setProducts(
+                                    IntStream.range(0, products.size()).
+                                            mapToObj(productIndex -> toProductAsDishIngredientResponse(
+                                                    dish,
+                                                    products.get(productIndex),
+                                                    ingredientIndex,
+                                                    productIndex,
+                                                    productIndex == 0,
+                                                    servingNumber != null ? servingNumber : BigDecimal.ONE
+                                            )).
+                                            toList()
+                            );
+
+                            return ir;
+                        }).
+                        toList()
+        );
+
+        return response;
     }
 
     private DishForListResponse toDishForListResponse(Dish dish) {

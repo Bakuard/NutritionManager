@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.List;
 import java.util.UUID;
@@ -305,7 +306,7 @@ public class DishController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Подбирает и возвращает список продуктов для приготовления указанного блюда.",
+    @Operation(summary = "Возвращает список продуктов для каждого ингредиента указанного блюда.",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
@@ -323,12 +324,49 @@ public class DishController {
             }
     )
     @Transactional
-    @PostMapping("/pickProductsList")
-    public ResponseEntity<DishProductsListResponse> pickProductsList(@RequestBody DishProductsListRequest dto) {
-        logger.info("Pick products list for dish. dto={}", dto);
-
+    @GetMapping("/getAllIngredientProducts")
+    public ResponseEntity<DishProductsListResponse> getAllIngredientProducts(
+            @RequestParam("dishId")
+            @Parameter(description = "Уникальный идентификатор блюда. Не может быть null.", required = true)
+            UUID dishId,
+            @RequestParam("servingNumber")
+            @Parameter(description = "Кол-во порций блюда. Не может быть null. Должно быть больше 0.", required = false)
+            BigDecimal servingNumber) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, dto);
+        logger.info("Get all ingredient products for dishId={} and ServingNumber={}", dishId, servingNumber);
+
+        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, dishId, servingNumber);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = """
+            Рассчитывает и возвращает стоимость блюда, которая представляет собой суммарную стоимость недостающего
+             кол-ва продукта выбранного для каждого ингредиента.
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти блюдо с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PostMapping("/getDishPrice")
+    public ResponseEntity<BigDecimal> getDishPrice(@RequestBody DishPriceRequest dto) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        logger.info("Pick products list for dish: userId={}, dto={}", userId, dto);
+
+        BigDecimal response = mapper.toDishPrice(userId, dto).orElse(null);
 
         return ResponseEntity.ok(response);
     }
