@@ -329,8 +329,8 @@ public class DishController {
             @RequestParam("dishId")
             @Parameter(description = "Уникальный идентификатор блюда. Не может быть null.", required = true)
             UUID dishId,
-            @RequestParam("servingNumber")
-            @Parameter(description = "Кол-во порций блюда. Не может быть null. Должно быть больше 0.", required = false)
+            @RequestParam(value = "servingNumber", required = false)
+            @Parameter(description = "Кол-во порций блюда. Должно быть больше 0. Значение по умолчанию равно 1")
             BigDecimal servingNumber) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishId={} and ServingNumber={}", dishId, servingNumber);

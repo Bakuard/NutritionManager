@@ -189,6 +189,8 @@ public class DtoMapper {
 
     public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID dishId, BigDecimal servingNumber) {
         Dish dish = dishRepository.tryGetById(userId, dishId);
+
+        servingNumber = servingNumber == null ? BigDecimal.ONE : servingNumber;
         return toDishProductsListResponse(dish, servingNumber);
     }
 
@@ -208,6 +210,7 @@ public class DtoMapper {
         Menu menu = menuRepository.tryGetById(userId, menuId);
         MenuItem menuItem = menu.tryGetMenuItem(dishName);
 
+        quantity = quantity == null ? BigDecimal.ONE : quantity;
         return toDishProductsListResponse(menuItem.getDish(), menuItem.getNecessaryQuantity(quantity));
     }
 
@@ -446,7 +449,7 @@ public class DtoMapper {
                                                     ingredientIndex,
                                                     productIndex,
                                                     productIndex == 0,
-                                                    servingNumber != null ? servingNumber : BigDecimal.ONE
+                                                    servingNumber
                                             )).
                                             toList()
                             );

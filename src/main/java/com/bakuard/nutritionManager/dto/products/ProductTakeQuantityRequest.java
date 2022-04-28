@@ -12,9 +12,17 @@ import java.util.UUID;
         """)
 public class ProductTakeQuantityRequest {
 
-    @Schema(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.")
+    @Schema(description = """
+            Уникальный идентификатор продукта в формате UUID. Ограничения:<br/>
+            1. Не может быть null. <br/>
+            2. Продукт с таким идентификатором должен существовать в БД. <br/>
+            """)
     private UUID productId;
-    @Schema(description = "Отнимаемое кол-во продукта. Не может быть null. Должно быть больше или равно нулю.")
+    @Schema(description = """
+            Отнимаемое кол-во продукта. Ограничения:<br/>
+            1. Не может быть null. <br/>
+            2. Не должно быть отрицательным. <br/>
+            """)
     private BigDecimal takeQuantity;
 
     public ProductTakeQuantityRequest() {

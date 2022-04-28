@@ -296,8 +296,8 @@ public class MenuController {
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
             UUID menuId,
-            @RequestParam("menuQuantity")
-            @Parameter(description = "Кол-во меню. Не может быть null. Должно быть больше 0.", required = false)
+            @RequestParam(value = "menuQuantity", required = false)
+            @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
             BigDecimal menuQuantity) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishName={}, menuId={}, menuQuantity={}",
@@ -323,7 +323,7 @@ public class MenuController {
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти блюдо с таким ID",
+                            description = "Если не удалось найти меню с таким ID",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class)))
             }
