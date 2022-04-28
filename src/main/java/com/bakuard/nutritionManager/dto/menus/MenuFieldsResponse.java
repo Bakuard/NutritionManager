@@ -8,15 +8,24 @@ import java.util.List;
 import java.util.Objects;
 
 @Schema(description = """
-        Наименования и теги всех меню конкретного пользователя (без дубликатов).
+        Наименования и теги всех меню конкретного пользователя.
         """)
 public class MenuFieldsResponse {
 
-    @Schema(description = "Наименования всех меню пользователя.")
+    @Schema(description = """
+            Наименования всех меню пользователя. Если у пользователя нет ни одного меню - данный список будет
+             пустым.
+            """)
     private List<FieldResponse> menuNames;
-    @Schema(description = "Теги всех меню пользователя.")
+    @Schema(description = """
+            Теги всех меню пользователя. Если ни одного меню этого пользователя нет ни одноо тега - данный список
+             будет пустым.
+            """)
     private List<FieldResponse> menuTags;
-    @Schema(description = "Наименования всех блюд пользователя.")
+    @Schema(description = """
+            Наименования всех блюд пользователя. Если у пользователя нет ни одного блюда - данный список будет
+             пустым.
+            """)
     private List<FieldResponse> dishNames;
 
     public MenuFieldsResponse() {

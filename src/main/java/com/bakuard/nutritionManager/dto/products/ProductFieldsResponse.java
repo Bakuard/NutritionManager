@@ -1,17 +1,41 @@
 package com.bakuard.nutritionManager.dto.products;
 
 import com.bakuard.nutritionManager.dto.FieldResponse;
-import com.bakuard.nutritionManager.model.Tag;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 import java.util.Objects;
 
+@Schema(description = """
+        Все теги, категории, производители, сорта и магазины всех продуктов конкретного пользователя.
+        """)
 public class ProductFieldsResponse {
 
+    @Schema(description = """
+            Все теги всех продуктов пользователя. Если ни для оодного продукта не используется ни один тег -
+             данный список будет пустым.
+            """)
     private List<FieldResponse> tags;
+    @Schema(description = """
+            Все категории всех продуктов пользователя. Если у пользователя нет ни одного продукта - данный
+             список будет пустым.
+            """)
     private List<FieldResponse> categories;
+    @Schema(description = """
+            Все производители всех продуктов пользователя. Если у пользователя нет ни одного продукта - данный
+             список будет пустым.
+            """)
     private List<FieldResponse> manufacturers;
+    @Schema(description = """
+            Все сорта всех продуктов пользователя. Если у пользователя нет ни одного продукта - данный
+             список будет пустым.
+            """)
     private List<FieldResponse> varieties;
+    @Schema(description = """
+            Все магазины всех продуктов пользователя. Если у пользователя нет ни одного продукта - данный
+             список будет пустым.
+            """)
     private List<FieldResponse> shops;
 
     public ProductFieldsResponse() {

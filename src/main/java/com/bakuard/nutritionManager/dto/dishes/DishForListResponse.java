@@ -8,24 +8,24 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Возвращаемые частичные данные о блюде используемые в списке блюд")
+@Schema(description = "Возвращаемые частичные данные о блюде используемые в списке блюд.")
 public class DishForListResponse {
 
     @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Dish.")
     private String type;
-    @Schema(description = "Уникальный идентфикатор блюда")
+    @Schema(description = "Уникальный идентфикатор блюда.")
     private UUID id;
-    @Schema(description = "Путь к изображению данного блюда")
+    @Schema(description = "Путь к изображению данного блюда.")
     private URL imageUrl;
-    @Schema(description = "Наименование блюда")
+    @Schema(description = "Наименование блюда.")
     private String name;
-    @Schema(description = "Размер одной порции блюда")
+    @Schema(description = "Размер одной порции блюда.")
     private BigDecimal servingSize;
-    @Schema(description = "Единица измерения кол-ва блюда")
+    @Schema(description = "Единица измерения кол-ва блюда.")
     private String unit;
-    @Schema(description = "Среднеарифметическая цена блюда")
+    @Schema(description = "Среднеарифметическая цена блюда.")
     private BigDecimal averagePrice;
-    @Schema(description = "Теги блюда")
+    @Schema(description = "Теги блюда. Если блюдо не содержит тегов - данный список будет пустым.")
     private List<String> tags;
 
     public DishForListResponse() {

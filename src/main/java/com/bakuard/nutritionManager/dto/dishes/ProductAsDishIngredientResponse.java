@@ -46,7 +46,7 @@ public class ProductAsDishIngredientResponse {
     private BigDecimal lackQuantity;
     @Schema(description = "Общая стоимость для недостающего кол-ва данного продукта.")
     private BigDecimal lackQuantityPrice;
-    @Schema(description = "Теги указаныне для данного продукта")
+    @Schema(description = "Теги указаныне для данного продукта. Если продукт не содержит тегов - данный список будет пустым.")
     private List<String> tags;
     @Schema(description = """
             Показывает - был ли даный продукт выбран пользователем из всех других продуктов

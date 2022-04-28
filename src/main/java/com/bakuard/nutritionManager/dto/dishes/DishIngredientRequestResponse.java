@@ -8,11 +8,20 @@ import java.util.Objects;
 @Schema(description = "Данные ингредиента блюда")
 public class DishIngredientRequestResponse {
 
-    @Schema(description = "Порядковый номер ингредиента в списке ингредиентов блюда.")
+    @Schema(description = """
+            Порядковый номер ингредиента в списке ингредиентов блюда.
+            """)
     private int index;
-    @Schema(description = "Кол-во данного ингредиента необходимого для приготовления одной порции блюда. Не может быть null.")
+    @Schema(description = """
+            Кол-во данного ингредиента необходимого для приготовления одной порции блюда. Ограничения:<br/>
+            1. Не может быть null. <br/>
+            2. Должен быть больше нуля. <br/>
+            """)
     private BigDecimal quantity;
-    @Schema(description = "Фильтр задающий множество взаимозаменяемых продуктов для данного ингредиента. Не может быть null.")
+    @Schema(description = """
+            Фильтр задающий множество взаимозаменяемых продуктов для данного ингредиента. Ограничения:<br/>
+            1. Не может быть null. <br/>
+            """)
     private DishIngredientFilterRequestResponse filter;
 
     public DishIngredientRequestResponse() {

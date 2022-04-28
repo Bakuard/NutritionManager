@@ -159,7 +159,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если указано не корректное значение для добавляемого кол-ва кол-ва продукта",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",
@@ -190,7 +190,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если указано не корректное значение для добавляемого кол-ва кол-ва продукта",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",

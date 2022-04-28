@@ -14,7 +14,10 @@ public class DishIngredientForListResponse {
     private int ingredientIndex;
     @Schema(description = "Категория к которой относятся все продукты данного ингредиента.")
     private String productCategory;
-    @Schema(description = "Список всех докупаемых продуктов данного ингредиента.")
+    @Schema(description = """
+            Список всех докупаемых продуктов данного ингредиента. Особые случаи: <br/>
+            1. Если данному ингредиенту не соответстует ни один продукт, то данный список будет пустым. <br/>
+            """)
     private List<ProductAsDishIngredientResponse> products;
 
     public DishIngredientForListResponse() {

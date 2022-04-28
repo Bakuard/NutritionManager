@@ -329,8 +329,8 @@ public class DishController {
             @RequestParam("dishId")
             @Parameter(description = "Уникальный идентификатор блюда. Не может быть null.", required = true)
             UUID dishId,
-            @RequestParam("servingNumber")
-            @Parameter(description = "Кол-во порций блюда. Не может быть null. Должно быть больше 0.", required = false)
+            @RequestParam(value = "servingNumber", required = false)
+            @Parameter(description = "Кол-во порций блюда. Должно быть больше 0. Значение по умолчанию равно 1")
             BigDecimal servingNumber) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishId={} and ServingNumber={}", dishId, servingNumber);
@@ -342,7 +342,11 @@ public class DishController {
 
     @Operation(summary = """
             Рассчитывает и возвращает стоимость блюда, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента.
+             кол-ва продукта выбранного для каждого ингредиента. Особые случаи: <br/>
+            1. Если блюдо не содержит ни одного ингредиента - возвращает null. <br/>
+            2. Если ни одному ингредиенту не соответствует ни один продукт - возвращает null. <br/>
+            3. Если какому-либо ингредиенту блюда не соответствует ни одного продукта - то он не принимает
+             участия в расчете стоимости блюда. <br/>
             """,
             responses = {
                     @ApiResponse(responseCode = "200"),
@@ -361,8 +365,8 @@ public class DishController {
             }
     )
     @Transactional
-    @PostMapping("/getDishPrice")
-    public ResponseEntity<BigDecimal> getDishPrice(@RequestBody DishPriceRequest dto) {
+    @PostMapping("/getLackProductPrice")
+    public ResponseEntity<BigDecimal> getLackProductPrice(@RequestBody DishPriceRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Pick products list for dish: userId={}, dto={}", userId, dto);
 

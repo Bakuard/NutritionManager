@@ -296,8 +296,8 @@ public class MenuController {
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
             UUID menuId,
-            @RequestParam("menuQuantity")
-            @Parameter(description = "Кол-во меню. Не может быть null. Должно быть больше 0.", required = false)
+            @RequestParam(value = "menuQuantity", required = false)
+            @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
             BigDecimal menuQuantity) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishName={}, menuId={}, menuQuantity={}",
@@ -310,7 +310,11 @@ public class MenuController {
 
     @Operation(summary = """
             Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню.
+             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню. Особые случаи: <br/>
+            1. Если ни одно блюдо не содержит ни одного ингредиента - возвращает null. <br/>
+            2. Если ни одному ингредиенту ни одного блюда не соответствует ни один продукт - возвращает null. <br/>
+            3. Если какому-либо ингредиенту какого-либо блюда не соответствует ни одного продукта - то он не принимает
+             участия в расчете стоимости меню. <br/>
             """,
             responses = {
                     @ApiResponse(responseCode = "200"),
@@ -323,14 +327,14 @@ public class MenuController {
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти блюдо с таким ID",
+                            description = "Если не удалось найти меню с таким ID",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class)))
             }
     )
     @Transactional
-    @PostMapping("/getMenuPrice")
-    public ResponseEntity<BigDecimal> getMenuPrice(@RequestBody MenuPriceRequest dto) {
+    @PostMapping("/getLackProductPrice")
+    public ResponseEntity<BigDecimal> getLackProductPrice(@RequestBody MenuPriceRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Pick products list for menu dishes: userId={}, dto={}", userId, dto);
 

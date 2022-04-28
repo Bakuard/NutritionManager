@@ -15,33 +15,33 @@ import java.util.UUID;
         """)
 public class ProductResponse {
 
-    @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Product.")
+    @Schema(description = "Поле указывающее тип данного объекта. Всегда имеет значение Product.")
     private String type;
-    @Schema(description = "Уникальный идентификатор продукта в формате UUID")
+    @Schema(description = "Уникальный идентификатор продукта в формате UUID.")
     private UUID id;
-    @Schema(description = "Учетные данные и ID пользователя к которому относится данный продукт")
+    @Schema(description = "Учетные данные и ID пользователя к которому относится данный продукт.")
     private UserResponse user;
-    @Schema(description = "Категория к которой относится продукт", example = "Помидор")
+    @Schema(description = "Категория к которой относится продукт.", example = "Помидор")
     private String category;
-    @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории")
+    @Schema(description = "Один из магазинов в котором можно приобрести продукты указанной категории.")
     private String shop;
-    @Schema(description = "Один из сортов продуктов указанной категории")
+    @Schema(description = "Один из сортов продуктов указанной категории.")
     private String grade;
-    @Schema(description = "Один из производителей продуктов указанной категории")
+    @Schema(description = "Один из производителей продуктов указанной категории.")
     private String manufacturer;
-    @Schema(description = "Цена прдукта указанной категории, сорта, производителя и продающегося в указанном магазине")
+    @Schema(description = "Цена прдукта указанной категории, сорта, производителя и продающегося в указанном магазине.")
     private BigDecimal price;
-    @Schema(description = "Размер упаковки")
+    @Schema(description = "Размер упаковки.")
     private BigDecimal packingSize;
-    @Schema(description = "Единица измерения кол-ва продукта")
+    @Schema(description = "Единица измерения кол-ва продукта.")
     private String unit;
-    @Schema(description = "Кол-во продукта имеющегося в наличии у пользователя")
+    @Schema(description = "Кол-во продукта имеющегося в наличии у пользователя.")
     private BigDecimal quantity;
-    @Schema(description = "Описание продукта")
+    @Schema(description = "Описание продукта.")
     private String description;
-    @Schema(description = "Путь к изображению данного продукта")
+    @Schema(description = "Путь к изображению данного продукта.")
     private URL imageUrl;
-    @Schema(description = "Теги указаныне для данного продукта")
+    @Schema(description = "Теги указанные для данного продукта. Если продукт не содержит тегов - данный список будет пустым.")
     private List<String> tags;
 
     public ProductResponse() {
