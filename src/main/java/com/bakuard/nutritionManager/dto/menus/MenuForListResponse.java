@@ -27,7 +27,7 @@ public class MenuForListResponse {
     private String imageUrl;
     @Schema(description = "Блюда входящие в состав данного меню.")
     private List<MenuItemRequestResponse> items;
-    @Schema(description = "Теги данного меню.")
+    @Schema(description = "Теги данного меню. Если для меню не заданно ни одного тега - данный список будет пустым.")
     private List<String> tags;
 
     public MenuForListResponse() {

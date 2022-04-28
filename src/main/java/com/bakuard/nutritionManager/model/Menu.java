@@ -150,17 +150,18 @@ public class Menu implements Entity<Menu> {
         for(MenuItem item : items) {
             Dish dish = item.getDish();
             for(int i = 0; i < dish.getIngredientNumber(); i++) {
-                DishIngredient ingredient = dish.getIngredient(i).orElseThrow();
+                final int ingredientIndex = i;
+
+                DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
                 BigDecimal necessaryQuantity = ingredient.getNecessaryQuantity(
                         item.getNecessaryQuantity(quantity)
                 );
 
-                final int ingredientIndex = i;
                 Optional<Product> product = dish.getProduct(
                         ingredientIndex,
                         constraints.stream().
-                                filter(c -> dish.getName().equals(c.dishName()) &&
-                                        c.ingredientIndex() == ingredientIndex).
+                                filter(c -> c.ingredientIndex() == ingredientIndex &&
+                                        dish.getName().equals(c.dishName())).
                                 mapToInt(ProductConstraint::productIndex).
                                 findFirst().
                                 orElse(0)

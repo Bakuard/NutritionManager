@@ -12,7 +12,7 @@ import java.util.UUID;
         """)
 public class MenuResponse {
 
-    @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Menu.")
+    @Schema(description = "Поле указывающее тип данного объекта. Всегда имеет значение Menu.")
     private String type;
     @Schema(description = "Уникальный идентификатор меню.")
     private UUID id;
@@ -26,7 +26,7 @@ public class MenuResponse {
     private String description;
     @Schema(description = "Блюда входящие в состав данного меню.")
     private List<MenuItemRequestResponse> items;
-    @Schema(description = "Теги данного меню.")
+    @Schema(description = "Теги данного меню. Если для меню не заданно ни одного тега - данный список будет пустым.")
     private List<String> tags;
 
     public MenuResponse() {

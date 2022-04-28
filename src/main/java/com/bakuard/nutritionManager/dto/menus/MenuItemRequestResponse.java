@@ -5,12 +5,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Schema(description = "Данные о блюде входящем в состав меню")
+@Schema(description = "Данные о блюде входящем в состав меню.")
 public class MenuItemRequestResponse {
 
-    @Schema(description = "Наименование блюда. Не может быть null.")
+    @Schema(description = """
+            Наименование блюда. Ограничения: <br/>
+            1. Не может быть null. <br/>
+            2. Среди блюд пользователя должно быть блюдо с таким наименованием. <br/>
+            3. Значение должно содержать как минимум один отображаемый символ. <br/>
+            """)
     private String dishName;
-    @Schema(description = "Кол-во порций указанного блюда. Не может быть null. Должно быть больше нуля.")
+    @Schema(description = """
+            Кол-во порций указанного блюда. Ограничения: <br/>
+            1. Не может быть null. <br/>
+            2. Должно быть больше нуля. <br/>
+            """)
     private BigDecimal servingNumber;
 
     public MenuItemRequestResponse() {
