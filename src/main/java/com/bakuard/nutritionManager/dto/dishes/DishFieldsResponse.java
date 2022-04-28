@@ -8,18 +8,26 @@ import java.util.List;
 import java.util.Objects;
 
 @Schema(description = """
-        Данные о тегах, единицах измерения кол-ва и наименованиях всех блюд конкретного пользователя
-         (без дубликатов).
+        Данные о тегах, единицах измерения кол-ва и наименованиях всех блюд конкретного пользователя.
         """)
 public class DishFieldsResponse {
 
     @Schema(description = "Единицы измерения кол-ва всех блюд пользователя.")
     private List<FieldResponse> dishUnits;
-    @Schema(description = "Все теги всех блюд пользователя.")
+    @Schema(description = """
+            Все теги всех блюд пользователя. Если ни для одного блюда не используется ни один тег -
+             данный список будет пустым.
+            """)
     private List<FieldResponse> dishTags;
-    @Schema(description = "Наименования всех блюд пользователя.")
+    @Schema(description = """
+            Наименования всех блюд пользователя. Если у пользователя нет ни одного блюда - данный
+             список будет пустым.
+            """)
     private List<FieldResponse> dishNames;
-    @Schema(description = "Категории всех продуктов пользователя.")
+    @Schema(description = """
+            Все категории всех продуктов пользователя. Если у пользователя нет ни одного продукта - данный
+             список будет пустым.
+            """)
     private List<FieldResponse> productCategories;
 
     public DishFieldsResponse() {

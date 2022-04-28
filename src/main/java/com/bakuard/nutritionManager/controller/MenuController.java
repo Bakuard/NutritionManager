@@ -329,8 +329,8 @@ public class MenuController {
             }
     )
     @Transactional
-    @PostMapping("/getMenuPrice")
-    public ResponseEntity<BigDecimal> getMenuPrice(@RequestBody MenuPriceRequest dto) {
+    @PostMapping("/getLackProductPrice")
+    public ResponseEntity<BigDecimal> getLackProductPrice(@RequestBody MenuPriceRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Pick products list for menu dishes: userId={}, dto={}", userId, dto);
 

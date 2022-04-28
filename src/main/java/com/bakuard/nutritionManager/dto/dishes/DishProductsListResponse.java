@@ -7,15 +7,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Возвращаемый список продуктов блюда")
+@Schema(description = "Возвращаемый список продуктов блюда.")
 public class DishProductsListResponse {
 
-    @Schema(description = "Уникальный идентфикатор блюда")
+    @Schema(description = "Уникальный идентфикатор блюда.")
     private UUID dishId;
-    @Schema(description = "Кол-во порций блюда на которое рассчитывается список докупаемых продуктов")
+    @Schema(description = "Кол-во порций блюда на которое рассчитывается список докупаемых продуктов.")
     private BigDecimal servingNumber;
     @Schema(description = """
-            Каждый элемент списка - перечень всех продуктов для конкретного ингредиента блюда.
+            Каждый элемент списка - перечень всех продуктов для конкретного ингредиента блюда. Особые случаи: <br/>
+            1. Если ни одному ингредиенту блюда не соответствует ни один продукт - возвращает пустой список. <br/>
             """)
     private List<DishIngredientForListResponse> categories;
 
