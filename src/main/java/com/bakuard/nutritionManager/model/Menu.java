@@ -53,7 +53,7 @@ public class Menu implements Entity<Menu> {
                 Rule.of("Menu.name").notNull(name).and(r -> r.notBlank(name)),
                 Rule.of("Menu.description").notNull(description).and(r -> r.notBlank(description)),
                 Rule.of("Menu.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, imageURlContainer)),
-                Rule.of("Menu.items").doesNotThrows(items, Entity.Builder::tryBuild, menuItemsContainer).
+                Rule.of("Menu.items").doesNotThrows(items, AbstractBuilder::tryBuild, menuItemsContainer).
                         and(r -> r.notContainsDuplicate(menuItemsContainer.get(), MenuItem::getDishName)),
                 Rule.of("Menu.tags").doesNotThrows(tags, Tag::new, tagContainer),
                 Rule.of("Menu.config").notNull(config)
@@ -487,7 +487,7 @@ public class Menu implements Entity<Menu> {
     public record ProductConstraint(String dishName, int ingredientIndex, int productIndex) {}
 
 
-    public static class Builder implements Entity.Builder<Menu> {
+    public static class Builder implements AbstractBuilder<Menu> {
 
         private UUID id;
         private User user;

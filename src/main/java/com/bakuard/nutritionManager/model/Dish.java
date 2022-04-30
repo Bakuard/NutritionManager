@@ -735,7 +735,7 @@ public class Dish implements Entity<Dish> {
     /**
      * Реализация паттерна "Builder" для блюда ({@link Dish}).
      */
-    public static class Builder implements Entity.Builder<Dish> {
+    public static class Builder implements AbstractBuilder<Dish> {
 
         private UUID id;
         private User user;

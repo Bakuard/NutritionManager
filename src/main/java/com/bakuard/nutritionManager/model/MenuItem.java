@@ -77,7 +77,7 @@ public class MenuItem {
     }
 
 
-    public static class Builder implements Entity.Builder<MenuItem> {
+    public static class Builder implements AbstractBuilder<MenuItem> {
 
         private String dishName;
         private Supplier<Dish> dish;

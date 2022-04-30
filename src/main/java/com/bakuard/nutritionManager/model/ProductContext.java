@@ -514,7 +514,7 @@ public class ProductContext {
     }
 
 
-    public static class Builder implements Entity.Builder<ProductContext> {
+    public static class Builder implements AbstractBuilder<ProductContext> {
 
         private String category;
         private String shop;
