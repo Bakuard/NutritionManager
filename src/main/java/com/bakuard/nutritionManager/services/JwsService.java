@@ -68,12 +68,14 @@ public class JwsService {
         try {
             claims = parseJws(jws, accessKeyPair);
         } catch(JwtException e) {
-            throw new ValidateException("Incorrect access jws", e);
+            throw new ValidateException("Incorrect access jws", e).
+                    setUserMessageKey("JwsService.parseAccessJws");
         }
 
         UUID accessJwsId = UUID.fromString(claims.getId());
         if(blackList.inBlackList(accessJwsId)) {
-            throw new ValidateException("Incorrect access jws");
+            throw new ValidateException("Incorrect access jws").
+                    setUserMessageKey("JwsService.parseAccessJws");
         }
 
         return UUID.fromString(claims.getSubject());
@@ -96,7 +98,8 @@ public class JwsService {
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw new ValidateException("Incorrect registration jws", e);
+            throw new ValidateException("Incorrect registration jws", e).
+                    setUserMessageKey("JwsService.parseRegistrationJws");
         }
     }
 
@@ -117,7 +120,8 @@ public class JwsService {
 
             return claims.get("email", String.class);
         } catch(JwtException e) {
-            throw new ValidateException("Incorrect change credential jws", e);
+            throw new ValidateException("Incorrect change credential jws", e).
+                    setUserMessageKey("JwsService.parseChangeCredentialsJws");
         }
     }
 

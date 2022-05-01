@@ -357,7 +357,8 @@ public class DtoMapper {
 
     public ExceptionResponse toExceptionResponse(ValidateException e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        if(e.getUserMessageKey() != null && e.getUserMessageKey().startsWith("AuthService")) {
+        String userMessageKey = e.getUserMessageKey().orElse(null);
+        if(userMessageKey != null && userMessageKey.startsWith("AuthService")) {
             httpStatus = HttpStatus.FORBIDDEN;
         } else if(e.containsConstraint(Constraint.ENTITY_MUST_EXISTS_IN_DB)) {
             httpStatus = HttpStatus.NOT_FOUND;
@@ -365,7 +366,7 @@ public class DtoMapper {
 
         ExceptionResponse response = new ExceptionResponse(
                 httpStatus,
-                getMessage(e.getUserMessageKey(), e.getMessage()),
+                getMessage(userMessageKey, null),
                 getMessage("errorTitle", "Error")
         );
         e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));

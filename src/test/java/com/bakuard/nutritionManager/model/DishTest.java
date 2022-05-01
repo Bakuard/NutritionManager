@@ -55,7 +55,6 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantity(0, -1, new BigDecimal("1.5")),
-                "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
     }
@@ -74,7 +73,6 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantity(0, 0, BigDecimal.ZERO),
-                "Dish.getLackQuantity",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -93,7 +91,6 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantity(0, 0, null),
-                "Dish.getLackQuantity",
                 Constraint.NOT_NULL
         );
     }
@@ -304,7 +301,6 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantityPrice(0, -1, new BigDecimal("1.5")),
-                "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
     }
@@ -323,7 +319,6 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantityPrice(0, 0, BigDecimal.ZERO),
-                "Dish.getLackQuantityPrice",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -342,7 +337,6 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackQuantityPrice(0, 0, null),
-                "Dish.getLackQuantityPrice",
                 Constraint.NOT_NULL
         );
     }
@@ -717,7 +711,6 @@ class DishTest {
 
         AssertUtil.assertValidateException(
                 () -> dish.getProduct(0, -1),
-                "Dish.getProduct",
                 Constraint.NOT_NEGATIVE_VALUE
         );
     }

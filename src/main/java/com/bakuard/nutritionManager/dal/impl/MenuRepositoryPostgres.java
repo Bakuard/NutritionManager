@@ -323,7 +323,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Menu tryGetById(UUID userId, UUID menuId) {
         return getById(userId, menuId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown menu with id=" + menuId + " for userId=" + userId)
+                        () -> new ValidateException("Unknown menu with id=" + menuId + " for userId=" + userId).
+                                addReason(Rule.of("MenuRepository.menuId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 
@@ -331,7 +332,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Menu tryGetByName(UUID userId, String name) {
         return getByName(userId, name).
                 orElseThrow(
-                        () -> new ValidateException("Unknown menu with name=" + name + " for userId=" + userId)
+                        () -> new ValidateException("Unknown menu with name=" + name + " for userId=" + userId).
+                                addReason(Rule.of("MenuRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 

@@ -62,19 +62,21 @@ public class ImageUploaderService implements DisposableBean {
         s3.setBucketPolicy("nutritionmanagerimages", policy.toJson());
     }
 
-    public URL uploadDishImage(UUID userId, MultipartFile image) {
-        try {
-            return uploadImage(userId, image, "dishimages");
-        } catch(Exception e) {
-            throw new ValidateException("Fail to upload dish image", e);
-        }
-    }
-
     public URL uploadProductImage(UUID userId, MultipartFile image) {
         try {
             return uploadImage(userId, image, "productimages");
         } catch(Exception e) {
-            throw new ValidateException("Fail to upload product image", e);
+            throw new ValidateException("Fail to upload product image", e).
+                    setUserMessageKey("ImageUploaderService.uploadProductImage");
+        }
+    }
+
+    public URL uploadDishImage(UUID userId, MultipartFile image) {
+        try {
+            return uploadImage(userId, image, "dishimages");
+        } catch(Exception e) {
+            throw new ValidateException("Fail to upload dish image", e).
+                    setUserMessageKey("ImageUploaderService.uploadDishImage");
         }
     }
 

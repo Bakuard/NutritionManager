@@ -24,7 +24,8 @@ public class EmailService {
         try {
             sendEmail("/mail/registration.html", jws, email);
         } catch(MessagingException e) {
-            throw new ValidateException("Fail to confirm email for registration.", e);
+            throw new ValidateException("Fail to confirm email for registration.", e).
+                    setUserMessageKey("EmailService.confirmEmailForRegistration");
         }
     }
 
@@ -32,7 +33,8 @@ public class EmailService {
         try {
             sendEmail("/mail/changeCredentials.html", jws, email);
         } catch(MessagingException e) {
-            throw new ValidateException("Fail to confirm email for change credentials.", e);
+            throw new ValidateException("Fail to confirm email for change credentials.", e).
+                    setUserMessageKey("EmailService.confirmEmailForChangeCredentials");
         }
     }
 

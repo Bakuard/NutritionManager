@@ -48,7 +48,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getMenuItemProducts(null, List.of()),
-                "Menu.getMenuItemProducts",
                 Constraint.NOT_NULL
         );
     }
@@ -65,7 +64,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getMenuItemProducts(BigDecimal.ZERO, List.of()),
-                "Menu.getMenuItemProducts",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -82,7 +80,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getMenuItemProducts(new BigDecimal(-1), List.of()),
-                "Menu.getMenuItemProducts",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -99,7 +96,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getMenuItemProducts(BigDecimal.ONE, null),
-                "Menu.getMenuItemProducts",
                 Constraint.NOT_NULL
         );
     }
@@ -118,7 +114,6 @@ class MenuTest {
                 () -> menu.getMenuItemProducts(BigDecimal.ONE, Arrays.asList(
                         new Menu.ProductConstraint("dish#1", 0, 0), null
                 )),
-                "Menu.getMenuItemProducts",
                 Constraint.NOT_CONTAINS_NULL
         );
     }
@@ -421,7 +416,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getNecessaryQuantity(null, Map.of()),
-                "Menu.getNecessaryQuantity",
                 Constraint.NOT_NULL
         );
     }
@@ -438,7 +432,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getNecessaryQuantity(createProduct(user, 0).tryBuild(), null),
-                "Menu.getNecessaryQuantity",
                 Constraint.NOT_NULL
         );
     }
@@ -548,7 +541,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getLackQuantity(null, Map.of()),
-                "Menu.getLackQuantity",
                 Constraint.NOT_NULL
         );
     }
@@ -565,7 +557,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getLackQuantity(createProduct(user, 0).tryBuild(), null),
-                "Menu.getLackQuantity",
                 Constraint.NOT_NULL
         );
     }
@@ -800,7 +791,6 @@ class MenuTest {
 
         AssertUtil.assertValidateException(
                 () -> menu.getLackProductsPrice(null),
-                "Menu.getLackProductsPrice",
                 Constraint.NOT_NULL
         );
     }

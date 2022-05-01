@@ -123,7 +123,6 @@ class MenuRepositoryTest {
     public void save1() {
         AssertUtil.assertValidateException(
                 () -> menuRepository.save(null),
-                "MenuRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -218,7 +217,6 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> menuRepository.save(menu)),
-                "MenuRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -343,7 +341,6 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> menuRepository.save(updatedMenu)),
-                "MenuRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -661,7 +658,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetById(user.getId(), toUUID(100)),
-                "MenuRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -680,7 +677,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetById(otherUser.getId(), toUUID(1)),
-                "MenuRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -818,7 +815,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetByName(user.getId(), "unknown menu"),
-                "MenuRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -836,7 +833,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetByName(otherUser.getId(), "Menu#1"),
-                "MenuRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 

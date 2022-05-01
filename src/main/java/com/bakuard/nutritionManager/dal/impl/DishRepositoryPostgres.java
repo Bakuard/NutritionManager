@@ -238,11 +238,6 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public Dish tryRemove(UUID userId, UUID dishId) {
-        Validator.check(
-                Rule.of("DishRepository.userId").notNull(userId),
-                Rule.of("DishRepository.dishId").notNull(dishId)
-        );
-
         Dish dish = getById(userId, dishId).
                 orElseThrow(
                         () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId).
@@ -264,7 +259,8 @@ public class DishRepositoryPostgres implements DishRepository {
     public Dish tryGetById(UUID userId, UUID dishId) {
         return getById(userId, dishId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId)
+                        () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId).
+                                addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 
@@ -272,7 +268,8 @@ public class DishRepositoryPostgres implements DishRepository {
     public Dish tryGetByName(UUID userId, String name) {
         return getByName(userId, name).
                 orElseThrow(
-                        () -> new ValidateException("Unknown dish with name=" + name + " for userId=" + userId)
+                        () -> new ValidateException("Unknown dish with name=" + name + " for userId=" + userId).
+                                addReason(Rule.of("DishRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 

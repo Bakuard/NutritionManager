@@ -73,11 +73,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product tryRemove(UUID userId, UUID productId) {
-        Validator.check(
-                Rule.of("ProductRepository.userId").notNull(userId),
-                Rule.of("ProductRepository.productId").notNull(productId)
-        );
-
         Product product = getById(userId, productId).
                 orElseThrow(
                         () -> new ValidateException("Unknown product with id=" + productId + " for userId=" + userId).
@@ -161,7 +156,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Product tryGetById(UUID userId, UUID productId) {
         return getById(userId, productId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown product with id = " + productId + " for userId=" + userId)
+                        () -> new ValidateException("Unknown product with id = " + productId + " for userId=" + userId).
+                                addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 

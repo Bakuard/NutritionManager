@@ -122,7 +122,6 @@ class DishRepositoryTest {
     public void save1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.save(null),
-                "DishRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -209,7 +208,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> dishRepository.save(dish)),
-                "DishRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -297,7 +295,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.save(updatedDish),
-                "DishRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -352,7 +349,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(user.getId(), null),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
@@ -366,7 +362,6 @@ class DishRepositoryTest {
     public void tryRemove2() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(null, toUUID(1)),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
@@ -383,7 +378,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(user.getId(), toUUID(100)),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -401,7 +395,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(user.getId(), toUUID(1)),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -452,7 +445,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getById(user.getId(), null),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -468,7 +460,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getById(null, toUUID(1)),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -531,7 +522,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(user.getId(), null),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -547,7 +537,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(null, toUUID(1)),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -563,7 +552,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(user.getId(), toUUID(100)),
-                "DishRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -580,7 +569,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(user.getId(), toUUID(1)),
-                "DishRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -612,7 +601,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getByName(user.getId(), null),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -628,7 +616,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getByName(null, "dish A"),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -691,7 +678,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(user.getId(), null),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -707,7 +693,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(null, "dish A"),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -723,7 +708,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(user.getId(), "unknown dish"),
-                "DishRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -740,7 +725,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(user.getId(), "dish A"),
-                "DishRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
     
@@ -770,7 +755,6 @@ class DishRepositoryTest {
     public void getDishesNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getDishesNumber(null),
-                "DishRepositoryPostgres.getDishesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1247,7 +1231,6 @@ class DishRepositoryTest {
     public void getTagsNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getTagsNumber(null),
-                "DishRepositoryPostgres.getTagsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1350,7 +1333,6 @@ class DishRepositoryTest {
     public void getUnitsNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getUnitsNumber(null),
-                "DishRepositoryPostgres.getUnitsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1453,7 +1435,6 @@ class DishRepositoryTest {
     public void getNamesNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getNamesNumber(null),
-                "DishRepositoryPostgres.getNamesNumber",
                 Constraint.NOT_NULL
         );
     }

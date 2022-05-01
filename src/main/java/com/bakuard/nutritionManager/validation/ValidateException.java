@@ -9,40 +9,20 @@ import java.util.function.Consumer;
  */
 public class ValidateException extends RuntimeException implements Iterable<RuleException> {
 
-    private static final StackWalker walker = StackWalker.getInstance(
-            Set.of(StackWalker.Option.RETAIN_CLASS_REFERENCE),
-            4
-    );
-
-
     private String userMessageKey;
 
-    public ValidateException() {
-        StackWalker.StackFrame frame = getFrame();
-        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
-    }
+    public ValidateException() {}
 
     public ValidateException(String message) {
         super(message);
-        StackWalker.StackFrame frame = getFrame();
-        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
     }
 
     public ValidateException(String message, Throwable cause) {
         super(message, cause);
-        StackWalker.StackFrame frame = getFrame();
-        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
     }
 
     public ValidateException(Throwable cause) {
         super(cause);
-        StackWalker.StackFrame frame = getFrame();
-        setUserMessageKey(frame.getDeclaringClass(), frame.getMethodName());
-    }
-
-    public ValidateException setUserMessageKey(Class<?> checkedClass, String methodName) {
-        userMessageKey = checkedClass.getSimpleName() + "." + methodName;
-        return this;
     }
 
     public ValidateException setUserMessageKey(String key) {
@@ -60,8 +40,8 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
         return this;
     }
 
-    public String getUserMessageKey() {
-        return userMessageKey;
+    public Optional<String> getUserMessageKey() {
+        return Optional.ofNullable(userMessageKey);
     }
 
     public boolean containsConstraint(Constraint constraint) {
@@ -129,28 +109,11 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
 
     @Override
     public String getMessage() {
-        StringBuilder result = new StringBuilder("Key = ").
-                append(userMessageKey);
+        StringBuilder result = new StringBuilder("Key=").append(userMessageKey);
 
-        if(super.getMessage() != null) result.append(". ").append(super.getMessage());
+        if(super.getMessage() != null) result.append(super.getMessage());
 
         return result.toString();
-    }
-
-
-    private StackWalker.StackFrame getFrame() {
-        final Class<?> c = walker.walk(stream -> stream.
-                skip(2).
-                findFirst().
-                orElseThrow()).
-                getDeclaringClass();
-
-        return walker.walk(stream -> stream.
-                skip(2).
-                dropWhile(f -> f.getMethodName().startsWith("lambda") || f.getDeclaringClass() != c).
-                findFirst().
-                orElseThrow()
-        );
     }
 
 }
