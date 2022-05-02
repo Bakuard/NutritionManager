@@ -23,6 +23,7 @@ public class Rule {
         return createResult(
                 constraint,
                 null,
+                ruleName,
                 Result.State.FAIL
         );
     }
@@ -31,6 +32,7 @@ public class Rule {
         return createResult(
                 constraint,
                 logMessage,
+                ruleName,
                 Result.State.FAIL
         );
     }
@@ -39,6 +41,7 @@ public class Rule {
         return createResult(
                 constraint,
                 null,
+                ruleName,
                 Result.State.SUCCESS
         );
     }
@@ -47,6 +50,7 @@ public class Rule {
         return createResult(
                 constraint,
                 logMessage,
+                ruleName,
                 Result.State.SUCCESS
         );
     }
@@ -55,6 +59,7 @@ public class Rule {
         return createResult(
                 constraint,
                 null,
+                ruleName,
                 Result.State.UNKNOWN
         );
     }
@@ -63,6 +68,7 @@ public class Rule {
         return createResult(
                 constraint,
                 logMessage,
+                ruleName,
                 Result.State.UNKNOWN
         );
     }
@@ -83,6 +89,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_NULL,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -102,6 +109,7 @@ public class Rule {
         return createResult(
                 Constraint.MUST_BE_NULL,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -123,6 +131,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_BLANK,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -163,6 +172,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_CONTAINS_BY_CONDITION,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -186,6 +196,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_CONTAINS_NULL,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -213,6 +224,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_CONTAINS_DUPLICATE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -242,6 +254,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_CONTAINS_DUPLICATE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -270,6 +283,7 @@ public class Rule {
         return createResult(
                 Constraint.CONTAINS_THE_SAME_ITEMS,
                 logMessage,
+                getRuleName(firstField, secondField),
                 state
         );
     }
@@ -295,6 +309,7 @@ public class Rule {
         return createResult(
                 Constraint.CONTAINS_ITEM,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -320,6 +335,7 @@ public class Rule {
         return createResult(
                 Constraint.CONTAINS_ITEM,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -348,23 +364,13 @@ public class Rule {
         return createResult(
                 Constraint.STRING_LENGTH,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
 
     public Result notNegative(BigDecimal checkedValue) {
-        Result.State state = checkedValue == null ?
-                Result.State.UNKNOWN :
-                Result.State.of(checkedValue.signum() >= 0);
-        String logMessage = state == Result.State.FAIL ?
-                "Can't be negative. Actual = " + checkedValue :
-                null;
-
-        return createResult(
-                Constraint.NOT_NEGATIVE_VALUE,
-                logMessage,
-                state
-        );
+        return notNegative(checkedValue, null);
     }
 
     public Result notNegative(BigDecimal checkedValue, String field) {
@@ -384,6 +390,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_NEGATIVE_VALUE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -405,6 +412,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_NEGATIVE_VALUE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -430,6 +438,7 @@ public class Rule {
         return createResult(
                 Constraint.POSITIVE_VALUE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -451,6 +460,7 @@ public class Rule {
         return createResult(
                 Constraint.POSITIVE_VALUE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -476,6 +486,7 @@ public class Rule {
         return createResult(
                 Constraint.NOT_CONTAINS_ITEM,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -497,6 +508,7 @@ public class Rule {
         return createResult(
                 Constraint.RANGE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -522,6 +534,7 @@ public class Rule {
         return createResult(
                 Constraint.MIN,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -543,6 +556,7 @@ public class Rule {
         return createResult(
                 Constraint.MIN,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -568,6 +582,7 @@ public class Rule {
         return createResult(
                 Constraint.MAX,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -589,6 +604,7 @@ public class Rule {
         return createResult(
                 Constraint.MAX,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -610,6 +626,7 @@ public class Rule {
         return createResult(
                 Constraint.EQUAL,
                 logMessage,
+                getRuleName(firstField, secondField),
                 state
         );
     }
@@ -631,6 +648,7 @@ public class Rule {
         return createResult(
                 Constraint.EQUAL,
                 logMessage,
+                getRuleName(firstField, secondField),
                 state
         );
     }
@@ -657,6 +675,7 @@ public class Rule {
         return createResult(
                 Constraint.LESS_THEN,
                 logMessage,
+                getRuleName(firstField, secondField),
                 state
         );
     }
@@ -683,6 +702,7 @@ public class Rule {
         return createResult(
                 Constraint.GREATER_THEN,
                 logMessage,
+                getRuleName(firstField, secondField),
                 state
         );
     }
@@ -709,6 +729,7 @@ public class Rule {
         return createResult(
                 Constraint.DIFFERENT_SIGNS,
                 logMessage,
+                getRuleName(firstField, secondField),
                 state
         );
     }
@@ -736,6 +757,7 @@ public class Rule {
         return createResult(
                 Constraint.IS_URL,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -765,6 +787,7 @@ public class Rule {
         return createResult(
                 Constraint.IS_BIG_DECIMAL,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -794,6 +817,7 @@ public class Rule {
         return createResult(
                 Constraint.IS_LONG,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -823,6 +847,7 @@ public class Rule {
         return createResult(
                 Constraint.IS_INTEGER,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -844,6 +869,7 @@ public class Rule {
         return createResult(
                 Constraint.IS_TRUE,
                 logMessage,
+                getRuleName(field),
                 state
         );
     }
@@ -888,6 +914,7 @@ public class Rule {
         return createResult(
                 Constraint.DOES_NOT_THROW,
                 logMessage,
+                getRuleName(field),
                 state,
                 unexpectedExceptions
         );
@@ -896,29 +923,7 @@ public class Rule {
     public <S, T> Result doesNotThrow(S source,
                                       Function<S, T> factory,
                                       Container<T> container) {
-        container.clear();
-
-        Result.State state = Result.State.UNKNOWN;
-        String logMessage = null;
-        List<Exception> unexpectedExceptions = new ArrayList<>();
-
-        if(source != null) {
-            try {
-                container.set(factory.apply(source));
-                state = Result.State.SUCCESS;
-            } catch(Exception e) {
-                state = Result.State.FAIL;
-                logMessage = e.getClass().getName();
-                unexpectedExceptions.add(e);
-            }
-        }
-
-        return createResult(
-                Constraint.DOES_NOT_THROW,
-                logMessage,
-                state,
-                unexpectedExceptions
-        );
+        return doesNotThrow(source, factory, container, null);
     }
 
     public <S, T> Result doesNotThrow(S source,
@@ -947,19 +952,32 @@ public class Rule {
         return createResult(
                 Constraint.DOES_NOT_THROW,
                 logMessage,
+                getRuleName(field),
                 state,
                 unexpectedExceptions
         );
     }
 
 
+    protected String getRuleName(String field) {
+        return field == null ? ruleName : ruleName + "." + field;
+    }
+
+    protected String getRuleName(String firstField, String secondField) {
+        return firstField == null || secondField == null ?
+                ruleName :
+                ruleName + "." + firstField + "." + secondField;
+    }
+
     protected Result createResult(Constraint constraint,
                                   String logMessage,
+                                  String ruleName,
                                   Result.State state) {
         return new Result(
                 constraint,
                 state,
                 logMessage,
+                ruleName,
                 this,
                 List.of()
         );
@@ -967,19 +985,17 @@ public class Rule {
 
     protected Result createResult(Constraint constraint,
                                   String logMessage,
+                                  String ruleName,
                                   Result.State state,
                                   List<Exception> suppressedExceptions) {
         return new Result(
                 constraint,
                 state,
                 logMessage,
+                ruleName,
                 this,
                 suppressedExceptions
         );
-    }
-
-    protected String getRuleName() {
-        return ruleName;
     }
 
 }
