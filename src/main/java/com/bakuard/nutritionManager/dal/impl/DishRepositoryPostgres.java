@@ -116,6 +116,8 @@ public class DishRepositoryPostgres implements DishRepository {
                 },
                 (ResultSet rs) -> {
                     Dish.Builder builder = null;
+                    HashSet<String> tags = new HashSet<>();
+                    HashSet<String> ingredients = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -140,14 +142,19 @@ public class DishRepositoryPostgres implements DishRepository {
                         }
 
                         String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+                        if(!rs.wasNull() && !tags.contains(tagValue)) {
+                            builder.addTag(tagValue);
+                            tags.add(tagValue);
+                        }
 
                         BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
                         if(!rs.wasNull()) {
                             String ingredientName = rs.getString("ingredientName");
                             Filter filter = toFilter(rs.getString("ingredientFilter"));
-                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                            if(!ingredients.contains(ingredientName)) {
                                 builder.addIngredient(ingredientName, filter, ingredientQuantity);
+                                ingredients.add(ingredientName);
+                            }
                         }
                     }
 
@@ -194,6 +201,8 @@ public class DishRepositoryPostgres implements DishRepository {
                 },
                 (ResultSet rs) -> {
                     Dish.Builder builder = null;
+                    HashSet<String> tags = new HashSet<>();
+                    HashSet<String> ingredients = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -218,14 +227,19 @@ public class DishRepositoryPostgres implements DishRepository {
                         }
 
                         String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+                        if(!rs.wasNull() && !tags.contains(tagValue)) {
+                            builder.addTag(tagValue);
+                            tags.add(tagValue);
+                        }
 
                         BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
                         if(!rs.wasNull()) {
                             String ingredientName = rs.getString("ingredientName");
                             Filter filter = toFilter(rs.getString("ingredientFilter"));
-                            if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                            if(!ingredients.contains(ingredientName)) {
                                 builder.addIngredient(ingredientName, filter, ingredientQuantity);
+                                ingredients.add(ingredientName);
+                            }
                         }
                     }
 
@@ -503,6 +517,8 @@ public class DishRepositoryPostgres implements DishRepository {
         List<Dish> result = new ArrayList<>();
 
         Dish.Builder builder = null;
+        HashSet<String> tags = new HashSet<>();
+        HashSet<String> ingredients = new HashSet<>();
         UUID lastDishId = null;
         while(rs.next()) {
             UUID dishId = (UUID)rs.getObject("dishId");
@@ -526,18 +542,26 @@ public class DishRepositoryPostgres implements DishRepository {
                         setImageUrl(rs.getString("imagePath")).
                         setConfig(appConfig).
                         setRepository(productRepository);
+
                 lastDishId = dishId;
+                tags.clear();
+                ingredients.clear();
             }
 
             String tagValue = rs.getString("tagValue");
-            if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+            if(!rs.wasNull() && !tags.contains(tagValue)) {
+                builder.addTag(tagValue);
+                tags.add(tagValue);
+            }
 
             BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
             if(!rs.wasNull()) {
                 String ingredientName = rs.getString("ingredientName");
                 Filter filter = toFilter(rs.getString("ingredientFilter"));
-                if(!builder.containsIngredient(ingredientName, filter, ingredientQuantity))
+                if(!ingredients.contains(ingredientName)) {
                     builder.addIngredient(ingredientName, filter, ingredientQuantity);
+                    ingredients.add(ingredientName);
+                }
             }
         }
 

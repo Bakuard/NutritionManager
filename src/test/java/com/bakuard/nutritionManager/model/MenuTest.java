@@ -925,8 +925,7 @@ class MenuTest {
 
     private MenuItem.Builder createMenuItem(Dish dish, BigDecimal quantity) {
         return new MenuItem.Builder().
-                setDishName(dish.getName()).
-                setDish(() -> dish).
+                setDish(dish).
                 setQuantity(quantity).
                 setConfig(conf);
     }

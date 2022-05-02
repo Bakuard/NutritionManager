@@ -563,27 +563,12 @@ public class Menu implements Entity<Menu> {
             return imageUrl;
         }
 
-        public MenuItem.Builder getItem(String dishName) {
-            return items.stream().
-                    filter(item -> item.containsDish(dishName)).
-                    findAny().
-                    orElse(null);
-        }
-
         public List<MenuItem.Builder> getItems() {
             return items;
         }
 
         public List<String> getTags() {
             return tags;
-        }
-
-        public boolean containsTag(String tag) {
-            return tags.contains(tag);
-        }
-
-        public boolean containsItem(String dishName) {
-            return items.stream().anyMatch(item -> item.containsDish(dishName));
         }
 
         @Override

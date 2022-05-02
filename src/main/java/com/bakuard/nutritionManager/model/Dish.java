@@ -828,14 +828,6 @@ public class Dish implements Entity<Dish> {
             return this;
         }
 
-        public boolean containsTag(String tag) {
-            return tags.contains(tag);
-        }
-
-        public boolean containsIngredient(String name, Filter filter, BigDecimal quantity) {
-            return ingredients.stream().anyMatch(i -> i.contains(name, filter, quantity));
-        }
-
         @Override
         public Dish tryBuild() throws ValidateException {
             return new Dish(

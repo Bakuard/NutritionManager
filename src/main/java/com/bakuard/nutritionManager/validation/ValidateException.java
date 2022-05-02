@@ -109,8 +109,9 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
 
     @Override
     public String getMessage() {
-        StringBuilder result = new StringBuilder("Key=").append(userMessageKey);
+        StringBuilder result = new StringBuilder();
 
+        if(userMessageKey != null) result.append("Key=").append(userMessageKey);
         if(super.getMessage() != null) result.append(super.getMessage());
 
         return result.toString();
