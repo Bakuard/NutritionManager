@@ -204,22 +204,25 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        Product updatedProduct = new Product(product1);
-        updatedProduct.addQuantity(BigDecimal.TEN);
-        updatedProduct.setDescription("new description");
-        updatedProduct.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
-        updatedProduct.setContext(
-                updatedProduct.getContext().
-                        setCategory("new Category").
-                        setShop("new Shop").
-                        setGrade("new Variety").
-                        setManufacturer("new Manufacturer").
-                        setUnit("new Unit").
-                        setPrice(new BigDecimal("150")).
-                        setPackingSize(new BigDecimal("1.5")).
-                        addTag(new Tag("new Tag")).
-                        removeTag(new Tag("1"))
-        );
+        Product updatedProduct = new Product.Builder().
+                setAppConfiguration(appConfiguration).
+                setId(toUUID(1)).
+                setUser(user).
+                setCategory("updated name").
+                setShop("updated shop").
+                setGrade("updated grade").
+                setManufacturer("updated manufacturer").
+                setUnit("updated unit").
+                setPrice(BigDecimal.TEN).
+                setPackingSize(BigDecimal.TEN).
+                setQuantity(BigDecimal.TEN).
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/products/images?updatedImageUrl").
+                addTag("tag 1").
+                addTag("1 tag").
+                addTag("updated tag 2").
+                addTag("2 tag updated").
+                tryBuild();
         boolean isSaved = commit(() -> repository.save(updatedProduct));
 
         Assertions.assertTrue(isSaved);
@@ -240,22 +243,25 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        Product expected = new Product(product1);
-        expected.addQuantity(BigDecimal.TEN);
-        expected.setDescription("new description");
-        expected.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
-        expected.setContext(
-                expected.getContext().
-                        setCategory("new Category").
-                        setShop("new Shop").
-                        setGrade("new Variety").
-                        setManufacturer("new Manufacturer").
-                        setUnit("new Unit").
-                        setPrice(new BigDecimal("150")).
-                        setPackingSize(new BigDecimal("1.5")).
-                        addTag(new Tag("new Tag")).
-                        removeTag(new Tag("1"))
-        );
+        Product expected = new Product.Builder().
+                setAppConfiguration(appConfiguration).
+                setId(toUUID(1)).
+                setUser(user).
+                setCategory("updated name").
+                setShop("updated shop").
+                setGrade("updated grade").
+                setManufacturer("updated manufacturer").
+                setUnit("updated unit").
+                setPrice(BigDecimal.TEN).
+                setPackingSize(BigDecimal.TEN).
+                setQuantity(BigDecimal.TEN).
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/products/images?updatedImageUrl").
+                addTag("tag 1").
+                addTag("1 tag").
+                addTag("updated tag 2").
+                addTag("2 tag updated").
+                tryBuild();
         commit(() -> repository.save(expected));
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
@@ -268,7 +274,7 @@ class ProductRepositoryTest {
              there are products in DB,
              product id exists,
              product state was changed,
-             user has a product with the same productContext and other in the database
+             user has a product with the same productContext in the database
              => exception
             """)
     void save9() {
@@ -281,8 +287,28 @@ class ProductRepositoryTest {
                 setDescription("unique description").
                 setQuantity(BigDecimal.TEN).
                 tryBuild();
-        Product updatedProduct = new Product(product2);
-        updatedProduct.setContext(product1.getContext());
+        Product updatedProduct = new Product.Builder().
+                setAppConfiguration(appConfiguration).
+                setId(toUUID(1)).
+                setUser(user).
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/products/images?updatedImageUrl").
+                setQuantity(BigDecimal.TEN).
+                setCategory("name#" + user.getName()).
+                setShop("shop#" + user.getName()).
+                setGrade("variety#" + user.getName()).
+                setManufacturer("manufacturer#" + user.getName()).
+                setUnit("unitA").
+                setPrice(BigDecimal.ZERO).
+                setPackingSize(BigDecimal.ONE).
+                addTag("tag 1").
+                addTag("1 tag").
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("tag 3").
+                addTag("3 tag").
+                addTag("a tag").
+                tryBuild();
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));

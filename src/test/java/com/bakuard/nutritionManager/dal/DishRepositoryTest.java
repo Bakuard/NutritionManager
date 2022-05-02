@@ -203,8 +203,17 @@ class DishRepositoryTest {
     public void save6() {
         User user = createAndSaveUser(1);
         commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
-        Dish dish = createDish(7, user);
-        dish.setName("dish 1");
+        Dish dish = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("dish 1").
+                setServingSize(BigDecimal.TEN).
+                setUnit("unit A").
+                setDescription("description A").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?id=7").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> dishRepository.save(dish)),
@@ -226,16 +235,45 @@ class DishRepositoryTest {
         Dish dish = createDish(7, user);
         commit(() -> dishRepository.save(dish));
 
-        Dish updatedDish = new Dish(dish);
-        updatedDish.setName("New name");
-        updatedDish.setServingSize(new BigDecimal("0.75"));
-        updatedDish.setUnit("new unit");
-        updatedDish.setDescription("new description");
-        updatedDish.setImageUrl("https://newDishImage");
-        updatedDish.removeIngredient("ingredient 1");
-        updatedDish.putIngredient("ingredient 4", Filter.anyCategory("category Z"), BigDecimal.TEN);
-        updatedDish.removeTag(new Tag("tag A"));
-        updatedDish.addTag(new Tag("tag Z"));
+        Dish updatedDish = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("updated dish").
+                setServingSize(BigDecimal.TEN).
+                setUnit("updated unit").
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("new tag").
+                addTag("tag new").
+                addIngredient("ingredient 1",
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyGrade("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                ),
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tag B"))
+                                )
+                        ),
+                        BigDecimal.TEN).
+                addIngredient("ingredient 3",
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyCategory("name A", "name B", "name C"),
+                                Filter.anyShop("shop B", "shop A"),
+                                Filter.anyGrade("variety B")
+                        ),
+                        new BigDecimal("5.4")).
+                tryBuild();
         boolean actual = commit(() -> dishRepository.save(updatedDish));
 
         Assertions.assertTrue(actual);
@@ -255,20 +293,45 @@ class DishRepositoryTest {
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
-        Dish expected = new Dish(dish);
-        expected.setName("New name");
-        expected.setServingSize(new BigDecimal("0.75"));
-        expected.setUnit("new unit");
-        expected.setDescription("new description");
-        expected.setImageUrl("https://newDishImage");
-        expected.removeIngredient("ingredient 1");
-        expected.putIngredient(
-                "ingredient 4",
-                Filter.and(Filter.user(user.getId()), Filter.anyCategory("category Z")),
-                BigDecimal.TEN
-        );
-        expected.removeTag(new Tag("tag A"));
-        expected.addTag(new Tag("tag Z"));
+        Dish expected = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("updated dish").
+                setServingSize(BigDecimal.TEN).
+                setUnit("updated unit").
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("new tag").
+                addTag("tag new").
+                addIngredient("ingredient 1",
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyGrade("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                ),
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tag B"))
+                                )
+                        ),
+                        BigDecimal.TEN).
+                addIngredient("ingredient 3",
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyCategory("name A", "name B", "name C"),
+                                Filter.anyShop("shop B", "shop A"),
+                                Filter.anyGrade("variety B")
+                        ),
+                        new BigDecimal("5.4")).
+                tryBuild();
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
@@ -290,8 +353,45 @@ class DishRepositoryTest {
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
-        Dish updatedDish = new Dish(dish);
-        updatedDish.setName("dish 1");
+        Dish updatedDish = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("dish 1").
+                setServingSize(BigDecimal.TEN).
+                setUnit("updated unit").
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("new tag").
+                addTag("tag new").
+                addIngredient("ingredient 1",
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyGrade("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                ),
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tag B"))
+                                )
+                        ),
+                        BigDecimal.TEN).
+                addIngredient("ingredient 3",
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyCategory("name A", "name B", "name C"),
+                                Filter.anyShop("shop B", "shop A"),
+                                Filter.anyGrade("variety B")
+                        ),
+                        new BigDecimal("5.4")).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.save(updatedDish),

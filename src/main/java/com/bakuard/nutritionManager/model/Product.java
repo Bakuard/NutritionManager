@@ -65,19 +65,6 @@ public class Product implements Entity<Product> {
     }
 
     /**
-     * Устанавливает для данного продукта указанные контекстные данные.
-     * @param context контекстные данные данного продукта ({@link ProductContext}).
-     * @throws ValidateException если указанное значение равняется null
-     */
-    public void setContext(ProductContext context) {
-        Validator.check(
-                Rule.of("Product.context").notNull(context)
-        );
-
-        this.context = context;
-    }
-
-    /**
      * Увеличевает кол-во данного продукта имеющегося в распоряжении у пользователя на указанное значение.
      * @param quantity значение на которое будет увеличенно кол-во данного продукта имеющегося в распряжении у
      *                 пользвателя.
@@ -113,29 +100,6 @@ public class Product implements Entity<Product> {
         BigDecimal remain = this.quantity.min(quantity);
         this.quantity = this.quantity.subtract(remain);
         return remain;
-    }
-
-    /**
-     * Устанавливает описание для текущего продукта. Метод модет принимать значение null.
-     * @param description описание продукта.
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Устанавливает значение пути к изображению данного продукта. Путь не обязательно может быть путем в
-     * файловой системе. Метод может принимать значение null.
-     * @param imageUrl путь изображения данного продукта.
-     */
-    public void setImageUrl(String imageUrl) {
-        Container<URL> url = new Container<>();
-
-        Validator.check(
-                Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url))
-        );
-
-        this.imageUrl = url.get();
     }
 
     /**
