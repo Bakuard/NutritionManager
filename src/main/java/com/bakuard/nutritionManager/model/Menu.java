@@ -116,7 +116,7 @@ public class Menu implements Entity<Menu> {
 
     /**
      * Возвращает данные о конкретном продукте для каждого ингрдиента блюда этого меню. Для каждого ингредиента
-     * каждого блюда можно указать. Особые случаи:<br/>
+     * каждого блюда можно выбрать конкретный продукт. Особые случаи:<br/>
      * 1. Если для данного меню не задано ни одно блюдо - возвращает пустой список. <br/>
      * 2. Если любое блюдо меню не имеет ни одноо ингредиента - возвращает пустой список. <br/>
      * 3. Если всем ингредиентам любого блюда этого меню не соответствует ни одного продукта - возвращает пустой
@@ -164,8 +164,8 @@ public class Menu implements Entity<Menu> {
                                         dish.getName().equals(c.dishName())).
                                 mapToInt(ProductConstraint::productIndex).
                                 findFirst().
-                                orElse(0)
-                );
+                                orElse(0)).
+                        product();
 
                 if(product.isPresent()) {
                     MenuItemProduct itemProduct = new MenuItemProduct(

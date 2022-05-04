@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 class PageTest {
@@ -288,14 +289,14 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(0, 10));
 
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> page.get(-1));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> page.getByGlobalIndex(-1));
     }
 
     @Test
     @DisplayName("""
             get(globalIndex):
              item with globalIndex out of page bottom line
-             => return null
+             => return empty Optional
             """)
     public void get2() {
         Page<Integer> page = Pageable.
@@ -303,14 +304,15 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        Assertions.assertNull(page.get(9));
+        Optional<Integer> actual = page.getByGlobalIndex(9);
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
             get(globalIndex):
              item with globalIndex out of page top line
-             => return null
+             => return empty Optional
             """)
     public void get3() {
         Page<Integer> page = Pageable.
@@ -318,7 +320,8 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        Assertions.assertNull(page.get(20));
+        Optional<Integer> actual = page.getByGlobalIndex(20);
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -333,7 +336,8 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        Assertions.assertEquals(10, page.get(10));
+        Optional<Integer> actual = page.getByGlobalIndex(10);
+        Assertions.assertEquals(10, actual.orElseThrow());
     }
 
     @Test
@@ -348,7 +352,8 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        Assertions.assertEquals(19, page.get(19));
+        Optional<Integer> actual = page.getByGlobalIndex(19);
+        Assertions.assertEquals(19, actual.orElseThrow());
     }
 
     @Test
@@ -363,7 +368,24 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        Assertions.assertEquals(15, page.get(15));
+        Optional<Integer> actual = page.getByGlobalIndex(15);
+        Assertions.assertEquals(15, actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            get(globalIndex):
+             page is empty
+             => return empty Optional
+            """)
+    public void get7() {
+        Page<Integer> page = Pageable.
+                ofIndex(10, 15).
+                createPageMetadata(0, 200).
+                createPage(List.of());
+
+        Optional<Integer> actual = page.getByGlobalIndex(15);
+        Assertions.assertTrue(actual.isEmpty());
     }
 
 

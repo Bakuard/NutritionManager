@@ -5,7 +5,10 @@ import com.google.common.collect.ImmutableList;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * Используется для пагинации. Представляет собой страницу - одну из равных по размеру частей выборки.<br/>
@@ -47,51 +50,81 @@ public final class Page<T> {
 
     /**
      * Возвращает элемет выборки по его порядковому номеру во всей выборке (глобальному индексу), по которой
-     * проводится пагинация. Если элемент с указанным глобальным индексом, на момент создания данного объекта
-     * Page, должен был находится на другой странице - метод вернет null.
+     * проводится пагинация. Особые случаи: <br/>
+     * 1. Если элемент с указанным глобальным индексом, на момент создания данного объекта Page, должен был
+     *    находится на другой странице - метод вернет пустой Optional. <br/>
+     * 2. Если исходная выборка, по которйо проводится пагинация, является пустой - вернет пустой Optional. <br/>
      * @param globalIndex глобальный индекс элемента (порядковый номер элемента во всей выборке).
-     * @return объект хранящийся на данной странице или null.
+     * @return объект хранящийся на данной странице или пустой Optional.
      * @throws IndexOutOfBoundsException если globalIndex < 0
      */
-    public T get(int globalIndex) {
-        return get(BigInteger.valueOf(globalIndex));
+    public Optional<T> getByGlobalIndex(int globalIndex) {
+        return getByGlobalIndex(BigInteger.valueOf(globalIndex));
     }
 
     /**
      * Возвращает элемет выборки по его порядковому номеру во всей выборке (глобальному индексу), по которой
-     * проводится пагинация. Если элемент с указанным глобальным индексом, на момент создания данного объекта
-     * Page, должен был находится на другой странице - метод вернет null.
+     * проводится пагинация. Особые случаи: <br/>
+     * 1. Если элемент с указанным глобальным индексом, на момент создания данного объекта Page, должен был
+     *    находится на другой странице - метод вернет пустой Optional. <br/>
+     * 2. Если исходная выборка, по которйо проводится пагинация, является пустой - вернет пустой Optional. <br/>
      * @param globalIndex глобальный индекс элемента (порядковый номер элемента во всей выборке).
-     * @return объект хранящийся на данной странице или null.
+     * @return объект хранящийся на данной странице или пустой Optional.
      * @throws IndexOutOfBoundsException если globalIndex < 0
      */
-    public T get(BigInteger globalIndex) {
+    public Optional<T> getByGlobalIndex(BigInteger globalIndex) {
         if(globalIndex.signum() < 0)
             throw new IndexOutOfBoundsException("globalIndex can't be less then zero. Actual value = " + globalIndex);
 
-        BigInteger offset = metadata.getOffset();
-        BigInteger topLine = offset.add(BigInteger.valueOf(metadata.getActualSize()));
-
         T result = null;
 
-        if(globalIndex.compareTo(offset) >= 0 && globalIndex.compareTo(topLine) < 0) {
-            int index = globalIndex.subtract(offset).intValueExact();
-            result = content.get(index);
+        if(!metadata.isEmpty()) {
+            BigInteger offset = metadata.getOffset();
+            BigInteger topLine = offset.add(BigInteger.valueOf(metadata.getActualSize()));
+
+            if (globalIndex.compareTo(offset) >= 0 && globalIndex.compareTo(topLine) < 0) {
+                int index = globalIndex.subtract(offset).intValueExact();
+                result = content.get(index);
+            }
         }
 
-        return result;
+        return Optional.ofNullable(result);
     }
 
     /**
-     * Воздает и возвращает новый объект страницы являющейся результатом преобразования всех элементов исходной
+     * Создает и возвращает новый объект страницы являющейся результатом преобразования всех элементов исходной
      * страницы в элементы указанного типа.
-     * @param converter функция выполняющая преобразование каждого отдельного элемента.
+     * @param mapper функция выполняющая преобразование каждого отдельного элемента.
      * @param <U> тип элементов возвращаемой страницы.
      * @return новый объект страницы.
      */
-    public <U>Page<U> map(Function<T, U> converter) {
+    public <U>Page<U> map(Function<T, U> mapper) {
         return new Page<>(
-                content.stream().map(converter).toList(),
+                content.stream().map(mapper).toList(),
+                metadata
+        );
+    }
+
+    /**
+     * Создает и возвращает новый объект страницы являющейся результатом преобразования всех элементов исходной
+     * страницы в элементы указанного типа.
+     * @param mapper функция выполняющая преобразование каждого отдельного элемента. В качестве входных данных
+     *               она получает объект, который надо преобразовать, и его глобальный индекс в выборке по которой
+     *               выполнялась пагинация.
+     * @param <U> тип элементов возвращаемой страницы.
+     * @return новый объект страницы.
+     */
+    public <U>Page<U> map(BiFunction<T, BigInteger, U> mapper) {
+        BigInteger firstIndex = metadata.getOffset();
+
+        return new Page<>(
+                IntStream.range(0, content.size()).
+                        mapToObj(i -> {
+                            BigInteger index = firstIndex.add(BigInteger.valueOf(i));
+                            T item = content.get(i);
+                            return mapper.apply(item, index);
+                        }).
+                        toList(),
                 metadata
         );
     }

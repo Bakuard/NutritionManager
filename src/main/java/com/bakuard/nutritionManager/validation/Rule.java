@@ -136,36 +136,23 @@ public class Rule {
         );
     }
 
-    public <T> Result notContains(Collection<T> checkedValue,
-                                  Function<T, Result.State> function) {
-        return notContains(checkedValue, function, null);
+    public <T> Result notContains(Collection<T> checkedValue, Predicate<T> matcher) {
+        return notContains(checkedValue, matcher, null);
     }
 
-    public <T> Result notContains(Collection<T> checkedValue,
-                                  Function<T, Result.State> function,
-                                  String field) {
+    public <T> Result notContains(Collection<T> checkedValue, Predicate<T> matcher, String field) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(checkedValue != null) {
-            state = checkedValue.stream().
-                    map(function).
-                    reduce(Result.State::and).
-                    orElse(Result.State.SUCCESS);
+            List<T> invalidItems = checkedValue.stream().filter(matcher.negate()).toList();
 
-            List<T> invalidItems = checkedValue.stream().
-                    filter(v -> function.apply(v) == Result.State.FAIL).
-                    toList();
-
-            List<T> unknownItems = checkedValue.stream().
-                    filter(v -> function.apply(v) == Result.State.UNKNOWN).
-                    toList();
+            state = Result.State.of(invalidItems.isEmpty());
 
             if(field == null && state != Result.State.SUCCESS) {
-                logMessage = "Invalid items: " + invalidItems + ", Unknown items: " + unknownItems;
+                logMessage = "Invalid items: " + invalidItems;
             } else if(state != Result.State.SUCCESS) {
-                logMessage = field + " can't contains items: " + invalidItems +
-                        ", Unknown items: " + unknownItems;
+                logMessage = field + " contains invalid items: " + invalidItems;
             }
         }
 
