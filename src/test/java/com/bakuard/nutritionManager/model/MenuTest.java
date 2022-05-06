@@ -1023,14 +1023,16 @@ class MenuTest {
 
     private Page<Product> createProductPage(User user,
                                             int itemIndex) {
-        int productsNumber = 20;
-        List<Product> products = IntStream.range(0, productsNumber).
-                mapToObj(i -> createProduct(user, i).tryBuild()).
+
+        Page.Metadata metadata = Pageable.ofIndex(30, itemIndex).
+                createPageMetadata(1000, 30);
+
+        int offset = metadata.getOffset().intValue();
+        List<Product> products = IntStream.range(0, metadata.getActualSize()).
+                mapToObj(i -> createProduct(user, offset + i).tryBuild()).
                 toList();
 
-        return Pageable.ofIndex(30, itemIndex).
-                createPageMetadata(productsNumber, 30).
-                createPage(products);
+        return metadata.createPage(products);
     }
 
 }

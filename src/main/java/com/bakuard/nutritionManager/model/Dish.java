@@ -260,6 +260,7 @@ public class Dish implements Entity<Dish> {
                 page.getMetadata().
                         getTotalItems().
                         subtract(BigInteger.ONE).
+                        max(BigInteger.ZERO).
                         min(BigInteger.valueOf(productIndex))
         );
         return new IngredientProduct(product, ingredientIndex, productIndex);
@@ -319,10 +320,14 @@ public class Dish implements Entity<Dish> {
         Validator.check(
                 Rule.of("Dish.constrains").notNull(constraints).
                         and(r -> r.notContainsNull(constraints)).
-                        and(r -> r.notContains(constraints,
-                                c -> c.ingredientIndex() >= 0 && c.ingredientIndex() < ingredients.size(),
-                                "ingredients")).
-                        and(r -> r.notContains(constraints, c -> c.productIndex() >= 0, "products"))
+                        and(r -> r.isEmpty(ingredients).or(
+                                 r2 -> r2.notContains(constraints,
+                                         c -> c.ingredientIndex() < 0 || c.ingredientIndex() >= ingredients.size(),
+                                         "ingredients").
+                                         and(r3 -> r3.notContains(constraints,
+                                                 c -> c.productIndex() < 0,
+                                                 "products"))
+                        ))
         );
 
         return IntStream.range(0, ingredients.size()).
@@ -387,21 +392,11 @@ public class Dish implements Entity<Dish> {
                 Rule.of("Dish.ingredientProduct").notNull(ingredientProduct)
         );
 
-        DishIngredient ingredient = ingredients.get(ingredientProduct.ingredientIndex());
-
         return ingredientProduct.product().
                 map(product -> {
-                    BigDecimal lackQuantity = ingredient.getNecessaryQuantity(servingNumber).
-                            subtract(product.getQuantity()).
-                            max(BigDecimal.ZERO);
-
-                    if(lackQuantity.signum() > 0) {
-                        lackQuantity = lackQuantity.
-                                divide(product.getContext().getPackingSize(), config.getMathContext()).
-                                setScale(0, RoundingMode.UP);
-                    }
-
-                    return lackQuantity;
+                    BigDecimal necessaryQuantity = calculateNecessaryQuantityInUnits(ingredientProduct, servingNumber);
+                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(product, necessaryQuantity);
+                    return calculatePackagesNumber(product, lackQuantityInUnits);
                 });
     }
 
@@ -440,10 +435,14 @@ public class Dish implements Entity<Dish> {
         );
 
         return ingredientProducts.stream().
-                map(i -> getLackQuantity(i, servingNumber)).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                reduce(BigDecimal::add);
+                filter(i -> i.product().isPresent()).
+                map(i -> calculateNecessaryQuantityInUnits(i, servingNumber)).
+                reduce(BigDecimal::add).
+                map(necessaryQuantityInUnits -> {
+                    Product product = ingredientProducts.get(0).product().orElseThrow();
+                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(product, necessaryQuantityInUnits);
+                    return calculatePackagesNumber(product, lackQuantityInUnits);
+                });
     }
 
     /**
@@ -475,17 +474,13 @@ public class Dish implements Entity<Dish> {
         return getLackQuantity(ingredientProduct, servingNumber).
                 map(lackQuantity -> {
                     Product product = ingredientProduct.product().orElseThrow();
-                    return lackQuantity.multiply(product.getContext().getPrice(), config.getMathContext());
+                    return calculateProductPrice(product, lackQuantity);
                 });
     }
 
     /**
-     * Для любого указанного продукта, из множества взаимозаменямых продуктов указанного ингредиента, вычисляет
-     * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
-     * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
-     * Недостающее кол-во рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой
-     * кол-во недостающих "упаковок" продукта. Данный метдо испльзуется, когда для разных ингредиентов блюда
-     * были выбраны одинаковые продукты.
+     * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта. Стоимость недостающего
+     * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки).
      * <br/>
      * Особые случаи: <br/>
      * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
@@ -505,20 +500,19 @@ public class Dish implements Entity<Dish> {
      *              2. если servingNumber меньше или равно нулю.<br/>
      *              3. если ingredients имеет значение null.<br/>
      */
-    public BigDecimal getLackQuantityPrice(List<IngredientProduct> ingredientProducts,
-                                           BigDecimal servingNumber) {
+    public Optional<BigDecimal> getLackQuantityPrice(List<IngredientProduct> ingredientProducts,
+                                                     BigDecimal servingNumber) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(r -> r.positiveValue(servingNumber)),
                 Rule.of("Dish.ingredients").notNull(ingredients)
         );
 
-        return ingredientProducts.stream().
-                map(i -> getLackQuantityPrice(i, servingNumber)).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                reduce(BigDecimal::add).
-                orElseThrow();
+        return getLackQuantity(ingredientProducts, servingNumber).
+                map(lackQuantityInPackages -> {
+                    Product product = ingredientProducts.get(0).product().orElseThrow();
+                    return calculateProductPrice(product, lackQuantityInPackages);
+                });
     }
 
     /**
@@ -552,10 +546,10 @@ public class Dish implements Entity<Dish> {
                 Rule.of("Dish.ingredients").notNull(ingredients)
         );
 
-        return ingredients.stream().
-                map(i -> getLackQuantityPrice(i, servingNumber)).
-                filter(Optional::isPresent).
-                map(Optional::get).
+        Map<Product, List<IngredientProduct>> groups = groupByProduct(ingredients);
+
+        return groups.values().stream().
+                map(value -> getLackQuantityPrice(value, servingNumber).orElseThrow()).
                 reduce(BigDecimal::add);
     }
 
@@ -582,7 +576,7 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает минимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * Возвращает минимально возможную стоимость одной порции данного блюда. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
      * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
@@ -590,20 +584,17 @@ public class Dish implements Entity<Dish> {
      * @return минимально возможная стоимость данного блюда.
      */
     public Optional<BigDecimal> getMinPrice() {
-        return IntStream.range(0, getIngredientNumber()).
-                mapToObj(i -> {
-                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
-                    return getProduct(i, 0).
-                            product().
-                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
-                }).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                reduce(BigDecimal::add);
+        List<ProductConstraint> constraints = IntStream.range(0, getIngredientNumber()).
+                        mapToObj(i -> new ProductConstraint(i, 0)).
+                        toList();
+
+        List<IngredientProduct> ingredientProducts = getProductForEachIngredient(constraints);
+
+        return getLackProductPrice(ingredientProducts, BigDecimal.ONE);
     }
 
     /**
-     * Возвращает максимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * Возвращает максимально возможную стоимость одной порции данного блюда. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
      * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
@@ -611,27 +602,23 @@ public class Dish implements Entity<Dish> {
      * @return максимально возможная стоимость данного блюда.
      */
     public Optional<BigDecimal> getMaxPrice() {
-        return IntStream.range(0, getIngredientNumber()).
-                mapToObj(i -> {
-                    /*
-                    * Если в метод getProduct(ingredientIndex, productIndex) в качестве productIndex передать
-                    * значение, которое больше или равно кол-ву всех продуктов соответствующих указанному
-                    * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
-                    * значение для productIndex чтобы получить последний продукт.
-                     */
-                    int lastProductIndex = 100000;
-                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
-                    return getProduct(i, lastProductIndex).
-                            product().
-                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
-                }).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                reduce(BigDecimal::add);
+        /*
+         * Если в метод getProduct(ingredientIndex, productIndex) в качестве productIndex передать
+         * значение, которое больше или равно кол-ву всех продуктов соответствующих указанному
+         * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
+         * значение для productIndex чтобы получить последний продукт.
+         */
+        List<ProductConstraint> constraints = IntStream.range(0, getIngredientNumber()).
+                mapToObj(i -> new ProductConstraint(i, 100000)).
+                toList();
+
+        List<IngredientProduct> ingredientProducts = getProductForEachIngredient(constraints);
+
+        return getLackProductPrice(ingredientProducts, BigDecimal.ONE);
     }
 
     /**
-     * Возвращает среднюю стоимость для данного блюда. Особые случаи:<br/>
+     * Возвращает среднюю стоимость для одной порции данного блюда. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту блюда не соответствует ни один продукт - возвращает пустой Optional.<br/>
      * 3. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
@@ -639,9 +626,10 @@ public class Dish implements Entity<Dish> {
      * @return средняя стоимость данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
-        return getMinPrice().
-                flatMap(min -> getMaxPrice().map(max -> max.add(min))).
-                map(sum -> sum.divide(new BigDecimal(2), config.getMathContext()));
+        Optional<BigDecimal> min = getMinPrice();
+        Optional<BigDecimal> max = getMaxPrice();
+        Optional<BigDecimal> sum = min.map(vMin -> vMin.add(max.orElseThrow()));
+        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.getMathContext()));
     }
 
     /**
@@ -696,6 +684,30 @@ public class Dish implements Entity<Dish> {
                 ", ingredients=" + ingredients +
                 ", tags=" + tags +
                 '}';
+    }
+
+
+    private BigDecimal calculateNecessaryQuantityInUnits(IngredientProduct ingredientProduct, BigDecimal servingNumber) {
+        return ingredients.get(ingredientProduct.ingredientIndex()).getNecessaryQuantity(servingNumber);
+    }
+
+    private BigDecimal calculateLackQuantityInUnits(Product product,
+                                                    BigDecimal necessaryQuantity) {
+        return necessaryQuantity.subtract(product.getQuantity()).max(BigDecimal.ZERO);
+    }
+
+    private BigDecimal calculatePackagesNumber(Product product, BigDecimal quantityInUnits) {
+        if(quantityInUnits.signum() > 0) {
+            quantityInUnits = quantityInUnits.
+                    divide(product.getContext().getPackingSize(), config.getMathContext()).
+                    setScale(0, RoundingMode.UP);
+        }
+
+        return quantityInUnits;
+    }
+
+    private BigDecimal calculateProductPrice(Product product, BigDecimal packagesNumber) {
+        return product.getContext().getPrice().multiply(packagesNumber, config.getMathContext());
     }
 
 

@@ -279,11 +279,11 @@ class PageTest {
 
     @Test
     @DisplayName("""
-            get(globalIndex):
+            getByGlobalIndex(globalIndex):
              globalIndex < 0
              => exception
             """)
-    public void get1() {
+    public void getByGlobalIndex1() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 9).
                 createPageMetadata(100, 200).
@@ -294,11 +294,11 @@ class PageTest {
 
     @Test
     @DisplayName("""
-            get(globalIndex):
+            getByGlobalIndex(globalIndex):
              item with globalIndex out of page bottom line
              => return empty Optional
             """)
-    public void get2() {
+    public void getByGlobalIndex2() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -310,11 +310,11 @@ class PageTest {
 
     @Test
     @DisplayName("""
-            get(globalIndex):
+            getByGlobalIndex(globalIndex):
              item with globalIndex out of page top line
              => return empty Optional
             """)
-    public void get3() {
+    public void getByGlobalIndex3() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -326,11 +326,11 @@ class PageTest {
 
     @Test
     @DisplayName("""
-            get(globalIndex):
+            getByGlobalIndex(globalIndex):
              item with globalIndex is first page item
              => return first page item
             """)
-    public void get4() {
+    public void getByGlobalIndex4() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -342,11 +342,11 @@ class PageTest {
 
     @Test
     @DisplayName("""
-            get(globalIndex):
+            getByGlobalIndex(globalIndex):
              item with globalIndex is last page item
              => return last page item
             """)
-    public void get5() {
+    public void getByGlobalIndex5() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -358,11 +358,11 @@ class PageTest {
 
     @Test
     @DisplayName("""
-            get(globalIndex):
+            getByGlobalIndex(globalIndex):
              item with globalIndex is middle page item
              => return middle page item
             """)
-    public void get6() {
+    public void getByGlobalIndex6() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -374,11 +374,11 @@ class PageTest {
 
     @Test
     @DisplayName("""
-            get(globalIndex):
+            getByGlobalIndex(globalIndex):
              page is empty
              => return empty Optional
             """)
-    public void get7() {
+    public void getByGlobalIndex7() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(0, 200).

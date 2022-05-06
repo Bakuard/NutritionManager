@@ -145,7 +145,7 @@ public class Rule {
         String logMessage = null;
 
         if(checkedValue != null) {
-            List<T> invalidItems = checkedValue.stream().filter(matcher.negate()).toList();
+            List<T> invalidItems = checkedValue.stream().filter(matcher).toList();
 
             state = Result.State.of(invalidItems.isEmpty());
 
@@ -321,6 +321,32 @@ public class Rule {
 
         return createResult(
                 Constraint.CONTAINS_ITEM,
+                logMessage,
+                getRuleName(field),
+                state
+        );
+    }
+
+    public <T> Result isEmpty(Collection<T> collection) {
+        return isEmpty(collection, null);
+    }
+
+    public <T> Result isEmpty(Collection<T> collection, String field) {
+        Result.State state = Result.State.UNKNOWN;
+        String logMessage = null;
+
+        if(collection != null) {
+            state = Result.State.of(collection.isEmpty());
+
+            if(field == null && state == Result.State.FAIL) {
+                logMessage = "collection must be empty";
+            } else if(state == Result.State.FAIL) {
+                logMessage = field + " must be empty";
+            }
+        }
+
+        return createResult(
+                Constraint.IS_EMPTY_COLLECTION,
                 logMessage,
                 getRuleName(field),
                 state

@@ -110,6 +110,7 @@ public class DtoMapper {
         return products.map(this::toProductResponse);
     }
 
+
     public DishResponse toDishResponse(Dish dish) {
         DishResponse response = new DishResponse();
         response.setId(dish.getId());
@@ -197,14 +198,14 @@ public class DtoMapper {
     public Optional<BigDecimal> toDishPrice(UUID userId, DishPriceRequest dto) {
         Dish dish = dishRepository.tryGetById(userId, dto.getDishId());
 
-        Map<Integer, Integer> indexes = dto.getProducts().stream().
-                collect(Collectors.toMap(
-                        DishIngredientProductRequest::getIngredientIndex,
-                        DishIngredientProductRequest::getProductIndex)
-                );
+        List<Dish.ProductConstraint> indexes = dto.getProducts().stream().
+                map(pr -> new Dish.ProductConstraint(pr.getIngredientIndex(), pr.getProductIndex())).
+                toList();
+        List<Dish.IngredientProduct> ingredients = dish.getProductForEachIngredient(indexes);
 
-        return dish.getLackProductPrice(dto.getServingNumber(), indexes);
+        return dish.getLackProductPrice(ingredients, dto.getServingNumber());
     }
+
 
     public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID menuId, String dishName, BigDecimal quantity) {
         Menu menu = menuRepository.tryGetById(userId, menuId);
@@ -397,11 +398,11 @@ public class DtoMapper {
     }
 
     private ProductAsDishIngredientResponse toProductAsDishIngredientResponse(Dish dish,
-                                                                              Product product,
-                                                                              int ingredientIndex,
-                                                                              int productIndex,
+                                                                              Dish.IngredientProduct ingredientProduct,
                                                                               boolean isChecked,
                                                                               BigDecimal servingNumber) {
+        Product product = ingredientProduct.product().orElseThrow();
+
         ProductAsDishIngredientResponse response = new ProductAsDishIngredientResponse();
         response.setId(product.getId());
         response.setUser(toUserResponse(product.getUser()));
@@ -415,13 +416,13 @@ public class DtoMapper {
         response.setUnit(product.getContext().getUnit());
         response.setQuantity(product.getQuantity());
         response.setNecessaryQuantity(
-                dish.tryGetIngredient(ingredientIndex).getNecessaryQuantity(servingNumber)
+                dish.tryGetIngredient(ingredientProduct.ingredientIndex()).getNecessaryQuantity(servingNumber)
         );
         response.setLackQuantity(
-                dish.getLackQuantity(ingredientIndex, productIndex, servingNumber).orElseThrow()
+                dish.getLackQuantity(ingredientProduct, servingNumber).orElseThrow()
         );
         response.setLackQuantityPrice(
-                dish.getLackQuantityPrice(ingredientIndex, productIndex, servingNumber).orElseThrow()
+                dish.getLackQuantityPrice(ingredientProduct, servingNumber).orElseThrow()
         );
         response.setTags(toTagsResponse(product.getContext().getTags()));
         response.setChecked(isChecked);
@@ -437,21 +438,20 @@ public class DtoMapper {
                         mapToObj(ingredientIndex -> {
                             DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
 
-                            List<Product> products = dish.getProducts(ingredientIndex, 0).getContent();
+                            List<Dish.IngredientProduct> products = dish.getProducts(ingredientIndex, 0).
+                                    getContent();
 
                             DishIngredientForListResponse ir = new DishIngredientForListResponse();
                             ir.setIngredientIndex(ingredientIndex);
                             ir.setProductCategory(ingredient.getName());
                             ir.setProducts(
-                                    IntStream.range(0, products.size()).
-                                            mapToObj(productIndex -> toProductAsDishIngredientResponse(
-                                                    dish,
-                                                    products.get(productIndex),
-                                                    ingredientIndex,
-                                                    productIndex,
-                                                    productIndex == 0,
-                                                    servingNumber
-                                            )).
+                                    products.stream().
+                                            map(ip ->
+                                                    toProductAsDishIngredientResponse(dish,
+                                                            ip,
+                                                            ip.ingredientIndex() == 0,
+                                                            servingNumber)
+                                            ).
                                             toList()
                             );
 

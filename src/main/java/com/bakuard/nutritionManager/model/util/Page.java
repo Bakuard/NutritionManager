@@ -266,7 +266,7 @@ public final class Page<T> {
          * @return true - если страница пустая, иначе - false.
          */
         public boolean isEmpty() {
-            return actualSize == 0;
+            return totalItems.signum() == 0;
         }
 
         /**

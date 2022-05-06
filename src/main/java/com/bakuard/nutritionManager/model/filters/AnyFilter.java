@@ -26,7 +26,7 @@ public class AnyFilter extends AbstractFilter {
                 Rule.of("AnyFilter." + type).notNull(values).
                         and(v -> v.notContainsNull(values)).
                         and(v -> v.min(values.size(), minItems)).
-                        and(v -> v.notContains(values, s -> !s.isBlank()))
+                        and(v -> v.notContains(values, String::isBlank))
         );
 
         this.values = ImmutableList.copyOf(values);
