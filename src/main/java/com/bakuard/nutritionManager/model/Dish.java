@@ -313,7 +313,8 @@ public class Dish implements Entity<Dish> {
      *         1. Если constraints имеет значение null. <br/>
      *         2. Если один из элементов constraints имеет значение null. <br/>
      *         3. Если ingredientIndex у одного из ProductConstraint меньше нуля. <br/>
-     *         4. Если ingredientIndex у одного из ProductConstraint больше или равен кол-ву ингредиентво. <br/>
+     *         4. Если ingredientIndex у одного из ProductConstraint больше или равен кол-ву ингредиентво, и при
+     *            этом блюдо содержит как минимум один ингредиент. <br/>
      *         5. Если productIndex у одного из ProductConstraint меньше нуля. <br/>
      */
     public List<IngredientProduct> getProductForEachIngredient(List<ProductConstraint> constraints) {

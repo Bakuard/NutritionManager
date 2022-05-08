@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DtoMapper {
@@ -209,7 +208,7 @@ public class DtoMapper {
 
     public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID menuId, String dishName, BigDecimal quantity) {
         Menu menu = menuRepository.tryGetById(userId, menuId);
-        MenuItem menuItem = menu.tryGetMenuItem(dishName);
+        MenuItem menuItem = menu.tryGetItem(dishName);
 
         quantity = quantity == null ? BigDecimal.ONE : quantity;
         return toDishProductsListResponse(menuItem.getDish(), menuItem.getNecessaryQuantity(quantity));

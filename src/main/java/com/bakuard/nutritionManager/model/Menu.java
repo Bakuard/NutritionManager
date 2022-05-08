@@ -115,14 +115,14 @@ public class Menu implements Entity<Menu> {
     }
 
     /**
-     * Возвращает данные о конкретном продукте для каждого ингрдиента блюда этого меню. Для каждого ингредиента
-     * каждого блюда можно выбрать конкретный продукт. Особые случаи:<br/>
-     * 1. Если для данного меню не задано ни одно блюдо - возвращает пустой список. <br/>
-     * 2. Если любое блюдо меню не имеет ни одноо ингредиента - возвращает пустой список. <br/>
-     * 3. Если всем ингредиентам любого блюда этого меню не соответствует ни одного продукта - возвращает пустой
-     *    список. <br/>
-     * 4. Если некоторому ингредиенту некоторого блюда не соответствует ни один продукт - то для данного ингредиента
-     *    НЕ будет добавлен элемент {@link MenuItemProduct} в итоговый список. <br/>
+     * Возвращает данные о конкретном продукте для каждого ингрдиента блюда этого меню. Особые случаи:<br/>
+     * 1. Если некоторому ингредиенту некоторого блюда не соответствует ни один продукт - то для этого ингредиента
+     *    будет добавлен элемент, метод {@link MenuItemProduct#product()} которого будет возвращаеть пустой
+     *    Optional. <br/>
+     * 2. Если некоторое блюдо этого меню не содержит ни одного ингредиента - то для этого блюда не будет добавлен
+     *    ни один элемент в итоговый список. <br/>
+     * 3. Если ни одно блюдо этого меню не содержит ни одного ингредиента - возвращает пустой список. <br/>
+     * 4. Если меню не содержит ни одного элемента - возвращает пустой список. <br/>
      * 5. Если для одного и того же ингредиента одного и того же блюда указанно несколько продуктов - будет
      *    выбран первый из указанных. <br/>
      * 6. Если для некоторого ингредиента некоторого блюда не указанно ни одного продукта - будет выбран самый
@@ -138,6 +138,11 @@ public class Menu implements Entity<Menu> {
      *         2. Если constraints имеет значение null. <br/>
      *         3. Если один из элементов constraints имеет значение null. <br/>
      *         4. Если quantity меньше или равно нулю. <br/>
+     *         5. Если ingredientIndex у одного из ProductConstraint меньше нуля. <br/>
+     *         6. Если ingredientIndex у одного из ProductConstraint больше или равен кол-ву ингредиентво, и при
+     *            этом меню содержит как минимум одно блюдо, которое содержит как минимум один ингредиент.<br/>
+     *         7. Если productIndex у одного из ProductConstraint меньше нуля. <br/>
+     *         8. Если dishName у одного из ProductConstraint равен null. <br/>
      */
     public List<MenuItemProduct> getMenuItemProducts(BigDecimal quantity,
                                                      List<ProductConstraint> constraints) {
@@ -280,7 +285,7 @@ public class Menu implements Entity<Menu> {
      * @return блюдо или пустой Optional.
      * @throws ValidateException если среди блюд этого мею нет блюда с указанным именем.
      */
-    public MenuItem tryGetMenuItem(String dishName) {
+    public MenuItem tryGetItem(String dishName) {
         return getMenuItem(dishName).
                 orElseThrow(
                         () -> new ValidateException().
@@ -418,63 +423,7 @@ public class Menu implements Entity<Menu> {
      * Используется для предоставлении данных о конкретном продукте соответствующих одному из ингредиентов
      * блюда входящего в это меню.
      */
-    public static final class MenuItemProduct {
-
-        private final MenuItem item;
-        private final Product product;
-        private final BigDecimal necessaryQuantity;
-
-        /**
-         * Создает новый объект MenuItemProduct.
-         * @param item элемент этого меню (блюдо и кол-во, в котором оно входит в состав этого меню).
-         * @param product один из продуктов соответствующих одному из ингредиентов этого элемента меню.
-         * @param necessaryQuantity кол-во этого продукта необходимого для приготовления всех порций блюда
-         *                          относящегося к указанному элементу (с учетом кол-ва меню).
-         * @param config Общме настройки прилоежния.
-         */
-        public MenuItemProduct(MenuItem item, Product product, BigDecimal necessaryQuantity, AppConfigData config) {
-            this.item = item;
-            this.product = product;
-            this.necessaryQuantity = necessaryQuantity.setScale(config.getNumberScale(), config.getRoundingMode());
-        }
-
-        public MenuItem getItem() {
-            return item;
-        }
-
-        public Product getProduct() {
-            return product;
-        }
-
-        public BigDecimal getNecessaryQuantity() {
-            return necessaryQuantity;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            MenuItemProduct that = (MenuItemProduct) o;
-            return item.equals(that.item) &&
-                    product.equals(that.product) &&
-                    necessaryQuantity.equals(that.necessaryQuantity);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(item, product, necessaryQuantity);
-        }
-
-        @Override
-        public String toString() {
-            return "MenuItemProduct{" +
-                    "item=" + item +
-                    ", product=" + product +
-                    ", necessaryQuantity=" + necessaryQuantity +
-                    '}';
-        }
-
-    }
+    public record MenuItemProduct(Optional<Product> product, MenuItem item, int ingredientIndex, int productIndex) {}
 
 
     /**

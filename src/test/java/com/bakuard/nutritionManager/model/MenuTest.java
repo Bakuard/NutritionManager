@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 class MenuTest {
@@ -121,10 +122,164 @@ class MenuTest {
     @Test
     @DisplayName("""
             getMenuItemProducts(quantity, constraints):
+             constraints contain items where ingredientIndex < 0
+             => exception
+            """)
+    public void getMenuItemProducts6() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getMenuItemProducts(BigDecimal.ONE, List.of(
+                        new Menu.ProductConstraint("dish#1", 0, 0),
+                        new Menu.ProductConstraint("dish#2", -1, 0)
+                )),
+                Constraint.NOT_CONTAINS_BY_CONDITION,
+                Constraint.IS_EMPTY_COLLECTION
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getMenuItemProducts(quantity, constraints):
+             constraints contain items where ingredientIndex = ingredients number
+             => exception
+            """)
+    public void getMenuItemProducts7() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
+                                new BigDecimal(5))
+                ).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 2, repository,
+                                        createIngredient(filter(user, 3), BigDecimal.TEN),
+                                        createIngredient(filter(user, 4), new BigDecimal(2)),
+                                        createIngredient(filter(user, 5), BigDecimal.TEN)),
+                                BigDecimal.ONE)
+                ).
+                tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getMenuItemProducts(BigDecimal.ONE, List.of(
+                        new Menu.ProductConstraint("dish#1", 0, 0),
+                        new Menu.ProductConstraint("dish#2", 2, 0)
+                )),
+                Constraint.NOT_CONTAINS_BY_CONDITION,
+                Constraint.IS_EMPTY_COLLECTION
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getMenuItemProducts(quantity, constraints):
+             constraints contain items where ingredientIndex > ingredients number
+             => exception
+            """)
+    public void getMenuItemProducts8() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
+                                new BigDecimal(5))
+                ).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 3, repository,
+                                        createIngredient(filter(user, 6), BigDecimal.ONE),
+                                        createIngredient(filter(user, 7), BigDecimal.ONE),
+                                        createIngredient(filter(user, 8), new BigDecimal(3))),
+                                BigDecimal.TEN)
+                ).
+                tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getMenuItemProducts(BigDecimal.ONE, List.of(
+                        new Menu.ProductConstraint("dish#1", 0, 0),
+                        new Menu.ProductConstraint("dish#2", 3, 0)
+                )),
+                Constraint.NOT_CONTAINS_BY_CONDITION,
+                Constraint.IS_EMPTY_COLLECTION
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getMenuItemProducts(quantity, constraints):
+             constraints contain items where productIndex < 0
+             => exception
+            """)
+    public void getMenuItemProducts9() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
+                                new BigDecimal(5))
+                ).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 2, repository,
+                                        createIngredient(filter(user, 3), BigDecimal.TEN),
+                                        createIngredient(filter(user, 4), new BigDecimal(2)),
+                                        createIngredient(filter(user, 5), BigDecimal.TEN)),
+                                BigDecimal.ONE)
+                ).
+                tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getMenuItemProducts(BigDecimal.ONE, List.of(
+                        new Menu.ProductConstraint("dish#1", 0, 0),
+                        new Menu.ProductConstraint("dish#2", 1, -1)
+                )),
+                Constraint.NOT_CONTAINS_BY_CONDITION,
+                Constraint.IS_EMPTY_COLLECTION
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getMenuItemProducts(quantity, constraints):
+             constraints contain items where dishName is null
+             => exception
+            """)
+    public void getMenuItemProducts10() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getMenuItemProducts(BigDecimal.ONE, List.of(
+                        new Menu.ProductConstraint("dish#1", 0, 0),
+                        new Menu.ProductConstraint(null, -1, 0)
+                )),
+                Constraint.NOT_CONTAINS_BY_CONDITION,
+                Constraint.IS_EMPTY_COLLECTION
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getMenuItemProducts(quantity, constraints):
              menu haven't any items
              => return empty list
             """)
-    public void getMenuItemProducts6() {
+    public void getMenuItemProducts11() {
         User user = createUser(1);
         Menu menu = createMenu(1, user).tryBuild();
 
@@ -146,7 +301,7 @@ class MenuTest {
              all menu dishes haven't ingredients
              => return empty list
             """)
-    public void getMenuItemProducts7() {
+    public void getMenuItemProducts12() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         User user = createUser(1);
         Menu menu = createMenu(1, user).
@@ -171,9 +326,9 @@ class MenuTest {
     @DisplayName("""
             getMenuItemProducts(quantity, constraints):
              all menu dish ingredients haven't suitable products
-             => return empty list
+             => return list where MenuItemProduct.product() return empty Optional
             """)
-    public void getMenuItemProducts8() {
+    public void getMenuItemProducts13() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Pageable.firstEmptyPage());
         User user = createUser(1);
@@ -181,25 +336,25 @@ class MenuTest {
                 addItem(
                         createMenuItem(
                                 createDish(user, 1, repository,
-                                        createIngredient(categoryFilter(user), new BigDecimal(5)),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), new BigDecimal(6))),
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         createMenuItem(
                                 createDish(user, 2, repository,
-                                        createIngredient(categoryFilter(user), BigDecimal.TEN),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), BigDecimal.TEN)),
+                                        createIngredient(filter(user, 3), BigDecimal.TEN),
+                                        createIngredient(filter(user, 4), new BigDecimal(2)),
+                                        createIngredient(filter(user, 5), BigDecimal.TEN)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         createMenuItem(
                                 createDish(user, 3, repository,
-                                        createIngredient(categoryFilter(user), BigDecimal.ONE),
-                                        createIngredient(shopFilter(user), BigDecimal.ONE),
-                                        createIngredient(gradeFilter(user), new BigDecimal(3))),
+                                        createIngredient(filter(user, 6), BigDecimal.ONE),
+                                        createIngredient(filter(user, 7), BigDecimal.ONE),
+                                        createIngredient(filter(user, 8), new BigDecimal(3))),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -208,48 +363,73 @@ class MenuTest {
                 BigDecimal.ONE,
                 List.of(
                         new Menu.ProductConstraint("dish#1", 0, 0),
-                        new Menu.ProductConstraint("dish#2", 0, 3),
-                        new Menu.ProductConstraint("dish#3", 1, 2)
+                        new Menu.ProductConstraint("dish#1", 1, 0),
+                        new Menu.ProductConstraint("dish#1", 2, 0),
+                        new Menu.ProductConstraint("dish#2", 0, 0),
+                        new Menu.ProductConstraint("dish#2", 1, 0),
+                        new Menu.ProductConstraint("dish#2", 2, 0),
+                        new Menu.ProductConstraint("dish#3", 0, 0),
+                        new Menu.ProductConstraint("dish#3", 1, 0),
+                        new Menu.ProductConstraint("dish#3", 2, 0)
                 )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        List<Menu.MenuItemProduct> expected = List.of(
+                emptyMenuItemProduct(menu.getItems().get(0), 0, 0),
+                emptyMenuItemProduct(menu.getItems().get(0), 1, 0),
+                emptyMenuItemProduct(menu.getItems().get(0), 2, 0),
+                emptyMenuItemProduct(menu.getItems().get(1), 0, 0),
+                emptyMenuItemProduct(menu.getItems().get(1), 1, 0),
+                emptyMenuItemProduct(menu.getItems().get(1), 2, 0),
+                emptyMenuItemProduct(menu.getItems().get(2), 0, 0),
+                emptyMenuItemProduct(menu.getItems().get(2), 1, 0),
+                emptyMenuItemProduct(menu.getItems().get(2), 2, 0)
+        );
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("""
             getMenuItemProducts(quantity, constraints):
              some menu dish ingredients have suitable products,
-             => return correct result (skip dish ingredients without suitable products)
+             => return correct result (MenuItemProduct.product() must return empty Optional for ingredient without products)
             """)
-    public void getMenuItemProducts9() {
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Pageable.firstEmptyPage());
+    public void getMenuItemProducts14() {
         User user = createUser(1);
-        MenuItem.Builder item1, item2, item3;
+        ProductRepository repository = mockProductRepository(
+                filter(user, 0), createProductPage(user, 0, this::createProduct),
+                filter(user, 1), createProductPage(user, 3, this::createProduct),
+                filter(user, 2), createProductPage(user, 2, this::createProduct),
+                filter(user, 3), Pageable.firstEmptyPage(),
+                filter(user, 4), Pageable.firstEmptyPage(),
+                filter(user, 5), Pageable.firstEmptyPage(),
+                filter(user, 6), createProductPage(user, 10, this::createProduct),
+                filter(user, 7), createProductPage(user, 15, this::createProduct),
+                filter(user, 8), createProductPage(user, 11, this::createProduct)
+        );
         Menu menu = createMenu(1, user).
                 addItem(
-                        item1 = createMenuItem(
-                                createDish(user, 1, mockProductRepository(user, 0, 3, 2),
-                                        createIngredient(categoryFilter(user), new BigDecimal(5)),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), new BigDecimal(6))),
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
                                 new BigDecimal(5))
                 ).
                 addItem(
-                        item2 = createMenuItem(
-                                createDish(user, 2, mockProductRepository(user, 1, 1, 4),
-                                        createIngredient(categoryFilter(user), BigDecimal.TEN),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), BigDecimal.TEN)),
+                        createMenuItem(
+                                createDish(user, 2, repository,
+                                        createIngredient(filter(user, 3), BigDecimal.TEN),
+                                        createIngredient(filter(user, 4), new BigDecimal(2)),
+                                        createIngredient(filter(user, 5), BigDecimal.TEN)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
-                        item3 = createMenuItem(
+                        createMenuItem(
                                 createDish(user, 3, repository,
-                                        createIngredient(categoryFilter(user), BigDecimal.ONE),
-                                        createIngredient(shopFilter(user), BigDecimal.ONE),
-                                        createIngredient(gradeFilter(user), new BigDecimal(3))),
+                                        createIngredient(filter(user, 6), BigDecimal.ONE),
+                                        createIngredient(filter(user, 7), BigDecimal.ONE),
+                                        createIngredient(filter(user, 8), new BigDecimal(3))),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -261,7 +441,7 @@ class MenuTest {
                         new Menu.ProductConstraint("dish#1", 1, 3),
                         new Menu.ProductConstraint("dish#1", 2, 2),
                         new Menu.ProductConstraint("dish#2", 0, 1),
-                        new Menu.ProductConstraint("dish#2", 1, 1),
+                        new Menu.ProductConstraint("dish#2", 1, 3),
                         new Menu.ProductConstraint("dish#2", 2, 4),
                         new Menu.ProductConstraint("dish#3", 0, 10),
                         new Menu.ProductConstraint("dish#3", 1, 15),
@@ -270,12 +450,15 @@ class MenuTest {
         );
 
         List<Menu.MenuItemProduct> expected = List.of(
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(250)),
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 3).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 2).tryBuild(), new BigDecimal(300)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 1).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 1).tryBuild(), new BigDecimal(20)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 4).tryBuild(), new BigDecimal(100))
+                menuItemProduct(createProduct(user, 0), menu.getItems().get(0), 0, 0),
+                menuItemProduct(createProduct(user, 3), menu.getItems().get(0), 1, 3),
+                menuItemProduct(createProduct(user, 2), menu.getItems().get(0), 2, 2),
+                emptyMenuItemProduct(menu.getItems().get(1), 0, 1),
+                emptyMenuItemProduct(menu.getItems().get(1), 1, 3),
+                emptyMenuItemProduct(menu.getItems().get(1), 2, 4),
+                menuItemProduct(createProduct(user, 10), menu.getItems().get(2), 0, 10),
+                menuItemProduct(createProduct(user, 15), menu.getItems().get(2), 1, 15),
+                menuItemProduct(createProduct(user, 11), menu.getItems().get(2), 2, 11)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -287,32 +470,42 @@ class MenuTest {
              there are several ProductConstraint for some ingredients
              => return correct result
             """)
-    public void getMenuItemProducts10() {
+    public void getMenuItemProducts15() {
         User user = createUser(1);
-        MenuItem.Builder item1, item2, item3;
+        ProductRepository repository = mockProductRepository(
+                filter(user, 0), createProductPage(user, 0, this::createProduct),
+                filter(user, 1), createProductPage(user, 3, this::createProduct),
+                filter(user, 2), createProductPage(user, 2, this::createProduct),
+                filter(user, 3), createProductPage(user, 1, this::createProduct),
+                filter(user, 4), createProductPage(user, 3, this::createProduct),
+                filter(user, 5), createProductPage(user, 4, this::createProduct),
+                filter(user, 6), createProductPage(user, 10, this::createProduct),
+                filter(user, 7), createProductPage(user, 15, this::createProduct),
+                filter(user, 8), createProductPage(user, 11, this::createProduct)
+        );
         Menu menu = createMenu(1, user).
                 addItem(
-                        item1 = createMenuItem(
-                                createDish(user, 1, mockProductRepository(user, 0, 3, 2),
-                                        createIngredient(categoryFilter(user), new BigDecimal(5)),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), new BigDecimal(6))),
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
                                 new BigDecimal(5))
                 ).
                 addItem(
-                        item2 = createMenuItem(
-                                createDish(user, 2, mockProductRepository(user, 1, 1, 4),
-                                        createIngredient(categoryFilter(user), BigDecimal.TEN),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), BigDecimal.TEN)),
+                        createMenuItem(
+                                createDish(user, 2, repository,
+                                        createIngredient(filter(user, 3), BigDecimal.TEN),
+                                        createIngredient(filter(user, 4), new BigDecimal(2)),
+                                        createIngredient(filter(user, 5), BigDecimal.TEN)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
-                        item3 = createMenuItem(
-                                createDish(user, 3, mockProductRepository(user, 10, 15, 11),
-                                        createIngredient(categoryFilter(user), BigDecimal.ONE),
-                                        createIngredient(shopFilter(user), BigDecimal.ONE),
-                                        createIngredient(gradeFilter(user), new BigDecimal(3))),
+                        createMenuItem(
+                                createDish(user, 3, repository,
+                                        createIngredient(filter(user, 6), BigDecimal.ONE),
+                                        createIngredient(filter(user, 7), BigDecimal.ONE),
+                                        createIngredient(filter(user, 8), new BigDecimal(3))),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -323,27 +516,28 @@ class MenuTest {
                         new Menu.ProductConstraint("dish#1", 0, 0),
                         new Menu.ProductConstraint("dish#1", 1, 3),
                         new Menu.ProductConstraint("dish#1", 2, 2),
-                        new Menu.ProductConstraint("dish#1", 2, 11),
                         new Menu.ProductConstraint("dish#1", 2, 15),
                         new Menu.ProductConstraint("dish#2", 0, 1),
-                        new Menu.ProductConstraint("dish#2", 1, 1),
+                        new Menu.ProductConstraint("dish#2", 1, 3),
+                        new Menu.ProductConstraint("dish#2", 1, 4),
                         new Menu.ProductConstraint("dish#2", 2, 4),
                         new Menu.ProductConstraint("dish#3", 0, 10),
+                        new Menu.ProductConstraint("dish#3", 0, 20),
                         new Menu.ProductConstraint("dish#3", 1, 15),
                         new Menu.ProductConstraint("dish#3", 2, 11)
                 )
         );
 
         List<Menu.MenuItemProduct> expected = List.of(
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(250)),
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 3).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 2).tryBuild(), new BigDecimal(300)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 1).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 1).tryBuild(), new BigDecimal(20)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 4).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item3.tryBuild(), createProduct(user, 10).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item3.tryBuild(), createProduct(user, 15).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item3.tryBuild(), createProduct(user, 11).tryBuild(), new BigDecimal(300))
+                menuItemProduct(createProduct(user, 0), menu.getItems().get(0), 0, 0),
+                menuItemProduct(createProduct(user, 3), menu.getItems().get(0), 1, 3),
+                menuItemProduct(createProduct(user, 2), menu.getItems().get(0), 2, 2),
+                menuItemProduct(createProduct(user, 1), menu.getItems().get(1), 0, 1),
+                menuItemProduct(createProduct(user, 3), menu.getItems().get(1), 1, 3),
+                menuItemProduct(createProduct(user, 4), menu.getItems().get(1), 2, 4),
+                menuItemProduct(createProduct(user, 10), menu.getItems().get(2), 0, 10),
+                menuItemProduct(createProduct(user, 15), menu.getItems().get(2), 1, 15),
+                menuItemProduct(createProduct(user, 11), menu.getItems().get(2), 2, 11)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -355,32 +549,42 @@ class MenuTest {
              no products selected for ingredients
              => return correct result
             """)
-    public void getMenuItemProducts11() {
+    public void getMenuItemProducts16() {
         User user = createUser(1);
-        MenuItem.Builder item1, item2, item3;
+        ProductRepository repository = mockProductRepository(
+                filter(user, 0), createProductPage(user, this::createProduct, 0, 2, 2, 4, 5),
+                filter(user, 1), createProductPage(user, this::createProduct, 11, 12, 13, 14, 15),
+                filter(user, 2), createProductPage(user, this::createProduct, 21, 22, 23, 24, 25),
+                filter(user, 3), createProductPage(user, this::createProduct, 31, 32, 33, 34, 35),
+                filter(user, 4), createProductPage(user, this::createProduct, 41, 42, 43, 44, 45),
+                filter(user, 5), createProductPage(user, this::createProduct, 51, 52, 53, 54, 55),
+                filter(user, 6), createProductPage(user, this::createProduct, 61, 62, 63, 64, 65),
+                filter(user, 7), createProductPage(user, this::createProduct, 71, 72, 73, 74, 75),
+                filter(user, 8), createProductPage(user, this::createProduct, 81, 82, 83, 84, 85)
+        );
         Menu menu = createMenu(1, user).
                 addItem(
-                        item1 = createMenuItem(
-                                createDish(user, 1, mockProductRepository(user, 0, 3, 2),
-                                        createIngredient(categoryFilter(user), new BigDecimal(5)),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), new BigDecimal(6))),
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
                                 new BigDecimal(5))
                 ).
                 addItem(
-                        item2 = createMenuItem(
-                                createDish(user, 2, mockProductRepository(user, 1, 1, 4),
-                                        createIngredient(categoryFilter(user), BigDecimal.TEN),
-                                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                                        createIngredient(shopFilter(user), BigDecimal.TEN)),
+                        createMenuItem(
+                                createDish(user, 2, repository,
+                                        createIngredient(filter(user, 3), BigDecimal.TEN),
+                                        createIngredient(filter(user, 4), new BigDecimal(2)),
+                                        createIngredient(filter(user, 5), BigDecimal.TEN)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
-                        item3 = createMenuItem(
-                                createDish(user, 3, mockProductRepository(user, 10, 15, 11),
-                                        createIngredient(categoryFilter(user), BigDecimal.ONE),
-                                        createIngredient(shopFilter(user), BigDecimal.ONE),
-                                        createIngredient(gradeFilter(user), new BigDecimal(3))),
+                        createMenuItem(
+                                createDish(user, 3, repository,
+                                        createIngredient(filter(user, 6), BigDecimal.ONE),
+                                        createIngredient(filter(user, 7), BigDecimal.ONE),
+                                        createIngredient(filter(user, 8), new BigDecimal(3))),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -391,15 +595,15 @@ class MenuTest {
         );
 
         List<Menu.MenuItemProduct> expected = List.of(
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(250)),
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item1.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(300)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(20)),
-                createMenuItemProduct(item2.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item3.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item3.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(100)),
-                createMenuItemProduct(item3.tryBuild(), createProduct(user, 0).tryBuild(), new BigDecimal(300))
+                menuItemProduct(createProduct(user, 0), menu.getItems().get(0), 0, 0),
+                menuItemProduct(createProduct(user, 11), menu.getItems().get(0), 1, 0),
+                menuItemProduct(createProduct(user, 21), menu.getItems().get(0), 2, 0),
+                menuItemProduct(createProduct(user, 31), menu.getItems().get(1), 0, 0),
+                menuItemProduct(createProduct(user, 41), menu.getItems().get(1), 1, 0),
+                menuItemProduct(createProduct(user, 51), menu.getItems().get(1), 2, 0),
+                menuItemProduct(createProduct(user, 61), menu.getItems().get(2), 0, 0),
+                menuItemProduct(createProduct(user, 71), menu.getItems().get(2), 1, 0),
+                menuItemProduct(createProduct(user, 81), menu.getItems().get(2), 2, 0)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -930,62 +1134,67 @@ class MenuTest {
                 setConfig(conf);
     }
 
-    private MenuItem[] createMenuItems(User user) {
-        MenuItem[] result = new MenuItem[3];
-
-        result[0] = createMenuItem(
-                createDish(user, 1, mockProductRepository(user, 10, 3, 2),
-                        createIngredient(categoryFilter(user), new BigDecimal(5)),
-                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                        createIngredient(shopFilter(user), new BigDecimal(6))
-                ),
-                new BigDecimal(5)
-        ).tryBuild();
-        result[1] = createMenuItem(
-                createDish(user, 2, mockProductRepository(user, 1, 3, 4),
-                        createIngredient(categoryFilter(user), BigDecimal.TEN),
-                        createIngredient(gradeFilter(user), new BigDecimal(2)),
-                        createIngredient(shopFilter(user), BigDecimal.TEN)),
-                BigDecimal.ONE
-        ).tryBuild();
-        result[2] = createMenuItem(
-                createDish(user, 3, mockProductRepository(user, 10, 15, 1),
-                        createIngredient(categoryFilter(user), BigDecimal.ONE),
-                        createIngredient(shopFilter(user), BigDecimal.ONE),
-                        createIngredient(gradeFilter(user), new BigDecimal(3))),
-                BigDecimal.TEN
-        ).tryBuild();
-
-        return result;
-    }
-
-    public Menu.MenuItemProduct createMenuItemProduct(MenuItem item, Product product, BigDecimal necessaryQuantity) {
+    public Menu.MenuItemProduct menuItemProduct(Product.Builder product,
+                                                MenuItem item,
+                                                int ingredientIndex,
+                                                int productIndex) {
         return new Menu.MenuItemProduct(
+                Optional.of(product.tryBuild()),
                 item,
-                product,
-                necessaryQuantity,
-                conf
+                ingredientIndex,
+                productIndex
         );
     }
 
-    private ProductRepository mockProductRepository(User user,
-                                                    int firstIngredientIndex,
-                                                    int secondIngredientIndex,
-                                                    int thirdIngredientIndex) {
+    public Menu.MenuItemProduct emptyMenuItemProduct(MenuItem item, 
+                                                     int ingredientIndex, 
+                                                     int productIndex) {
+        return new Menu.MenuItemProduct(
+                Optional.empty(),
+                item,
+                ingredientIndex,
+                productIndex
+        );
+    }
+
+    private ProductRepository mockProductRepository(Filter filter00, Page<Product> page00,
+                                                    Filter filter01, Page<Product> page01,
+                                                    Filter filter02, Page<Product> page02,
+                                                    Filter filter10, Page<Product> page10,
+                                                    Filter filter11, Page<Product> page11,
+                                                    Filter filter12, Page<Product> page12,
+                                                    Filter filter20, Page<Product> page20,
+                                                    Filter filter21, Page<Product> page21,
+                                                    Filter filter22, Page<Product> page22) {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(firstIngredientIndex, categoryFilter(user))))
-                ).
-                thenReturn(createProductPage(user, firstIngredientIndex));
-        Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(secondIngredientIndex, shopFilter(user))))
-                ).
-                thenReturn(createProductPage(user, secondIngredientIndex));
-        Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(thirdIngredientIndex, gradeFilter(user))))
-                ).
-                thenReturn(createProductPage(user, thirdIngredientIndex));
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter00)))).
+                thenReturn(page00);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter01)))).
+                thenReturn(page01);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter02)))).
+                thenReturn(page02);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter10)))).
+                thenReturn(page10);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter11)))).
+                thenReturn(page11);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter12)))).
+                thenReturn(page12);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter20)))).
+                thenReturn(page20);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter21)))).
+                thenReturn(page21);
+        Mockito.when(repository.getProducts(Mockito.eq(createCriteria(filter22)))).
+                thenReturn(page22);
         return repository;
+    }
+
+    private Filter filter(User user, int num) {
+        return Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("tag" + num), new Tag("common tag")),
+                Filter.anyCategory("category " + num),
+                Filter.anyGrade("grade " + num)
+        );
     }
 
 
@@ -993,43 +1202,35 @@ class MenuTest {
         return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
     }
 
-    private Filter categoryFilter(User user) {
-        return Filter.and(
-                Filter.anyCategory("categoryA"),
-                Filter.user(user.getId())
-        );
-    }
-
-    private Filter shopFilter(User user) {
-        return Filter.and(
-                Filter.anyShop("shopA"),
-                Filter.user(user.getId())
-        );
-    }
-
-    private Filter gradeFilter(User user) {
-        return Filter.and(
-                Filter.anyGrade("gradeA"),
-                Filter.user(user.getId())
-        );
-    }
-
-    private Criteria createCriteria(int itemIndex, Filter filter) {
+    private Criteria createCriteria(Filter filter) {
         return new Criteria().
-                setPageable(Pageable.ofIndex(30, itemIndex)).
+                setPageable(Pageable.of(30, 0)).
                 setFilter(filter).
                 setSort(Sort.products().asc("price"));
     }
 
     private Page<Product> createProductPage(User user,
-                                            int itemIndex) {
-
-        Page.Metadata metadata = Pageable.ofIndex(30, itemIndex).
+                                            int productIndex,
+                                            BiFunction<User, Integer, Product.Builder> productFactory) {
+        Page.Metadata metadata = Pageable.ofIndex(30, productIndex).
                 createPageMetadata(1000, 30);
 
         int offset = metadata.getOffset().intValue();
         List<Product> products = IntStream.range(0, metadata.getActualSize()).
-                mapToObj(i -> createProduct(user, offset + i).tryBuild()).
+                mapToObj(i -> productFactory.apply(user, offset + i).tryBuild()).
+                toList();
+
+        return metadata.createPage(products);
+    }
+
+    private Page<Product> createProductPage(User user,
+                                            BiFunction<User, Integer, Product.Builder> productFactory,
+                                            int... productIds) {
+        Page.Metadata metadata = Pageable.of(30 , 0).
+                createPageMetadata(productIds.length, 30);
+
+        List<Product> products = Arrays.stream(productIds).
+                mapToObj(i -> productFactory.apply(user, i).tryBuild()).
                 toList();
 
         return metadata.createPage(products);
