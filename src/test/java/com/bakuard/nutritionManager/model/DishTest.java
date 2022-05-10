@@ -42,11 +42,11 @@ class DishTest {
 
     @Test
     @DisplayName("""
-            getLackQuantity(ingredientProduct, servingNumber):
+            getLackPackageQuantity(ingredientProduct, servingNumber):
              servingNumber is null
              => exception
             """)
-    public void getLackQuantity1() {
+    public void getLackPackageQuantity1() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -55,18 +55,18 @@ class DishTest {
         Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantity(ip, null),
+                () -> dish.getLackPackageQuantity(ip, null),
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(ingredientProduct, servingNumber):
+            getLackPackageQuantity(ingredientProduct, servingNumber):
              servingNumber is negative
              => exception
             """)
-    public void getLackQuantity2() {
+    public void getLackPackageQuantity2() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -75,18 +75,18 @@ class DishTest {
         Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantity(ip, new BigDecimal(-1)),
+                () -> dish.getLackPackageQuantity(ip, new BigDecimal(-1)),
                 Constraint.POSITIVE_VALUE
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(ingredientProduct, servingNumber):
+            getLackPackageQuantity(ingredientProduct, servingNumber):
              ingredientProduct is null
              => exception
             """)
-    public void getLackQuantity3() {
+    public void getLackPackageQuantity3() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -95,18 +95,18 @@ class DishTest {
         Dish.IngredientProduct ip = null;
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantity(ip, new BigDecimal(2)),
+                () -> dish.getLackPackageQuantity(ip, new BigDecimal(2)),
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(ingredientProduct, servingNumber):
+            getLackPackageQuantity(ingredientProduct, servingNumber):
              servingNumber is zero
              => exception
             """)
-    public void getLackQuantity4() {
+    public void getLackPackageQuantity4() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -115,18 +115,18 @@ class DishTest {
         Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantity(ip, BigDecimal.ZERO),
+                () -> dish.getLackPackageQuantity(ip, BigDecimal.ZERO),
                 Constraint.POSITIVE_VALUE
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(ingredientProduct, servingNumber):
+            getLackPackageQuantity(ingredientProduct, servingNumber):
              ingredientProduct.product() is empty Optional
              => return empty Optional
             """)
-    public void getLackQuantity5() {
+    public void getLackPackageQuantity5() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -134,18 +134,18 @@ class DishTest {
                 tryBuild();
         Dish.IngredientProduct ip = emptyIngredientProduct(0, 1);
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ip, BigDecimal.TEN);
+        Optional<BigDecimal> actual = dish.getLackPackageQuantity(ip, BigDecimal.TEN);
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(ingredientProduct, servingNumber):
+            getLackPackageQuantity(ingredientProduct, servingNumber):
              all arguments is correct
              => return correct result
             """)
-    public void getLackQuantity6() {
+    public void getLackPackageQuantity6() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -155,18 +155,18 @@ class DishTest {
                 createProduct(user, 10).setQuantity(new BigDecimal(2)), 0, 10
         );
 
-        Optional<BigDecimal> actual = dish.getLackQuantity(ip, BigDecimal.TEN);
+        Optional<BigDecimal> actual = dish.getLackPackageQuantity(ip, BigDecimal.TEN);
 
         AssertUtil.assertEquals(new BigDecimal(18), actual.orElseThrow());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(ingredientProduct, servingNumber):
+            getLackPackageQuantityPrice(ingredientProduct, servingNumber):
              servingNumber is null
              => exception
             """)
-    public void getLackQuantityPrice1() {
+    public void getLackPackageQuantityPrice1() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -175,18 +175,18 @@ class DishTest {
         Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantityPrice(ip, null),
+                () -> dish.getLackPackageQuantityPrice(ip, null),
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(ingredientProduct, servingNumber):
+            getLackPackageQuantityPrice(ingredientProduct, servingNumber):
              servingNumber is negative
              => exception
             """)
-    public void getLackQuantityPrice2() {
+    public void getLackPackageQuantityPrice2() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -195,18 +195,18 @@ class DishTest {
         Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantityPrice(ip, new BigDecimal(-1)),
+                () -> dish.getLackPackageQuantityPrice(ip, new BigDecimal(-1)),
                 Constraint.POSITIVE_VALUE
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(ingredientProduct, servingNumber):
+            getLackPackageQuantityPrice(ingredientProduct, servingNumber):
              ingredientProduct is null
              => exception
             """)
-    public void getLackQuantityPrice3() {
+    public void getLackPackageQuantityPrice3() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -215,18 +215,18 @@ class DishTest {
         Dish.IngredientProduct ip = null;
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantityPrice(ip, new BigDecimal(2)),
+                () -> dish.getLackPackageQuantityPrice(ip, new BigDecimal(2)),
                 Constraint.NOT_NULL
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(ingredientProduct, servingNumber):
+            getLackPackageQuantityPrice(ingredientProduct, servingNumber):
              servingNumber is zero
              => exception
             """)
-    public void getLackQuantityPrice4() {
+    public void getLackPackageQuantityPrice4() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -235,18 +235,18 @@ class DishTest {
         Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
-                () -> dish.getLackQuantityPrice(ip, BigDecimal.ZERO),
+                () -> dish.getLackPackageQuantityPrice(ip, BigDecimal.ZERO),
                 Constraint.POSITIVE_VALUE
         );
     }
 
     @Test
     @DisplayName("""
-            getLackQuantityPrice(ingredientProduct, servingNumber):
+            getLackPackageQuantityPrice(ingredientProduct, servingNumber):
              ingredientProduct.product() is empty Optional
              => return empty Optional
             """)
-    public void getLackQuantityPrice5() {
+    public void getLackPackageQuantityPrice5() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -254,18 +254,18 @@ class DishTest {
                 tryBuild();
         Dish.IngredientProduct ip = emptyIngredientProduct(0, 1);
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ip, BigDecimal.TEN);
+        Optional<BigDecimal> actual = dish.getLackPackageQuantityPrice(ip, BigDecimal.TEN);
 
         Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
-            getLackQuantity(ingredientProduct, servingNumber):
+            getLackPackageQuantityPrice(ingredientProduct, servingNumber):
              all arguments is correct
              => return correct result
             """)
-    public void getLackQuantityPrice6() {
+    public void getLackPackageQuantityPrice6() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = createDish(1, createUser(), repository).
@@ -275,7 +275,7 @@ class DishTest {
                 createProduct(user, 10).setQuantity(new BigDecimal(2)), 0, 10
         );
 
-        Optional<BigDecimal> actual = dish.getLackQuantityPrice(ip, BigDecimal.TEN);
+        Optional<BigDecimal> actual = dish.getLackPackageQuantityPrice(ip, BigDecimal.TEN);
 
         AssertUtil.assertEquals(new BigDecimal(1980), actual.orElseThrow());
     }
@@ -1145,11 +1145,21 @@ class DishTest {
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 100, 101, 102)
+                        (u, i) -> createProduct(u, i).
+                                setPrice(BigDecimal.ZERO).
+                                setQuantity(new BigDecimal(1000)),
+                        100, 101, 102)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+        ).thenReturn(
+                createProductPage(user,
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(200)).
+                                setPackingSize(BigDecimal.TEN).
+                                setQuantity(new BigDecimal(1000)),
+                        10, 11, 12)
+        );
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 addIngredient(createIngredient(filter(user, 1), 1)).
@@ -1175,21 +1185,30 @@ class DishTest {
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(100)).setPackingSize(BigDecimal.ONE),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(100)).
+                                setPackingSize(BigDecimal.ONE).
+                                setQuantity(new BigDecimal(1000)),
                         0, 1, 2)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(570)).setPackingSize(BigDecimal.ONE),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(570)).
+                                setPackingSize(BigDecimal.ONE).
+                                setQuantity(new BigDecimal(1000)),
                         520, 521, 522)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(200)).setPackingSize(new BigDecimal(2)),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(200)).
+                                setPackingSize(new BigDecimal(2)).
+                                setQuantity(new BigDecimal(1000)),
                         20, 21, 22)
         );
         Dish dish = createDish(1, user, repository).
@@ -1216,18 +1235,18 @@ class DishTest {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
+        ).thenReturn(createProductPage(user, 0,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(550)).
-                        setPackingSize(new BigDecimal(5)).
+                        setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)))
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user,
+        ).thenReturn(createProductPage(user, 0,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(550)).
-                        setPackingSize(new BigDecimal(5)).
+                        setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)))
         );
         Mockito.when(
@@ -1236,7 +1255,8 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(10)).
-                                setPackingSize(new BigDecimal("0.5")),
+                                setPackingSize(new BigDecimal("0.5")).
+                                setQuantity(new BigDecimal(1000)),
                         20, 21, 22)
         );
         Dish dish = createDish(1, user, repository).
@@ -1341,14 +1361,18 @@ class DishTest {
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(BigDecimal.ZERO),
                         10, 11, 12)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(1500)).setPackingSize(new BigDecimal(250)),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(1500)).
+                                setPackingSize(new BigDecimal(250)).
+                                setQuantity(new BigDecimal(1000)),
                         203, 204, 205)
         );
         Dish dish = createDish(1, user, repository).
@@ -1377,7 +1401,8 @@ class DishTest {
         ).thenReturn(createProductPage(user,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(600)).
-                        setPackingSize(new BigDecimal(120)),
+                        setPackingSize(new BigDecimal(120)).
+                        setQuantity(new BigDecimal(1000)),
                 0, 1, 2, 3)
         );
         Mockito.when(
@@ -1386,7 +1411,8 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(500)).
-                                setPackingSize(new BigDecimal(200)),
+                                setPackingSize(new BigDecimal(200)).
+                                setQuantity(new BigDecimal(1000)),
                         11, 12, 13)
         );
         Mockito.when(
@@ -1395,7 +1421,8 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(250)).
-                                setPackingSize(new BigDecimal(150)),
+                                setPackingSize(new BigDecimal(150)).
+                                setQuantity(new BigDecimal(1000)),
                         51, 52, 53)
         );
         Dish dish = createDish(1, user, repository).
@@ -1425,8 +1452,9 @@ class DishTest {
         ).thenReturn(createProductPage(user,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(600)).
-                        setPackingSize(new BigDecimal(5)).
-                        setQuantity(new BigDecimal(5)))
+                        setPackingSize(new BigDecimal(7)).
+                        setQuantity(new BigDecimal(5)),
+                12, 13, 14)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
@@ -1434,8 +1462,9 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(600)).
-                                setPackingSize(new BigDecimal(5)).
-                                setQuantity(new BigDecimal(5)))
+                                setPackingSize(new BigDecimal(7)).
+                                setQuantity(new BigDecimal(5)),
+                        12, 13, 14)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
@@ -1443,7 +1472,8 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(250)).
-                                setPackingSize(new BigDecimal(15)),
+                                setPackingSize(new BigDecimal(15)).
+                                setQuantity(new BigDecimal(1000)),
                         101, 111, 121)
         );
         Dish dish = createDish(1, user, repository).
@@ -1563,14 +1593,18 @@ class DishTest {
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(BigDecimal.ZERO),
                         10, 11, 12)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(1500)).setPackingSize(new BigDecimal(250)),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(1500)).
+                                setPackingSize(new BigDecimal(250)).
+                                setQuantity(new BigDecimal(1000)),
                         203, 204, 205)
         );
         Mockito.when(
@@ -1580,11 +1614,21 @@ class DishTest {
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 100, 101, 102)
+                        (u, i) -> createProduct(u, i).
+                                setPrice(BigDecimal.ZERO).
+                                setQuantity(new BigDecimal(1000)),
+                        100, 101, 102)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
-        ).thenReturn(createProductPage(user, this::createProduct));
+        ).thenReturn(
+                createProductPage(user,
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(200)).
+                                setPackingSize(BigDecimal.TEN).
+                                setQuantity(new BigDecimal(1000)),
+                        10, 11, 12)
+        );
         Dish dish = createDish(1, user, repository).
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 addIngredient(createIngredient(filter(user, 1), 1)).
@@ -1611,7 +1655,8 @@ class DishTest {
         ).thenReturn(createProductPage(user,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(600)).
-                        setPackingSize(new BigDecimal(120)),
+                        setPackingSize(new BigDecimal(120)).
+                        setQuantity(new BigDecimal(1000)),
                 0, 1, 2, 3)
         );
         Mockito.when(
@@ -1620,7 +1665,8 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(500)).
-                                setPackingSize(new BigDecimal(200)),
+                                setPackingSize(new BigDecimal(200)).
+                                setQuantity(new BigDecimal(1000)),
                         11, 12, 13)
         );
         Mockito.when(
@@ -1629,28 +1675,38 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(250)).
-                                setPackingSize(new BigDecimal(150)),
+                                setPackingSize(new BigDecimal(150)).
+                                setQuantity(new BigDecimal(1000)),
                         51, 52, 53)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(100)).setPackingSize(BigDecimal.ONE),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(100)).
+                                setPackingSize(BigDecimal.ONE).
+                                setQuantity(new BigDecimal(1000)),
                         0, 1, 2)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(570)).setPackingSize(BigDecimal.ONE),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(570)).
+                                setPackingSize(BigDecimal.ONE).
+                                setQuantity(new BigDecimal(1000)),
                         520, 521, 522)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
         ).thenReturn(
                 createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(new BigDecimal(200)).setPackingSize(new BigDecimal(2)),
+                        (u, i) -> createProduct(u, i).
+                                setPrice(new BigDecimal(200)).
+                                setPackingSize(new BigDecimal(2)).
+                                setQuantity(new BigDecimal(1000)),
                         20, 21, 22)
         );
         Dish dish = createDish(1, user, repository).
@@ -1680,8 +1736,9 @@ class DishTest {
         ).thenReturn(createProductPage(user,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(600)).
-                        setPackingSize(new BigDecimal(5)).
-                        setQuantity(new BigDecimal(5)))
+                        setPackingSize(new BigDecimal(7)).
+                        setQuantity(new BigDecimal(5)),
+                12, 13, 14)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
@@ -1689,8 +1746,9 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(600)).
-                                setPackingSize(new BigDecimal(5)).
-                                setQuantity(new BigDecimal(5)))
+                                setPackingSize(new BigDecimal(7)).
+                                setQuantity(new BigDecimal(5)),
+                        12, 13, 14)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
@@ -1698,23 +1756,24 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(250)).
-                                setPackingSize(new BigDecimal(15)),
+                                setPackingSize(new BigDecimal(15)).
+                                setQuantity(new BigDecimal(1000)),
                         101, 111, 121)
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
+        ).thenReturn(createProductPage(user, 0,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(550)).
-                        setPackingSize(new BigDecimal(5)).
+                        setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)))
         );
         Mockito.when(
                 repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user,
+        ).thenReturn(createProductPage(user, 0,
                 (u, i) -> createProduct(u, i).
                         setPrice(new BigDecimal(550)).
-                        setPackingSize(new BigDecimal(5)).
+                        setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)))
         );
         Mockito.when(
@@ -1723,7 +1782,8 @@ class DishTest {
                 createProductPage(user,
                         (u, i) -> createProduct(u, i).
                                 setPrice(new BigDecimal(10)).
-                                setPackingSize(new BigDecimal("0.5")),
+                                setPackingSize(new BigDecimal("0.5")).
+                                setQuantity(new BigDecimal(1000)),
                         20, 21, 22)
         );
         Dish dish = createDish(1, user, repository).

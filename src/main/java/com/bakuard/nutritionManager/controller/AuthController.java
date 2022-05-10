@@ -7,7 +7,7 @@ import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.util.Pair;
-import com.bakuard.nutritionManager.services.AuthService;
+import com.bakuard.nutritionManager.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

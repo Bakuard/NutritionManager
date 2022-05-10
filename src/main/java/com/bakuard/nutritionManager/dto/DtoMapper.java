@@ -220,9 +220,8 @@ public class DtoMapper {
         List<Menu.ProductConstraint> constraints = dto.getProducts().stream().
                 map(d -> new Menu.ProductConstraint(d.getDishName(), d.getIngredientIndex(), d.getProductIndex())).
                 toList();
-        List<Menu.MenuItemProduct> items = menu.getMenuItemProducts(dto.getQuantity(), constraints);
-        Map<Product, List<Menu.MenuItemProduct>> products = menu.groupByProduct(items);
-        return menu.getLackProductsPrice(products);
+        List<Menu.MenuItemProduct> items = menu.getMenuItemProducts(constraints);
+        return menu.getLackProductsPrice(items, dto.getQuantity());
     }
 
 
@@ -418,10 +417,10 @@ public class DtoMapper {
                 dish.tryGetIngredient(ingredientProduct.ingredientIndex()).getNecessaryQuantity(servingNumber)
         );
         response.setLackQuantity(
-                dish.getLackQuantity(ingredientProduct, servingNumber).orElseThrow()
+                dish.getLackPackageQuantity(ingredientProduct, servingNumber).orElseThrow()
         );
         response.setLackQuantityPrice(
-                dish.getLackQuantityPrice(ingredientProduct, servingNumber).orElseThrow()
+                dish.getLackPackageQuantityPrice(ingredientProduct, servingNumber).orElseThrow()
         );
         response.setTags(toTagsResponse(product.getContext().getTags()));
         response.setChecked(isChecked);

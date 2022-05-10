@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.config;
 
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dal.impl.*;
-import com.bakuard.nutritionManager.services.*;
+import com.bakuard.nutritionManager.service.*;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 
 import com.zaxxer.hikari.HikariConfig;

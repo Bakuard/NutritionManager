@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.services;
+package com.bakuard.nutritionManager.service;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.*;

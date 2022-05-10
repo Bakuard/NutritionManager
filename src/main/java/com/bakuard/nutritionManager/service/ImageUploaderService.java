@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.services;
+package com.bakuard.nutritionManager.service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.policy.Policy;
