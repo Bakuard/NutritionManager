@@ -54,6 +54,8 @@ public final class Page<T> {
      * 1. Если элемент с указанным глобальным индексом, на момент создания данного объекта Page, должен был
      *    находится на другой странице - метод вернет пустой Optional. <br/>
      * 2. Если исходная выборка, по которйо проводится пагинация, является пустой - вернет пустой Optional. <br/>
+     * 3. Если в выборке не существует элемента с таким индексом (индекс выходит за допустимый диапозон) -
+     *    вернет пустой Optional. <br/>
      * @param globalIndex глобальный индекс элемента (порядковый номер элемента во всей выборке).
      * @return объект хранящийся на данной странице или пустой Optional.
      * @throws IndexOutOfBoundsException если globalIndex < 0
@@ -68,21 +70,19 @@ public final class Page<T> {
      * 1. Если элемент с указанным глобальным индексом, на момент создания данного объекта Page, должен был
      *    находится на другой странице - метод вернет пустой Optional. <br/>
      * 2. Если исходная выборка, по которйо проводится пагинация, является пустой - вернет пустой Optional. <br/>
+     * 3. Если в выборке не существует элемента с таким индексом (индекс выходит за допустимый диапозон) -
+     *    вернет пустой Optional. <br/>
      * @param globalIndex глобальный индекс элемента (порядковый номер элемента во всей выборке).
      * @return объект хранящийся на данной странице или пустой Optional.
-     * @throws IndexOutOfBoundsException если globalIndex < 0
      */
     public Optional<T> getByGlobalIndex(BigInteger globalIndex) {
-        if(globalIndex.signum() < 0)
-            throw new IndexOutOfBoundsException("globalIndex can't be less then zero. Actual value = " + globalIndex);
-
         T result = null;
 
         if(!metadata.isEmpty()) {
             BigInteger offset = metadata.getOffset();
             BigInteger topLine = offset.add(BigInteger.valueOf(metadata.getActualSize()));
 
-            if (globalIndex.compareTo(offset) >= 0 && globalIndex.compareTo(topLine) < 0) {
+            if(globalIndex.compareTo(offset) >= 0 && globalIndex.compareTo(topLine) < 0) {
                 int index = globalIndex.subtract(offset).intValueExact();
                 result = content.get(index);
             }

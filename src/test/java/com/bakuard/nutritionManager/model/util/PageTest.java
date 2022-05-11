@@ -280,16 +280,52 @@ class PageTest {
     @Test
     @DisplayName("""
             getByGlobalIndex(globalIndex):
+             page contains items,
              globalIndex < 0
-             => exception
+             => return empty Optional
             """)
     public void getByGlobalIndex1() {
         Page<Integer> page = Pageable.
-                ofIndex(10, 9).
+                ofIndex(10, 0).
                 createPageMetadata(100, 200).
                 createPage(createFullList(0, 10));
 
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> page.getByGlobalIndex(-1));
+        Optional<Integer> actual = page.getByGlobalIndex(-1);
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getByGlobalIndex(globalIndex):
+             page contains items,
+             globalIndex = total items number
+             => return empty Optional
+            """)
+    public void getByGlobalIndex2() {
+        Page<Integer> lastPage = Pageable.
+                ofIndex(10, 99).
+                createPageMetadata(100, 200).
+                createPage(createFullList(0, 10));
+
+        Optional<Integer> actual = lastPage.getByGlobalIndex(100);
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getByGlobalIndex(globalIndex):
+             page contains items,
+             globalIndex > total items number
+             => return empty Optional
+            """)
+    public void getByGlobalIndex3() {
+        Page<Integer> lastPage = Pageable.
+                ofIndex(10, 99).
+                createPageMetadata(100, 200).
+                createPage(createFullList(0, 10));
+
+        Optional<Integer> actual = lastPage.getByGlobalIndex(101);
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -298,7 +334,7 @@ class PageTest {
              item with globalIndex out of page bottom line
              => return empty Optional
             """)
-    public void getByGlobalIndex2() {
+    public void getByGlobalIndex4() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -314,7 +350,7 @@ class PageTest {
              item with globalIndex out of page top line
              => return empty Optional
             """)
-    public void getByGlobalIndex3() {
+    public void getByGlobalIndex5() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -330,7 +366,7 @@ class PageTest {
              item with globalIndex is first page item
              => return first page item
             """)
-    public void getByGlobalIndex4() {
+    public void getByGlobalIndex6() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -346,7 +382,7 @@ class PageTest {
              item with globalIndex is last page item
              => return last page item
             """)
-    public void getByGlobalIndex5() {
+    public void getByGlobalIndex7() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -362,7 +398,7 @@ class PageTest {
              item with globalIndex is middle page item
              => return middle page item
             """)
-    public void getByGlobalIndex6() {
+    public void getByGlobalIndex8() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
@@ -378,7 +414,7 @@ class PageTest {
              page is empty
              => return empty Optional
             """)
-    public void getByGlobalIndex7() {
+    public void getByGlobalIndex9() {
         Page<Integer> page = Pageable.
                 ofIndex(10, 15).
                 createPageMetadata(0, 200).

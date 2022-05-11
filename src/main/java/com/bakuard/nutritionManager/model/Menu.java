@@ -4,10 +4,10 @@ import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Представляет собой меню - группу из неповторяющихся блюд, где для каждого блюда указанно его кол-во.
@@ -186,7 +186,12 @@ public class Menu implements Entity<Menu> {
      *         6. Если dishName у одного из ProductConstraint равен null. <br/>
      */
     public List<MenuItemProduct> getMenuItemProducts(List<ProductConstraint> constraints) {
-       return null;
+        Validator.check(
+                Rule.of("Menu.constrains").notNull(constraints).
+                        and(r -> r.notContainsNull(constraints))
+        );
+
+        return null;
     }
 
     /**

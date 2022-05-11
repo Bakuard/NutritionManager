@@ -437,7 +437,7 @@ public class DtoMapper {
                             DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
 
                             List<Dish.IngredientProduct> products = dish.getProducts(ingredientIndex, 0).
-                                    getContent();
+                                    orElseThrow().getContent();
 
                             DishIngredientForListResponse ir = new DishIngredientForListResponse();
                             ir.setIngredientIndex(ingredientIndex);

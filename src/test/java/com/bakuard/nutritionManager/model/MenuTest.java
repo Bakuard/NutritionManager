@@ -556,6 +556,136 @@ class MenuTest {
         Assertions.assertEquals(expected, actual);
     }
 
+    @Test
+    @DisplayName("""
+            getDishIngredientQuantity(product, menuNumber):
+             product is null
+             => exception
+            """)
+    public void getDishIngredientQuantity1() {
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> menu.getDishIngredientQuantity(null, BigDecimal.TEN),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getDishIngredientQuantity(product, menuNumber):
+             menuNumber is null
+             => exception
+            """)
+    public void getDishIngredientQuantity2() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
+                                new BigDecimal(5))
+                ).
+                tryBuild();
+
+        Menu.MenuItemProduct product =
+                menuItemProduct(createProduct(user, 0), 0, 1, 0);
+
+        AssertUtil.assertValidateException(
+                () -> menu.getDishIngredientQuantity(product, null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getDishIngredientQuantity(product, menuNumber):
+             menuNumber < 0
+             => exception
+            """)
+    public void getDishIngredientQuantity3() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
+                                new BigDecimal(5))
+                ).
+                tryBuild();
+
+        Menu.MenuItemProduct product =
+                menuItemProduct(createProduct(user, 0), 0, 1, 0);
+
+        AssertUtil.assertValidateException(
+                () -> menu.getDishIngredientQuantity(product, new BigDecimal(-1)),
+                Constraint.POSITIVE_VALUE
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getDishIngredientQuantity(product, menuNumber):
+             menuNumber = 0
+             => exception
+            """)
+    public void getDishIngredientQuantity4() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
+                                new BigDecimal(5))
+                ).
+                tryBuild();
+
+        Menu.MenuItemProduct product =
+                menuItemProduct(createProduct(user, 0), 0, 1, 0);
+
+        AssertUtil.assertValidateException(
+                () -> menu.getDishIngredientQuantity(product, BigDecimal.ZERO),
+                Constraint.POSITIVE_VALUE
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getDishIngredientQuantity(product, menuNumber):
+             all arguments is correct
+             => return correct result
+            """)
+    public void getDishIngredientQuantity5() {
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        User user = createUser(1);
+        Menu menu = createMenu(1, user).
+                addItem(
+                        createMenuItem(
+                                createDish(user, 1, repository,
+                                        createIngredient(filter(user, 0), new BigDecimal(5)),
+                                        createIngredient(filter(user, 1), new BigDecimal(2)),
+                                        createIngredient(filter(user, 2), new BigDecimal(6))),
+                                new BigDecimal(5))
+                ).
+                tryBuild();
+        Menu.MenuItemProduct product =
+                menuItemProduct(createProduct(user, 0), 0, 1, 0);
+
+        Optional<BigDecimal> actual = menu.getDishIngredientQuantity(product, BigDecimal.TEN);
+
+        AssertUtil.assertEquals(new BigDecimal(100), actual.orElseThrow());
+    }
+
 
     private User createUser(int userId) {
         return new User.Builder().

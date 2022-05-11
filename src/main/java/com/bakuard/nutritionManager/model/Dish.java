@@ -173,22 +173,24 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
+     * Возвращает кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента. Особые
+     * случаи: <br/>
+     * 1. Если блюдо не содержит ингредиента с таким индексом - возвращает пустой Optional. <br/>
      * @param ingredientIndex индекс ингредиента для которого рассчитывается кол-во взаимозаменяемых продуктов.
-     * @return кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
-     * @throws ValidateException если выполняется хотя бы одноиз условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
+     * @return кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента или пустой Optional.
      */
-    public int getProductsNumber(int ingredientIndex) {
-        DishIngredient ingredient = tryGetIngredient(ingredientIndex);
-        return productRepository.getProductsNumber(new Criteria().setFilter(ingredient.getFilter()));
+    public Optional<Integer> getProductsNumber(int ingredientIndex) {
+        return getIngredient(ingredientIndex).
+                map(
+                        ingredient -> productRepository.getProductsNumber(
+                                new Criteria().setFilter(ingredient.getFilter())
+                        )
+                );
     }
 
     /**
      * Возвращает ингредиент по его индексу. Особые случаи: <br/>
-     * 1. Если индекс ингредиента меньше 0 - возвращает пустой Optional. <br/>
-     * 2. Если индекс ингредиента больше или равен кол-ву ингредиентов блюда - возвращает пустой Optional. <br/>
+     * 1. Если блюдо не содержит ингредиента с таким индексом - возвращает пустой Optional. <br/>
      * @param ingredientIndex индекс искомого ингредиента.
      * @return ингредиент блюда или пустой Optional.
      */
@@ -207,8 +209,8 @@ public class Dish implements Entity<Dish> {
      * @param ingredientIndex индекс искомого ингредиента.
      * @return ингредиент блюда или пустой Optional.
      * @throws ValidateException если выполняется хотя бы одно из условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
+     *                           1. ingredientIndex < нуля.<br/>
+     *                           2. ingredientIndex >= кол-ву ингредиентов блюда.
      */
     public DishIngredient tryGetIngredient(int ingredientIndex) {
         Validator.check(
@@ -230,105 +232,77 @@ public class Dish implements Entity<Dish> {
      * Возвращает продукт из множества всех взаимозаменяемых продуктов для данного ингредиента по его
      * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
      * ингредиента упорядоченно по цене в порядке возрастания. Особые случаи:<br/>
-     * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
-     *    данного ингредиента, то {@link IngredientProduct#product()} будет возвращать пустой Optional.<br/>
-     * 2. Если в БД есть продукты соответствующие данному ингредиенту и productIndex больше или равен их
-     *    кол-ву, то метод вернет последний продукт из всего множества продуктов данного ингредиента.
+     * 1. Если блюдо не содержит ингредиента с индексом ingredientIndex - возвращает пустой Optional. <br/>
+     * 2. Если указанный ингредиент не имеет продукта с индексом productIndex - то {@link IngredientProduct#product()}
+     *    будет возвращать пустой Optional.<br/>
      * @param ingredientIndex индекс ингредиента для которого возвращается один из возможных взаимозаменяемых продуктов.
      * @param productIndex порядковый номер продукта.
      * @return продукт по его порядковому номеру.
-     * @throws ValidateException если выполняется хотя бы одноиз условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.<br/>
-     *                           3. если productIndex < 0
      */
-    public IngredientProduct getProduct(int ingredientIndex, int productIndex) {
-        Validator.check(
-                Rule.of("Dish.productIndex").notNegative(productIndex)
-        );
-
-        DishIngredient ingredient = tryGetIngredient(ingredientIndex);
-
-        Page<Product> page = productRepository.getProducts(
-                new Criteria().
-                        setPageable(Pageable.ofIndex(30, productIndex)).
-                        setSort(ingredientProductsSort).
-                        setFilter(ingredient.getFilter())
-        );
-
-        Optional<Product> product = page.getByGlobalIndex(
-                page.getMetadata().
-                        getTotalItems().
-                        subtract(BigInteger.ONE).
-                        max(BigInteger.ZERO).
-                        min(BigInteger.valueOf(productIndex))
-        );
-        return new IngredientProduct(product, ingredientIndex, productIndex);
+    public Optional<IngredientProduct> getProduct(int ingredientIndex, int productIndex) {
+        return getIngredient(ingredientIndex).
+                map(ingredient -> {
+                    Page<Product> page = getProductPageBy(ingredient, productIndex);
+                    Optional<Product> product = page.getByGlobalIndex(BigInteger.valueOf(productIndex));
+                    return new IngredientProduct(product, ingredientIndex, productIndex);
+                });
     }
 
     /**
      * Возвращает часть выборки продуктов соответствующих указанному ингредиенту. Все продукты в выборке
-     * упорядоченны по цене в порядке возрастания. Если ингредиенту не соответствует ни один продукт - возвращает
-     * пустой объект {@link Page}.
+     * упорядоченны по цене в порядке возрастания. Особые случаи: <br/>
+     * 1. Если ингредиенту не соответствует ни один продукт - возвращает пустой объект {@link Page}. <br/>
+     * 2. Если среди ингредиентов блюда нет ингредиента с таким индексом - возвращает пустой Optional. <br/>
      * @param ingredientIndex индекс ингредиента.
      * @param pageNumber номер страницы выборки.
      * @return страницу из выборки продуктов соответствующих указанному ингредиенту.
-     * @throws ValidateException если выполняется хотя бы одно из условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
      */
-    public Page<IngredientProduct> getProducts(int ingredientIndex, int pageNumber) {
-        DishIngredient ingredient = tryGetIngredient(ingredientIndex);
+    public Optional<Page<IngredientProduct>> getProducts(int ingredientIndex, int pageNumber) {
+        return getIngredient(ingredientIndex).
+                map(ingredient -> {
+                    Page<Product> productPage =  productRepository.getProducts(
+                            new Criteria().
+                                    setPageable(Pageable.of(30, pageNumber)).
+                                    setSort(ingredientProductsSort).
+                                    setFilter(ingredient.getFilter())
+                    );
 
-        Page<Product> productPage =  productRepository.getProducts(
-                new Criteria().
-                        setPageable(Pageable.of(30, pageNumber)).
-                        setSort(ingredientProductsSort).
-                        setFilter(ingredient.getFilter())
-        );
-
-        return productPage.map(
-                (product, index) ->
-                        new IngredientProduct(Optional.ofNullable(product), ingredientIndex, index.intValue())
-        );
+                    return productPage.map(
+                            (product, index) ->
+                                    new IngredientProduct(Optional.ofNullable(product), ingredientIndex, index.intValue())
+                    );
+                });
     }
 
     /**
      * Возвращает данные о выбранном продукте для каждого ингрдиента блюда. Индекс элемента в итоговом списке
      * соответствует индексу ингедиента к которому этот элемент относится. Особые случаи:<br/>
-     * 1. Если некоторому ингредиенту блюда не соответствует ни один продукт - то для этого ингредиента
+     * 1. Если блюдо не содержит ингредиентов - возвращает пустой список. <br/>
+     * 2. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента < 0 - этот элемент не будет
+     *    принимать участия в формировании итогового результата. <br/>
+     * 3. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента >= кол-ву ингредиентов блюда -
+     *    этот элемент не будет принимать участия в формировании итогового результата. <br/>
+     * 4. Если {@link ProductConstraint#productIndex()} некоторого элемента < 0 - этот элемент не будет
+     *    принимать участия в формировании итогового результата. <br/>
+     * 5. Если {@link ProductConstraint#productIndex()} некоторого элемента >= кол-ва продуктов соответствующих
+     *    этому ингредиенту - этот элемент не будет принимать участия в формировании итогового результата. <br/>
+     * 6. Если некоторому ингредиенту блюда не соответствует ни один продукт - то для этого ингредиента
      *    будет добавлен элемент, метод {@link IngredientProduct#product()} которого будет возвращаеть пустой
      *    Optional. <br/>
-     * 2. Если для одного и того же ингредиента блюда указанно несколько продуктов - будет выбран первый
+     * 7. Если для одного и того же ингредиента блюда указанно несколько продуктов - будет выбран первый
      *    из указанных. <br/>
-     * 3. Если для некоторого ингредиента блюда не указанно ни одного продукта - будет выбран самый
+     * 8. Если для некоторого ингредиента блюда не указанно ни одного продукта - будет выбран самый
      *    дешевый из всех продуктов подходящих для данного ингредиента. <br/>
-     * 4. Если для некоторого ингредиента блюда задан индекс продукта, который больше или равен кол-ву
-     *    всех продуктов соответствующих данному ингредиенту - то для этого ингредиента будет выбран последний
-     *    из всех соответствующих ему продуктов (все продукты упорядочены по цене в порядке возрастания). <br/>
-     * 5. Если блюдо не содержит ингредиентов - возвращает пустой список. <br/>
      * @param constraints ограничения задающие конкретные продукты для ингредиентов блюд.
      * @return данные об одном конкретном продукте для каждого ингредиента блюда.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
      *         1. Если constraints имеет значение null. <br/>
      *         2. Если один из элементов constraints имеет значение null. <br/>
-     *         3. Если ingredientIndex у одного из ProductConstraint меньше нуля. <br/>
-     *         4. Если ingredientIndex у одного из ProductConstraint больше или равен кол-ву ингредиентво, и при
-     *            этом блюдо содержит как минимум один ингредиент. <br/>
-     *         5. Если productIndex у одного из ProductConstraint меньше нуля. <br/>
      */
     public List<IngredientProduct> getProductForEachIngredient(List<ProductConstraint> constraints) {
         Validator.check(
                 Rule.of("Dish.constrains").notNull(constraints).
-                        and(r -> r.notContainsNull(constraints)).
-                        and(r -> r.isEmpty(ingredients).or(
-                                 r2 -> r2.notContains(constraints,
-                                         c -> c.ingredientIndex() < 0 || c.ingredientIndex() >= ingredients.size(),
-                                         "ingredients").
-                                         and(r3 -> r3.notContains(constraints,
-                                                 c -> c.productIndex() < 0,
-                                                 "products"))
-                        ))
+                        and(r -> r.notContainsNull(constraints))
         );
 
         return IntStream.range(0, ingredients.size()).
@@ -339,7 +313,7 @@ public class Dish implements Entity<Dish> {
                             findFirst().
                             orElse(0);
 
-                    return getProduct(i, productIndex);
+                    return getProduct(i, productIndex).orElseThrow();
                 }).
                 toList();
     }
@@ -356,7 +330,7 @@ public class Dish implements Entity<Dish> {
      */
     public Map<Product, List<IngredientProduct>> groupByProduct(List<IngredientProduct> ingredientProducts) {
         Validator.check(
-                Rule.of("Dish.ingredients").notNull(ingredients)
+                Rule.of("Dish.ingredients").notNull(ingredientProducts)
         );
 
         return ingredientProducts.stream().
@@ -624,8 +598,7 @@ public class Dish implements Entity<Dish> {
                                                     BigDecimal servingNumber) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(r -> r.positiveValue(servingNumber)),
-                Rule.of("Dish.ingredients").notNull(ingredients)
+                        and(r -> r.positiveValue(servingNumber))
         );
 
         Map<Product, List<IngredientProduct>> groups = groupByProduct(ingredients);
@@ -650,7 +623,7 @@ public class Dish implements Entity<Dish> {
      */
     public BigInteger getNumberIngredientCombinations() {
         return IntStream.range(0, ingredients.size()).
-                map(this::getProductsNumber).
+                map(i -> getProductsNumber(i).orElseThrow()).
                 filter(i -> i > 0).
                 mapToObj(BigInteger::valueOf).
                 reduce(BigInteger::multiply).
@@ -805,6 +778,16 @@ public class Dish implements Entity<Dish> {
 
     private BigDecimal calculateProductPrice(Product product, BigDecimal packagesNumber) {
         return product.getContext().getPrice().multiply(packagesNumber, config.getMathContext());
+    }
+
+
+    private Page<Product> getProductPageBy(DishIngredient ingredient, int productIndex) {
+        return productRepository.getProducts(
+                new Criteria().
+                        setPageable(Pageable.ofIndex(30, productIndex)).
+                        setSort(ingredientProductsSort).
+                        setFilter(ingredient.getFilter())
+        );
     }
 
 

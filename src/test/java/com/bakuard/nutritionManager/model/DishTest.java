@@ -515,7 +515,7 @@ class DishTest {
     @DisplayName("""
             getProduct(ingredientIndex, productIndex):
              ingredientIndex < 0
-             => exception
+             => return empty Optional
             """)
     public void getProduct1() {
         User user = createUser();
@@ -524,17 +524,16 @@ class DishTest {
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        AssertUtil.assertValidateException(
-                () -> dish.getProduct(-1, 0),
-                Constraint.RANGE
-        );
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(-1, 0);
+
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
             getProduct(ingredientIndex, productIndex):
              ingredientIndex = dish ingredients number
-             => exception
+             => return empty Optional
             """)
     public void getProduct2() {
         User user = createUser();
@@ -543,17 +542,16 @@ class DishTest {
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        AssertUtil.assertValidateException(
-                () -> dish.getProduct(1, 0),
-                Constraint.RANGE
-        );
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(1, 0);
+
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
             getProduct(ingredientIndex, productIndex):
              ingredientIndex > dish ingredients number
-             => exception
+             => return empty Optional
             """)
     public void getProduct3() {
         User user = createUser();
@@ -562,36 +560,38 @@ class DishTest {
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        AssertUtil.assertValidateException(
-                () -> dish.getProduct(2, 0),
-                Constraint.RANGE
-        );
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(2, 0);
+
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     @DisplayName("""
             getProduct(ingredientIndex, productIndex):
              productIndex < 0
-             => exception
+             => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct4() {
         User user = createUser();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(createCriteria(6, filter(user, 0))))
+                ).
+                thenReturn(createProductPage(user, this::createProduct, 0, 1, 2, 3, 4));
         Dish dish = createDish(1, createUser(), repository).
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        AssertUtil.assertValidateException(
-                () -> dish.getProduct(0, -1),
-                Constraint.NOT_NEGATIVE_VALUE
-        );
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(0, -1);
+
+        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
     }
 
     @Test
     @DisplayName("""
             getProduct(ingredientIndex, productIndex):
              there are not products matching this ingredient
-             => return empty Optional
+             => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct5() {
         User user = createUser();
@@ -601,9 +601,9 @@ class DishTest {
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        Dish.IngredientProduct actual = dish.getProduct(0, 0);
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 0);
 
-        Assertions.assertTrue(actual.product().isEmpty());
+        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
     }
 
     @Test
@@ -624,10 +624,10 @@ class DishTest {
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        Dish.IngredientProduct actual = dish.getProduct(0, 4);
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 4);
 
         Dish.IngredientProduct expected = ingredientProduct(createProduct(user, 4), 0, 4);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
     @Test
@@ -635,7 +635,7 @@ class DishTest {
             getProduct(ingredientIndex, productIndex):
              there are products matching this ingredient,
              productIndex = ingredient products number
-             => return correct result
+             => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct7() {
         User user = createUser();
@@ -643,15 +643,14 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(5, filter(user, 0))))
                 ).
-                thenReturn(createProductPage(user, 5, this::createProduct));
+                thenReturn(createProductPage(user, this::createProduct, 0, 1, 2, 3, 4));
         Dish dish = createDish(1, createUser(), repository).
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        Dish.IngredientProduct actual = dish.getProduct(0, 5);
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 5);
 
-        Dish.IngredientProduct expected = ingredientProduct(createProduct(user, 5), 0, 5);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
     }
 
     @Test
@@ -659,7 +658,7 @@ class DishTest {
             getProduct(ingredientIndex, productIndex):
              there are products matching this ingredient,
              productIndex > ingredient products number
-             => return correct result
+             => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct8() {
         User user = createUser();
@@ -667,15 +666,14 @@ class DishTest {
         Mockito.when(
                         repository.getProducts(Mockito.eq(createCriteria(6, filter(user, 0))))
                 ).
-                thenReturn(createProductPage(user, 6, this::createProduct));
+                thenReturn(createProductPage(user, this::createProduct, 0, 1, 2, 3, 4));
         Dish dish = createDish(1, createUser(), repository).
                 addIngredient(createIngredient(filter(user, 0), 0)).
                 tryBuild();
 
-        Dish.IngredientProduct actual = dish.getProduct(0, 6);
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 6);
 
-        Dish.IngredientProduct expected = ingredientProduct(createProduct(user, 6), 0, 6);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
     }
 
     @Test

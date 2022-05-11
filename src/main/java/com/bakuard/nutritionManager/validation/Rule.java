@@ -353,6 +353,32 @@ public class Rule {
         );
     }
 
+    public <T> Result notEmpty(Collection<T> collection) {
+        return notEmpty(collection, null);
+    }
+
+    public <T> Result notEmpty(Collection<T> collection, String field) {
+        Result.State state = Result.State.UNKNOWN;
+        String logMessage = null;
+
+        if(collection != null) {
+            state = Result.State.of(!collection.isEmpty());
+
+            if(field == null && state == Result.State.FAIL) {
+                logMessage = "collection can't be empty";
+            } else if(state == Result.State.FAIL) {
+                logMessage = field + " can't be empty";
+            }
+        }
+
+        return createResult(
+                Constraint.NOT_EMPTY_COLLECTION,
+                logMessage,
+                getRuleName(field),
+                state
+        );
+    }
+
     public Result stringLength(String checkedValue, int minLength, int maxLength) {
         return stringLength(checkedValue, minLength, maxLength, null);
     }
