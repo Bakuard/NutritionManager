@@ -233,8 +233,9 @@ public class Dish implements Entity<Dish> {
      * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
      * ингредиента упорядоченно по цене в порядке возрастания. Особые случаи:<br/>
      * 1. Если блюдо не содержит ингредиента с индексом ingredientIndex - возвращает пустой Optional. <br/>
-     * 2. Если указанный ингредиент не имеет продукта с индексом productIndex - то {@link IngredientProduct#product()}
-     *    будет возвращать пустой Optional.<br/>
+     * 2. Если указанный ингредиент не имеет продукта с индексом productIndex, но при этом множество продуктов
+     *    подходящих для указанного ингредиента не пусто - то {@link IngredientProduct#product()} будет возвращать
+     *    пустой Optional.<br/>
      * @param ingredientIndex индекс ингредиента для которого возвращается один из возможных взаимозаменяемых продуктов.
      * @param productIndex порядковый номер продукта.
      * @return продукт по его порядковому номеру.
@@ -278,21 +279,23 @@ public class Dish implements Entity<Dish> {
      * Возвращает данные о выбранном продукте для каждого ингрдиента блюда. Индекс элемента в итоговом списке
      * соответствует индексу ингедиента к которому этот элемент относится. Особые случаи:<br/>
      * 1. Если блюдо не содержит ингредиентов - возвращает пустой список. <br/>
-     * 2. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента < 0 - этот элемент не будет
-     *    принимать участия в формировании итогового результата. <br/>
+     * 2. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента < 0 - этот элемент будет отброшен и
+     *    не будет принимать участия в формировании итогового результата. <br/>
      * 3. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента >= кол-ву ингредиентов блюда -
-     *    этот элемент не будет принимать участия в формировании итогового результата. <br/>
-     * 4. Если {@link ProductConstraint#productIndex()} некоторого элемента < 0 - этот элемент не будет
-     *    принимать участия в формировании итогового результата. <br/>
+     *    этот элемент будет отброшен и не будет принимать участия в формировании итогового результата. <br/>
+     * 4. Если {@link ProductConstraint#productIndex()} некоторого элемента < 0 - этот элемент будет отброшен и
+     *    не будет принимать участия в формировании итогового результата. <br/>
      * 5. Если {@link ProductConstraint#productIndex()} некоторого элемента >= кол-ва продуктов соответствующих
-     *    этому ингредиенту - этот элемент не будет принимать участия в формировании итогового результата. <br/>
+     *    этому ингредиенту и при это множество продуктов соответствующих указанному ингредиенту не пусто - этот
+     *    элемент будет отброшен и не будет принимать участия в формировании итогового результата. <br/>
      * 6. Если некоторому ингредиенту блюда не соответствует ни один продукт - то для этого ингредиента
      *    будет добавлен элемент, метод {@link IngredientProduct#product()} которого будет возвращаеть пустой
      *    Optional. <br/>
-     * 7. Если для одного и того же ингредиента блюда указанно несколько продуктов - будет выбран первый
-     *    из указанных. <br/>
-     * 8. Если для некоторого ингредиента блюда не указанно ни одного продукта - будет выбран самый
-     *    дешевый из всех продуктов подходящих для данного ингредиента. <br/>
+     * 7. Если для одного и того же ингредиента блюда указанно несколько элементов задающих для него продукт - будет
+     *    выбран первый корректный элемент из списка. <br/>
+     * 8. Если для некоторого ингредиента блюда не указанно ни одного продукта в входном списке или все элементы
+     *    содержащие такие ограничения были отброшены - будет выбран самый дешевый из всех продуктов подходящих
+     *    для данного ингредиента. <br/>
      * @param constraints ограничения задающие конкретные продукты для ингредиентов блюд.
      * @return данные об одном конкретном продукте для каждого ингредиента блюда.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
@@ -306,14 +309,15 @@ public class Dish implements Entity<Dish> {
         );
 
         return IntStream.range(0, ingredients.size()).
-                mapToObj(i -> {
+                mapToObj(ingredientIndex -> {
                     int productIndex = constraints.stream().
-                            filter(c -> c.ingredientIndex() == i).
+                            filter(c -> c.ingredientIndex() == ingredientIndex).
                             mapToInt(ProductConstraint::productIndex).
+                            filter(pIndex -> pIndex >= 0 && pIndex < getProductsNumber(ingredientIndex).orElseThrow()).
                             findFirst().
                             orElse(0);
 
-                    return getProduct(i, productIndex).orElseThrow();
+                    return getProduct(ingredientIndex, productIndex).orElseThrow();
                 }).
                 toList();
     }
@@ -667,11 +671,18 @@ public class Dish implements Entity<Dish> {
          * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
          * значение для productIndex чтобы получить последний продукт.
          */
-        List<ProductConstraint> constraints = IntStream.range(0, getIngredientNumber()).
-                mapToObj(i -> new ProductConstraint(i, 100000)).
-                toList();
+        List<IngredientProduct> ingredientProducts = IntStream.range(0, getIngredientNumber()).
+                mapToObj(ingredientIndex -> {
+                    DishIngredient ingredient = ingredients.get(ingredientIndex);
+                    int productIndex = 100000;
 
-        List<IngredientProduct> ingredientProducts = getProductForEachIngredient(constraints);
+                    Page<Product> page = getProductPageBy(ingredient, productIndex);
+                    Optional<Product> product = page.getByGlobalIndex(
+                            page.getMetadata().getTotalItems().subtract(BigInteger.ONE)
+                    );
+                    return new IngredientProduct(product, ingredientIndex, productIndex);
+                }).
+                toList();
 
         return groupByProduct(ingredientProducts).values().stream().
                 map(values -> getNecessaryPackageQuantityPrice(values, BigDecimal.ONE).orElseThrow()).
@@ -688,8 +699,8 @@ public class Dish implements Entity<Dish> {
      * @return средняя стоимость данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
-        Optional<BigDecimal> min = getMinPrice();
         Optional<BigDecimal> max = getMaxPrice();
+        Optional<BigDecimal> min = getMinPrice();
         Optional<BigDecimal> sum = min.map(vMin -> vMin.add(max.orElseThrow()));
         return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.getMathContext()));
     }
@@ -782,12 +793,12 @@ public class Dish implements Entity<Dish> {
 
 
     private Page<Product> getProductPageBy(DishIngredient ingredient, int productIndex) {
-        return productRepository.getProducts(
-                new Criteria().
-                        setPageable(Pageable.ofIndex(30, productIndex)).
-                        setSort(ingredientProductsSort).
-                        setFilter(ingredient.getFilter())
-        );
+        Criteria criteria = new Criteria().
+                setPageable(Pageable.ofIndex(30, productIndex)).
+                setSort(ingredientProductsSort).
+                setFilter(ingredient.getFilter());
+
+        return productRepository.getProducts(criteria);
     }
 
 
