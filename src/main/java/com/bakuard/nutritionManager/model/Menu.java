@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -160,30 +161,35 @@ public class Menu implements Entity<Menu> {
 
     /**
      * Возвращает данные о конкретном продукте для каждого ингредиента каждого блюда этого меню. Особые случаи:<br/>
-     * 1. Если некоторому ингредиенту некоторого блюда не соответствует ни один продукт - то для этого ингредиента
+     * 1. Если меню не содержит ни одного элемента - возвращает пустой список. <br/>
+     * 2. Если ни одно блюдо этого меню не содержит ни одного ингредиента - возвращает пустой список. <br/>
+     * 3. Если некоторое блюдо этого меню не содержит ни одного ингредиента - то для этого блюда не будет добавлен
+     *    ни один элемент в итоговый список. <br/>
+     * 4. Если {@link ProductConstraint#dishName()} одного из элементов указывает на блюдо, которого нет в данном
+     *    меню - этот элемент будет отброшен и не будет принимать участия в формировании конечного резузльтата. <br/>
+     * 5. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента < 0 - этот элемент будет отброшен
+     *    и не будет принимать участия в формировании конечного резузльтата. <br/>
+     * 6. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента >= кол-во всех ингредиентов
+     *    соответствующего блюда - этот элемент будет отброшен и не будет принимать участия в формировании конечного
+     *    резузльтата. <br/>
+     * 7. Если {@link ProductConstraint#productIndex()} некоторого элемента < 0 - этот элемент будет отброшен
+     *    и не будет принимать участия в формировании конечного резузльтата. <br/>
+     * 8. Если {@link ProductConstraint#productIndex()} некоторого элемента >= кол-во всех продуктов соответствующего
+     *    блюда и ингредиента, и при этом кол-во этих продуктов больше нуля - этот элемент будет отброшен и не будет
+     *    принимать участия в формировании конечного резузльтата. <br/>
+     * 10. Если некоторому ингредиенту некоторого блюда не соответствует ни один продукт - то для этого ингредиента
      *    будет добавлен элемент, метод {@link MenuItemProduct#product()} которого будет возвращаеть пустой
      *    Optional. <br/>
-     * 2. Если некоторое блюдо этого меню не содержит ни одного ингредиента - то для этого блюда не будет добавлен
-     *    ни один элемент в итоговый список. <br/>
-     * 3. Если ни одно блюдо этого меню не содержит ни одного ингредиента - возвращает пустой список. <br/>
-     * 4. Если меню не содержит ни одного элемента - возвращает пустой список. <br/>
-     * 5. Если для одного и того же ингредиента одного и того же блюда указанно несколько продуктов - будет
-     *    выбран первый из указанных. <br/>
-     * 6. Если для некоторого ингредиента некоторого блюда не указанно ни одного продукта - будет выбран самый
-     *    дешевый из всех продуктов подходящих для данного ингредиента. <br/>
-     * 7. Если для некоторого ингредиента некоторого блюда задан индекс продукта, который больше или равен кол-ву
-     *    всех продуктов соответствующих данному ингредиенту - то для этого ингредиента будет выбран последний
-     *    из всех соответствующих ему продуктов (все продукты упорядочены по цене в порядке возрастания). <br/>
+     * 11. Если для одного и того же ингредиента одного и того же блюда constraints содержит несколько элементов -
+     *    будет выбран первый корректный из указанных. <br/>
+     * 12. Если для некоторого ингредиента некоторого блюда не указанно ни одного элемента в constraints или все
+     *    элементы содержащие такие ограничения были отброшены - будет выбран самый дешевый из всех продуктов
+     *    подходящих для данного ингредиента. <br/>
      * @param constraints ограничения задающие конкретные продукты для ингредиентов блюд этого меню.
      * @return данные об одном конкретном продукте для каждого ингредиента блюда этого меню.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
      *         1. Если constraints имеет значение null. <br/>
      *         2. Если один из элементов constraints имеет значение null. <br/>
-     *         3. Если ingredientIndex у одного из ProductConstraint меньше нуля. <br/>
-     *         4. Если ingredientIndex у одного из ProductConstraint больше или равен кол-ву ингредиентво, и при
-     *            этом меню содержит как минимум одно блюдо, которое содержит как минимум один ингредиент.<br/>
-     *         5. Если productIndex у одного из ProductConstraint меньше нуля. <br/>
-     *         6. Если dishName у одного из ProductConstraint равен null. <br/>
      */
     public List<MenuItemProduct> getMenuItemProducts(List<ProductConstraint> constraints) {
         Validator.check(
@@ -191,7 +197,26 @@ public class Menu implements Entity<Menu> {
                         and(r -> r.notContainsNull(constraints))
         );
 
-        return null;
+        ArrayList<MenuItemProduct> result = new ArrayList<>();
+        for(int itemIndex = 0; itemIndex < items.size(); itemIndex++) {
+            Dish dish = items.get(itemIndex).getDish();
+            for(int i = 0; i < dish.getIngredientNumber(); i++) {
+                final int ingredientIndex = i;
+                int productIndex = constraints.stream().
+                        filter(c -> c.ingredientIndex() == ingredientIndex && dish.getName().equals(c.dishName())).
+                        mapToInt(ProductConstraint::productIndex).
+                        filter(pIndex -> pIndex >= 0 && pIndex < dish.getProductsNumber(ingredientIndex).orElseThrow()).
+                        findFirst().
+                        orElse(0);
+
+                Dish.IngredientProduct product = dish.getProduct(ingredientIndex, productIndex).orElseThrow();
+
+                MenuItemProduct menuItemProduct = new MenuItemProduct(
+                        product.product(), itemIndex, ingredientIndex, productIndex);
+                result.add(menuItemProduct);
+            }
+        }
+        return result;
     }
 
     /**
@@ -230,7 +255,22 @@ public class Menu implements Entity<Menu> {
      */
     public Optional<BigDecimal> getDishIngredientQuantity(MenuItemProduct product,
                                                           BigDecimal menuNumber) {
-        return null;
+        Validator.check(
+                Rule.of("Menu.product").notNull(product),
+                Rule.of("Menu.menuNumber").notNull(menuNumber).
+                        and(r -> r.positiveValue(menuNumber))
+        );
+
+        BigDecimal result = null;
+
+        if(product.product().isPresent()) {
+            MenuItem item = items.get(product.itemIndex());
+            DishIngredient ingredient = item.getDish().tryGetIngredient(product.ingredientIndex());
+            result = ingredient.getNecessaryQuantity(item.getNecessaryQuantity(menuNumber));
+            result = result.setScale(config.getNumberScale(), config.getRoundingMode());
+        }
+
+        return Optional.ofNullable(result);
     }
 
     /**
@@ -243,7 +283,7 @@ public class Menu implements Entity<Menu> {
      * 3. Если какой-либо из элементов списка {@link MenuItemProduct#product()} возвращает пустой Optional -
      *    то этот элемент списка не принимает участия в формировании итогового результата. <br/><br/>
      * Метод не проверят содержимое объекта products (список не содержит null, для всех элементов списка
-     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно с помощью
+     * используется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно с помощью
      * метода {@link #groupByProduct(List)}.
      * @param products данные о продукте используемом для нескольких ингредиентов нескольких блюд.
      * @param menuNumber кол-во данного меню.
@@ -256,12 +296,31 @@ public class Menu implements Entity<Menu> {
      */
     public Map<MenuItem, BigDecimal> getProductQuantityForDishes(List<MenuItemProduct> products,
                                                                  BigDecimal menuNumber) {
-        return null;
+        Validator.check(
+                Rule.of("Menu.products").notNull(products),
+                Rule.of("Menu.menuNumber").notNull(menuNumber).
+                        and(r -> r.positiveValue(menuNumber))
+        );
+
+        Map<Integer, List<MenuItemProduct>> productsByDishes = products.stream().
+                filter(p -> p.product().isPresent()).
+                collect(Collectors.groupingBy(MenuItemProduct::itemIndex));
+
+        return productsByDishes.entrySet().stream().
+                collect(Collectors.toMap(
+                        pair -> items.get(pair.getKey()),
+                        pair -> pair.getValue().stream().
+                                    map(p -> getDishIngredientQuantity(p, menuNumber).orElseThrow()).
+                                    reduce(BigDecimal::add).
+                                    orElseThrow()
+                ));
     }
 
     /**
      * Возвращает кол-во указанного продукта необходимого для приготовления всех блюд этого меню, в состав
-     * которых входит этот продукт. Расчет ведется с учетом кол-ва меню. Особые случаи: <br/>
+     * которых входит этот продукт (все элементы products должны относится к одному продукту). Расчет ведется
+     * с учетом кол-ва меню. <br/>
+     * Особые случаи: <br/>
      * 1. Если products является пустым - возвращает пустой Optional. <br/>
      * 2. Если {@link MenuItemProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
      *    также вернет пустой Optional. <br/>
@@ -280,14 +339,24 @@ public class Menu implements Entity<Menu> {
      */
     public Optional<BigDecimal> getNecessaryQuantity(List<MenuItemProduct> products,
                                                      BigDecimal menuNumber) {
-        return null;
+        Validator.check(
+                Rule.of("Menu.products").notNull(products),
+                Rule.of("Menu.menuNumber").notNull(menuNumber).
+                        and(r -> r.positiveValue(menuNumber))
+        );
+
+        return products.stream().
+                filter(p -> p.product().isPresent()).
+                map(p -> getDishIngredientQuantity(p, menuNumber).orElseThrow()).
+                reduce(BigDecimal::add);
     }
 
     /**
      * Возвращает НЕДОСТАЮЩЕЕ кол-во указанного продукта (с учетом кол-ва, которое уже есть в наличии у пользователя)
-     * необходимого для приготовления всех блюд этого меню, в состав которых этот продукт входит. Недостающее кол-во
-     * рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой кол-во недостающих "упаковок"
-     * продукта. Особые случаи:<br/>
+     * необходимого для приготовления всех блюд этого меню, в состав которых этот продукт входит. Все элементы
+     * products должны относится к одному продукту. Недостающее кол-во рассчитывается с учетом фасовки продукта
+     * (размера упаковки) и представляет собой кол-во недостающих "упаковок" продукта. <br/>
+     * Особые случаи:<br/>
      * 1. Если products является пустым - возвращает пустой Optional. <br/>
      * 2. Если {@link MenuItemProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
      *    также вернет пустой Optional. <br/>
@@ -306,13 +375,25 @@ public class Menu implements Entity<Menu> {
      */
     public Optional<BigDecimal> getLackPackageQuantity(List<MenuItemProduct> products,
                                                        BigDecimal menuNumber) {
-        return null;
+        Validator.check(
+                Rule.of("Menu.products").notNull(products),
+                Rule.of("Menu.menuNumber").notNull(menuNumber).
+                        and(r -> r.positiveValue(menuNumber))
+        );
+
+        return getNecessaryQuantity(products, menuNumber).
+                map(necessaryQuantityInUnits -> {
+                    Product product = retrieveProduct(products);
+                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(product, necessaryQuantityInUnits);
+                    return calculatePackagesNumber(product, lackQuantityInUnits);
+                });
     }
 
     /**
      * Возвращает общую стоимость недостающего кол-ва указанного продукта (с учетом кол-ва, которое уже есть в
      * наличии у пользователя) необходимого для приготовления всех блюд этого меню, в состав которых этот
-     * продукт входит. Стоимость недостающего кол-ва рассчитывается с учетом фасовки продукта (размера упаковки).
+     * продукт входит. Все элементы products должны относится к одному продукту. Стоимость недостающего кол-ва
+     * рассчитывается с учетом фасовки продукта (размера упаковки).<br/>
      * Особые случаи:<br/>
      * 1. Если products является пустым - возвращает пустой Optional. <br/>
      * 2. Если {@link MenuItemProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
@@ -332,14 +413,23 @@ public class Menu implements Entity<Menu> {
      */
     public Optional<BigDecimal> getLackPackageQuantityPrice(List<MenuItemProduct> products,
                                                             BigDecimal menuNumber) {
-        return null;
+        return getLackPackageQuantity(products, menuNumber).
+                map(lackPackageQuantity -> {
+                    Product product = retrieveProduct(products);
+                    return calculateProductPrice(product, lackPackageQuantity);
+                });
     }
 
     /**
      * Возвращает стоимость данного меню с учетом выбранных продуктов для каждого ингредиента блюда и
      * кол-вом даного меню. Расчет стоимости ведется только для недостающего кол-ва продукта. Допускается,
-     * что для некоторых ингредиентов некоторых блюд этого меню не указано ни одного продукта. Особые случаи:<br/>
-     * 1. Если products пуст - возвращает пустой Optional. <br/><br/>
+     * что для некоторых ингредиентов некоторых блюд этого меню не указано ни одного продукта.
+     * Особые случаи:<br/>
+     * 1. Если products является пустым - возвращает пустой Optional. <br/>
+     * 2. Если {@link MenuItemProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
+     *    также вернет пустой Optional. <br/>
+     * 3. Если какой-либо из элементов списка {@link MenuItemProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/><br/>
      * Данный метод полагается, что передаваемый список был корректно сформирован вызывающим кодом, например,
      * вызовом метода {@link #getMenuItemProducts(List)}.
      * @param products данные об одном из продуктов каждого ингредиента каждого блюда этого меню.
@@ -352,7 +442,17 @@ public class Menu implements Entity<Menu> {
      */
     public Optional<BigDecimal> getLackProductsPrice(List<MenuItemProduct> products,
                                                      BigDecimal menuNumber) {
-        return null;
+        Validator.check(
+                Rule.of("Menu.products").notNull(products),
+                Rule.of("Menu.menuNumber").notNull(menuNumber).
+                        and(r -> r.positiveValue(menuNumber))
+        );
+
+        Map<Product, List<MenuItemProduct>> groups = groupByProduct(products);
+
+        return groups.values().stream().
+                map(value -> getLackPackageQuantityPrice(value, menuNumber).orElseThrow()).
+                reduce(BigDecimal::add);
     }
 
     /**
@@ -402,9 +502,10 @@ public class Menu implements Entity<Menu> {
      * @return средняя стоимость данного меню.
      */
     public Optional<BigDecimal> getAveragePrice() {
-        return getMinPrice().
-                flatMap(min -> getMaxPrice().map(max -> max.add(min))).
-                map(sum -> sum.divide(new BigDecimal(2), config.getMathContext()));
+        Optional<BigDecimal> max = getMaxPrice();
+        Optional<BigDecimal> min = getMinPrice();
+        Optional<BigDecimal> sum = min.map(vMin -> vMin.add(max.orElseThrow()));
+        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.getMathContext()));
     }
 
     @Override
@@ -442,6 +543,34 @@ public class Menu implements Entity<Menu> {
                 ", items=" + items +
                 ", tags=" + tags +
                 '}';
+    }
+
+
+    private Product retrieveProduct(List<MenuItemProduct> menuItemProducts) {
+        return menuItemProducts.stream().
+                filter(i -> i.product().isPresent()).
+                map(i -> i.product().orElseThrow()).
+                findAny().
+                orElseThrow();
+    }
+
+    private BigDecimal calculateLackQuantityInUnits(Product product,
+                                                    BigDecimal necessaryQuantity) {
+        return necessaryQuantity.subtract(product.getQuantity()).max(BigDecimal.ZERO);
+    }
+
+    private BigDecimal calculatePackagesNumber(Product product, BigDecimal quantityInUnits) {
+        if(quantityInUnits.signum() > 0) {
+            quantityInUnits = quantityInUnits.
+                    divide(product.getContext().getPackingSize(), config.getMathContext()).
+                    setScale(0, RoundingMode.UP);
+        }
+
+        return quantityInUnits;
+    }
+
+    private BigDecimal calculateProductPrice(Product product, BigDecimal packagesNumber) {
+        return product.getContext().getPrice().multiply(packagesNumber, config.getMathContext());
     }
 
 
