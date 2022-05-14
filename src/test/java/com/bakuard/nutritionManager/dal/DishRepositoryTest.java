@@ -166,7 +166,7 @@ class DishRepositoryTest {
             """)
     public void save4() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         boolean actual = commit(() -> dishRepository.save(dish));
@@ -183,7 +183,7 @@ class DishRepositoryTest {
             """)
     public void save5() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish expected = createDish(7, user);
 
         commit(() -> dishRepository.save(expected));
@@ -202,7 +202,7 @@ class DishRepositoryTest {
             """)
     public void save6() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = new Dish.Builder().
                 setId(toUUID(7)).
                 setUser(user).
@@ -231,7 +231,7 @@ class DishRepositoryTest {
             """)
     public void save7() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
         commit(() -> dishRepository.save(dish));
 
@@ -289,7 +289,7 @@ class DishRepositoryTest {
             """)
     public void save8() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
@@ -349,7 +349,7 @@ class DishRepositoryTest {
             """)
     public void save9() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
@@ -409,7 +409,7 @@ class DishRepositoryTest {
             """)
     public void save10() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
@@ -428,7 +428,7 @@ class DishRepositoryTest {
             """)
     public void save11() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish expected = createDish(7, user);
 
         commit(() -> dishRepository.save(expected));
@@ -474,7 +474,7 @@ class DishRepositoryTest {
             """)
     public void tryRemove3() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(user.getId(), toUUID(100)),
@@ -868,7 +868,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber2() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         User actualUser = createAndSaveUser(2);
 
         int actual = dishRepository.getDishesNumber(
@@ -887,7 +887,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
@@ -903,7 +903,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber4() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -927,7 +927,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber5() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -951,8 +951,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -976,8 +976,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber7() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -1003,8 +1003,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber8() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -1031,8 +1031,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber9() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -1069,8 +1069,7 @@ class DishRepositoryTest {
             """)
     public void getDishes2() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
         User actualUser = createAndSaveUser(100);
 
         Page<Dish> actual = dishRepository.getDishes(
@@ -1093,8 +1092,7 @@ class DishRepositoryTest {
             """)
     public void getDishes3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1118,8 +1116,7 @@ class DishRepositoryTest {
             """)
     public void getDishes4() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1143,8 +1140,7 @@ class DishRepositoryTest {
             """)
     public void getDishes5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1171,8 +1167,7 @@ class DishRepositoryTest {
             """)
     public void getDishes6() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1201,10 +1196,8 @@ class DishRepositoryTest {
             """)
     public void getDishes7() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1233,10 +1226,8 @@ class DishRepositoryTest {
             """)
     public void getDishes8() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1265,10 +1256,8 @@ class DishRepositoryTest {
             """)
     public void getDishes9() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1300,10 +1289,8 @@ class DishRepositoryTest {
             """)
     public void getDishes10() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1359,8 +1346,7 @@ class DishRepositoryTest {
             """)
     public void getTagsNumber3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getTagsNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -1409,8 +1395,7 @@ class DishRepositoryTest {
             """)
     public void getTags3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
@@ -1461,8 +1446,7 @@ class DishRepositoryTest {
             """)
     public void getUnitsNumber3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getUnitsNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -1511,8 +1495,7 @@ class DishRepositoryTest {
             """)
     public void getUnits3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
@@ -1563,8 +1546,7 @@ class DishRepositoryTest {
             """)
     public void getNamesNumber3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getNamesNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -1613,8 +1595,7 @@ class DishRepositoryTest {
             """)
     public void getNames3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<String> actual = dishRepository.getNames(
                 new Criteria().
@@ -1669,7 +1650,7 @@ class DishRepositoryTest {
         return user;
     }
 
-    private List<Product> createProducts(User user) {
+    private List<Product> createAndSaveProducts(User user) {
         ArrayList<Product> products = new ArrayList<>();
 
         products.add(
@@ -1798,6 +1779,8 @@ class DishRepositoryTest {
                         tryBuild()
         );
 
+        commit(() -> products.forEach(p -> productRepository.save(p)));
+        
         return products;
     }
 
@@ -1861,7 +1844,7 @@ class DishRepositoryTest {
                 tryBuild();
     }
 
-    private List<Dish> createDishes(User user) {
+    private List<Dish> createAndSaveDishes(User user) {
         ArrayList<Dish> dishes = new ArrayList<>();
 
         dishes.add(
@@ -2050,6 +2033,8 @@ class DishRepositoryTest {
                         tryBuild()
         );
 
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        
         return dishes;
     }
 
