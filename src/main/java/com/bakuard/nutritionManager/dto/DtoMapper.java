@@ -424,6 +424,7 @@ public class DtoMapper {
         );
         response.setTags(toTagsResponse(product.getContext().getTags()));
         response.setChecked(isChecked);
+        response.setProductIndex(ingredientProduct.productIndex());
         return response;
     }
 
@@ -444,10 +445,10 @@ public class DtoMapper {
                             ir.setProductCategory(ingredient.getName());
                             ir.setProducts(
                                     products.stream().
-                                            map(ip ->
+                                            map(ingredientProduct ->
                                                     toProductAsDishIngredientResponse(dish,
-                                                            ip,
-                                                            ip.ingredientIndex() == 0,
+                                                            ingredientProduct,
+                                                            ingredientProduct.ingredientIndex() == 0,
                                                             servingNumber)
                                             ).
                                             toList()

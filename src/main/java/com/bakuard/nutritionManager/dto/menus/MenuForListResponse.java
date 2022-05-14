@@ -21,7 +21,7 @@ public class MenuForListResponse {
     private UserResponse user;
     @Schema(description = "Наименование меню.")
     private String name;
-    @Schema(description = "Среднеарифметическая цена меню.")
+    @Schema(description = "Средняя цена меню.")
     private BigDecimal averagePrice;
     @Schema(description = "Путь к изображению данного меню.")
     private String imageUrl;

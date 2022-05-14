@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Содержит данные продукта входящего в список докупаемых продуктов блюда")
+@Schema(description = "Содержит данные продукта отосящегося к одному из ингредиентов блюда.")
 public class ProductAsDishIngredientResponse {
 
     @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Product.")
@@ -54,6 +54,11 @@ public class ProductAsDishIngredientResponse {
              Если это так - принимает значение true, иначе false.
             """)
     private boolean isChecked;
+
+    @Schema(description = """
+            Порядковый номер (индекс) продукта среди всех продуктов соответстющих некоторому ингредиенту блюда.
+            """)
+    private int productIndex;
 
     public ProductAsDishIngredientResponse() {
         type = "Product";
@@ -195,36 +200,44 @@ public class ProductAsDishIngredientResponse {
         isChecked = checked;
     }
 
+    public int getProductIndex() {
+        return productIndex;
+    }
+
+    public void setProductIndex(int productIndex) {
+        this.productIndex = productIndex;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProductAsDishIngredientResponse that = (ProductAsDishIngredientResponse) o;
-        return Objects.equals(type, that.type) &&
+        return isChecked == that.isChecked &&
+                productIndex == that.productIndex &&
+                Objects.equals(type, that.type) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(user, that.user) &&
                 Objects.equals(imageUrl, that.imageUrl) &&
                 Objects.equals(category, that.category) &&
                 Objects.equals(shop, that.shop) &&
                 Objects.equals(grade, that.grade) &&
-                Objects.equals(manufacturer, that.manufacturer) &&
-                Objects.equals(price, that.price) &&
                 Objects.equals(packingSize, that.packingSize) &&
                 Objects.equals(unit, that.unit) &&
+                Objects.equals(manufacturer, that.manufacturer) &&
+                Objects.equals(price, that.price) &&
                 Objects.equals(quantity, that.quantity) &&
                 Objects.equals(necessaryQuantity, that.necessaryQuantity) &&
                 Objects.equals(lackQuantity, that.lackQuantity) &&
                 Objects.equals(lackQuantityPrice, that.lackQuantityPrice) &&
-                Objects.equals(tags, that.tags) &&
-                isChecked == that.isChecked;
+                Objects.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, id, user, imageUrl, category, shop,
-                grade, manufacturer, price, packingSize, unit, quantity,
-                necessaryQuantity, lackQuantity, lackQuantityPrice, tags,
-                isChecked);
+        return Objects.hash(type, id, user, imageUrl, category, shop, grade,
+                packingSize, unit, manufacturer, price, quantity, necessaryQuantity,
+                lackQuantity, lackQuantityPrice, tags, isChecked, productIndex);
     }
 
     @Override
@@ -237,16 +250,17 @@ public class ProductAsDishIngredientResponse {
                 ", category='" + category + '\'' +
                 ", shop='" + shop + '\'' +
                 ", grade='" + grade + '\'' +
-                ", manufacturer='" + manufacturer + '\'' +
-                ", price=" + price +
                 ", packingSize=" + packingSize +
                 ", unit='" + unit + '\'' +
+                ", manufacturer='" + manufacturer + '\'' +
+                ", price=" + price +
                 ", quantity=" + quantity +
                 ", necessaryQuantity=" + necessaryQuantity +
                 ", lackQuantity=" + lackQuantity +
                 ", lackQuantityPrice=" + lackQuantityPrice +
                 ", tags=" + tags +
                 ", isChecked=" + isChecked +
+                ", productIndex=" + productIndex +
                 '}';
     }
 

@@ -151,7 +151,7 @@ public class MenuController {
     )
     @Transactional
     @GetMapping("/getById")
-    public ResponseEntity<DishResponse> getById(
+    public ResponseEntity<MenuResponse> getById(
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор меню в формате UUID. Не может быть null.", required = true)
             UUID id) {
@@ -175,7 +175,7 @@ public class MenuController {
     )
     @Transactional
     @GetMapping("/getByName")
-    public ResponseEntity<DishResponse> getByName(
+    public ResponseEntity<MenuResponse> getByName(
             @RequestParam("name")
             @Parameter(description = "Наименование меню. Не может быть null.", required = true)
             String name) {

@@ -23,7 +23,7 @@ public class DishForListResponse {
     private BigDecimal servingSize;
     @Schema(description = "Единица измерения кол-ва блюда.")
     private String unit;
-    @Schema(description = "Среднеарифметическая цена блюда.")
+    @Schema(description = "Средняя цена блюда.")
     private BigDecimal averagePrice;
     @Schema(description = "Теги блюда. Если блюдо не содержит тегов - данный список будет пустым.")
     private List<String> tags;
