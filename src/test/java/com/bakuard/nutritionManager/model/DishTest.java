@@ -47,12 +47,12 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantity1() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
-        Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
+        Dish.IngredientProduct ip = ingredientProduct(product(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackPackageQuantity(ip, null),
@@ -67,12 +67,12 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantity2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
-        Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
+        Dish.IngredientProduct ip = ingredientProduct(product(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackPackageQuantity(ip, new BigDecimal(-1)),
@@ -87,10 +87,10 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantity3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
         Dish.IngredientProduct ip = null;
 
@@ -107,12 +107,12 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantity4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
-        Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
+        Dish.IngredientProduct ip = ingredientProduct(product(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackPackageQuantity(ip, BigDecimal.ZERO),
@@ -127,10 +127,10 @@ class DishTest {
              => return empty Optional
             """)
     public void getLackPackageQuantity5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
         Dish.IngredientProduct ip = emptyIngredientProduct(0, 1);
 
@@ -146,13 +146,13 @@ class DishTest {
              => return correct result
             """)
     public void getLackPackageQuantity6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
         Dish.IngredientProduct ip = ingredientProduct(
-                createProduct(user, 10).setQuantity(new BigDecimal(2)), 0, 10
+                product(user, 10).setQuantity(new BigDecimal(2)), 0, 10
         );
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantity(ip, BigDecimal.TEN);
@@ -167,12 +167,12 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantityPrice1() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
-        Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
+        Dish.IngredientProduct ip = ingredientProduct(product(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackPackageQuantityPrice(ip, null),
@@ -187,12 +187,12 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantityPrice2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
-        Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
+        Dish.IngredientProduct ip = ingredientProduct(product(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackPackageQuantityPrice(ip, new BigDecimal(-1)),
@@ -207,10 +207,10 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantityPrice3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
         Dish.IngredientProduct ip = null;
 
@@ -227,12 +227,12 @@ class DishTest {
              => exception
             """)
     public void getLackPackageQuantityPrice4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
-        Dish.IngredientProduct ip = ingredientProduct(createProduct(user, 10), 0, 1);
+        Dish.IngredientProduct ip = ingredientProduct(product(user, 10), 0, 1);
 
         AssertUtil.assertValidateException(
                 () -> dish.getLackPackageQuantityPrice(ip, BigDecimal.ZERO),
@@ -247,10 +247,10 @@ class DishTest {
              => return empty Optional
             """)
     public void getLackPackageQuantityPrice5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
         Dish.IngredientProduct ip = emptyIngredientProduct(0, 1);
 
@@ -266,13 +266,13 @@ class DishTest {
              => return correct result
             """)
     public void getLackPackageQuantityPrice6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
         Dish.IngredientProduct ip = ingredientProduct(
-                createProduct(user, 10).setQuantity(new BigDecimal(2)), 0, 10
+                product(user, 10).setQuantity(new BigDecimal(2)), 0, 10
         );
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantityPrice(ip, BigDecimal.TEN);
@@ -287,12 +287,12 @@ class DishTest {
              => exception
             """)
     public void getLackProductPrice1() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         AssertUtil.assertValidateException(
@@ -308,17 +308,17 @@ class DishTest {
              => exception
             """)
     public void getLackProductPrice2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
         List<Dish.IngredientProduct> ip = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 0),
-                ingredientProduct(createProduct(user, 1), 1, 0),
-                ingredientProduct(createProduct(user, 3), 2, 4)
+                ingredientProduct(product(user, 10), 0, 0),
+                ingredientProduct(product(user, 1), 1, 0),
+                ingredientProduct(product(user, 3), 2, 4)
         );
 
         AssertUtil.assertValidateException(
@@ -334,17 +334,17 @@ class DishTest {
              => exception
             """)
     public void getLackProductPrice3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
         List<Dish.IngredientProduct> ip = List.of(
-                ingredientProduct(createProduct(user, 1), 0, 0),
-                ingredientProduct(createProduct(user, 1), 1, 0),
-                ingredientProduct(createProduct(user, 3), 2, 4)
+                ingredientProduct(product(user, 1), 0, 0),
+                ingredientProduct(product(user, 1), 1, 0),
+                ingredientProduct(product(user, 3), 2, 4)
         );
 
         AssertUtil.assertValidateException(
@@ -360,17 +360,17 @@ class DishTest {
              => exception
             """)
     public void getLackProductPrice4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
         List<Dish.IngredientProduct> ip = List.of(
-                ingredientProduct(createProduct(user, 1), 0, 0),
-                ingredientProduct(createProduct(user, 1), 1, 0),
-                ingredientProduct(createProduct(user, 3), 2, 4)
+                ingredientProduct(product(user, 1), 0, 0),
+                ingredientProduct(product(user, 1), 1, 0),
+                ingredientProduct(product(user, 3), 2, 4)
         );
 
         AssertUtil.assertValidateException(
@@ -386,12 +386,12 @@ class DishTest {
              => return empty Optional
             """)
     public void getLackProductPrice5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(List.of(), BigDecimal.TEN);
@@ -406,12 +406,12 @@ class DishTest {
              => return empty Optional
             """)
     public void getLackProductPrice6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
         List<Dish.IngredientProduct> ip = List.of(
                 emptyIngredientProduct(0, 1),
@@ -431,17 +431,17 @@ class DishTest {
              => return correct result (skip all ingredients with empty Optional for product)
             """)
     public void getLackProductPrice7() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
         List<Dish.IngredientProduct> ip = List.of(
                 emptyIngredientProduct(0, 1),
-                ingredientProduct(createProduct(user, 1), 1, 0),
-                ingredientProduct(createProduct(user, 3), 2, 4)
+                ingredientProduct(product(user, 1), 1, 0),
+                ingredientProduct(product(user, 3), 2, 4)
         );
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
@@ -456,17 +456,17 @@ class DishTest {
              => return correct result
             """)
     public void getLackProductPrice8() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
         List<Dish.IngredientProduct> ip = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 10),
-                ingredientProduct(createProduct(user, 1), 1, 0),
-                ingredientProduct(createProduct(user, 3), 2, 4)
+                ingredientProduct(product(user, 10), 0, 10),
+                ingredientProduct(product(user, 1), 1, 0),
+                ingredientProduct(product(user, 3), 2, 4)
         );
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
@@ -482,25 +482,25 @@ class DishTest {
              => return correct result
             """)
     public void getLackProductPrice9() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
         List<Dish.IngredientProduct> ip = List.of(
-                ingredientProduct(createProduct(user, 1).
+                ingredientProduct(product(user, 1).
                                 setPackingSize(new BigDecimal(23)).
                                 setPrice(new BigDecimal(550)).
                                 setQuantity(new BigDecimal(45)),
                         0, 1),
-                ingredientProduct(createProduct(user, 1).
+                ingredientProduct(product(user, 1).
                                 setPackingSize(new BigDecimal(23)).
                                 setPrice(new BigDecimal(550)).
                                 setQuantity(new BigDecimal(45)),
                         0, 1),
-                ingredientProduct(createProduct(user, 3).
+                ingredientProduct(product(user, 3).
                                 setPackingSize(new BigDecimal(5)).
                                 setPrice(new BigDecimal(250)),
                         2, 4)
@@ -518,10 +518,10 @@ class DishTest {
              => return empty Optional
             """)
     public void getProduct1() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(-1, 0);
@@ -536,10 +536,10 @@ class DishTest {
              => return empty Optional
             """)
     public void getProduct2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(1, 0);
@@ -554,10 +554,10 @@ class DishTest {
              => return empty Optional
             """)
     public void getProduct3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(2, 0);
@@ -572,14 +572,14 @@ class DishTest {
              => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(6, filter(user, 0))))
+                        repository.getProducts(Mockito.eq(criteria(6, filter(user, 0))))
                 ).
-                thenReturn(createProductPage(user, this::createProduct, 0, 1, 2, 3, 4));
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+                thenReturn(productPage(user, this::product, 0, 1, 2, 3, 4));
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, -1);
@@ -594,11 +594,11 @@ class DishTest {
              => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Pageable.firstEmptyPage());
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 0);
@@ -614,19 +614,19 @@ class DishTest {
              => return correct result
             """)
     public void getProduct6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(4, filter(user, 0))))
+                        repository.getProducts(Mockito.eq(criteria(4, filter(user, 0))))
                 ).
-                thenReturn(createProductPage(user, 4, this::createProduct));
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+                thenReturn(productPage(user, 4, this::product));
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 4);
 
-        Dish.IngredientProduct expected = ingredientProduct(createProduct(user, 4), 0, 4);
+        Dish.IngredientProduct expected = ingredientProduct(product(user, 4), 0, 4);
         Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
@@ -638,14 +638,14 @@ class DishTest {
              => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct7() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(5, filter(user, 0))))
+                        repository.getProducts(Mockito.eq(criteria(5, filter(user, 0))))
                 ).
-                thenReturn(createProductPage(user, this::createProduct, 0, 1, 2, 3, 4));
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+                thenReturn(productPage(user, this::product, 0, 1, 2, 3, 4));
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 5);
@@ -661,14 +661,14 @@ class DishTest {
              => return item where IngredientProduct.product() return empty Optional
             """)
     public void getProduct8() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProducts(Mockito.eq(createCriteria(6, filter(user, 0))))
+                        repository.getProducts(Mockito.eq(criteria(6, filter(user, 0))))
                 ).
-                thenReturn(createProductPage(user, this::createProduct, 0, 1, 2, 3, 4));
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+                thenReturn(productPage(user, this::product, 0, 1, 2, 3, 4));
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 6);
@@ -683,10 +683,10 @@ class DishTest {
              => exception
             """)
     public void getProductForEachIngredient1() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         AssertUtil.assertValidateException(
@@ -702,10 +702,10 @@ class DishTest {
              => exception
             """)
     public void getProductForEachIngredient2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
 
         AssertUtil.assertValidateException(
@@ -723,9 +723,9 @@ class DishTest {
              => return empty list
             """)
     public void getProductForEachIngredient3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Dish dish = createDish(1, user, repository).tryBuild();
+        Dish dish = dish(1, user, repository).tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(
                 List.of(
@@ -745,30 +745,30 @@ class DishTest {
              => return correct result (skip this items and use default value)
             """)
     public void getProductForEachIngredient4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(10, filter(user, 0))))
-        ).thenReturn(createProductPage(user, 10, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(10, filter(user, 0))))
+        ).thenReturn(productPage(user, 10, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
+        ).thenReturn(productPage(user, 0, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 1, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 2))))
+        ).thenReturn(productPage(user, 1, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(1000);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(List.of(
@@ -778,9 +778,9 @@ class DishTest {
         ));
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 10),
-                ingredientProduct(createProduct(user, 0), 1, 0),
-                ingredientProduct(createProduct(user, 1), 2, 1)
+                ingredientProduct(product(user, 10), 0, 10),
+                ingredientProduct(product(user, 0), 1, 0),
+                ingredientProduct(product(user, 1), 2, 1)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -792,30 +792,30 @@ class DishTest {
              => return correct result (skip this items and use default value)
             """)
     public void getProductForEachIngredient5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(10, filter(user, 0))))
-        ).thenReturn(createProductPage(user, 10, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(10, filter(user, 0))))
+        ).thenReturn(productPage(user, 10, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
+        ).thenReturn(productPage(user, 0, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 1, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 2))))
+        ).thenReturn(productPage(user, 1, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(1000);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(List.of(
@@ -825,9 +825,9 @@ class DishTest {
         ));
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 10),
-                ingredientProduct(createProduct(user, 0), 1, 0),
-                ingredientProduct(createProduct(user, 1), 2, 1)
+                ingredientProduct(product(user, 10), 0, 10),
+                ingredientProduct(product(user, 0), 1, 0),
+                ingredientProduct(product(user, 1), 2, 1)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -839,30 +839,30 @@ class DishTest {
              => return correct result (skip this items and use default value)
             """)
     public void getProductForEachIngredient6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(10, filter(user, 0))))
-        ).thenReturn(createProductPage(user, 10, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(10, filter(user, 0))))
+        ).thenReturn(productPage(user, 10, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
+        ).thenReturn(productPage(user, 0, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 1, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 2))))
+        ).thenReturn(productPage(user, 1, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(1000);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(List.of(
@@ -872,9 +872,9 @@ class DishTest {
         ));
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 10),
-                ingredientProduct(createProduct(user, 0), 1, 0),
-                ingredientProduct(createProduct(user, 1), 2, 1)
+                ingredientProduct(product(user, 10), 0, 10),
+                ingredientProduct(product(user, 0), 1, 0),
+                ingredientProduct(product(user, 1), 2, 1)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -886,30 +886,30 @@ class DishTest {
              => return correct result (skip this items and use default value)
             """)
     public void getProductForEachIngredient7() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(10, filter(user, 0))))
-        ).thenReturn(createProductPage(user, 10, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(10, filter(user, 0))))
+        ).thenReturn(productPage(user, 10, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(-1, filter(user, 1))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(-1, filter(user, 1))))
+        ).thenReturn(productPage(user, 0, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 1, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 2))))
+        ).thenReturn(productPage(user, 1, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(1000);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(List.of(
@@ -919,9 +919,9 @@ class DishTest {
         ));
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 10),
-                ingredientProduct(createProduct(user, 0), 1, 0),
-                ingredientProduct(createProduct(user, 1), 2, 1)
+                ingredientProduct(product(user, 10), 0, 10),
+                ingredientProduct(product(user, 0), 1, 0),
+                ingredientProduct(product(user, 1), 2, 1)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -933,30 +933,30 @@ class DishTest {
              => return correct result (skip this items and use default value)
             """)
     public void getProductForEachIngredient8() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(10, filter(user, 0))))
-        ).thenReturn(createProductPage(user, this::createProduct, 0,1,2,3,4,5,6,7,8,9,10));
+                repository.getProducts(Mockito.eq(criteria(10, filter(user, 0))))
+        ).thenReturn(productPage(user, this::product, 0,1,2,3,4,5,6,7,8,9,10));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(11);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(4, filter(user, 1))))
-        ).thenReturn(createProductPage(user, this::createProduct, 11,12,13,14));
+                repository.getProducts(Mockito.eq(criteria(4, filter(user, 1))))
+        ).thenReturn(productPage(user, this::product, 11,12,13,14));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(4);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 2))))
-        ).thenReturn(createProductPage(user, this::createProduct, 100,200,300,400,500,600,700));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 2))))
+        ).thenReturn(productPage(user, this::product, 100,200,300,400,500,600,700));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(7);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(List.of(
@@ -966,9 +966,9 @@ class DishTest {
         ));
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 10),
-                ingredientProduct(createProduct(user, 11), 1, 0),
-                ingredientProduct(createProduct(user, 200), 2, 1)
+                ingredientProduct(product(user, 10), 0, 10),
+                ingredientProduct(product(user, 11), 1, 0),
+                ingredientProduct(product(user, 200), 2, 1)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -980,30 +980,30 @@ class DishTest {
              => return correct result (skip this items and use default value)
             """)
     public void getProductForEachIngredient9() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(10, filter(user, 0))))
-        ).thenReturn(createProductPage(user, this::createProduct, 0,1,2,3,4,5,6,7,8,9,10));
+                repository.getProducts(Mockito.eq(criteria(10, filter(user, 0))))
+        ).thenReturn(productPage(user, this::product, 0,1,2,3,4,5,6,7,8,9,10));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(11);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(4, filter(user, 1))))
-        ).thenReturn(createProductPage(user, this::createProduct, 11,12,13,14));
+                repository.getProducts(Mockito.eq(criteria(4, filter(user, 1))))
+        ).thenReturn(productPage(user, this::product, 11,12,13,14));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(4);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 2))))
-        ).thenReturn(createProductPage(user, this::createProduct, 100,200,300,400,500,600,700));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 2))))
+        ).thenReturn(productPage(user, this::product, 100,200,300,400,500,600,700));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(7);
-        Dish dish = createDish(1, createUser(), repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(List.of(
@@ -1013,9 +1013,9 @@ class DishTest {
         ));
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 10), 0, 10),
-                ingredientProduct(createProduct(user, 11), 1, 0),
-                ingredientProduct(createProduct(user, 200), 2, 1)
+                ingredientProduct(product(user, 10), 0, 10),
+                ingredientProduct(product(user, 11), 1, 0),
+                ingredientProduct(product(user, 200), 2, 1)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -1027,30 +1027,30 @@ class DishTest {
              => empty item for this ingredient
             """)
     public void getProductForEachIngredient10() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(0);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 1))))
-        ).thenReturn(createProductPage(user, 1, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 1))))
+        ).thenReturn(productPage(user, 1, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(3, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 3, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(3, filter(user, 2))))
+        ).thenReturn(productPage(user, 3, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(1000);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(
@@ -1063,8 +1063,8 @@ class DishTest {
 
         List<Dish.IngredientProduct> expected = List.of(
                 emptyIngredientProduct(0, 0),
-                ingredientProduct(createProduct(user, 1), 1, 1),
-                ingredientProduct(createProduct(user, 3), 2, 3)
+                ingredientProduct(product(user, 1), 1, 1),
+                ingredientProduct(product(user, 3), 2, 3)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -1077,30 +1077,30 @@ class DishTest {
              => return correct result (use first ProductConstraint for each ingredient)
             """)
     public void getProductForEachIngredient11() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
+        ).thenReturn(productPage(user, 0, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(1, filter(user, 1))))
-        ).thenReturn(createProductPage(user, 1, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(1, filter(user, 1))))
+        ).thenReturn(productPage(user, 1, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(3, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 3, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(3, filter(user, 2))))
+        ).thenReturn(productPage(user, 3, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(1000);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(
@@ -1116,9 +1116,9 @@ class DishTest {
         );
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 0), 0, 0),
-                ingredientProduct(createProduct(user, 1), 1, 1),
-                ingredientProduct(createProduct(user, 3), 2, 3)
+                ingredientProduct(product(user, 0), 0, 0),
+                ingredientProduct(product(user, 1), 1, 1),
+                ingredientProduct(product(user, 3), 2, 3)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -1131,30 +1131,30 @@ class DishTest {
              => return correct result (default product for ingredients)
             """)
     public void getProductForEachIngredient12() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
+        ).thenReturn(productPage(user, 0, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user, 0, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
+        ).thenReturn(productPage(user, 0, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
         ).thenReturn(1000);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(4, filter(user, 2))))
-        ).thenReturn(createProductPage(user, 4, this::createProduct));
+                repository.getProducts(Mockito.eq(criteria(4, filter(user, 2))))
+        ).thenReturn(productPage(user, 4, this::product));
         Mockito.when(
-                repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
         ).thenReturn(1000);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         List<Dish.IngredientProduct> actual = dish.getProductForEachIngredient(
@@ -1164,9 +1164,9 @@ class DishTest {
         );
 
         List<Dish.IngredientProduct> expected = List.of(
-                ingredientProduct(createProduct(user, 0), 0, 0),
-                ingredientProduct(createProduct(user, 0), 1, 0),
-                ingredientProduct(createProduct(user, 4), 2, 4)
+                ingredientProduct(product(user, 0), 0, 0),
+                ingredientProduct(product(user, 0), 1, 0),
+                ingredientProduct(product(user, 4), 2, 4)
         );
         Assertions.assertEquals(expected, actual);
     }
@@ -1179,8 +1179,8 @@ class DishTest {
             """)
     public void getNumberIngredientCombinations1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        User user = createUser();
-        Dish dish = createDish(1, user, repository).tryBuild();
+        User user = user();
+        Dish dish = dish(1, user, repository).tryBuild();
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
@@ -1195,11 +1195,11 @@ class DishTest {
             """)
     public void getNumberIngredientCombinations2() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        User user = createUser();
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        User user = user();
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         BigInteger actual = dish.getNumberIngredientCombinations();
@@ -1214,24 +1214,24 @@ class DishTest {
              => return correct result
             """)
     public void getNumberIngredientCombinations3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProductsNumber(Mockito.eq(createCriteria(filter(user, 0))))
+                        repository.getProductsNumber(Mockito.eq(criteria(filter(user, 0))))
                 ).
                 thenReturn(0);
         Mockito.when(
-                    repository.getProductsNumber(Mockito.eq(createCriteria(filter(user, 1))))
+                    repository.getProductsNumber(Mockito.eq(criteria(filter(user, 1))))
                 ).
                 thenReturn(10);
         Mockito.when(
-                        repository.getProductsNumber(Mockito.eq(createCriteria(filter(user, 2))))
+                        repository.getProductsNumber(Mockito.eq(criteria(filter(user, 2))))
                 ).
                 thenReturn(5);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         BigInteger actual = dish.getNumberIngredientCombinations();
@@ -1246,24 +1246,24 @@ class DishTest {
              => return correct result
             """)
     public void getNumberIngredientCombinations4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
-                        repository.getProductsNumber(Mockito.eq(createCriteria(filter(user, 0))))
+                        repository.getProductsNumber(Mockito.eq(criteria(filter(user, 0))))
                 ).
                 thenReturn(2);
         Mockito.when(
-                        repository.getProductsNumber(Mockito.eq(createCriteria(filter(user, 1))))
+                        repository.getProductsNumber(Mockito.eq(criteria(filter(user, 1))))
                 ).
                 thenReturn(10);
         Mockito.when(
-                        repository.getProductsNumber(Mockito.eq(createCriteria(filter(user, 2))))
+                        repository.getProductsNumber(Mockito.eq(criteria(filter(user, 2))))
                 ).
                 thenReturn(5);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         BigInteger actual = dish.getNumberIngredientCombinations();
@@ -1279,8 +1279,8 @@ class DishTest {
             """)
     public void getMinPrice1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        User user = createUser();
-        Dish dish = createDish(1, user, repository).tryBuild();
+        User user = user();
+        Dish dish = dish(1, user, repository).tryBuild();
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
@@ -1294,16 +1294,16 @@ class DishTest {
              => return empty Optional
             """)
     public void getMinPrice2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).
                 thenReturn(Pageable.firstEmptyPage());
         Mockito.when(repository.getProductsNumber(Mockito.any())).
                 thenReturn(0);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMinPrice();
@@ -1319,33 +1319,33 @@ class DishTest {
              => return 0
             """)
     public void getMinPrice3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(0);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 25, 50, 501)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 25, 50, 501)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 44, 45, 46)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 44, 45, 46)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMinPrice();
@@ -1361,40 +1361,40 @@ class DishTest {
              => return correct result
             """)
     public void getMinPrice4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(0);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(BigDecimal.ZERO).
                                 setQuantity(new BigDecimal(1000)),
                         100, 101, 102)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(200)).
                                 setPackingSize(BigDecimal.TEN).
                                 setQuantity(new BigDecimal(1000)),
                         10, 11, 12)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMinPrice();
@@ -1410,48 +1410,48 @@ class DishTest {
              => return correct result
             """)
     public void getMinPrice5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(100)).
                                 setPackingSize(BigDecimal.ONE).
                                 setQuantity(new BigDecimal(1000)),
                         0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(570)).
                                 setPackingSize(BigDecimal.ONE).
                                 setQuantity(new BigDecimal(1000)),
                         520, 521, 522)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(200)).
                                 setPackingSize(new BigDecimal(2)).
                                 setQuantity(new BigDecimal(1000)),
                         20, 21, 22)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMinPrice();
@@ -1468,46 +1468,46 @@ class DishTest {
              => return correct result
             """)
     public void getMinPrice6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(550)).
                         setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)),
                 0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(550)).
                         setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)),
                 0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(10)).
                                 setPackingSize(new BigDecimal("0.5")).
                                 setQuantity(new BigDecimal(1000)),
                         20, 21, 22)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMinPrice();
@@ -1523,8 +1523,8 @@ class DishTest {
             """)
     public void getMaxPrice1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        User user = createUser();
-        Dish dish = createDish(1, user, repository).tryBuild();
+        User user = user();
+        Dish dish = dish(1, user, repository).tryBuild();
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
@@ -1538,16 +1538,16 @@ class DishTest {
              => return empty Optional
             """)
     public void getMaxPrice2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).
                 thenReturn(Pageable.firstEmptyPage());
         Mockito.when(repository.getProductsNumber(Mockito.any())).
                 thenReturn(0);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
@@ -1563,33 +1563,33 @@ class DishTest {
              => return 0
             """)
     public void getMaxPrice3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 0)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 0)))).
                 thenReturn(0);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 1)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 1)))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 2)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 2)))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 0, 12, 25)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 0, 12, 25)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 36, 74, 82)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 36, 74, 82)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
@@ -1605,39 +1605,39 @@ class DishTest {
              => return correct result
             """)
     public void getMaxPrice4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 0)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 0)))).
                 thenReturn(0);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 1)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 1)))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 2)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 2)))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(BigDecimal.ZERO),
                         10, 11, 12)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(1500)).
                                 setPackingSize(new BigDecimal(250)).
                                 setQuantity(new BigDecimal(1000)),
                         203, 204, 205)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
@@ -1653,47 +1653,47 @@ class DishTest {
              => return correct result
             """)
     public void getMaxPrice5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 0)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 0)))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 1)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 1)))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 2)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 2)))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(600)).
                         setPackingSize(new BigDecimal(120)).
                         setQuantity(new BigDecimal(1000)),
                 0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(500)).
                                 setPackingSize(new BigDecimal(200)).
                                 setQuantity(new BigDecimal(1000)),
                         11, 12, 13)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(250)).
                                 setPackingSize(new BigDecimal(150)).
                                 setQuantity(new BigDecimal(1000)),
                         51, 52, 53)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
@@ -1710,47 +1710,47 @@ class DishTest {
              => return correct result
             """)
     public void getMaxPrice6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 0)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 0)))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 1)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 1)))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(createCriteriaNumber(filter(user, 2)))).
+        Mockito.when(repository.getProductsNumber(criteriaNumber(filter(user, 2)))).
                 thenReturn(3);
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(600)).
                         setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(5)),
                 12, 13, 14)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(600)).
                                 setPackingSize(new BigDecimal(7)).
                                 setQuantity(new BigDecimal(5)),
                         12, 13, 14)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(250)).
                                 setPackingSize(new BigDecimal(15)).
                                 setQuantity(new BigDecimal(1000)),
                         101, 111, 121)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
@@ -1766,8 +1766,8 @@ class DishTest {
             """)
     public void getAveragePrice1() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        User user = createUser();
-        Dish dish = createDish(1, user, repository).tryBuild();
+        User user = user();
+        Dish dish = dish(1, user, repository).tryBuild();
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
@@ -1781,16 +1781,16 @@ class DishTest {
              => return empty Optional
             """)
     public void getAveragePrice2() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).
                 thenReturn(Pageable.firstEmptyPage());
         Mockito.when(repository.getProductsNumber(Mockito.any())).
                 thenReturn(0);
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
@@ -1806,52 +1806,52 @@ class DishTest {
              => return 0
             """)
     public void getAveragePrice3() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
 
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(0);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 25, 50, 501)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 25, 50, 501)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 44, 45, 46)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 44, 45, 46)
         );
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 0, 12, 25)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 0, 12, 25)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).setPrice(BigDecimal.ZERO), 36, 74, 82)
+                productPage(user,
+                        (u, i) -> product(u, i).setPrice(BigDecimal.ZERO), 36, 74, 82)
         );
 
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
 
@@ -1869,32 +1869,32 @@ class DishTest {
              => return correct result
             """)
     public void getAveragePrice4() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(0);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(BigDecimal.ZERO).
                                 setQuantity(new BigDecimal(1000)),
                         100, 101, 102)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(200)).
                                 setPackingSize(BigDecimal.TEN).
                                 setQuantity(new BigDecimal(1000)),
@@ -1902,30 +1902,30 @@ class DishTest {
         );
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
         ).thenReturn(Pageable.firstEmptyPage());
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(BigDecimal.ZERO),
                         10, 11, 12)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(1500)).
                                 setPackingSize(new BigDecimal(250)).
                                 setQuantity(new BigDecimal(1000)),
                         203, 204, 205)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
@@ -1941,40 +1941,40 @@ class DishTest {
              => return correct result
             """)
     public void getAveragePrice5() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(100)).
                                 setPackingSize(BigDecimal.ONE).
                                 setQuantity(new BigDecimal(1000)),
                         0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(570)).
                                 setPackingSize(BigDecimal.ONE).
                                 setQuantity(new BigDecimal(1000)),
                         520, 521, 522)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(200)).
                                 setPackingSize(new BigDecimal(2)).
                                 setQuantity(new BigDecimal(1000)),
@@ -1982,38 +1982,38 @@ class DishTest {
         );
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(600)).
                         setPackingSize(new BigDecimal(120)).
                         setQuantity(new BigDecimal(1000)),
                 0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(500)).
                                 setPackingSize(new BigDecimal(200)).
                                 setQuantity(new BigDecimal(1000)),
                         11, 12, 13)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(250)).
                                 setPackingSize(new BigDecimal(150)).
                                 setQuantity(new BigDecimal(1000)),
                         51, 52, 53)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
@@ -2030,38 +2030,38 @@ class DishTest {
              => return correct result
             """)
     public void getAveragePrice6() {
-        User user = createUser();
+        User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 0))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 1))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))).
                 thenReturn(3);
-        Mockito.when(repository.getProductsNumber(Mockito.eq(createCriteriaNumber(filter(user, 2))))).
+        Mockito.when(repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))).
                 thenReturn(3);
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(550)).
                         setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)),
                 0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 1))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(550)).
                         setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(6)),
                 0, 1, 2)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(0, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(0, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(10)).
                                 setPackingSize(new BigDecimal("0.5")).
                                 setQuantity(new BigDecimal(1000)),
@@ -2069,38 +2069,38 @@ class DishTest {
         );
 
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 0))))
-        ).thenReturn(createProductPage(user,
-                (u, i) -> createProduct(u, i).
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
+        ).thenReturn(productPage(user,
+                (u, i) -> product(u, i).
                         setPrice(new BigDecimal(600)).
                         setPackingSize(new BigDecimal(7)).
                         setQuantity(new BigDecimal(5)),
                 12, 13, 14)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 1))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(600)).
                                 setPackingSize(new BigDecimal(7)).
                                 setQuantity(new BigDecimal(5)),
                         12, 13, 14)
         );
         Mockito.when(
-                repository.getProducts(Mockito.eq(createCriteria(100000, filter(user, 2))))
+                repository.getProducts(Mockito.eq(criteria(100000, filter(user, 2))))
         ).thenReturn(
-                createProductPage(user,
-                        (u, i) -> createProduct(u, i).
+                productPage(user,
+                        (u, i) -> product(u, i).
                                 setPrice(new BigDecimal(250)).
                                 setPackingSize(new BigDecimal(15)).
                                 setQuantity(new BigDecimal(1000)),
                         101, 111, 121)
         );
-        Dish dish = createDish(1, user, repository).
-                addIngredient(createIngredient(filter(user, 0), 0)).
-                addIngredient(createIngredient(filter(user, 1), 1)).
-                addIngredient(createIngredient(filter(user, 2), 2)).
+        Dish dish = dish(1, user, repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
                 tryBuild();
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
@@ -2109,7 +2109,7 @@ class DishTest {
     }
 
 
-    private User createUser() {
+    private User user() {
         return new User.Builder().
                 setId(toUUID(1)).
                 setName("User").
@@ -2118,7 +2118,7 @@ class DishTest {
                 tryBuild();
     }
 
-    private Product.Builder createProduct(User user, int id) {
+    private Product.Builder product(User user, int id) {
         BigDecimal productNumber = new BigDecimal(id).abs().add(BigDecimal.ONE);
         return new Product.Builder().
                 setAppConfiguration(conf).
@@ -2138,9 +2138,9 @@ class DishTest {
                 addTag("common tag");
     }
 
-    private Dish.Builder createDish(int dishId,
-                                    User user,
-                                    ProductRepository repository) {
+    private Dish.Builder dish(int dishId,
+                              User user,
+                              ProductRepository repository) {
         return new Dish.Builder().
                 setId(toUUID(dishId)).
                 setUser(user).
@@ -2155,7 +2155,7 @@ class DishTest {
                 addTag("common tag");
     }
 
-    private DishIngredient.Builder createIngredient(Filter filter, int ingredientIndex) {
+    private DishIngredient.Builder ingredient(Filter filter, int ingredientIndex) {
         return new DishIngredient.Builder().
                 setName("some ingredient " + ingredientIndex).
                 setFilter(filter).
@@ -2163,18 +2163,18 @@ class DishTest {
                 setConfig(conf);
     }
     
-    private Criteria createCriteria(int productIndex, Filter filter) {
+    private Criteria criteria(int productIndex, Filter filter) {
         return new Criteria().
                 setPageable(Pageable.ofIndex(30, productIndex)).
                 setFilter(filter).
                 setSort(Sort.products().asc("price"));
     }
 
-    private Criteria createCriteriaNumber(Filter filter) {
+    private Criteria criteriaNumber(Filter filter) {
         return new Criteria().setFilter(filter);
     }
 
-    private Criteria createCriteria(Filter filter) {
+    private Criteria criteria(Filter filter) {
         return new Criteria().setFilter(filter);
     }
 
@@ -2187,9 +2187,9 @@ class DishTest {
         );
     }
 
-    private Page<Product> createProductPage(User user,
-                                            int productIndex,
-                                            BiFunction<User, Integer, Product.Builder> productFactory) {
+    private Page<Product> productPage(User user,
+                                      int productIndex,
+                                      BiFunction<User, Integer, Product.Builder> productFactory) {
         Page.Metadata metadata = Pageable.ofIndex(30, productIndex).
                 createPageMetadata(1000, 30);
 
@@ -2201,9 +2201,9 @@ class DishTest {
         return metadata.createPage(products);
     }
 
-    private Page<Product> createProductPage(User user,
-                                            BiFunction<User, Integer, Product.Builder> productFactory,
-                                            int... productIds) {
+    private Page<Product> productPage(User user,
+                                      BiFunction<User, Integer, Product.Builder> productFactory,
+                                      int... productIds) {
         Page.Metadata metadata = Pageable.of(30 , 0).
                 createPageMetadata(productIds.length, 30);
 
