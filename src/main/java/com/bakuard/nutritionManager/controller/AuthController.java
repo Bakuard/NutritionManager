@@ -7,7 +7,7 @@ import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.util.Pair;
-import com.bakuard.nutritionManager.services.AuthService;
+import com.bakuard.nutritionManager.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,7 +64,7 @@ public class AuthController {
 
         Pair<String, User> jws = authService.enter(dto.getUserName(), dto.getUserPassword());
 
-        JwsResponse response = mapper.toJwsResponse(jws.getFirst(), jws.getSecond());
+        JwsResponse response = mapper.toJwsResponse(jws.first(), jws.second());
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.enter", response));
     }
 
@@ -141,7 +141,7 @@ public class AuthController {
 
         Pair<String, User> accessJws = authService.registration(registrationJws, dto.getUserName(), dto.getUserPassword());
 
-        JwsResponse response = mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond());
+        JwsResponse response = mapper.toJwsResponse(accessJws.first(), accessJws.second());
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.registration", response));
     }
 
@@ -169,7 +169,7 @@ public class AuthController {
 
         Pair<String, User> accessJws = authService.changeCredential(changeCredentialsJws, dto.getUserName(), dto.getUserPassword());
 
-        JwsResponse response = mapper.toJwsResponse(accessJws.getFirst(), accessJws.getSecond());
+        JwsResponse response = mapper.toJwsResponse(accessJws.first(), accessJws.second());
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.changeCredential", response));
     }
 

@@ -10,7 +10,7 @@ import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.util.Page;
 
-import com.bakuard.nutritionManager.services.ImageUploaderService;
+import com.bakuard.nutritionManager.service.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -341,6 +341,10 @@ public class DishController {
     }
 
     @Operation(summary = """
+            Рассчитывает и возвращает стоимость блюда, которая представляет собой суммарную стоимость недостающего
+             кол-ва продукта выбранного для каждого ингредиента.
+            """,
+            description = """
             Рассчитывает и возвращает стоимость блюда, которая представляет собой суммарную стоимость недостающего
              кол-ва продукта выбранного для каждого ингредиента. Особые случаи: <br/>
             1. Если блюдо не содержит ни одного ингредиента - возвращает null. <br/>

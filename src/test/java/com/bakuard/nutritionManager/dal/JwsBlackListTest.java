@@ -100,7 +100,6 @@ class JwsBlackListTest {
     public void addToBlackList1() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.addToBlackList(null, LocalDateTime.now().plusDays(2))),
-                "JwsBlackListPostgres.addToBlackList",
                 Constraint.NOT_NULL
         );
     }
@@ -110,7 +109,6 @@ class JwsBlackListTest {
     public void addToBlackList2() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.addToBlackList(toUUID(1), null)),
-                "JwsBlackListPostgres.addToBlackList",
                 Constraint.NOT_NULL
         );
     }
@@ -220,7 +218,6 @@ class JwsBlackListTest {
     public void removeAllExpired2() {
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.removeAllExpired(null)),
-                "JwsBlackListPostgres.removeAllExpired",
                 Constraint.NOT_NULL
         );
     }

@@ -151,7 +151,7 @@ public class User implements Entity<User> {
     }
 
 
-    public static class Builder implements Entity.Builder<User> {
+    public static class Builder implements AbstractBuilder<User> {
 
         private UUID id;
         private String name;
@@ -195,7 +195,7 @@ public class User implements Entity<User> {
     }
 
 
-    public static class LoadBuilder implements Entity.Builder<User> {
+    public static class LoadBuilder implements AbstractBuilder<User> {
 
         private UUID id;
         private String name;

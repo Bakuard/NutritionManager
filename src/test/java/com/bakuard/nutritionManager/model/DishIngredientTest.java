@@ -53,7 +53,6 @@ class DishIngredientTest {
 
         AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(new BigDecimal("-1.7")),
-                "DishIngredient.getNecessaryQuantity",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -77,7 +76,6 @@ class DishIngredientTest {
 
         AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(BigDecimal.ZERO),
-                "DishIngredient.getNecessaryQuantity",
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -124,7 +122,6 @@ class DishIngredientTest {
 
         AssertUtil.assertValidateException(
                 () -> ingredient.getNecessaryQuantity(null),
-                "DishIngredient.getNecessaryQuantity",
                 Constraint.NOT_NULL
         );
     }

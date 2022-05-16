@@ -10,7 +10,7 @@ import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 
-import com.bakuard.nutritionManager.services.ImageUploaderService;
+import com.bakuard.nutritionManager.service.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

@@ -1,7 +1,7 @@
 package com.bakuard.nutritionManager.config;
 
 import com.bakuard.nutritionManager.validation.ValidateException;
-import com.bakuard.nutritionManager.services.JwsService;
+import com.bakuard.nutritionManager.service.JwsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;

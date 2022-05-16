@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -107,145 +108,6 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Устанавливает наименование для данного блюда. Указанное наименование будет сохранено без начальных и
-     * конечных пробельных символов.
-     * @param name наименование для данного блюда.
-     * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *         1. если name имеет значение null.<br/>
-     *         2. если name не содержит ни одного отображаемого символа.
-     */
-    public void setName(String name) {
-        Validator.check(
-                Rule.of("Dish.name").notNull(name).and(v -> v.notBlank(name))
-        );
-
-        this.name = name.trim();
-    }
-
-    /**
-     * Устанавливает размер одной порции данного блюда.
-     * @param servingSize размер одной порции данного блюда.
-     * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *         1. если servingNumber имеет значение null.<br/>
-     *         2. если servingNumber меньше или равен нулю.
-     */
-    public void setServingSize(BigDecimal servingSize) {
-        Validator.check(
-                Rule.of("Dish.servingSize").notNull(servingSize).
-                        and(r -> r.positiveValue(servingSize))
-        );
-
-        this.servingSize = servingSize.setScale(config.getNumberScale(), config.getRoundingMode());
-    }
-
-    /**
-     * Задает наименование единицы измерения кол-ва для данного блюда. Заданное значение будет сохранено без
-     * начальных и конечных пробельных символов.
-     * @param unit наименование единицы измерения кол-ва для данного блюда.
-     * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *         1. если unit имеет значение null.<br/>
-     *         2. если unit не содержит ни одного отображаемого символа.
-     */
-    public void setUnit(String unit) {
-        Validator.check(
-                Rule.of("Dish.unit").notNull(unit).and(v -> v.notBlank(unit))
-        );
-
-        this.unit = unit.trim();
-    }
-
-    /**
-     * Задает описание для данного блюда. Метод может принимать значение null.
-     * @param description описание для данного блюда.
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Задает путь изображения данного блюда. Путь не обязательно может быть путем в файловой системе.
-     * Метод может принимать значение null.
-     * @param imageUrl путь изображения данного блюда.
-     */
-    public void setImageUrl(String imageUrl) {
-        Container<URL> urlContainer = new Container<>();
-
-        Validator.check(
-                Rule.of("Dish.imageUrl").isNull(imageUrl).or(v -> v.isUrl(imageUrl, urlContainer))
-        );
-
-        this.imageUrl = urlContainer.get();
-    }
-
-    /**
-     * Добавляет в данное блюдо ингредиент представленный множеством взаимозаменяемых продуктов (которое,
-     * в свою очередь, представленно ограничением filter). Для добавляемого ингредиента будет указанно
-     * его кол-во и наименование. Если блюдо уже содержит ингредиент с таким наименованием, то для него будут
-     * перезаписаны огрнаинчения и кол-во.
-     * @param name наименование ингредиента.
-     * @param filter ограничение задающее множество взаимозаменяемых продуктов, каждый из которых может
-     *               выступать данным конкретным ингредиентом этого блюда.
-     * @param quantity кол-во соответсвующего ингредиента.
-     * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *         1. если quantity меньше или равен нулю.<br/>
-     *         2. если один из параметров имеет значение null.<br/>
-     *         3. если name не содержит ни одного отображаемого символа.
-     */
-    public void putIngredient(String name, Filter filter, BigDecimal quantity) {
-        DishIngredient ingredient = new DishIngredient(name, filter, quantity, config);
-
-        int index = IntStream.range(0, ingredients.size()).
-                filter(i -> ingredients.get(i).getName().equals(name)).
-                findFirst().
-                orElse(-1);
-
-        if(index != -1) ingredients.set(1, ingredient);
-        else ingredients.add(ingredient);
-    }
-
-    /**
-     * Удаляет указанный ингредиент по его имени и возвращает его. Если блюдо не содержит ингредиент с таким
-     * именем, то метод просто возвращает null.
-     * @param name имя ингредиента.
-     * @return удаленный ингредиент или null.
-     */
-    public DishIngredient removeIngredient(String name) {
-        DishIngredient removed = ingredients.stream().
-                filter(ingredient -> ingredient.getName().equals(name)).
-                findAny().
-                orElse(null);
-
-        ingredients.remove(removed);
-
-        return removed;
-    }
-
-    /**
-     * Добавляет новый тег в указанное блюдо.
-     * @param tag добавляемый тег.
-     * @throws ValidateException в следующих случаях:<br/>
-     *         1. если указанное значение равняется null<br/>
-     *         2. если указанный тег уже содержится в данном объекте.
-     */
-    public void addTag(Tag tag) {
-        Validator.check(
-                Rule.of("Dish.tag").notNull(tag),
-                Rule.of("Dish.tags").notContainsItem(tags, tag)
-        );
-
-        tags.add(tag);
-    }
-
-    /**
-     * Удаляет указанный тег из блюда. Если указанный тег отсутствует в блюде или имеет значение null,
-     * метод ничего не делает.
-     * @param tag удаляемый тег.
-     */
-    public void removeTag(Tag tag) {
-        tags.remove(tag);
-    }
-
-    /**
      * Возвращает уникальный идетификатор данного блюда.
      * @return уникальный идетификатор данного блюда.
      */
@@ -303,21 +165,32 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает ингредиент по его имени. Если у блюда нет ингредиента с таким имененем - возвращает
-     * пустой Optional.
-     * @param name имя искомого ингредиента.
-     * @return ингредиент блюда.
+     * Возвращает кол-во ингредиентов данного блюда.
+     * @return кол-во ингредиентов данного блюда.
      */
-    public Optional<DishIngredient> getIngredient(String name) {
-        return ingredients.stream().
-                filter(i -> i.getName().equals(name)).
-                findAny();
+    public int getIngredientNumber() {
+        return ingredients.size();
+    }
+
+    /**
+     * Возвращает кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента. Особые
+     * случаи: <br/>
+     * 1. Если блюдо не содержит ингредиента с таким индексом - возвращает пустой Optional. <br/>
+     * @param ingredientIndex индекс ингредиента для которого рассчитывается кол-во взаимозаменяемых продуктов.
+     * @return кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента или пустой Optional.
+     */
+    public Optional<Integer> getProductsNumber(int ingredientIndex) {
+        return getIngredient(ingredientIndex).
+                map(
+                        ingredient -> productRepository.getProductsNumber(
+                                new Criteria().setFilter(ingredient.getFilter())
+                        )
+                );
     }
 
     /**
      * Возвращает ингредиент по его индексу. Особые случаи: <br/>
-     * 1. Если индекс ингредиента меньше 0 - возвращает пустой Optional. <br/>
-     * 2. Если индекс ингредиента больше или равен кол-ву ингредиентов блюда - возвращает пустой Optional. <br/>
+     * 1. Если блюдо не содержит ингредиента с таким индексом - возвращает пустой Optional. <br/>
      * @param ingredientIndex индекс искомого ингредиента.
      * @return ингредиент блюда или пустой Optional.
      */
@@ -336,8 +209,8 @@ public class Dish implements Entity<Dish> {
      * @param ingredientIndex индекс искомого ингредиента.
      * @return ингредиент блюда или пустой Optional.
      * @throws ValidateException если выполняется хотя бы одно из условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
+     *                           1. ingredientIndex < нуля.<br/>
+     *                           2. ingredientIndex >= кол-ву ингредиентов блюда.
      */
     public DishIngredient tryGetIngredient(int ingredientIndex) {
         Validator.check(
@@ -356,162 +229,386 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает кол-во ингредиентов данного блюда.
-     * @return кол-во ингредиентов данного блюда.
-     */
-    public int getIngredientNumber() {
-        return ingredients.size();
-    }
-
-    /**
      * Возвращает продукт из множества всех взаимозаменяемых продуктов для данного ингредиента по его
      * порядковому номеру (т.е. индексу. Индексация начинается с нуля). Множество продуктов для данного
      * ингредиента упорядоченно по цене в порядке возрастания. Особые случаи:<br/>
-     * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
-     *    данного ингредиента, то метод вернет пустой Optional.<br/>
-     * 2. Если в БД есть продукты соответствующие данному ингредиенту и productIndex больше или равен их
-     *    кол-ву, то метод вернет последний продукт из всего множества продуктов данного ингредиента.
+     * 1. Если блюдо не содержит ингредиента с индексом ingredientIndex - возвращает пустой Optional. <br/>
+     * 2. Если указанный ингредиент не имеет продукта с индексом productIndex - то {@link IngredientProduct#product()}
+     *    будет возвращать пустой Optional.<br/>
      * @param ingredientIndex индекс ингредиента для которого возвращается один из возможных взаимозаменяемых продуктов.
      * @param productIndex порядковый номер продукта.
      * @return продукт по его порядковому номеру.
-     * @throws ValidateException если выполняется хотя бы одноиз условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.<br/>
-     *                           3. если productIndex < 0
      */
-    public Optional<Product> getProduct(int ingredientIndex, int productIndex) {
-        Validator.check(
-                Rule.of("Dish.productIndex").notNegative(productIndex)
-        );
-
-        DishIngredient ingredient = tryGetIngredient(ingredientIndex);
-        Page<Product> page = productRepository.getProducts(
-                new Criteria().
-                        setPageable(Pageable.ofIndex(30, productIndex)).
-                        setSort(ingredientProductsSort).
-                        setFilter(ingredient.getFilter())
-        );
-
-        Product product = null;
-
-        if(!page.getMetadata().isEmpty()) {
-            product = page.get(
-                    page.getMetadata().
-                            getTotalItems().
-                            subtract(BigInteger.ONE).
-                            min(BigInteger.valueOf(productIndex))
-            );
-        }
-
-        return Optional.ofNullable(product);
+    public Optional<IngredientProduct> getProduct(int ingredientIndex, int productIndex) {
+        return getIngredient(ingredientIndex).
+                map(ingredient -> {
+                    Page<Product> page = getProductPageBy(ingredient, productIndex);
+                    Optional<Product> product = page.getByGlobalIndex(BigInteger.valueOf(productIndex));
+                    return new IngredientProduct(product, ingredientIndex, productIndex);
+                });
     }
 
     /**
      * Возвращает часть выборки продуктов соответствующих указанному ингредиенту. Все продукты в выборке
-     * упорядоченны по цене в порядке возрастания.
+     * упорядоченны по цене в порядке возрастания. Особые случаи: <br/>
+     * 1. Если ингредиенту не соответствует ни один продукт - возвращает пустой объект {@link Page}. <br/>
+     * 2. Если среди ингредиентов блюда нет ингредиента с таким индексом - возвращает пустой Optional. <br/>
      * @param ingredientIndex индекс ингредиента.
      * @param pageNumber номер страницы выборки.
      * @return страницу из выборки продуктов соответствующих указанному ингредиенту.
-     * @throws ValidateException если выполняется хотя бы одно из условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
      */
-    public Page<Product> getProducts(int ingredientIndex, int pageNumber) {
-        DishIngredient ingredient = tryGetIngredient(ingredientIndex);
-        return productRepository.getProducts(
-                new Criteria().
-                        setPageable(Pageable.of(30, pageNumber)).
-                        setSort(ingredientProductsSort).
-                        setFilter(ingredient.getFilter())
+    public Optional<Page<IngredientProduct>> getProducts(int ingredientIndex, int pageNumber) {
+        return getIngredient(ingredientIndex).
+                map(ingredient -> {
+                    Page<Product> productPage =  productRepository.getProducts(
+                            new Criteria().
+                                    setPageable(Pageable.of(30, pageNumber)).
+                                    setSort(ingredientProductsSort).
+                                    setFilter(ingredient.getFilter())
+                    );
+
+                    return productPage.map(
+                            (product, index) ->
+                                    new IngredientProduct(Optional.ofNullable(product), ingredientIndex, index.intValue())
+                    );
+                });
+    }
+
+    /**
+     * Возвращает данные о выбранном продукте для каждого ингрдиента блюда. Индекс элемента в итоговом списке
+     * соответствует индексу ингедиента к которому этот элемент относится. Особые случаи:<br/>
+     * 1. Если блюдо не содержит ингредиентов - возвращает пустой список. <br/>
+     * 2. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента < 0 - этот элемент будет отброшен и
+     *    не будет принимать участия в формировании итогового результата. <br/>
+     * 3. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента >= кол-ву ингредиентов блюда -
+     *    этот элемент будет отброшен и не будет принимать участия в формировании итогового результата. <br/>
+     * 4. Если {@link ProductConstraint#productIndex()} некоторого элемента < 0 - этот элемент будет отброшен и
+     *    не будет принимать участия в формировании итогового результата. <br/>
+     * 5. Если {@link ProductConstraint#productIndex()} некоторого элемента >= кол-ва продуктов соответствующих
+     *    этому ингредиенту и при это множество продуктов соответствующих указанному ингредиенту не пусто - этот
+     *    элемент будет отброшен и не будет принимать участия в формировании итогового результата. <br/>
+     * 6. Если некоторому ингредиенту блюда не соответствует ни один продукт - то для этого ингредиента
+     *    будет добавлен элемент, метод {@link IngredientProduct#product()} которого будет возвращаеть пустой
+     *    Optional. <br/>
+     * 7. Если для одного и того же ингредиента блюда указанно несколько элементов задающих для него продукт - будет
+     *    выбран первый корректный элемент из списка. <br/>
+     * 8. Если для некоторого ингредиента блюда не указанно ни одного продукта в входном списке или все элементы
+     *    содержащие такие ограничения были отброшены - будет выбран самый дешевый из всех продуктов подходящих
+     *    для данного ингредиента. <br/>
+     * @param constraints ограничения задающие конкретные продукты для ингредиентов блюд.
+     * @return данные об одном конкретном продукте для каждого ингредиента блюда.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
+     *         1. Если constraints имеет значение null. <br/>
+     *         2. Если один из элементов constraints имеет значение null. <br/>
+     */
+    public List<IngredientProduct> getProductForEachIngredient(List<ProductConstraint> constraints) {
+        Validator.check(
+                Rule.of("Dish.constrains").notNull(constraints).
+                        and(r -> r.notContainsNull(constraints))
         );
+
+        return IntStream.range(0, ingredients.size()).
+                mapToObj(ingredientIndex -> {
+                    int productIndex = constraints.stream().
+                            filter(c -> c.ingredientIndex() == ingredientIndex).
+                            mapToInt(ProductConstraint::productIndex).
+                            filter(pIndex -> pIndex >= 0 && pIndex < getProductsNumber(ingredientIndex).orElseThrow()).
+                            findFirst().
+                            orElse(0);
+
+                    return getProduct(ingredientIndex, productIndex).orElseThrow();
+                }).
+                toList();
     }
 
     /**
-     * Возвращает кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
-     * @param ingredientIndex индекс ингредиента для которого рассчитывается кол-во взаимозаменяемых продуктов.
-     * @return кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента.
-     * @throws ValidateException если выполняется хотя бы одноиз условий:<br/>
-     *                           1. ingredientIndex меньше нуля.<br/>
-     *                           2. ingredientIndex больше или равен кол-ву ингредиентов блюда.
+     * Групирует продукты относящиеся к разным ингредиентам по одинаковым продуктам. Если
+     * {@link IngredientProduct#product()} какого-то ингредиента возвращает пустой Optional -
+     * он не будет участвовать в формировании итогового результата.<br/><br/>
+     * Данный метод полагается, что передаваемый список был корректно сформирован вызывающим кодом, например,
+     * вызовом метода {@link #getProductForEachIngredient(List)}.
+     * @param ingredientProducts данные об одном конкретном продукте для каждого ингредиента блюда.
+     * @return продукты разных ингредиентов сгрупированные по одинаковым продуктам.
+     * @throws ValidateException если menuItemProducts является null.
      */
-    public int getProductsNumber(int ingredientIndex) {
-        DishIngredient ingredient = tryGetIngredient(ingredientIndex);
-        return productRepository.getProductsNumber(new Criteria().setFilter(ingredient.getFilter()));
+    public Map<Product, List<IngredientProduct>> groupByProduct(List<IngredientProduct> ingredientProducts) {
+        Validator.check(
+                Rule.of("Dish.ingredients").notNull(ingredientProducts)
+        );
+
+        return ingredientProducts.stream().
+                filter(i -> i.product().isPresent()).
+                collect(Collectors.groupingBy(i -> i.product().orElseThrow()));
     }
 
     /**
-     * Для любого указанного продукта, из множества взаимозаменямых продуктов данного ингредиента, вычисляет
+     * В некоторых случаях один и тот же продукт может использоваться для нескольких ингредиентов блюда. Этот метод
+     * возвращает общее кол-во указаннаго продукта необходимого для всех ингредиентов блюда где он используется.
+     * Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
+     *    также вернет пустой Optional. <br/>
+     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
+     * 3. Если список пуст - возвращает пустой Optional. <br/>
+     * <br/><br/>
+     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
+     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно с помощью
+     * метода: {@link #groupByProduct(List)}.
+     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param servingNumber кол-во порций блюда.
+     * @return общее кол-во указаннаго продукта необходимого для всех ингредиентов блюда где он используется.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. если servingNumber имеет значение null.<br/>
+     *              2. если servingNumber меньше или равно нулю.<br/>
+     *              3. если ingredients имеет значение null.<br/>
+     */
+    public Optional<BigDecimal> getNecessaryQuantity(List<IngredientProduct> ingredientProducts,
+                                                     BigDecimal servingNumber) {
+        Validator.check(
+                Rule.of("Dish.servingNumber").notNull(servingNumber).
+                        and(r -> r.positiveValue(servingNumber)),
+                Rule.of("Dish.ingredients").notNull(ingredients)
+        );
+
+        return ingredientProducts.stream().
+                filter(i -> i.product().isPresent()).
+                map(i -> calculateNecessaryQuantityInUnits(i, servingNumber)).
+                reduce(BigDecimal::add);
+    }
+
+    /**
+     * Возвращает необходимое кол-во "упаковок" продукта. Стоимость необходимого кол-ва рассчитывается
+     * с учетом фасовки продукта (размера упаковки). Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
+     *    также вернет пустой Optional. <br/>
+     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
+     * 3. Если список пуст - возвращает пустой Optional. <br/>
+     * <br/><br/>
+     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
+     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно
+     * с помощью метода: {@link #groupByProduct(List)}.
+     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param servingNumber кол-во порций блюда.
+     * @return общее кол-во упаковок указаннаго продукта необходимого для всех ингредиентов блюда где он
+     *         используется.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. если servingNumber имеет значение null.<br/>
+     *              2. если servingNumber меньше или равно нулю.<br/>
+     *              3. если ingredients имеет значение null.<br/>
+     */
+    public Optional<BigDecimal> getNecessaryPackageQuantity(List<IngredientProduct> ingredientProducts,
+                                                            BigDecimal servingNumber) {
+        return getNecessaryQuantity(ingredientProducts, servingNumber).
+                map(necessaryQuantity -> {
+                    Product product = retrieveProduct(ingredientProducts);
+                    return calculatePackagesNumber(product, necessaryQuantity);
+                });
+    }
+
+    /**
+     * Возвращает общую цену за необходимое кол-во "упаковок" продукта. Стоимость необходимого кол-ва рассчитывается
+     * с учетом фасовки продукта (размера упаковки). Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
+     *    также вернет пустой Optional. <br/>
+     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
+     * 3. Если список пуст - возвращает пустой Optional. <br/>
+     * <br/><br/>
+     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
+     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно
+     * с помощью метода: {@link #groupByProduct(List)}.
+     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param servingNumber кол-во порций блюда.
+     * @return общую цену за необходимое кол-во докупаемого продукта, БЕЗ учета кол-ва уже имеющегося в наличии
+     *         у пользователя.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. если servingNumber имеет значение null.<br/>
+     *              2. если servingNumber меньше или равно нулю.<br/>
+     *              3. если ingredients имеет значение null.<br/>
+     */
+    public Optional<BigDecimal> getNecessaryPackageQuantityPrice(List<IngredientProduct> ingredientProducts,
+                                                                 BigDecimal servingNumber) {
+        return getNecessaryPackageQuantity(ingredientProducts, servingNumber).
+                map(necessaryPackageQuantity -> {
+                    Product product = retrieveProduct(ingredientProducts);
+                    return calculateProductPrice(product, necessaryPackageQuantity);
+                });
+    }
+
+    /**
+     * Для любого указанного продукта, из множества взаимозаменямых продуктов указанного ингредиента, вычисляет
      * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
      * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
      * Недостающее кол-во рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой
-     * кол-во недостающих "упаковок" продукта. Особые случаи:<br/>
-     * 1. Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
-     *    то метод вернет результат для последнего продукта.<br/>
-     * 2. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
-     *    данного ингредиента, то метод вернет пустой Optional.
-     * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
-     * @param ingredientIndex индекс ингредиента для которого рассчитывается кол-во недостающих продуктов.
+     * кол-во недостающих "упаковок" продукта. <br/>
+     * Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} возвращает пустой Optional - этот метод также вернет
+     *    пустой Optional.
+     * <br/><br/>
+     * Метод не проверят содержимое объекта ingredientProduct (не выходят ли индексы за допустимые пределы, действительно
+     * ли указанный продукт соответствует указанном ингредиенту) полагая, что данный объект был сформирован правильно
+     * с помощью одного из методов: {@link #getProduct(int, int)} или {@link #getProductForEachIngredient(List)}.
+     * @param ingredientProduct данные об одном из продуктов соответствующих одному из ингредиентов.
      * @param servingNumber кол-во порций блюда.
      * @return кол-во "упаковок" докупаемого продукта.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. servingNumber является null.<br/>
      *              2. servingNumber <= 0 <br/>
-     *              3. productIndex < 0 <br/>
-     *              4. ingredientIndex меньше нуля.<br/>
-     *              5. ingredientIndex больше или равен кол-ву ингредиентов блюда.<br/>
+     *              3. ingredientProduct является null. <br/>
      */
-    public Optional<BigDecimal> getLackQuantity(int ingredientIndex,
-                                                int productIndex,
-                                                BigDecimal servingNumber) {
+    public Optional<BigDecimal> getLackPackageQuantity(IngredientProduct ingredientProduct,
+                                                       BigDecimal servingNumber) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(v -> v.positiveValue(servingNumber))
+                        and(v -> v.positiveValue(servingNumber)),
+                Rule.of("Dish.ingredientProduct").notNull(ingredientProduct)
         );
 
-        return getProduct(ingredientIndex, productIndex).
-                map(product -> getLackQuantity(ingredients.get(ingredientIndex), product, servingNumber));
+        return ingredientProduct.product().
+                map(product -> {
+                    BigDecimal necessaryQuantity = calculateNecessaryQuantityInUnits(ingredientProduct, servingNumber);
+                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(product, necessaryQuantity);
+                    return calculatePackagesNumber(product, lackQuantityInUnits);
+                });
+    }
+
+    /**
+     * Для любого указанного продукта, из множества взаимозаменямых продуктов указанного ингредиента, вычисляет
+     * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
+     * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
+     * Недостающее кол-во рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой
+     * кол-во недостающих "упаковок" продукта. Данный метдо используется, когда для разных ингредиентов блюда
+     * были выбраны одинаковые продукты.
+     * <br/>
+     * Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
+     *    также вернет пустой Optional. <br/>
+     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
+     * 3. Если список пуст - возвращает пустой Optional. <br/>
+     * <br/><br/>
+     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
+     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно с помощью
+     * метода: {@link #groupByProduct(List)}.
+     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param servingNumber кол-во порций блюда.
+     * @return кол-во "упаковок" докупаемого продукта.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. если servingNumber имеет значение null.<br/>
+     *              2. если servingNumber меньше или равно нулю.<br/>
+     *              3. если ingredients имеет значение null.<br/>
+     */
+    public Optional<BigDecimal> getLackPackageQuantity(List<IngredientProduct> ingredientProducts,
+                                                       BigDecimal servingNumber) {
+        return getNecessaryQuantity(ingredientProducts, servingNumber).
+                map(necessaryQuantityInUnits -> {
+                    Product product = retrieveProduct(ingredientProducts);
+                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(product, necessaryQuantityInUnits);
+                    return calculatePackagesNumber(product, lackQuantityInUnits);
+                });
     }
 
     /**
      * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта. Стоимость недостающего
-     * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки). Особые случаи: <br/>
-     * 1. Если в БД нет ни одного продукта удовлетворяющего ограничению {@link DishIngredient#getFilter()}
-     *    данного ингредиента, то метод вернет пустой Optional.<br/>
-     * 2. Если указанный productIndex больше или равен кол-ву всех продуктов соответствующих данному ингрдиенту,
-     *    то метод вернет результат для последнего продукта.<br/>
-     * @param productIndex порядковый номер продукта из множества взаимозаменяемых продуктов данного ингредиента.
-     * @param ingredientIndex индекс ингредиента для которого рассчитывается общай цена недостающего кол-ва продуктов.
+     * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки).
+     * <br/>
+     * Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} возвращает пустой Optional - этот метод также вернет
+     *    пустой Optional.
+     * <br/><br/>
+     * Метод не проверят содержимое объекта ingredientProduct (не выходят ли индексы за допустимые пределы, действительно
+     * ли указанный продукт соответствует указанном ингредиенту) полагая, что данный объект был сформирован правильно
+     * с помощью одного из методов: {@link #getProduct(int, int)} или {@link #getProductForEachIngredient(List)}.
+     * @param ingredientProduct данные об одном из продуктов соответствующих одному из ингредиентов.
      * @param servingNumber кол-во порций блюда.
      * @return общую цену за недостающее кол-во докупаемого продукта.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. servingNumber является null.<br/>
      *              2. servingNumber <= 0 <br/>
-     *              3. productIndex < 0 <br/>
-     *              4. ingredientIndex меньше нуля.<br/>
-     *              5. ingredientIndex больше или равен кол-ву ингредиентов блюда.<br/>
+     *              3. ingredientProduct является null. <br/>
      */
-    public Optional<BigDecimal> getLackQuantityPrice(int ingredientIndex,
-                                                     int productIndex,
-                                                     BigDecimal servingNumber) {
-        Validator.check(
-                Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(v -> v.positiveValue(servingNumber))
-        );
-
-        return getProduct(ingredientIndex, productIndex).
-                map(
-                        product -> getLackQuantity(ingredients.get(ingredientIndex), product, servingNumber).
-                                multiply(product.getContext().getPrice(), config.getMathContext())
-                );
+    public Optional<BigDecimal> getLackPackageQuantityPrice(IngredientProduct ingredientProduct,
+                                                            BigDecimal servingNumber) {
+        return getLackPackageQuantity(ingredientProduct, servingNumber).
+                map(lackQuantity -> {
+                    Product product = ingredientProduct.product().orElseThrow();
+                    return calculateProductPrice(product, lackQuantity);
+                });
     }
 
     /**
-     * Проверяет - содержится ли в блюде ингредиент с указанным именем.
-     * @param name имя искомого ингредиента.
-     * @return true - если указанный ингредиент содержится в данном блюде, иначе - false.
+     * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта. Стоимость недостающего
+     * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки).
+     * <br/>
+     * Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
+     *    также вернет пустой Optional. <br/>
+     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
+     * 3. Если список пуст - возвращает пустой Optional. <br/>
+     * <br/><br/>
+     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
+     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно
+     * с помощью метода: {@link #groupByProduct(List)}.
+     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param servingNumber кол-во порций блюда.
+     * @return общую цену за недостающее кол-во докупаемого продукта.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. если servingNumber имеет значение null.<br/>
+     *              2. если servingNumber меньше или равно нулю.<br/>
+     *              3. если ingredients имеет значение null.<br/>
      */
-    public boolean containsIngredients(String name) {
-        return ingredients.stream().anyMatch(ingredient -> ingredient.getName().equals(name));
+    public Optional<BigDecimal> getLackPackageQuantityPrice(List<IngredientProduct> ingredientProducts,
+                                                            BigDecimal servingNumber) {
+        Validator.check(
+                Rule.of("Dish.servingNumber").notNull(servingNumber).
+                        and(r -> r.positiveValue(servingNumber)),
+                Rule.of("Dish.ingredients").notNull(ingredients)
+        );
+
+        return getLackPackageQuantity(ingredientProducts, servingNumber).
+                map(lackQuantityInPackages -> {
+                    Product product = retrieveProduct(ingredientProducts);
+                    return calculateProductPrice(product, lackQuantityInPackages);
+                });
+    }
+
+    /**
+     * Возвращает стоимость данного блюда, которая представляет собой суммарную стоимость недостающего кол-ва одного
+     * из продуктов выбранных для каждого ингредиента. Допускается, что для некоторых ингредиентов блюда не
+     * указано ни одного продукта. Особые случаи: <br/>
+     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
+     *    также вернет пустой Optional. <br/>
+     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
+     * 3. Если список пуст - возвращает пустой Optional. <br/>
+     * <br/><br/>
+     * Данный метод не проверяет содержимое списка ingredients на достоверность (список не содержит null, для
+     * каждого ингредиента указан только один продукт, каждый продукт соответствует своему ингредиенту и т.д.)
+     * полагая, что данный список был сформирован корректно с использованием метода
+     * {@link #getProductForEachIngredient(List)}.
+     * @param ingredients каждый элемент списка содержит данные об одном конкретном продукте соответствующего
+     *                    одному конкретному ингредиенту этого блюда.
+     * @param servingNumber кол-во порций блюда для которых рассчитывается общая стоимость.
+     * @return стоимость данного блюда или пустой Optional.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
+     *              1. если servingNumber имеет значение null.<br/>
+     *              2. если servingNumber меньше или равно нулю.<br/>
+     *              3. если ingredients имеет значение null.<br/>
+     */
+    public Optional<BigDecimal> getLackProductPrice(List<IngredientProduct> ingredients,
+                                                    BigDecimal servingNumber) {
+        Validator.check(
+                Rule.of("Dish.servingNumber").notNull(servingNumber).
+                        and(r -> r.positiveValue(servingNumber))
+        );
+
+        Map<Product, List<IngredientProduct>> groups = groupByProduct(ingredients);
+
+        return groups.values().stream().
+                map(value -> getLackPackageQuantityPrice(value, servingNumber).orElseThrow()).
+                reduce(BigDecimal::add);
     }
 
     /**
@@ -523,22 +620,13 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Проверяет, содержится ли указанный тег в данном блюде.
-     * @param tag искомый тег.
-     * @return true - если указанный тег содержится в данном блюде, иначе - false.
-     */
-    public boolean containsTag(Tag tag) {
-        return tags.contains(tag);
-    }
-
-    /**
      * Возвращает кол-во всех возможных комбинаций состава данного блюда. Если для данного блюда не было
      * указанно ни одного ингредиента или любому ингредиенту не соответсвует ни один продукт - возвращает 0.
      * @return кол-во всех возможных комбинаций состава данного блюда.
      */
     public BigInteger getNumberIngredientCombinations() {
         return IntStream.range(0, ingredients.size()).
-                map(this::getProductsNumber).
+                map(i -> getProductsNumber(i).orElseThrow()).
                 filter(i -> i > 0).
                 mapToObj(BigInteger::valueOf).
                 reduce(BigInteger::multiply).
@@ -546,61 +634,8 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает стоимость данного блюда, которая представляет собой суммарную стоимость недостающего кол-ва одного
-     * из продуктов выбранных для каждого ингредиента. Особые случаи:<br/>
-     * 1. Если блюдо не содержит ни одного ингредиента - возвращает пустой Optional.<br/>
-     * 2. Если любому ингредиенту не соответсвует ни один продукт - возвращает пустой Optional.<br/>
-     * 3. Если для какого-либо ингредиента не соответствует ни один продукт - то он не принимает участия
-     *    в рассчете цены блюда.<br/>
-     * 4. Если для какого-либо ингредиента не выбран продукт - то в качестве значения по умолчанию будет
-     *    выбран самый дешевый продукт соответствующий данному ингредиенту.
-     * @param servingNumber кол-во порций блюда для которых рассчитывается общая стоимость.
-     * @param productsIndex набор пар - [индекс ингредиента, индекс продукта], где индекс продукта
-     *                    это индекс из отсортированного в порядке возрастания по цене множества взаимозаменяемых
-     *                    продуктов этого ингредиента.
-     * @return стоиомость данного блюда или пустой Optional.
-     * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
-     *              1. если servingNumber имеет значение null.<br/>
-     *              2. если servingNumber меньше или равно нулю.<br/>
-     *              3. если productsIndex имеет значение null.<br/>
-     *              4. если хотя бы один из ключей productsIndex имеет значение null.<br/>
-     *              5. если хотя бы одно из значений productsIndex имеет значение null.<br/>
-     *              6. если хотя бы одно из значений productsIndex отрицательное число.<br/>
-     *              7. если хотя бы один из ключей productsIndex меньше нуля.<br/>
-     *              8. если хотя бы один из ключей productsIndex больше или равен кол-ву ингредиентов.<br/>
-     */
-    public Optional<BigDecimal> getLackProductPrice(BigDecimal servingNumber,
-                                                    Map<Integer, Integer> productsIndex) {
-        Validator.check(
-                Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(r -> r.positiveValue(servingNumber)),
-                Rule.of("Dish.productsIndex").notNull(productsIndex).
-                        and(r -> r.notContainsNull(productsIndex.keySet(), "keySet")).
-                        and(r -> r.notContainsNull(productsIndex.values(), "values")).
-                        and(r -> r.notContains(
-                                productsIndex.keySet(),
-                                (i -> Result.State.of(i >= 0 && i < ingredients.size())),
-                                "keySet"
-                        )).
-                        and(r -> r.notContains(
-                                productsIndex.values(),
-                                (i -> Result.State.of(i >= 0)),
-                                "values"
-                        ))
-        );
-
-        return IntStream.range(0, ingredients.size()).
-                mapToObj(i -> {
-                    int productIndex = productsIndex.get(i) != null ? productsIndex.get(i) : 0;
-                    return getLackQuantityPrice(i, productIndex, servingNumber);
-                }).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                reduce(BigDecimal::add);
-    }
-
-    /**
-     * Возвращает минимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * Возвращает минимально возможную стоимость одной порции данного блюда. При расчете минимальной стоимости
+     * порции блюда НЕ учитывается кол-во продуктов уже имеющееся в наличии у пользователя. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
      * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
@@ -608,19 +643,20 @@ public class Dish implements Entity<Dish> {
      * @return минимально возможная стоимость данного блюда.
      */
     public Optional<BigDecimal> getMinPrice() {
-        return IntStream.range(0, getIngredientNumber()).
-                mapToObj(i -> {
-                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
-                    return getProduct(i, 0).
-                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
-                }).
-                filter(Optional::isPresent).
-                map(Optional::get).
+        List<ProductConstraint> constraints = IntStream.range(0, getIngredientNumber()).
+                        mapToObj(i -> new ProductConstraint(i, 0)).
+                        toList();
+
+        List<IngredientProduct> ingredientProducts = getProductForEachIngredient(constraints);
+
+        return groupByProduct(ingredientProducts).values().stream().
+                map(values -> getNecessaryPackageQuantityPrice(values, BigDecimal.ONE).orElseThrow()).
                 reduce(BigDecimal::add);
     }
 
     /**
-     * Возвращает максимально возможную стоимость данного блюда. Особые случаи:<br/>
+     * Возвращает максимально возможную стоимость одной порции данного блюда. При расчете максимальной стоимости
+     * порции блюда НЕ учитывается кол-во продуктов уже имеющееся в наличии у пользователя. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
      * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
@@ -628,26 +664,33 @@ public class Dish implements Entity<Dish> {
      * @return максимально возможная стоимость данного блюда.
      */
     public Optional<BigDecimal> getMaxPrice() {
-        return IntStream.range(0, getIngredientNumber()).
-                mapToObj(i -> {
-                    /*
-                    * Если в метод getProduct(ingredientIndex, productIndex) в качестве productIndex передать
-                    * значение, которое больше или равно кол-ву всех продуктов соответствующих указанному
-                    * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
-                    * значение для productIndex чтобы получить последний продукт.
-                     */
-                    int lastProductIndex = 100000;
-                    BigDecimal necessaryQuantity = ingredients.get(i).getNecessaryQuantity(BigDecimal.ONE);
-                    return getProduct(i, lastProductIndex).
-                            map(product -> product.getContext().getPrice().multiply(necessaryQuantity));
+        /*
+         * Если в метод getProduct(ingredientIndex, productIndex) в качестве productIndex передать
+         * значение, которое больше или равно кол-ву всех продуктов соответствующих указанному
+         * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
+         * значение для productIndex чтобы получить последний продукт.
+         */
+        List<IngredientProduct> ingredientProducts = IntStream.range(0, getIngredientNumber()).
+                mapToObj(ingredientIndex -> {
+                    DishIngredient ingredient = ingredients.get(ingredientIndex);
+                    int productIndex = 100000;
+
+                    Page<Product> page = getProductPageBy(ingredient, productIndex);
+                    Optional<Product> product = page.getByGlobalIndex(
+                            page.getMetadata().getTotalItems().subtract(BigInteger.ONE)
+                    );
+                    return new IngredientProduct(product, ingredientIndex, productIndex);
                 }).
-                filter(Optional::isPresent).
-                map(Optional::get).
+                toList();
+
+        return groupByProduct(ingredientProducts).values().stream().
+                map(values -> getNecessaryPackageQuantityPrice(values, BigDecimal.ONE).orElseThrow()).
                 reduce(BigDecimal::add);
     }
 
     /**
-     * Возвращает среднюю стоимость для данного блюда. Особые случаи:<br/>
+     * Возвращает среднюю стоимость для одной порции данного блюда. При расчете средней стоимости
+     * порции блюда НЕ учитывается кол-во продуктов уже имеющееся в наличии у пользователя. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту блюда не соответствует ни один продукт - возвращает пустой Optional.<br/>
      * 3. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
@@ -655,9 +698,10 @@ public class Dish implements Entity<Dish> {
      * @return средняя стоимость данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
-        return getMinPrice().
-                flatMap(min -> getMaxPrice().map(max -> max.add(min))).
-                map(sum -> sum.divide(new BigDecimal(2), config.getMathContext()));
+        Optional<BigDecimal> max = getMaxPrice();
+        Optional<BigDecimal> min = getMinPrice();
+        Optional<BigDecimal> sum = min.map(vMin -> vMin.add(max.orElseThrow()));
+        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.getMathContext()));
     }
 
     /**
@@ -715,27 +759,58 @@ public class Dish implements Entity<Dish> {
     }
 
 
-    private BigDecimal getLackQuantity(DishIngredient ingredient,
-                                       Product product,
-                                       BigDecimal servingNumber) {
-        BigDecimal lackQuantity = ingredient.getNecessaryQuantity(servingNumber).
-                subtract(product.getQuantity()).
-                max(BigDecimal.ZERO);
+    private Product retrieveProduct(List<IngredientProduct> ingredientProducts) {
+        return ingredientProducts.stream().
+                filter(i -> i.product().isPresent()).
+                map(i -> i.product().orElseThrow()).
+                findAny().
+                orElseThrow();
+    }
 
-        if(lackQuantity.signum() > 0) {
-            lackQuantity = lackQuantity.
+    private BigDecimal calculateNecessaryQuantityInUnits(IngredientProduct ingredientProduct, BigDecimal servingNumber) {
+        return ingredients.get(ingredientProduct.ingredientIndex()).getNecessaryQuantity(servingNumber);
+    }
+
+    private BigDecimal calculateLackQuantityInUnits(Product product,
+                                                    BigDecimal necessaryQuantity) {
+        return necessaryQuantity.subtract(product.getQuantity()).max(BigDecimal.ZERO);
+    }
+
+    private BigDecimal calculatePackagesNumber(Product product, BigDecimal quantityInUnits) {
+        if(quantityInUnits.signum() > 0) {
+            quantityInUnits = quantityInUnits.
                     divide(product.getContext().getPackingSize(), config.getMathContext()).
                     setScale(0, RoundingMode.UP);
         }
 
-        return lackQuantity;
+        return quantityInUnits;
     }
+
+    private BigDecimal calculateProductPrice(Product product, BigDecimal packagesNumber) {
+        return product.getContext().getPrice().multiply(packagesNumber, config.getMathContext());
+    }
+
+
+    private Page<Product> getProductPageBy(DishIngredient ingredient, int productIndex) {
+        Criteria criteria = new Criteria().
+                setPageable(Pageable.ofIndex(30, productIndex)).
+                setSort(ingredientProductsSort).
+                setFilter(ingredient.getFilter());
+
+        return productRepository.getProducts(criteria);
+    }
+
+
+    public record ProductConstraint(int ingredientIndex, int productIndex) {}
+
+
+    public record IngredientProduct(Optional<Product> product, int ingredientIndex, int productIndex) {}
 
 
     /**
      * Реализация паттерна "Builder" для блюда ({@link Dish}).
      */
-    public static class Builder implements Entity.Builder<Dish> {
+    public static class Builder implements AbstractBuilder<Dish> {
 
         private UUID id;
         private User user;
@@ -826,14 +901,6 @@ public class Dish implements Entity<Dish> {
         public Builder setRepository(ProductRepository repository) {
             this.repository = repository;
             return this;
-        }
-
-        public boolean containsTag(String tag) {
-            return tags.contains(tag);
-        }
-
-        public boolean containsIngredient(String name, Filter filter, BigDecimal quantity) {
-            return ingredients.stream().anyMatch(i -> i.contains(name, filter, quantity));
         }
 
         @Override

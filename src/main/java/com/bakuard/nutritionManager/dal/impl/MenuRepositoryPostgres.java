@@ -12,9 +12,11 @@ import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
+
 import org.jooq.Condition;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,10 +26,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static org.jooq.impl.DSL.*;
@@ -129,6 +128,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 },
                 rs -> {
                     Menu.Builder builder = null;
+                    HashSet<String> tags = new HashSet<>();
+                    HashSet<String> items = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -150,16 +151,19 @@ public class MenuRepositoryPostgres implements MenuRepository {
                         }
 
                         String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+                        if(!rs.wasNull() && !tags.contains(tagValue)) {
+                            builder.addTag(tagValue);
+                            tags.add(tagValue);
+                        }
 
                         String dishName = rs.getString("dishName");
-                        if(!rs.wasNull() && !builder.containsItem(dishName)) {
+                        if(!rs.wasNull() && !items.contains(dishName)) {
                             builder.addItem(
                                     new MenuItem.Builder().
                                             setConfig(appConfig).
-                                            setDishName(dishName).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
+                            items.add(dishName);
                         }
                     }
 
@@ -171,6 +175,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
             List<Dish> dishes = statement.query(
                     connection -> connection.prepareStatement("""
                             SELECT MenuItems.menuId,
+                                   MenuItems.index,
                                    Dishes.*,
                                    DishTags.*,
                                    Users.userId,
@@ -193,13 +198,14 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                 LEFT JOIN DishIngredients
                                     ON MenuItems.dishId = DishIngredients.dishId
                                 WHERE MenuItems.menuId = ?
-                                ORDER BY Dishes.dishId, DishTags.index, DishIngredients.index;
+                                ORDER BY MenuItems.index, DishTags.index, DishIngredients.index;
                             """),
                     ps -> ps.setObject(1, menuId),
                     dishRepository::mapToDishes
             );
 
-            dishes.forEach(dish -> result.getItem(dish.getName()).setDish(() -> dish));
+            for(int i = 0; i < result.getItems().size(); i++)
+                result.getItems().get(i).setDish(dishes.get(i));
         }
 
         return Optional.ofNullable(result == null ? null : result.tryBuild());
@@ -241,6 +247,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 },
                 rs -> {
                     Menu.Builder builder = null;
+                    HashSet<String> tags = new HashSet<>();
+                    HashSet<String> items = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -262,16 +270,19 @@ public class MenuRepositoryPostgres implements MenuRepository {
                         }
 
                         String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+                        if(!rs.wasNull() && !tags.contains(tagValue)) {
+                            builder.addTag(tagValue);
+                            tags.add(tagValue);
+                        }
 
                         String dishName = rs.getString("dishName");
-                        if(!rs.wasNull() && !builder.containsItem(dishName)) {
+                        if(!rs.wasNull() && !items.contains(dishName)) {
                             builder.addItem(
                                     new MenuItem.Builder().
                                             setConfig(appConfig).
-                                            setDishName(dishName).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
+                            items.add(dishName);
                         }
                     }
 
@@ -282,7 +293,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
         if(result != null) {
             List<Dish> dishes = statement.query(
                     connection -> connection.prepareStatement("""
-                            SELECT Dishes.*,
+                            SELECT MenuItems.index,
+                                   Dishes.*,
                                    DishTags.*,
                                    Users.userId,
                                    Users.name as userName,
@@ -304,7 +316,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                 LEFT JOIN DishIngredients
                                     ON MenuItems.dishId = DishIngredients.dishId
                                 WHERE Menus.name = ? AND Menus.userId = ?
-                                ORDER BY Dishes.dishId, DishTags.index, DishIngredients.index;
+                                ORDER BY MenuItems.index, DishTags.index, DishIngredients.index;
                             """),
                     ps -> {
                         ps.setString(1, name);
@@ -313,7 +325,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
                     dishRepository::mapToDishes
             );
 
-            dishes.forEach(dish -> result.getItem(dish.getName()).setDish(() -> dish));
+            for(int i = 0; i < dishes.size(); i++)
+                result.getItems().get(i).setDish(dishes.get(i));
         }
 
         return Optional.ofNullable(result == null ? null : result.tryBuild());
@@ -323,7 +336,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Menu tryGetById(UUID userId, UUID menuId) {
         return getById(userId, menuId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown menu with id=" + menuId + " for userId=" + userId)
+                        () -> new ValidateException("Unknown menu with id=" + menuId + " for userId=" + userId).
+                                addReason(Rule.of("MenuRepository.menuId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 
@@ -331,7 +345,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Menu tryGetByName(UUID userId, String name) {
         return getByName(userId, name).
                 orElseThrow(
-                        () -> new ValidateException("Unknown menu with name=" + name + " for userId=" + userId)
+                        () -> new ValidateException("Unknown menu with name=" + name + " for userId=" + userId).
+                                addReason(Rule.of("MenuRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 
@@ -380,6 +395,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
                     ArrayList<Menu.Builder> builders = new ArrayList<>();
 
                     Menu.Builder builder = null;
+                    HashSet<String> tags = new HashSet<>();
+                    HashSet<String> items = new HashSet<>();
                     UUID lastMenuId = null;
                     while(rs.next()) {
                         UUID menuId = (UUID)rs.getObject("menuId");
@@ -402,19 +419,24 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     setConfig(appConfig);
 
                             lastMenuId = menuId;
+                            tags.clear();
+                            items.clear();
                         }
 
                         String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull() && !builder.containsTag(tagValue)) builder.addTag(tagValue);
+                        if(!rs.wasNull() && !tags.contains(tagValue)) {
+                            builder.addTag(tagValue);
+                            tags.add(tagValue);
+                        }
 
                         String dishName = rs.getString("dishName");
-                        if(!rs.wasNull() && !builder.containsItem(dishName)) {
+                        if(!rs.wasNull() && !items.contains(dishName)) {
                             builder.addItem(
                                     new MenuItem.Builder().
                                             setConfig(appConfig).
-                                            setDishName(dishName).
                                             setQuantity(rs.getBigDecimal("itemQuantity"))
                             );
+                            items.add(dishName);
                         }
                     }
 
@@ -428,7 +450,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
             if(!builder.getItems().isEmpty()) {
                 List<Dish> dishes = statement.query(
                         connection -> connection.prepareStatement("""
-                                SELECT MenuItems.menuId,
+                                SELECT MenuItems.index,
+                                       MenuItems.menuId,
                                        Dishes.*,
                                        DishTags.*,
                                        Users.userId,
@@ -451,13 +474,14 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     LEFT JOIN DishIngredients
                                         ON MenuItems.dishId = DishIngredients.dishId
                                     WHERE MenuItems.menuId = ?
-                                    ORDER BY Dishes.dishId, DishTags.index, DishIngredients.index;
+                                    ORDER BY MenuItems.index, DishTags.index, DishIngredients.index;
                                 """),
                         ps -> ps.setObject(1, builder.getId()),
                         dishRepository::mapToDishes
                 );
 
-                dishes.forEach(dish -> builder.getItem(dish.getName()).setDish(() -> dish));
+                for(int i = 0; i < dishes.size(); i++)
+                    builder.getItems().get(i).setDish(dishes.get(i));
             }
         }
 

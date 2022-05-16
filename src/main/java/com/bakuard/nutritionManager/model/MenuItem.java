@@ -7,49 +7,47 @@ import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public class MenuItem {
 
-    private final String dishName;
-    private final Supplier<Dish> dish;
+    private final Dish dish;
     private final BigDecimal quantity;
     private final AppConfigData config;
 
     public MenuItem(MenuItem other) {
-        dishName = other.dishName;
         dish = other.dish;
         quantity = other.quantity;
         config = other.config;
     }
 
-    private MenuItem(String dishName,
-                     Supplier<Dish> dish,
+    private MenuItem(Dish dish,
                      BigDecimal quantity,
                      AppConfigData config) {
         Validator.check(
-                Rule.of("MenuItem.dishName").notNull(dishName).and(r -> r.notBlank(dishName)),
                 Rule.of("MenuItem.dish").notNull(dish),
                 Rule.of("MenuItem.quantity").notNull(quantity).and(r -> r.positiveValue(quantity)),
                 Rule.of("MenuItem.config").notNull(config)
         );
 
-        this.dishName = dishName;
         this.dish = dish;
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.config = config;
     }
 
     public String getDishName() {
-        return dishName;
+        return dish.getName();
     }
 
     public Dish getDish() {
-        return dish.get();
+        return dish;
     }
 
     public BigDecimal getNecessaryQuantity(BigDecimal menuNumber) {
         return quantity.multiply(menuNumber, config.getMathContext());
+    }
+
+    public AppConfigData getConfig() {
+        return config;
     }
 
     @Override
@@ -57,30 +55,27 @@ public class MenuItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MenuItem menuItem = (MenuItem) o;
-        return dishName.equals(menuItem.dishName) &&
-                getDish().equals(menuItem.getDish()) &&
+        return dish.equals(menuItem.dish) &&
                 quantity.equals(menuItem.quantity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishName, getDish(), quantity);
+        return Objects.hash(dish, quantity);
     }
 
     @Override
     public String toString() {
         return "MenuItem{" +
-                "dishName='" + dishName + '\'' +
-                ", dishId=" + getDish().getId() +
+                "dish={id=" + dish.getId() + ", name=" + dish.getName() + '}' +
                 ", quantity=" + quantity +
                 '}';
     }
 
 
-    public static class Builder implements Entity.Builder<MenuItem> {
+    public static class Builder implements AbstractBuilder<MenuItem> {
 
-        private String dishName;
-        private Supplier<Dish> dish;
+        private Dish dish;
         private BigDecimal quantity;
         private AppConfigData config;
 
@@ -88,12 +83,7 @@ public class MenuItem {
 
         }
 
-        public Builder setDishName(String dishName) {
-            this.dishName = dishName;
-            return this;
-        }
-
-        public Builder setDish(Supplier<Dish> dish) {
+        public Builder setDish(Dish dish) {
             this.dish = dish;
             return this;
         }
@@ -108,13 +98,9 @@ public class MenuItem {
             return this;
         }
 
-        public boolean containsDish(String dishName) {
-            return dishName.equals(this.dishName);
-        }
-
         @Override
         public MenuItem tryBuild() throws ValidateException {
-            return new MenuItem(dishName, dish, quantity, config);
+            return new MenuItem(dish, quantity, config);
         }
 
     }

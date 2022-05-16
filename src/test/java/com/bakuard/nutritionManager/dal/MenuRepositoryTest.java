@@ -123,7 +123,6 @@ class MenuRepositoryTest {
     public void save1() {
         AssertUtil.assertValidateException(
                 () -> menuRepository.save(null),
-                "MenuRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -218,7 +217,6 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> menuRepository.save(menu)),
-                "MenuRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -343,7 +341,6 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> menuRepository.save(updatedMenu)),
-                "MenuRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -661,7 +658,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetById(user.getId(), toUUID(100)),
-                "MenuRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -680,7 +677,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetById(otherUser.getId(), toUUID(1)),
-                "MenuRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -818,7 +815,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetByName(user.getId(), "unknown menu"),
-                "MenuRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -836,7 +833,7 @@ class MenuRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> menuRepository.tryGetByName(otherUser.getId(), "Menu#1"),
-                "MenuRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -1607,10 +1604,10 @@ class MenuRepositoryTest {
     private Menu createMenu(User user, int menuId) {
         List<Dish> dishes = List.of(
                 createDish(user, 0),
-                createDish(user, 1),
                 createDish(user, 2),
-                createDish(user, 3),
-                createDish(user, 4)
+                createDish(user, 1),
+                createDish(user, 4),
+                createDish(user, 3)
         );
 
         Menu menu = new Menu.Builder().
@@ -1623,10 +1620,10 @@ class MenuRepositoryTest {
                 addTag("common tag").
                 addTag("tag#" + menuId).
                 addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"))).
-                addItem(createMenuItem(dishes.get(1), new BigDecimal("5"))).
-                addItem(createMenuItem(dishes.get(2), new BigDecimal("10.1"))).
-                addItem(createMenuItem(dishes.get(3), new BigDecimal("0.4"))).
-                addItem(createMenuItem(dishes.get(4), new BigDecimal("2"))).
+                addItem(createMenuItem(dishes.get(1), new BigDecimal("10.1"))).
+                addItem(createMenuItem(dishes.get(2), new BigDecimal("5"))).
+                addItem(createMenuItem(dishes.get(3), new BigDecimal("2"))).
+                addItem(createMenuItem(dishes.get(4), new BigDecimal("0.4"))).
                 tryBuild();
 
         commit(() -> dishes.forEach(dish -> dishRepository.save(dish)));
@@ -1662,22 +1659,19 @@ class MenuRepositoryTest {
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
-                                        setDishName("dish#0").
-                                        setDish(() -> dish0)
+                                        setDish(dish0)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
-                                        setDishName("dish#50").
-                                        setDish(() -> dish50)
+                                        setDish(dish50)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
-                                        setDishName("dish#100").
-                                        setDish(() -> dish100)
+                                        setDish(dish100)
                         ).
                         tryBuild()
         );
@@ -1697,22 +1691,19 @@ class MenuRepositoryTest {
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
-                                        setDishName("dish#1").
-                                        setDish(() -> dish1)
+                                        setDish(dish1)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
-                                        setDishName("dish#50").
-                                        setDish(() -> dish50)
+                                        setDish(dish50)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
-                                        setDishName("dish#100").
-                                        setDish(() -> dish100)
+                                        setDish(dish100)
                         ).
                         tryBuild()
         );
@@ -1732,22 +1723,19 @@ class MenuRepositoryTest {
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
-                                        setDishName("dish#2").
-                                        setDish(() -> dish2)
+                                        setDish(dish2)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
-                                        setDishName("dish#60").
-                                        setDish(() -> dish60)
+                                        setDish(dish60)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
-                                        setDishName("dish#100").
-                                        setDish(() -> dish100)
+                                        setDish(dish100)
                         ).
                         tryBuild()
         );
@@ -1767,22 +1755,19 @@ class MenuRepositoryTest {
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
-                                        setDishName("dish#3").
-                                        setDish(() -> dish3)
+                                        setDish(dish3)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
-                                        setDishName("dish#60").
-                                        setDish(() -> dish60)
+                                        setDish(dish60)
                         ).
                         addItem(
                                 new MenuItem.Builder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
-                                        setDishName("dish#100").
-                                        setDish(() -> dish100)
+                                        setDish(dish100)
                         ).
                         tryBuild()
         );
@@ -1875,8 +1860,7 @@ class MenuRepositoryTest {
     private MenuItem.Builder createMenuItem(Dish dish, BigDecimal quantity) {
         return new MenuItem.Builder().
                 setConfig(appConfiguration).
-                setDish(() -> dish).
-                setDishName(dish.getName()).
+                setDish(dish).
                 setQuantity(quantity);
     }
 

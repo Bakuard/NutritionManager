@@ -121,7 +121,7 @@ public class DishIngredient {
     /**
      * Реализация паттерна "Builder" для ингредиентов блюд ({@link DishIngredient}).
      */
-    public static class Builder implements Entity.Builder<DishIngredient> {
+    public static class Builder implements AbstractBuilder<DishIngredient> {
 
         private String name;
         private Filter filter;

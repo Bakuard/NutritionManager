@@ -39,7 +39,7 @@ public class AssertUtil {
                 }
             }
 
-            if(!userMessageKey.equals(ex.getUserMessageKey())) {
+            if(!userMessageKey.equals(ex.getUserMessageKey().orElse(null))) {
                 Assertions.fail("Unexpected user message key. Expected: " + userMessageKey +
                         ". Actual: " + ex.getUserMessageKey()
                 );
@@ -59,7 +59,7 @@ public class AssertUtil {
 
             ValidateException ex = (ValidateException) e;
 
-            if(!userMessageKey.equals(ex.getUserMessageKey())) {
+            if(!userMessageKey.equals(ex.getUserMessageKey().orElse(null))) {
                 Assertions.fail("Unexpected user message key. Expected: " + userMessageKey +
                         ". Actual: " + ex.getUserMessageKey()
                 );

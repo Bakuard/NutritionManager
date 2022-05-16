@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.services;
+package com.bakuard.nutritionManager.service;
 
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
@@ -24,20 +24,24 @@ public class AuthService {
         try {
             user = userRepository.tryGetByName(name);
         } catch(ValidateException e) {
-            throw new ValidateException("Incorrect credentials").addReason(e);
+            throw new ValidateException("Incorrect credentials").
+                    addReason(e).
+                    setUserMessageKey("AuthService.enter");
         }
 
         if(user.isCorrectPassword(password)) {
             String jws = jwsService.generateAccessJws(user);
             return new Pair<>(jws, user);
         } else {
-            throw new ValidateException("Incorrect credentials");
+            throw new ValidateException("Incorrect credentials").
+                    setUserMessageKey("AuthService.enter");
         }
     }
 
     public void verifyEmailForRegistration(String email) {
         if(userRepository.getByEmail(email).isPresent()) {
-            throw new ValidateException();
+            throw new ValidateException().
+                    setUserMessageKey("AuthService.verifyEmailForRegistration");
         }
 
         String jws = jwsService.generateRegistrationJws(email);
@@ -64,7 +68,9 @@ public class AuthService {
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
         } catch(ValidateException e) {
-            throw new ValidateException("Fail to register new user=" + name).addReason(e);
+            throw new ValidateException("Fail to register new user=" + name).
+                    addReason(e).
+                    setUserMessageKey("AuthService.registration");
         }
     }
 
@@ -80,7 +86,9 @@ public class AuthService {
             String accessJws = jwsService.generateAccessJws(user);
             return new Pair<>(accessJws, user);
         } catch(ValidateException e) {
-            throw new ValidateException("Fail to change credential for user=" + name).addReason(e);
+            throw new ValidateException("Fail to change credential for user=" + name).
+                    addReason(e).
+                    setUserMessageKey("AuthService.changeCredential");
         }
     }
 
@@ -99,7 +107,9 @@ public class AuthService {
 
             return user;
         } catch(ValidateException e) {
-            throw new ValidateException("Fail to change login and email for user").addReason(e);
+            throw new ValidateException("Fail to change login and email for user").
+                    addReason(e).
+                    setUserMessageKey("AuthService.changeLoginAndEmail");
         }
     }
 
@@ -117,7 +127,9 @@ public class AuthService {
 
             return user;
         } catch(ValidateException e) {
-            throw new ValidateException("Incorrect password").addReason(e);
+            throw new ValidateException("Incorrect password").
+                    addReason(e).
+                    setUserMessageKey("AuthService.changePassword");
         }
     }
 

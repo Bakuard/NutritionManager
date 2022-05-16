@@ -131,8 +131,7 @@ public class Sort {
         Container<Boolean> d = new Container<>();
 
         Validator.check(
-                () -> new ValidateException("Unknown sort direction").
-                        setUserMessageKey("Sort.put"),
+                () -> new ValidateException("Unknown sort direction"),
                 Rule.of("Sort.direction").notNull(direction).
                         and(r -> {
                             switch(direction) {

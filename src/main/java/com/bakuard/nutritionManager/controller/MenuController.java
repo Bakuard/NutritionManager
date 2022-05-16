@@ -151,7 +151,7 @@ public class MenuController {
     )
     @Transactional
     @GetMapping("/getById")
-    public ResponseEntity<DishResponse> getById(
+    public ResponseEntity<MenuResponse> getById(
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор меню в формате UUID. Не может быть null.", required = true)
             UUID id) {
@@ -175,7 +175,7 @@ public class MenuController {
     )
     @Transactional
     @GetMapping("/getByName")
-    public ResponseEntity<DishResponse> getByName(
+    public ResponseEntity<MenuResponse> getByName(
             @RequestParam("name")
             @Parameter(description = "Наименование меню. Не может быть null.", required = true)
             String name) {
@@ -309,6 +309,10 @@ public class MenuController {
     }
 
     @Operation(summary = """
+            Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
+             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню.
+            """,
+            description = """
             Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
              кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню. Особые случаи: <br/>
             1. Если ни одно блюдо не содержит ни одного ингредиента - возвращает null. <br/>

@@ -28,7 +28,7 @@ public class UserRepositoryPostgres implements UserRepository {
     @Override
     public boolean save(User user) {
         Validator.check(
-                Rule.of("UserRepositoryPostgres.user").notNull(user)
+                Rule.of("UserRepository.user").notNull(user)
         );
 
         User oldUser = getById(user.getId()).orElse(null);
@@ -43,8 +43,8 @@ public class UserRepositoryPostgres implements UserRepository {
                 wasSaved = true;
             }
         } catch(DuplicateKeyException e) {
-            throw new ValidateException("Fail to save user").
-                    addReason(Rule.of("UserRepositoryPostgres.user").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+            throw new ValidateException("Fail to save user", e).
+                    addReason(Rule.of("UserRepository.user").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
         }
 
         return wasSaved;
@@ -53,7 +53,7 @@ public class UserRepositoryPostgres implements UserRepository {
     @Override
     public Optional<User> getById(UUID userId) {
         Validator.check(
-                Rule.of("UserRepositoryPostgres.userId").notNull(userId)
+                Rule.of("UserRepository.userId").notNull(userId)
         );
 
         return statement.query(
@@ -84,7 +84,7 @@ public class UserRepositoryPostgres implements UserRepository {
     @Override
     public Optional<User> getByName(String name) {
         Validator.check(
-                Rule.of("UserRepositoryPostgres.name").notNull(name)
+                Rule.of("UserRepository.name").notNull(name)
         );
 
         return statement.query(
@@ -115,7 +115,7 @@ public class UserRepositoryPostgres implements UserRepository {
     @Override
     public Optional<User> getByEmail(String email) {
         Validator.check(
-                Rule.of("UserRepositoryPostgres.email").notNull(email)
+                Rule.of("UserRepository.email").notNull(email)
         );
 
         return statement.query(
@@ -147,7 +147,8 @@ public class UserRepositoryPostgres implements UserRepository {
     public User tryGetById(UUID userId) {
         return getById(userId).
                 orElseThrow(
-                       () -> new ValidateException("Unknown user with id = " + userId)
+                       () -> new ValidateException("Unknown user with id = " + userId).
+                               addReason(Rule.of("UserRepository.userId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 
@@ -155,7 +156,8 @@ public class UserRepositoryPostgres implements UserRepository {
     public User tryGetByName(String name) {
         return getByName(name).
                 orElseThrow(
-                        () -> new ValidateException("Unknown user with name = " + name)
+                        () -> new ValidateException("Unknown user with name = " + name).
+                                addReason(Rule.of("UserRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 
@@ -163,7 +165,8 @@ public class UserRepositoryPostgres implements UserRepository {
     public User tryGetByEmail(String email) {
         return getByEmail(email).
                 orElseThrow(
-                        () -> new ValidateException("Unknown user with email = " + email)
+                        () -> new ValidateException("Unknown user with email = " + email).
+                                addReason(Rule.of("UserRepository.email").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 

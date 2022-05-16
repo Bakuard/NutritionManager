@@ -73,11 +73,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public Product tryRemove(UUID userId, UUID productId) {
-        Validator.check(
-                Rule.of("ProductRepository.userId").notNull(userId),
-                Rule.of("ProductRepository.productId").notNull(productId)
-        );
-
         Product product = getById(userId, productId).
                 orElseThrow(
                         () -> new ValidateException("Unknown product with id=" + productId + " for userId=" + userId).
@@ -161,7 +156,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Product tryGetById(UUID userId, UUID productId) {
         return getById(userId, productId).
                 orElseThrow(
-                        () -> new ValidateException("Unknown product with id = " + productId + " for userId=" + userId)
+                        () -> new ValidateException("Unknown product with id = " + productId + " for userId=" + userId).
+                                addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
                 );
     }
 
@@ -433,7 +429,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getProductsNumber(Criteria criteria) {
         Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -449,7 +445,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -473,7 +469,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getShopsNumber(Criteria criteria) {
         Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -495,7 +491,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getGradesNumber(Criteria criteria) {
         Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
@@ -517,10 +513,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getCategoriesNumber(Criteria criteria) {
         Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER))).
-                        and(r -> r.isTrue(criteria.getFilter().containsOnly(USER)))
-                        
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
+                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER) &&
+                                criteria.getFilter().containsOnly(USER)))
         );
 
         String query = select(countDistinct(field("Products.category"))).
@@ -541,7 +536,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getManufacturersNumber(Criteria criteria) {
         Validator.check(
                 Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
+                        and(r -> r.notNull(criteria.getFilter(), "filter")).
                         and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 

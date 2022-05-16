@@ -2,7 +2,7 @@ package com.bakuard.nutritionManager.config;
 
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dal.impl.*;
-import com.bakuard.nutritionManager.services.*;
+import com.bakuard.nutritionManager.service.*;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -191,7 +191,7 @@ public class SpringConfig implements WebMvcConfigurer {
                 info(
                         new Info().
                                 title("Nutrition Manager API").
-                                version("0.7.10").
+                                version("0.8.0").
                                 contact(new Contact().email("purplespicemerchant@gmail.com"))
                 );
     }

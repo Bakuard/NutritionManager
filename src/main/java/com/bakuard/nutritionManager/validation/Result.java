@@ -50,17 +50,20 @@ public final class Result {
     private final Constraint[] constraints;
     private final State state;
     private final String logMessage;
+    private final String ruleName;
     private final Rule rule;
     private final List<Exception> suppressedExceptions;
 
     public Result(Constraint constraint,
                   State state,
                   String logMessage,
+                  String ruleName,
                   Rule rule,
                   List<Exception> suppressedExceptions) {
         this.constraints = new Constraint[]{Objects.requireNonNull(constraint, "constraint can't be null")};
         this.state = Objects.requireNonNull(state, "state can't be null");
         this.logMessage = logMessage;
+        this.ruleName = ruleName;
         this.rule = rule;
         this.suppressedExceptions = suppressedExceptions;
     }
@@ -68,11 +71,13 @@ public final class Result {
     private Result(Constraint[] constraints,
                    State state,
                    String logMessage,
+                   String ruleName,
                    Rule rule,
                    List<Exception> suppressedExceptions) {
         this.constraints = constraints;
         this.state = state;
         this.logMessage = logMessage;
+        this.ruleName = ruleName;
         this.rule = rule;
         this.suppressedExceptions = suppressedExceptions;
     }
@@ -125,6 +130,7 @@ public final class Result {
                         concat(constraints, result.constraints),
                         state.or(result.state),
                         joinLogMessages(logMessage, result.logMessage),
+                        ruleName,
                         rule,
                         suppressed
                 );
@@ -136,8 +142,7 @@ public final class Result {
 
     public RuleException check() {
         if(!isSuccess()) {
-            String userMessageKey = rule.getRuleName() +
-                    Arrays.toString(constraints).replaceAll(" ", "");
+            String userMessageKey = ruleName + Arrays.toString(constraints).replaceAll(" ", "");
             RuleException exception = new RuleException(
                     userMessageKey,
                     getLogMessage(),
@@ -200,7 +205,7 @@ public final class Result {
     }
 
     private String getLogMessage() {
-        StringBuilder result =  new StringBuilder(rule.getRuleName()).
+        StringBuilder result =  new StringBuilder(ruleName).
                 append(Arrays.toString(constraints)).
                 append(" - is ").
                 append(state).

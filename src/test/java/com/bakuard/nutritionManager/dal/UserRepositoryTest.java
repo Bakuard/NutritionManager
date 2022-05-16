@@ -106,7 +106,6 @@ class UserRepositoryTest {
     public void save1() {
         AssertUtil.assertValidateException(
                 () -> repository.save(null),
-                "UserRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -168,7 +167,6 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
-                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -189,7 +187,6 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
-                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -210,7 +207,6 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(addedUser),
-                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -275,7 +271,6 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
-                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -304,7 +299,6 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
-                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -333,7 +327,6 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.save(expected),
-                "UserRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -375,7 +368,6 @@ class UserRepositoryTest {
     public void getById1() {
         AssertUtil.assertValidateException(
                 () -> repository.getById(null),
-                "UserRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -407,7 +399,6 @@ class UserRepositoryTest {
     public void tryGetById1() {
         AssertUtil.assertValidateException(
                 () -> repository.tryGetById(null),
-                "UserRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -420,7 +411,7 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.tryGetById(toUUID(2)),
-                "UserRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -441,7 +432,6 @@ class UserRepositoryTest {
     public void getByName1() {
         AssertUtil.assertValidateException(
                 () -> repository.getByName(null),
-                "UserRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -477,7 +467,6 @@ class UserRepositoryTest {
     public void tryGetByName1() {
         AssertUtil.assertValidateException(
                 () -> repository.tryGetByName(null),
-                "UserRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -494,7 +483,7 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.tryGetByName("some user"),
-                "UserRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -518,7 +507,6 @@ class UserRepositoryTest {
     public void getByEmail1() {
         AssertUtil.assertValidateException(
                 () -> repository.getByEmail(null),
-                "UserRepositoryPostgres.getByEmail",
                 Constraint.NOT_NULL
         );
     }
@@ -554,7 +542,6 @@ class UserRepositoryTest {
     public void tryGetByEmail1() {
         AssertUtil.assertValidateException(
                 () -> repository.tryGetByEmail(null),
-                "UserRepositoryPostgres.getByEmail",
                 Constraint.NOT_NULL
         );
     }
@@ -571,7 +558,7 @@ class UserRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> repository.tryGetByEmail("newEmail@mail.com"),
-                "UserRepositoryPostgres.tryGetByEmail"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 

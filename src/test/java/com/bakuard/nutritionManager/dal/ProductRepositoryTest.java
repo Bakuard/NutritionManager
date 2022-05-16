@@ -110,7 +110,6 @@ class ProductRepositoryTest {
     void save1() {
         AssertUtil.assertValidateException(
                 () -> repository.save(null),
-                "ProductRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -119,7 +118,7 @@ class ProductRepositoryTest {
     @DisplayName("save(product): no products in DB => return true")
     void save2() {
         User user = createAndSaveUser(1);
-        Product product = createProduct(1, user).tryBuild();
+        Product product = createProduct(1, user);
 
         Assertions.assertTrue(commit(() -> repository.save(product)));
     }
@@ -128,7 +127,7 @@ class ProductRepositoryTest {
     @DisplayName("save(product): no products in DB => add product")
     void save3() {
         User user = createAndSaveUser(1);
-        Product expected = createProduct(1, user).tryBuild();
+        Product expected = createProduct(1, user);
 
         commit(() -> repository.save(expected));
         Product actual = repository.tryGetById(user.getId(), expected.getId());
@@ -141,9 +140,9 @@ class ProductRepositoryTest {
     void save4() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
-        Product product1 = createProduct(1, user1).setPrice(new BigDecimal("115.12")).tryBuild();
-        Product product2 = createProduct(2, user1).tryBuild();
-        Product addedProduct = createProduct(3, user2).tryBuild();
+        Product product1 = createProduct(1, user1);
+        Product product2 = createProduct(2, user1);
+        Product addedProduct = createProduct(3, user2);
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
@@ -156,9 +155,9 @@ class ProductRepositoryTest {
     void save5() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
-        Product product1 = createProduct(1, user1).setPrice(new BigDecimal("115.12")).tryBuild();
-        Product product2 = createProduct(2, user1).tryBuild();
-        Product expected = createProduct(3, user2).tryBuild();
+        Product product1 = createProduct(1, user1);
+        Product product2 = createProduct(2, user1);
+        Product expected = createProduct(3, user2);
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
@@ -178,15 +177,35 @@ class ProductRepositoryTest {
             """)
     void save6() {
         User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user).setPrice(new BigDecimal("115.12")).tryBuild();
-        Product product2 = createProduct(2, user).tryBuild();
-        Product addedProduct = createProduct(3, user).tryBuild();
+        Product product1 = createProduct(1, user);
+        Product product2 = createProduct(2, user);
+        Product addedProduct = new Product.Builder().
+                setAppConfiguration(appConfiguration).
+                setId(toUUID(3)).
+                setUser(user).
+                setCategory("name#2").
+                setShop("shop#2").
+                setGrade("variety#2").
+                setManufacturer("manufacturer#2").
+                setUnit("unitA").
+                setPrice(BigDecimal.TEN).
+                setPackingSize(BigDecimal.ONE).
+                setQuantity(BigDecimal.ZERO).
+                setDescription("some description #3").
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=3").
+                addTag("tag 1").
+                addTag("1 tag").
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("tag 3").
+                addTag("3 tag").
+                addTag("a tag").
+                tryBuild();
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
         AssertUtil.assertValidateException(
                 () -> commit(() ->repository.save(addedProduct)),
-                "ProductRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -201,27 +220,30 @@ class ProductRepositoryTest {
             """)
     void save7() {
         User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user).setPrice(new BigDecimal("115.12")).tryBuild();
-        Product product2 = createProduct(2, user).setPrice(BigDecimal.TEN).tryBuild();
+        Product product1 = createProduct(1, user);
+        Product product2 = createProduct(2, user);
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        Product updatedProduct = new Product(product1);
-        updatedProduct.addQuantity(BigDecimal.TEN);
-        updatedProduct.setDescription("new description");
-        updatedProduct.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
-        updatedProduct.setContext(
-                updatedProduct.getContext().
-                        setCategory("new Category").
-                        setShop("new Shop").
-                        setGrade("new Variety").
-                        setManufacturer("new Manufacturer").
-                        setUnit("new Unit").
-                        setPrice(new BigDecimal("150")).
-                        setPackingSize(new BigDecimal("1.5")).
-                        addTag(new Tag("new Tag")).
-                        removeTag(new Tag("1"))
-        );
+        Product updatedProduct = new Product.Builder().
+                setAppConfiguration(appConfiguration).
+                setId(toUUID(1)).
+                setUser(user).
+                setCategory("updated name").
+                setShop("updated shop").
+                setGrade("updated grade").
+                setManufacturer("updated manufacturer").
+                setUnit("updated unit").
+                setPrice(BigDecimal.TEN).
+                setPackingSize(BigDecimal.TEN).
+                setQuantity(BigDecimal.TEN).
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/products/images?updatedImageUrl").
+                addTag("tag 1").
+                addTag("1 tag").
+                addTag("updated tag 2").
+                addTag("2 tag updated").
+                tryBuild();
         boolean isSaved = commit(() -> repository.save(updatedProduct));
 
         Assertions.assertTrue(isSaved);
@@ -237,27 +259,30 @@ class ProductRepositoryTest {
             """)
     void save8() {
         User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user).setPrice(new BigDecimal("115.12")).tryBuild();
-        Product product2 = createProduct(2, user).setPrice(BigDecimal.TEN).tryBuild();
+        Product product1 = createProduct(1, user);
+        Product product2 = createProduct(2, user);
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
-        Product expected = new Product(product1);
-        expected.addQuantity(BigDecimal.TEN);
-        expected.setDescription("new description");
-        expected.setImageUrl("https://nutritionmanager.xyz/products/images?id=112");
-        expected.setContext(
-                expected.getContext().
-                        setCategory("new Category").
-                        setShop("new Shop").
-                        setGrade("new Variety").
-                        setManufacturer("new Manufacturer").
-                        setUnit("new Unit").
-                        setPrice(new BigDecimal("150")).
-                        setPackingSize(new BigDecimal("1.5")).
-                        addTag(new Tag("new Tag")).
-                        removeTag(new Tag("1"))
-        );
+        Product expected = new Product.Builder().
+                setAppConfiguration(appConfiguration).
+                setId(toUUID(1)).
+                setUser(user).
+                setCategory("updated name").
+                setShop("updated shop").
+                setGrade("updated grade").
+                setManufacturer("updated manufacturer").
+                setUnit("updated unit").
+                setPrice(BigDecimal.TEN).
+                setPackingSize(BigDecimal.TEN).
+                setQuantity(BigDecimal.TEN).
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/products/images?updatedImageUrl").
+                addTag("tag 1").
+                addTag("1 tag").
+                addTag("updated tag 2").
+                addTag("2 tag updated").
+                tryBuild();
         commit(() -> repository.save(expected));
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
@@ -270,28 +295,41 @@ class ProductRepositoryTest {
              there are products in DB,
              product id exists,
              product state was changed,
-             user has a product with the same productContext and other in the database
+             user has a product with the same productContext in the database
              => exception
             """)
     void save9() {
         User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user).
-                setPrice(new BigDecimal("115.12")).
+        Product product1 = createProduct(1, user);
+        Product product2 = createProduct(2, user);
+        Product updatedProduct = new Product.Builder().
+                setAppConfiguration(appConfiguration).
+                setId(toUUID(2)).
+                setUser(user).
+                setCategory("name#1").
+                setShop("shop#1").
+                setGrade("variety#1").
+                setManufacturer("manufacturer#1").
+                setUnit("unitA").
+                setPrice(BigDecimal.TEN).
+                setPackingSize(BigDecimal.ONE).
+                setQuantity(BigDecimal.ZERO).
+                setDescription("some description #2").
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=2").
+                addTag("tag 1").
+                addTag("1 tag").
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("tag 3").
+                addTag("3 tag").
+                addTag("a tag").
                 tryBuild();
-        Product product2 = createProduct(2, user).
-                setImageUrl("https://nutritionmanager.xyz/products/images?id=unique").
-                setDescription("unique description").
-                setQuantity(BigDecimal.TEN).
-                tryBuild();
-        Product updatedProduct = new Product(product2);
-        updatedProduct.setContext(product1.getContext());
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.save(updatedProduct)),
-                "ProductRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -306,8 +344,8 @@ class ProductRepositoryTest {
             """)
     void save10() {
         User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user).setPrice(new BigDecimal("115.12")).tryBuild();
-        Product product2 = createProduct(2, user).setUnit("unitB").tryBuild();
+        Product product1 = createProduct(1, user);
+        Product product2 = createProduct(2, user);
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
@@ -327,8 +365,8 @@ class ProductRepositoryTest {
             """)
     void save11() {
         User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user).setPrice(new BigDecimal("115.12")).tryBuild();
-        Product product2 = createProduct(2, user).setUnit("unitB").tryBuild();
+        Product product1 = createProduct(1, user);
+        Product product2 = createProduct(2, user);
         Product expected = new Product(product1);
 
         commit(() -> repository.save(product1));
@@ -346,7 +384,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryRemove(user.getId(), null)),
-                "ProductRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
@@ -358,7 +395,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryRemove(null, toUUID(1))),
-                "ProductRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
@@ -374,7 +410,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryRemove(user.getId(), toUUID(10))),
-                "ProductRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -388,11 +423,10 @@ class ProductRepositoryTest {
             """)
     void tryRemove4() {
         User user = createAndSaveUser(1);
-        commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
+        commit(() -> repository.save(createProduct(1, createAndSaveUser(2))));
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryRemove(user.getId(), toUUID(1))),
-                "ProductRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -406,7 +440,7 @@ class ProductRepositoryTest {
             """)
     void tryRemove5() {
         User user = createAndSaveUser(1);
-        Product product = createProduct(1, user).tryBuild();
+        Product product = createProduct(1, user);
         commit(() -> repository.save(product));
 
         commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
@@ -424,7 +458,7 @@ class ProductRepositoryTest {
             """)
     void tryRemove6() {
         User user = createAndSaveUser(1);
-        Product expected = createProduct(1, user).tryBuild();
+        Product expected = createProduct(1, user);
         commit(() -> repository.save(expected));
 
         Product actual = commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
@@ -439,7 +473,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(user.getId(), null)),
-                "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -451,7 +484,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(null, toUUID(1))),
-                "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -479,7 +511,7 @@ class ProductRepositoryTest {
             """)
     void getById4() {
         User user = createAndSaveUser(1);
-        commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
+        commit(() -> repository.save(createProduct(1, createAndSaveUser(2))));
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
 
@@ -495,7 +527,7 @@ class ProductRepositoryTest {
             """)
     void getById5() {
         User user = createAndSaveUser(1);
-        Product expected = createProduct(1, user).tryBuild();
+        Product expected = createProduct(1, user);
         commit(() -> repository.save(expected));
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
@@ -510,7 +542,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(user.getId(), null)),
-                "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -522,7 +553,6 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(null, toUUID(1))),
-                "ProductRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -538,7 +568,7 @@ class ProductRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(user.getId(), toUUID(256))),
-                "ProductRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -551,11 +581,11 @@ class ProductRepositoryTest {
             """)
     void tryGetById4() {
         User user = createAndSaveUser(1);
-        commit(() -> repository.save(createProduct(1, createAndSaveUser(2)).tryBuild()));
+        commit(() -> repository.save(createProduct(1, createAndSaveUser(2))));
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(user.getId(), toUUID(1))),
-                "ProductRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -568,7 +598,7 @@ class ProductRepositoryTest {
             """)
     void tryGetById5() {
         User user = createAndSaveUser(1);
-        Product expected = createProduct(1, user).tryBuild();
+        Product expected = createProduct(1, user);
         commit(() -> repository.save(expected));
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
@@ -585,7 +615,6 @@ class ProductRepositoryTest {
     void getProductsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getProductsNumber(null),
-                "ProductRepositoryPostgres.getProductsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -615,7 +644,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -639,7 +668,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -657,7 +686,7 @@ class ProductRepositoryTest {
     void getProductsNumber5() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
-        commit(() -> createProducts(user1).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user1);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -686,7 +715,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -715,7 +744,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber7() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().setFilter(
@@ -739,7 +768,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber8() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -767,7 +796,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber9() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -797,7 +826,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber10() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -829,7 +858,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber11() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -861,7 +890,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber12() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -893,7 +922,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber13() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -925,7 +954,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber14() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -958,7 +987,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber15() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -992,7 +1021,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber16() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -1025,7 +1054,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber17() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -1066,7 +1095,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber18() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -1117,7 +1146,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber19() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -1169,7 +1198,7 @@ class ProductRepositoryTest {
             """)
     void getProductsNumber20() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getProductsNumber(
                 new Criteria().
@@ -1220,8 +1249,7 @@ class ProductRepositoryTest {
     void getProducts2() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
-        List<Product> products = createProducts(user1);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user1);
         Page<Product> expected = Pageable.firstEmptyPage();
 
         Page<Product> actual = repository.getProducts(
@@ -1243,8 +1271,7 @@ class ProductRepositoryTest {
             """)
     void getProducts3() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(5, 0).
                 createPageMetadata(6, 200).
                 createPage(products.subList(0, 5));
@@ -1269,8 +1296,7 @@ class ProductRepositoryTest {
             """)
     void getProducts4() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(5, 1).
                 createPageMetadata(6, 200).
                 createPage(products.subList(5, 6));
@@ -1295,8 +1321,7 @@ class ProductRepositoryTest {
             """)
     void getProducts5() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(2, 0).
                 createPageMetadata(3, 200).
                 createPage(products.subList(3, 5));
@@ -1326,8 +1351,7 @@ class ProductRepositoryTest {
             """)
     void getProducts6() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(products.subList(5, 6));
@@ -1385,11 +1409,10 @@ class ProductRepositoryTest {
             """)
     void getProducts8() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(1, 0).
                 createPageMetadata(1, 200).
                 createPage(products.subList(5, 6));
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1419,9 +1442,8 @@ class ProductRepositoryTest {
             """)
     void getProducts9() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.firstEmptyPage();
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1455,11 +1477,10 @@ class ProductRepositoryTest {
             """)
     void getProducts10() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1493,9 +1514,8 @@ class ProductRepositoryTest {
             """)
     void getProducts11() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.firstEmptyPage();
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1526,11 +1546,10 @@ class ProductRepositoryTest {
             """)
     void getProducts12() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(3, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(4, 6));
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1562,9 +1581,8 @@ class ProductRepositoryTest {
             """)
     void getProducts13() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.firstEmptyPage();
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1597,9 +1615,8 @@ class ProductRepositoryTest {
             """)
     void getProducts14() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.firstEmptyPage();
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1632,11 +1649,10 @@ class ProductRepositoryTest {
             """)
     void getProducts15() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1669,9 +1685,8 @@ class ProductRepositoryTest {
             """)
     void getProducts16() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.firstEmptyPage();
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1706,9 +1721,8 @@ class ProductRepositoryTest {
             """)
     void getProducts17() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.firstEmptyPage();
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1744,11 +1758,10 @@ class ProductRepositoryTest {
             """)
     void getProducts18() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1784,9 +1797,8 @@ class ProductRepositoryTest {
             """)
     void getProducts19() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
+        List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = Pageable.firstEmptyPage();
-        commit(() -> products.forEach(p -> repository.save(p)));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1829,8 +1841,7 @@ class ProductRepositoryTest {
             """)
     void getProducts20() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1887,8 +1898,7 @@ class ProductRepositoryTest {
             """)
     void getProducts21() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1944,8 +1954,7 @@ class ProductRepositoryTest {
             """)
     void getProducts22() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -2007,8 +2016,7 @@ class ProductRepositoryTest {
             """)
     void getProducts23() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        commit(() -> products.forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -2048,7 +2056,6 @@ class ProductRepositoryTest {
     void getTagsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getTagsNumber(null),
-                "ProductRepositoryPostgres.getTagsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2078,7 +2085,7 @@ class ProductRepositoryTest {
             """)
     void getTagsNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
@@ -2094,7 +2101,7 @@ class ProductRepositoryTest {
             """)
     void getTagsNumber4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getTagsNumber(
                 new Criteria().setFilter(
@@ -2151,10 +2158,10 @@ class ProductRepositoryTest {
             """)
     void getTags3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
         Page<Tag> expected = Pageable.of(5, 0).
                 createPageMetadata(9, 200).
-                createPage(createTags().subList(0, 5));
+                createPage(createTags(products).subList(0, 5));
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
@@ -2175,10 +2182,10 @@ class ProductRepositoryTest {
             """)
     void getTags4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        List<Product> products = createAndSaveProducts(user);
         Page<Tag> expected = Pageable.of(4, 2).
                 createPageMetadata(9, 200).
-                createPage(createTags().subList(8, 9));
+                createPage(createTags(products).subList(8, 9));
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
@@ -2199,7 +2206,7 @@ class ProductRepositoryTest {
             """)
     void getTags5() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<Tag> expected = Pageable.of(5, 0).
                 createPageMetadata(5, 200).
                 createPage(List.of(
@@ -2234,7 +2241,7 @@ class ProductRepositoryTest {
             """)
     void getTags6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<Tag> expected = Pageable.of(4, 1).
                 createPageMetadata(5, 200).
                 createPage(List.of(
@@ -2264,7 +2271,6 @@ class ProductRepositoryTest {
     void getShopsNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getShopsNumber(null),
-                "ProductRepositoryPostgres.getShopsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2294,7 +2300,7 @@ class ProductRepositoryTest {
             """)
     void getShopsNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getShopsNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -2312,7 +2318,7 @@ class ProductRepositoryTest {
             """)
     void getShopsNumber4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getShopsNumber(
                 new Criteria().
@@ -2368,7 +2374,7 @@ class ProductRepositoryTest {
             """)
     void getShops3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(3, 0).
                 createPageMetadata(3, 200).
                 createPage(List.of("shop A", "shop B", "shop C"));
@@ -2391,7 +2397,7 @@ class ProductRepositoryTest {
             """)
     void getShops4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(List.of("shop C"));
@@ -2414,7 +2420,7 @@ class ProductRepositoryTest {
             """)
     void getShops5() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("shop A", "shop B"));
@@ -2442,7 +2448,7 @@ class ProductRepositoryTest {
             """)
     void getShops6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("shop A", "shop B"));
@@ -2470,7 +2476,6 @@ class ProductRepositoryTest {
     void getGradesNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getGradesNumber(null),
-                "ProductRepositoryPostgres.getGradesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2500,7 +2505,7 @@ class ProductRepositoryTest {
             """)
     void getGradesNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getGradesNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -2518,7 +2523,7 @@ class ProductRepositoryTest {
             """)
     void getGradesNumber4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getGradesNumber(
                 new Criteria().
@@ -2574,7 +2579,7 @@ class ProductRepositoryTest {
             """)
     void getGrades3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(4, 0).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
@@ -2597,7 +2602,7 @@ class ProductRepositoryTest {
             """)
     void getGrades4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety D"));
@@ -2620,7 +2625,7 @@ class ProductRepositoryTest {
             """)
     void getGrades5() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
@@ -2648,7 +2653,7 @@ class ProductRepositoryTest {
             """)
     void getGrades6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
@@ -2676,7 +2681,6 @@ class ProductRepositoryTest {
     void getCategoriesNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getCategoriesNumber(null),
-                "ProductRepositoryPostgres.getCategoriesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2705,7 +2709,7 @@ class ProductRepositoryTest {
             """)
     void getCategoriesNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getCategoriesNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -2755,7 +2759,7 @@ class ProductRepositoryTest {
             """)
     void getCategories3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("name A", "name B"));
@@ -2778,7 +2782,7 @@ class ProductRepositoryTest {
             """)
     void getCategories4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(1, 1).
                 createPageMetadata(2, 200).
                 createPage(List.of("name B"));
@@ -2801,7 +2805,6 @@ class ProductRepositoryTest {
     void getManufacturersNumber1() {
         AssertUtil.assertValidateException(
                 () -> repository.getManufacturersNumber(null),
-                "ProductRepositoryPostgres.getManufacturersNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -2831,7 +2834,7 @@ class ProductRepositoryTest {
             """)
     void getManufacturersNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getManufacturersNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -2849,7 +2852,7 @@ class ProductRepositoryTest {
             """)
     void getManufacturersNumber4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         int actual = repository.getManufacturersNumber(
                 new Criteria().
@@ -2905,7 +2908,7 @@ class ProductRepositoryTest {
             """)
     void getManufacturers3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
@@ -2928,7 +2931,7 @@ class ProductRepositoryTest {
             """)
     void getManufacturers4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
@@ -2951,7 +2954,7 @@ class ProductRepositoryTest {
             """)
     void getManufacturers5() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
@@ -2979,7 +2982,7 @@ class ProductRepositoryTest {
             """)
     void getManufacturers6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
         Page<String> expected = Pageable.of(5, 0).
                 createPageMetadata(1, 200).
                 createPage(List.of("manufacturer A"));
@@ -3007,7 +3010,6 @@ class ProductRepositoryTest {
     void getProductsSum1() {
         AssertUtil.assertValidateException(
                 () -> repository.getProductsSum(null),
-                "ProductRepositoryPostgres.getProductsSum",
                 Constraint.NOT_NULL
         );
     }
@@ -3023,7 +3025,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum2() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3052,7 +3054,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum3() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3081,7 +3083,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum4() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3111,7 +3113,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum5() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3141,7 +3143,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3168,7 +3170,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum7() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3195,7 +3197,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum8() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3223,7 +3225,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum9() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3253,7 +3255,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum10() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3284,7 +3286,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum11() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3314,7 +3316,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum12() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3342,7 +3344,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum13() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3371,7 +3373,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum14() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3397,7 +3399,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum15() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3425,7 +3427,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum16() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3463,7 +3465,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum17() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3513,7 +3515,7 @@ class ProductRepositoryTest {
             """)
     void getProductsSum18() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> repository.save(p)));
+        createAndSaveProducts(user);
 
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
@@ -3579,35 +3581,36 @@ class ProductRepositoryTest {
         return user;
     }
 
-    private Product.Builder createProduct(int productId, User user) {
+    private Product createProduct(int productId, User user) {
         return new Product.Builder().
                 setAppConfiguration(appConfiguration).
                 setId(toUUID(productId)).
                 setUser(user).
-                setCategory("name#" + user.getName()).
-                setShop("shop#" + user.getName()).
-                setGrade("variety#" + user.getName()).
-                setManufacturer("manufacturer#" + user.getName()).
+                setCategory("name#" + productId).
+                setShop("shop#" + productId).
+                setGrade("variety#" + productId).
+                setManufacturer("manufacturer#" + productId).
                 setUnit("unitA").
-                setPrice(BigDecimal.ZERO).
+                setPrice(BigDecimal.TEN).
                 setPackingSize(BigDecimal.ONE).
                 setQuantity(BigDecimal.ZERO).
-                setDescription("some description A").
-                setImageUrl("https://nutritionmanager.xyz/products/images?id=1").
+                setDescription("some description #" + productId).
+                setImageUrl("https://nutritionmanager.xyz/products/images?id=" + productId).
                 addTag("tag 1").
                 addTag("1 tag").
                 addTag("tag 2").
                 addTag("2 tag").
                 addTag("tag 3").
                 addTag("3 tag").
-                addTag("a tag");
+                addTag("a tag").
+                tryBuild();
     }
 
     private UUID toUUID(int number) {
         return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
     }
 
-    private List<Product> createProducts(User user) {
+    private List<Product> createAndSaveProducts(User user) {
         ArrayList<Product> products = new ArrayList<>();
 
         products.add(
@@ -3736,23 +3739,17 @@ class ProductRepositoryTest {
                         tryBuild()
         );
 
+        commit(() -> products.forEach(p -> repository.save(p)));
+        
         return products;
     }
 
-    private List<Tag> createTags() {
-        ArrayList<Tag> tags = new ArrayList<>();
-
-        tags.add(new Tag("common tag"));
-        tags.add(new Tag("tag A"));
-        tags.add(new Tag("tag B"));
-        tags.add(new Tag("value 1"));
-        tags.add(new Tag("value 2"));
-        tags.add(new Tag("value 3"));
-        tags.add(new Tag("value 4"));
-        tags.add(new Tag("value 5"));
-        tags.add(new Tag("value 6"));
-
-        return tags;
+    private List<Tag> createTags(List<Product> allProducts) {
+        return allProducts.stream().
+                flatMap(p -> p.getContext().getTags().stream()).
+                distinct().
+                sorted().
+                toList();
     }
 
 }

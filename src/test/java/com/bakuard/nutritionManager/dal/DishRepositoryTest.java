@@ -122,7 +122,6 @@ class DishRepositoryTest {
     public void save1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.save(null),
-                "DishRepositoryPostgres.save",
                 Constraint.NOT_NULL
         );
     }
@@ -167,7 +166,7 @@ class DishRepositoryTest {
             """)
     public void save4() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         boolean actual = commit(() -> dishRepository.save(dish));
@@ -184,7 +183,7 @@ class DishRepositoryTest {
             """)
     public void save5() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish expected = createDish(7, user);
 
         commit(() -> dishRepository.save(expected));
@@ -203,13 +202,21 @@ class DishRepositoryTest {
             """)
     public void save6() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
-        Dish dish = createDish(7, user);
-        dish.setName("dish 1");
+        createAndSaveDishes(user);
+        Dish dish = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("dish 1").
+                setServingSize(BigDecimal.TEN).
+                setUnit("unit A").
+                setDescription("description A").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?id=7").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> dishRepository.save(dish)),
-                "DishRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -224,20 +231,49 @@ class DishRepositoryTest {
             """)
     public void save7() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
         commit(() -> dishRepository.save(dish));
 
-        Dish updatedDish = new Dish(dish);
-        updatedDish.setName("New name");
-        updatedDish.setServingSize(new BigDecimal("0.75"));
-        updatedDish.setUnit("new unit");
-        updatedDish.setDescription("new description");
-        updatedDish.setImageUrl("https://newDishImage");
-        updatedDish.removeIngredient("ingredient 1");
-        updatedDish.putIngredient("ingredient 4", Filter.anyCategory("category Z"), BigDecimal.TEN);
-        updatedDish.removeTag(new Tag("tag A"));
-        updatedDish.addTag(new Tag("tag Z"));
+        Dish updatedDish = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("updated dish").
+                setServingSize(BigDecimal.TEN).
+                setUnit("updated unit").
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("new tag").
+                addTag("tag new").
+                addIngredient("ingredient 1",
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyGrade("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                ),
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tag B"))
+                                )
+                        ),
+                        BigDecimal.TEN).
+                addIngredient("ingredient 3",
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyCategory("name A", "name B", "name C"),
+                                Filter.anyShop("shop B", "shop A"),
+                                Filter.anyGrade("variety B")
+                        ),
+                        new BigDecimal("5.4")).
+                tryBuild();
         boolean actual = commit(() -> dishRepository.save(updatedDish));
 
         Assertions.assertTrue(actual);
@@ -253,24 +289,49 @@ class DishRepositoryTest {
             """)
     public void save8() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
-        Dish expected = new Dish(dish);
-        expected.setName("New name");
-        expected.setServingSize(new BigDecimal("0.75"));
-        expected.setUnit("new unit");
-        expected.setDescription("new description");
-        expected.setImageUrl("https://newDishImage");
-        expected.removeIngredient("ingredient 1");
-        expected.putIngredient(
-                "ingredient 4",
-                Filter.and(Filter.user(user.getId()), Filter.anyCategory("category Z")),
-                BigDecimal.TEN
-        );
-        expected.removeTag(new Tag("tag A"));
-        expected.addTag(new Tag("tag Z"));
+        Dish expected = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("updated dish").
+                setServingSize(BigDecimal.TEN).
+                setUnit("updated unit").
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("new tag").
+                addTag("tag new").
+                addIngredient("ingredient 1",
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyGrade("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                ),
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tag B"))
+                                )
+                        ),
+                        BigDecimal.TEN).
+                addIngredient("ingredient 3",
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyCategory("name A", "name B", "name C"),
+                                Filter.anyShop("shop B", "shop A"),
+                                Filter.anyGrade("variety B")
+                        ),
+                        new BigDecimal("5.4")).
+                tryBuild();
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
@@ -288,16 +349,52 @@ class DishRepositoryTest {
             """)
     public void save9() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
-        Dish updatedDish = new Dish(dish);
-        updatedDish.setName("dish 1");
+        Dish updatedDish = new Dish.Builder().
+                setId(toUUID(7)).
+                setUser(user).
+                setName("dish 1").
+                setServingSize(BigDecimal.TEN).
+                setUnit("updated unit").
+                setDescription("updated description").
+                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
+                setConfig(appConfiguration).
+                setRepository(productRepository).
+                addTag("tag 2").
+                addTag("2 tag").
+                addTag("new tag").
+                addTag("tag new").
+                addIngredient("ingredient 1",
+                        Filter.orElse(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("common tag")),
+                                        Filter.anyCategory("name A"),
+                                        Filter.anyShop("shop A"),
+                                        Filter.anyGrade("variety A"),
+                                        Filter.anyManufacturer("manufacturer A")
+                                ),
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tag B"))
+                                )
+                        ),
+                        BigDecimal.TEN).
+                addIngredient("ingredient 3",
+                        Filter.and(
+                                Filter.user(user.getId()),
+                                Filter.anyCategory("name A", "name B", "name C"),
+                                Filter.anyShop("shop B", "shop A"),
+                                Filter.anyGrade("variety B")
+                        ),
+                        new BigDecimal("5.4")).
+                tryBuild();
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.save(updatedDish),
-                "DishRepositoryPostgres.save",
                 Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB
         );
     }
@@ -312,7 +409,7 @@ class DishRepositoryTest {
             """)
     public void save10() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish dish = createDish(7, user);
 
         commit(() -> dishRepository.save(dish));
@@ -331,7 +428,7 @@ class DishRepositoryTest {
             """)
     public void save11() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         Dish expected = createDish(7, user);
 
         commit(() -> dishRepository.save(expected));
@@ -352,7 +449,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(user.getId(), null),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
@@ -366,7 +462,6 @@ class DishRepositoryTest {
     public void tryRemove2() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(null, toUUID(1)),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.NOT_NULL
         );
     }
@@ -379,11 +474,10 @@ class DishRepositoryTest {
             """)
     public void tryRemove3() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(user.getId(), toUUID(100)),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -401,7 +495,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryRemove(user.getId(), toUUID(1)),
-                "DishRepositoryPostgres.tryRemove",
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -452,7 +545,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getById(user.getId(), null),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -468,7 +560,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getById(null, toUUID(1)),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -531,7 +622,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(user.getId(), null),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -547,7 +637,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(null, toUUID(1)),
-                "DishRepositoryPostgres.getById",
                 Constraint.NOT_NULL
         );
     }
@@ -563,7 +652,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(user.getId(), toUUID(100)),
-                "DishRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -580,7 +669,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetById(user.getId(), toUUID(1)),
-                "DishRepositoryPostgres.tryGetById"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -612,7 +701,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getByName(user.getId(), null),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -628,7 +716,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.getByName(null, "dish A"),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -691,7 +778,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(user.getId(), null),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -707,7 +793,6 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(null, "dish A"),
-                "DishRepositoryPostgres.getByName",
                 Constraint.NOT_NULL
         );
     }
@@ -723,7 +808,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(user.getId(), "unknown dish"),
-                "DishRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
 
@@ -740,7 +825,7 @@ class DishRepositoryTest {
 
         AssertUtil.assertValidateException(
                 () -> dishRepository.tryGetByName(user.getId(), "dish A"),
-                "DishRepositoryPostgres.tryGetByName"
+                Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
     
@@ -770,7 +855,6 @@ class DishRepositoryTest {
     public void getDishesNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getDishesNumber(null),
-                "DishRepositoryPostgres.getDishesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -784,7 +868,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber2() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
         User actualUser = createAndSaveUser(2);
 
         int actual = dishRepository.getDishesNumber(
@@ -803,7 +887,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber3() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
@@ -819,7 +903,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber4() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -843,7 +927,7 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber5() {
         User user = createAndSaveUser(1);
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -867,8 +951,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber6() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -892,8 +976,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber7() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -919,8 +1003,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber8() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -947,8 +1031,8 @@ class DishRepositoryTest {
             """)
     public void getDishesNumber9() {
         User user = createAndSaveUser(1);
-        commit(() -> createProducts(user).forEach(p -> productRepository.save(p)));
-        commit(() -> createDishes(user).forEach(d -> dishRepository.save(d)));
+        createAndSaveProducts(user);
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getDishesNumber(
                 new Criteria().
@@ -985,8 +1069,7 @@ class DishRepositoryTest {
             """)
     public void getDishes2() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
         User actualUser = createAndSaveUser(100);
 
         Page<Dish> actual = dishRepository.getDishes(
@@ -1009,8 +1092,7 @@ class DishRepositoryTest {
             """)
     public void getDishes3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1034,8 +1116,7 @@ class DishRepositoryTest {
             """)
     public void getDishes4() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1059,8 +1140,7 @@ class DishRepositoryTest {
             """)
     public void getDishes5() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1087,8 +1167,7 @@ class DishRepositoryTest {
             """)
     public void getDishes6() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1117,10 +1196,8 @@ class DishRepositoryTest {
             """)
     public void getDishes7() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1149,10 +1226,8 @@ class DishRepositoryTest {
             """)
     public void getDishes8() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1181,10 +1256,8 @@ class DishRepositoryTest {
             """)
     public void getDishes9() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1216,10 +1289,8 @@ class DishRepositoryTest {
             """)
     public void getDishes10() {
         User user = createAndSaveUser(1);
-        List<Product> products = createProducts(user);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> products.forEach(p -> productRepository.save(p)));
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Product> products = createAndSaveProducts(user);
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
@@ -1247,7 +1318,6 @@ class DishRepositoryTest {
     public void getTagsNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getTagsNumber(null),
-                "DishRepositoryPostgres.getTagsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1276,8 +1346,7 @@ class DishRepositoryTest {
             """)
     public void getTagsNumber3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getTagsNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -1326,8 +1395,7 @@ class DishRepositoryTest {
             """)
     public void getTags3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
@@ -1350,7 +1418,6 @@ class DishRepositoryTest {
     public void getUnitsNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getUnitsNumber(null),
-                "DishRepositoryPostgres.getUnitsNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1379,8 +1446,7 @@ class DishRepositoryTest {
             """)
     public void getUnitsNumber3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getUnitsNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -1429,8 +1495,7 @@ class DishRepositoryTest {
             """)
     public void getUnits3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
@@ -1453,7 +1518,6 @@ class DishRepositoryTest {
     public void getNamesNumber1() {
         AssertUtil.assertValidateException(
                 () -> dishRepository.getNamesNumber(null),
-                "DishRepositoryPostgres.getNamesNumber",
                 Constraint.NOT_NULL
         );
     }
@@ -1482,8 +1546,7 @@ class DishRepositoryTest {
             """)
     public void getNamesNumber3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        createAndSaveDishes(user);
 
         int actual = dishRepository.getNamesNumber(
                 new Criteria().setFilter(Filter.user(user.getId()))
@@ -1532,8 +1595,7 @@ class DishRepositoryTest {
             """)
     public void getNames3() {
         User user = createAndSaveUser(1);
-        List<Dish> dishes = createDishes(user);
-        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        List<Dish> dishes = createAndSaveDishes(user);
 
         Page<String> actual = dishRepository.getNames(
                 new Criteria().
@@ -1588,7 +1650,7 @@ class DishRepositoryTest {
         return user;
     }
 
-    private List<Product> createProducts(User user) {
+    private List<Product> createAndSaveProducts(User user) {
         ArrayList<Product> products = new ArrayList<>();
 
         products.add(
@@ -1717,6 +1779,8 @@ class DishRepositoryTest {
                         tryBuild()
         );
 
+        commit(() -> products.forEach(p -> productRepository.save(p)));
+        
         return products;
     }
 
@@ -1780,7 +1844,7 @@ class DishRepositoryTest {
                 tryBuild();
     }
 
-    private List<Dish> createDishes(User user) {
+    private List<Dish> createAndSaveDishes(User user) {
         ArrayList<Dish> dishes = new ArrayList<>();
 
         dishes.add(
@@ -1969,6 +2033,8 @@ class DishRepositoryTest {
                         tryBuild()
         );
 
+        commit(() -> dishes.forEach(d -> dishRepository.save(d)));
+        
         return dishes;
     }
 

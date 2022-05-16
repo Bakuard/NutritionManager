@@ -53,7 +53,7 @@ public class Product implements Entity<Product> {
                 Rule.of("Product.config").notNull(config),
                 Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url)),
                 Rule.of("Product.context").notNull(contextBuilder).
-                        and(v -> v.doesNotThrow(contextBuilder, Entity.Builder::tryBuild, context))
+                        and(v -> v.doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context))
         );
 
         this.id = id;
@@ -62,19 +62,6 @@ public class Product implements Entity<Product> {
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.description = description;
         this.imageUrl = url.get();
-    }
-
-    /**
-     * Устанавливает для данного продукта указанные контекстные данные.
-     * @param context контекстные данные данного продукта ({@link ProductContext}).
-     * @throws ValidateException если указанное значение равняется null
-     */
-    public void setContext(ProductContext context) {
-        Validator.check(
-                Rule.of("Product.context").notNull(context)
-        );
-
-        this.context = context;
     }
 
     /**
@@ -113,29 +100,6 @@ public class Product implements Entity<Product> {
         BigDecimal remain = this.quantity.min(quantity);
         this.quantity = this.quantity.subtract(remain);
         return remain;
-    }
-
-    /**
-     * Устанавливает описание для текущего продукта. Метод модет принимать значение null.
-     * @param description описание продукта.
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Устанавливает значение пути к изображению данного продукта. Путь не обязательно может быть путем в
-     * файловой системе. Метод может принимать значение null.
-     * @param imageUrl путь изображения данного продукта.
-     */
-    public void setImageUrl(String imageUrl) {
-        Container<URL> url = new Container<>();
-
-        Validator.check(
-                Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url))
-        );
-
-        this.imageUrl = url.get();
     }
 
     /**
@@ -236,7 +200,7 @@ public class Product implements Entity<Product> {
      * Объекты данного класса не устанавливают никаких значений по умолчанию для конструирования объектов
      * Product.
      */
-    public static class Builder implements Entity.Builder<Product> {
+    public static class Builder implements AbstractBuilder<Product> {
 
         private UUID id;
         private User user;
