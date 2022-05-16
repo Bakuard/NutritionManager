@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.dto.menus;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class MenuResponse {
     @Schema(description = "Наименование меню.")
     private String name;
     @Schema(description = "Путь к изображению данного меню.")
-    private String imageUrl;
+    private URL imageUrl;
     @Schema(description = "Описание данного меню.")
     private String description;
     @Schema(description = "Блюда входящие в состав данного меню.")
@@ -61,11 +62,11 @@ public class MenuResponse {
         this.name = name;
     }
 
-    public String getImageUrl() {
+    public URL getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public void setImageUrl(URL imageUrl) {
         this.imageUrl = imageUrl;
     }
 

@@ -3653,8 +3653,8 @@ class MenuTest {
                 addTag("tag#" + id);
     }
 
-    private MenuItem.Builder menuItem(Dish dish, BigDecimal quantity) {
-        return new MenuItem.Builder().
+    private MenuItem.LoadBuilder menuItem(Dish dish, BigDecimal quantity) {
+        return new MenuItem.LoadBuilder().
                 setDish(dish).
                 setQuantity(quantity).
                 setConfig(conf);

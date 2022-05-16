@@ -1,5 +1,9 @@
 package com.bakuard.nutritionManager.validation;
 
+import com.bakuard.nutritionManager.model.AbstractBuilder;
+import com.bakuard.nutritionManager.model.Menu;
+import com.bakuard.nutritionManager.model.MenuItem;
+
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
@@ -913,14 +917,14 @@ public class Rule {
         );
     }
 
-    public <S, T> Result doesNotThrows(Collection<S> source,
-                                       Function<S, T> factory,
+    public <S, T> Result doesNotThrows(Collection<? extends S> source,
+                                       Function<? super S, ? extends T> factory,
                                        Container<List<T>> container) {
         return doesNotThrows(source, factory, container, null);
     }
 
-    public <S, T> Result doesNotThrows(Collection<S> source,
-                                       Function<S, T> factory,
+    public <S, T> Result doesNotThrows(Collection<? extends S> source,
+                                       Function<? super S, ? extends T> factory,
                                        Container<List<T>> container,
                                        String field) {
         container.clear();

@@ -43,7 +43,7 @@ public class Menu implements Entity<Menu> {
                  String name,
                  String description,
                  String imageUrl,
-                 List<MenuItem.Builder> items,
+                 List<AbstractBuilder<MenuItem>> items,
                  List<String> tags,
                  AppConfigData config) {
         Container<List<MenuItem>> menuItemsContainer = new Container<>();
@@ -54,7 +54,6 @@ public class Menu implements Entity<Menu> {
                 Rule.of("Menu.id").notNull(id),
                 Rule.of("Menu.user").notNull(user),
                 Rule.of("Menu.name").notNull(name).and(r -> r.notBlank(name)),
-                Rule.of("Menu.description").notNull(description).and(r -> r.notBlank(description)),
                 Rule.of("Menu.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, imageURlContainer)),
                 Rule.of("Menu.items").doesNotThrows(items, AbstractBuilder::tryBuild, menuItemsContainer).
                         and(r -> r.notContainsDuplicate(menuItemsContainer.get(), MenuItem::getDishName)),
@@ -700,13 +699,18 @@ public class Menu implements Entity<Menu> {
         private String name;
         private String description;
         private String imageUrl;
-        private List<MenuItem.Builder> items;
+        private List<AbstractBuilder<MenuItem>> items;
         private List<String> tags;
         private AppConfigData config;
 
         public Builder() {
             items = new ArrayList<>();
             tags = new ArrayList<>();
+        }
+
+        public Builder generateId() {
+            id = UUID.randomUUID();
+            return this;
         }
 
         public Builder setId(UUID id) {
@@ -739,7 +743,7 @@ public class Menu implements Entity<Menu> {
             return this;
         }
 
-        public Builder addItem(MenuItem.Builder item) {
+        public Builder addItem(AbstractBuilder<MenuItem> item) {
             items.add(item);
             return this;
         }
@@ -769,7 +773,7 @@ public class Menu implements Entity<Menu> {
             return imageUrl;
         }
 
-        public List<MenuItem.Builder> getItems() {
+        public List<AbstractBuilder<MenuItem>> getItems() {
             return items;
         }
 

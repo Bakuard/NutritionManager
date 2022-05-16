@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.dto.users.UserResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -17,14 +18,12 @@ public class MenuForListResponse {
     private String type;
     @Schema(description = "Уникальный идентификатор меню.")
     private UUID id;
-    @Schema(description = "Данные пользователя, которому принадлежит меню.")
-    private UserResponse user;
     @Schema(description = "Наименование меню.")
     private String name;
     @Schema(description = "Средняя цена меню.")
     private BigDecimal averagePrice;
     @Schema(description = "Путь к изображению данного меню.")
-    private String imageUrl;
+    private URL imageUrl;
     @Schema(description = "Блюда входящие в состав данного меню.")
     private List<MenuItemRequestResponse> items;
     @Schema(description = "Теги данного меню. Если для меню не заданно ни одного тега - данный список будет пустым.")
@@ -46,14 +45,6 @@ public class MenuForListResponse {
         this.id = id;
     }
 
-    public UserResponse getUser() {
-        return user;
-    }
-
-    public void setUser(UserResponse user) {
-        this.user = user;
-    }
-
     public String getName() {
         return name;
     }
@@ -70,11 +61,11 @@ public class MenuForListResponse {
         this.averagePrice = averagePrice;
     }
 
-    public String getImageUrl() {
+    public URL getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public void setImageUrl(URL imageUrl) {
         this.imageUrl = imageUrl;
     }
 
@@ -100,7 +91,6 @@ public class MenuForListResponse {
         if (o == null || getClass() != o.getClass()) return false;
         MenuForListResponse that = (MenuForListResponse) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(user, that.user) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(averagePrice, that.averagePrice) &&
                 Objects.equals(imageUrl, that.imageUrl) &&
@@ -110,14 +100,13 @@ public class MenuForListResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, name, averagePrice, imageUrl, items, tags);
+        return Objects.hash(id, name, averagePrice, imageUrl, items, tags);
     }
 
     @Override
     public String toString() {
         return "MenuForListResponse{" +
                 "id=" + id +
-                ", user=" + user +
                 ", name='" + name + '\'' +
                 ", averagePrice=" + averagePrice +
                 ", imageUrl='" + imageUrl + '\'' +
