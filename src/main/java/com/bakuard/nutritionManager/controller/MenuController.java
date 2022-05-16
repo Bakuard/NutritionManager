@@ -9,6 +9,7 @@ import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.model.util.Page;
 
+import com.bakuard.nutritionManager.service.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,10 +42,15 @@ public class MenuController {
     private DtoMapper mapper;
     private MenuRepository repository;
 
+    private ImageUploaderService imageUploaderService;
+
     @Autowired
-    public MenuController(DtoMapper mapper, MenuRepository repository) {
+    public MenuController(DtoMapper mapper,
+                          MenuRepository repository,
+                          ImageUploaderService imageUploaderService) {
         this.mapper = mapper;
         this.repository = repository;
+        this.imageUploaderService = imageUploaderService;
     }
 
     @Operation(summary = "Загружает изображение меню и возвращает его URL",
@@ -67,7 +73,9 @@ public class MenuController {
     public ResponseEntity<SuccessResponse<URL>> uploadImage(@RequestParam("image") MultipartFile image) {
         logger.info("Upload menu image.");
 
-        return ResponseEntity.ok(null);
+        URL imageUrl = imageUploaderService.uploadMenuImage(JwsAuthenticationProvider.getAndClearUserId(), image);
+
+        return ResponseEntity.ok(mapper.toSuccessResponse("menu.uploadImage", imageUrl));
     }
 
     @Operation(summary = "Добавление нового меню",

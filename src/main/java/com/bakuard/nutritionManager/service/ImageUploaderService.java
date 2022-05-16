@@ -80,6 +80,15 @@ public class ImageUploaderService implements DisposableBean {
         }
     }
 
+    public URL uploadMenuImage(UUID userId, MultipartFile image) {
+        try {
+            return uploadImage(userId, image, "menuimages");
+        } catch(Exception e) {
+            throw new ValidateException("Fail to upload menu image", e).
+                    setUserMessageKey("ImageUploaderService.uploadMenuImage");
+        }
+    }
+
     @Transactional
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24)
     public void removeUnusedImages() throws AmazonServiceException {
