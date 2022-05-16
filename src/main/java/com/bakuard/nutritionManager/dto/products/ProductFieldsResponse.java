@@ -31,7 +31,7 @@ public class ProductFieldsResponse {
             Все сорта всех продуктов пользователя. Если у пользователя нет ни одного продукта - данный
              список будет пустым.
             """)
-    private List<FieldResponse> varieties;
+    private List<FieldResponse> grades;
     @Schema(description = """
             Все магазины всех продуктов пользователя. Если у пользователя нет ни одного продукта - данный
              список будет пустым.
@@ -66,12 +66,12 @@ public class ProductFieldsResponse {
         this.manufacturers = manufacturers;
     }
 
-    public List<FieldResponse> getVarieties() {
-        return varieties;
+    public List<FieldResponse> getGrades() {
+        return grades;
     }
 
     public void setGrades(List<FieldResponse> grades) {
-        this.varieties = grades;
+        this.grades = grades;
     }
 
     public List<FieldResponse> getShops() {
@@ -90,13 +90,13 @@ public class ProductFieldsResponse {
         return Objects.equals(tags, that.tags) &&
                 Objects.equals(categories, that.categories) &&
                 Objects.equals(manufacturers, that.manufacturers) &&
-                Objects.equals(varieties, that.varieties) &&
+                Objects.equals(grades, that.grades) &&
                 Objects.equals(shops, that.shops);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tags, categories, manufacturers, varieties, shops);
+        return Objects.hash(tags, categories, manufacturers, grades, shops);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class ProductFieldsResponse {
                 "tags=" + tags +
                 ", categories=" + categories +
                 ", manufacturers=" + manufacturers +
-                ", grades=" + varieties +
+                ", grades=" + grades +
                 ", shops=" + shops +
                 '}';
     }
