@@ -448,7 +448,7 @@ public class DtoMapper {
                                             map(ingredientProduct ->
                                                     toProductAsDishIngredientResponse(dish,
                                                             ingredientProduct,
-                                                            ingredientProduct.ingredientIndex() == 0,
+                                                            ingredientProduct.productIndex() == 0,
                                                             servingNumber)
                                             ).
                                             toList()
