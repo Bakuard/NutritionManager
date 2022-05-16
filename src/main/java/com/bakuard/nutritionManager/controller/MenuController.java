@@ -1,14 +1,15 @@
 package com.bakuard.nutritionManager.controller;
 
 import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
+import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dto.DtoMapper;
-import com.bakuard.nutritionManager.dto.dishes.*;
+import com.bakuard.nutritionManager.dto.dishes.DishProductsListResponse;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
+import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.util.Page;
-
 import com.bakuard.nutritionManager.service.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,10 +17,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,7 +95,11 @@ public class MenuController {
     public ResponseEntity<SuccessResponse<MenuResponse>> add(@RequestBody MenuAddRequest dto) {
         logger.info("Add new menu. dto={}", dto);
 
-        return ResponseEntity.ok(null);
+        Menu menu = mapper.toMenu(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        repository.save(menu);
+
+        MenuResponse response = mapper.toMenuResponse(menu);
+        return ResponseEntity.ok(mapper.toSuccessResponse("menu.add", response));
     }
 
     @Operation(summary = "Обновление меню",
@@ -117,7 +120,11 @@ public class MenuController {
     public ResponseEntity<SuccessResponse<MenuResponse>> update(@RequestBody MenuUpdateRequest dto) {
         logger.info("Update menu. dto={}", dto);
 
-        return ResponseEntity.ok(null);
+        Menu menu = mapper.toMenu(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        repository.save(menu);
+
+        MenuResponse response = mapper.toMenuResponse(menu);
+        return ResponseEntity.ok(mapper.toSuccessResponse("menu.update", response));
     }
 
     @Operation(summary = "Удаление меню",
@@ -141,7 +148,10 @@ public class MenuController {
             UUID id) {
         logger.info("Delete menu by id={}", id);
 
-        return ResponseEntity.ok(null);
+        Menu menu = repository.tryRemove(JwsAuthenticationProvider.getAndClearUserId(), id);
+
+        MenuResponse response = mapper.toMenuResponse(menu);
+        return ResponseEntity.ok(mapper.toSuccessResponse("menu.delete", response));
     }
 
     @Operation(summary = "Получение меню по его ID",
@@ -165,7 +175,10 @@ public class MenuController {
             UUID id) {
         logger.info("Get menu by id = {}", id);
 
-        return ResponseEntity.ok(null);
+        Menu menu = repository.tryGetById(JwsAuthenticationProvider.getAndClearUserId(), id);
+
+        MenuResponse response = mapper.toMenuResponse(menu);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Получение меню по его наименованию",
@@ -189,7 +202,10 @@ public class MenuController {
             String name) {
         logger.info("Get menu by name={}", name);
 
-        return ResponseEntity.ok(null);
+        Menu menu = repository.tryGetByName(JwsAuthenticationProvider.getAndClearUserId(), name);
+
+        MenuResponse response = mapper.toMenuResponse(menu);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Получение выборки меню указанного пользователя",
@@ -253,7 +269,17 @@ public class MenuController {
                         "sortRule={}, dishNames={}, tags={}",
                 page, size, userId, sortRule, dishNames, tags);
 
-        return ResponseEntity.ok(null);
+        Criteria criteria = mapper.toMenuCriteria(
+                page,
+                size,
+                userId,
+                sortRule,
+                dishNames,
+                tags
+        );
+
+        Page<MenuForListResponse> response = mapper.toMenusResponse(repository.getMenus(criteria));
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = """
@@ -272,7 +298,11 @@ public class MenuController {
     public ResponseEntity<MenuFieldsResponse> getAllMenusFields() {
         logger.info("Get all menus fields");
 
-        return ResponseEntity.ok(null);
+        MenuFieldsResponse response = mapper.toMenuFieldsResponse(
+                JwsAuthenticationProvider.getAndClearUserId()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = """

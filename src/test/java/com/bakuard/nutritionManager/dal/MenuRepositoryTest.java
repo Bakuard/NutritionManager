@@ -1656,19 +1656,19 @@ class MenuRepositoryTest {
                         addTag("tag#0").
                         addTag("tagA").
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
                                         setDish(dish0)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
                                         setDish(dish50)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
                                         setDish(dish100)
@@ -1688,19 +1688,19 @@ class MenuRepositoryTest {
                         addTag("tag#1").
                         addTag("tagA").
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
                                         setDish(dish1)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
                                         setDish(dish50)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
                                         setDish(dish100)
@@ -1720,19 +1720,19 @@ class MenuRepositoryTest {
                         addTag("tag#2").
                         addTag("tagB").
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
                                         setDish(dish2)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
                                         setDish(dish60)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
                                         setDish(dish100)
@@ -1752,19 +1752,19 @@ class MenuRepositoryTest {
                         addTag("tag#3").
                         addTag("tagB").
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(BigDecimal.TEN).
                                         setDish(dish3)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal("3.5")).
                                         setDish(dish60)
                         ).
                         addItem(
-                                new MenuItem.Builder().
+                                new MenuItem.LoadBuilder().
                                         setConfig(appConfiguration).
                                         setQuantity(new BigDecimal(2)).
                                         setDish(dish100)
@@ -1857,8 +1857,8 @@ class MenuRepositoryTest {
                 tryBuild();
     }
 
-    private MenuItem.Builder createMenuItem(Dish dish, BigDecimal quantity) {
-        return new MenuItem.Builder().
+    private MenuItem.LoadBuilder createMenuItem(Dish dish, BigDecimal quantity) {
+        return new MenuItem.LoadBuilder().
                 setConfig(appConfiguration).
                 setDish(dish).
                 setQuantity(quantity);

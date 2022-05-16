@@ -5,7 +5,7 @@ import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.dto.exceptions.*;
-import com.bakuard.nutritionManager.dto.menus.MenuPriceRequest;
+import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.dto.users.UserResponse;
 import com.bakuard.nutritionManager.model.*;
@@ -141,7 +141,9 @@ public class DtoMapper {
                 setServingSize(dto.getServingSize()).
                 setUnit(dto.getUnit()).
                 setDescription(dto.getDescription()).
-                setImageUrl(dto.getImageUrl());
+                setImageUrl(dto.getImageUrl()).
+                setConfig(appConfiguration).
+                setRepository(productRepository);
 
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
@@ -150,9 +152,6 @@ public class DtoMapper {
                 });
 
         dto.getTags().forEach(builder::addTag);
-
-        builder.setConfig(appConfiguration).
-                setRepository(productRepository);
 
         return builder.tryBuild();
     }
@@ -167,7 +166,9 @@ public class DtoMapper {
                 setServingSize(dto.getServingSize()).
                 setUnit(dto.getUnit()).
                 setDescription(dto.getDescription()).
-                setImageUrl(dto.getImageUrl());
+                setImageUrl(dto.getImageUrl()).
+                setConfig(appConfiguration).
+                setRepository(productRepository);
 
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
@@ -176,9 +177,6 @@ public class DtoMapper {
                 });
 
         dto.getTags().forEach(builder::addTag);
-
-        builder.setConfig(appConfiguration).
-                setRepository(productRepository);
 
         return builder.tryBuild();
     }
@@ -205,6 +203,60 @@ public class DtoMapper {
         return dish.getLackProductPrice(ingredients, dto.getServingNumber());
     }
 
+
+    public MenuResponse toMenuResponse(Menu menu) {
+        MenuResponse response = new MenuResponse();
+        response.setId(menu.getId());
+        response.setUser(toUserResponse(menu.getUser()));
+        response.setName(menu.getName());
+        response.setImageUrl(menu.getImageUrl());
+        response.setDescription(menu.getDescription());
+        response.setItems(
+                menu.getItems().stream().map(this::toMenuItemRequestResponse).toList()
+        );
+        response.setTags(toTagsResponse(menu.getTags()));
+        return response;
+    }
+
+    public Menu toMenu(UUID userId, MenuAddRequest dto) {
+        User user = userRepository.tryGetById(userId);
+
+        Menu.Builder builder = new Menu.Builder().
+                generateId().
+                setUser(user).
+                setName(dto.getName()).
+                setDescription(dto.getDescription()).
+                setImageUrl(dto.getImageUrl()).
+                setConfig(appConfiguration);
+
+        dto.getTags().forEach(builder::addTag);
+
+        dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
+
+        return builder.tryBuild();
+    }
+
+    public Menu toMenu(UUID userId, MenuUpdateRequest dto) {
+        User user = userRepository.tryGetById(userId);
+
+        Menu.Builder builder = new Menu.Builder().
+                setId(dto.getId()).
+                setUser(user).
+                setName(dto.getName()).
+                setDescription(dto.getDescription()).
+                setImageUrl(dto.getImageUrl()).
+                setConfig(appConfiguration);
+
+        dto.getTags().forEach(builder::addTag);
+
+        dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
+
+        return builder.tryBuild();
+    }
+
+    public Page<MenuForListResponse> toMenusResponse(Page<Menu> menus) {
+        return menus.map(this::toMenuForListResponse);
+    }
 
     public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID menuId, String dishName, BigDecimal quantity) {
         Menu menu = menuRepository.tryGetById(userId, menuId);
@@ -246,7 +298,7 @@ public class DtoMapper {
 
         Filter filter = null;
         if(filters.size() == 1) filter = filters.get(0);
-        else if(filters.size() > 1) filter = Filter.and(filters);
+        else filter = Filter.and(filters);
 
         return new Criteria().
                 setPageable(Pageable.of(size, page)).
@@ -272,7 +324,33 @@ public class DtoMapper {
 
         Filter filter = null;
         if(filters.size() == 1) filter = filters.get(0);
-        else if(filters.size() > 1) filter = Filter.and(filters);
+        else filter = Filter.and(filters);
+
+        return new Criteria().
+                setPageable(Pageable.of(size, page)).
+                setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
+                setFilter(filter);
+    }
+
+    public Criteria toMenuCriteria(int page,
+                                   int size,
+                                   UUID userId,
+                                   String sortRule,
+                                   List<String> dishNames,
+                                   List<String> tags) {
+        List<Filter> filters = new ArrayList<>();
+        filters.add(Filter.user(userId));
+
+        if(dishNames != null && !dishNames.isEmpty()) {
+            filters.add(Filter.anyDish(dishNames));
+        }
+        if(tags != null && !tags.isEmpty()) {
+            filters.add(Filter.minTags(toTags(tags)));
+        }
+
+        Filter filter = null;
+        if(filters.size() == 1) filter = filters.get(0);
+        else filter = Filter.and(filters);
 
         return new Criteria().
                 setPageable(Pageable.of(size, page)).
@@ -317,6 +395,23 @@ public class DtoMapper {
         response.setDishUnits(units.getContent().stream().map(FieldResponse::new).toList());
         response.setDishNames(names.getContent().stream().map(FieldResponse::new).toList());
         response.setProductCategories(categories.getContent().stream().map(FieldResponse::new).toList());
+
+        return response;
+    }
+
+    public MenuFieldsResponse toMenuFieldsResponse(UUID userId) {
+        Criteria criteria = new Criteria().
+                setPageable(Pageable.of(1000, 0)).
+                setFilter(Filter.user(userId));
+
+        Page<Tag> menuTags = menuRepository.getTags(criteria);
+        Page<String> menuNames = menuRepository.getNames(criteria);
+        Page<String> dishNames = dishRepository.getNames(criteria);
+
+        MenuFieldsResponse response = new MenuFieldsResponse();
+        response.setMenuTags(menuTags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
+        response.setMenuNames(menuNames.getContent().stream().map(FieldResponse::new).toList());
+        response.setDishNames(dishNames.getContent().stream().map(FieldResponse::new).toList());
 
         return response;
     }
@@ -529,6 +624,33 @@ public class DtoMapper {
             temp.getOperands().forEach(stack::addLast);
         }
 
+        return response;
+    }
+
+    private MenuItemRequestResponse toMenuItemRequestResponse(MenuItem item) {
+        MenuItemRequestResponse result = new MenuItemRequestResponse();
+        result.setDishName(item.getDishName());
+        result.setServingNumber(item.getNecessaryQuantity(BigDecimal.ONE));
+        return result;
+    }
+
+    private MenuItem.Builder toMenuItem(UUID userId, MenuItemRequestResponse dto) {
+        return new MenuItem.Builder().
+                setDishName(dto.getDishName()).
+                setQuantity(dto.getServingNumber()).
+                setConfig(appConfiguration).
+                setRepository(dishRepository).
+                setUserId(userId);
+    }
+
+    private MenuForListResponse toMenuForListResponse(Menu menu) {
+        MenuForListResponse response = new MenuForListResponse();
+        response.setId(menu.getId());
+        response.setName(menu.getName());
+        response.setAveragePrice(menu.getAveragePrice().orElse(null));
+        response.setImageUrl(menu.getImageUrl());
+        response.setItems(menu.getItems().stream().map(this::toMenuItemRequestResponse).toList());
+        response.setTags(toTagsResponse(menu.getTags()));
         return response;
     }
 

@@ -159,7 +159,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                         String dishName = rs.getString("dishName");
                         if(!rs.wasNull() && !items.contains(dishName)) {
                             builder.addItem(
-                                    new MenuItem.Builder().
+                                    new MenuItem.LoadBuilder().
                                             setConfig(appConfig).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
@@ -205,7 +205,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
             );
 
             for(int i = 0; i < result.getItems().size(); i++)
-                result.getItems().get(i).setDish(dishes.get(i));
+                ((MenuItem.LoadBuilder) result.getItems().get(i)).setDish(dishes.get(i));
         }
 
         return Optional.ofNullable(result == null ? null : result.tryBuild());
@@ -278,7 +278,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                         String dishName = rs.getString("dishName");
                         if(!rs.wasNull() && !items.contains(dishName)) {
                             builder.addItem(
-                                    new MenuItem.Builder().
+                                    new MenuItem.LoadBuilder().
                                             setConfig(appConfig).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
@@ -326,7 +326,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
             );
 
             for(int i = 0; i < dishes.size(); i++)
-                result.getItems().get(i).setDish(dishes.get(i));
+                ((MenuItem.LoadBuilder) result.getItems().get(i)).setDish(dishes.get(i));
         }
 
         return Optional.ofNullable(result == null ? null : result.tryBuild());
@@ -432,7 +432,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                         String dishName = rs.getString("dishName");
                         if(!rs.wasNull() && !items.contains(dishName)) {
                             builder.addItem(
-                                    new MenuItem.Builder().
+                                    new MenuItem.LoadBuilder().
                                             setConfig(appConfig).
                                             setQuantity(rs.getBigDecimal("itemQuantity"))
                             );
@@ -481,7 +481,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 );
 
                 for(int i = 0; i < dishes.size(); i++)
-                    builder.getItems().get(i).setDish(dishes.get(i));
+                    ((MenuItem.LoadBuilder) builder.getItems().get(i)).setDish(dishes.get(i));
             }
         }
 
