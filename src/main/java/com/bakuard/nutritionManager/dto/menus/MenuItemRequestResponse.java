@@ -21,6 +21,10 @@ public class MenuItemRequestResponse {
             2. Должно быть больше нуля. <br/>
             """)
     private BigDecimal servingNumber;
+    @Schema(description = """
+            Порядковый номер (индекс) блюда среди всех блюд конкретного меню. Нумерация начинается с нуля.
+            """)
+    private int itemIndex;
 
     public MenuItemRequestResponse() {
 
@@ -42,25 +46,35 @@ public class MenuItemRequestResponse {
         this.servingNumber = servingNumber;
     }
 
+    public int getItemIndex() {
+        return itemIndex;
+    }
+
+    public void setItemIndex(int itemIndex) {
+        this.itemIndex = itemIndex;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MenuItemRequestResponse that = (MenuItemRequestResponse) o;
-        return Objects.equals(dishName, that.dishName) &&
+        return itemIndex == that.itemIndex &&
+                Objects.equals(dishName, that.dishName) &&
                 Objects.equals(servingNumber, that.servingNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishName, servingNumber);
+        return Objects.hash(dishName, servingNumber, itemIndex);
     }
 
     @Override
     public String toString() {
-        return "MenuItemRequest{" +
+        return "MenuItemRequestResponse{" +
                 "dishName='" + dishName + '\'' +
-                ", quantity=" + servingNumber +
+                ", servingNumber=" + servingNumber +
+                ", itemIndex=" + itemIndex +
                 '}';
     }
 

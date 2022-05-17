@@ -212,7 +212,9 @@ public class DtoMapper {
         response.setImageUrl(menu.getImageUrl());
         response.setDescription(menu.getDescription());
         response.setItems(
-                menu.getItems().stream().map(this::toMenuItemRequestResponse).toList()
+                IntStream.range(0, menu.getMenuItemNumbers()).
+                        mapToObj(i -> toMenuItemRequestResponse(menu.tryGetItem(i), i)).
+                        toList()
         );
         response.setTags(toTagsResponse(menu.getTags()));
         return response;
@@ -627,10 +629,11 @@ public class DtoMapper {
         return response;
     }
 
-    private MenuItemRequestResponse toMenuItemRequestResponse(MenuItem item) {
+    private MenuItemRequestResponse toMenuItemRequestResponse(MenuItem item, int itemIndex) {
         MenuItemRequestResponse result = new MenuItemRequestResponse();
         result.setDishName(item.getDishName());
         result.setServingNumber(item.getNecessaryQuantity(BigDecimal.ONE));
+        result.setItemIndex(itemIndex);
         return result;
     }
 
@@ -649,7 +652,11 @@ public class DtoMapper {
         response.setName(menu.getName());
         response.setAveragePrice(menu.getAveragePrice().orElse(null));
         response.setImageUrl(menu.getImageUrl());
-        response.setItems(menu.getItems().stream().map(this::toMenuItemRequestResponse).toList());
+        response.setItems(
+                IntStream.range(0, menu.getMenuItemNumbers()).
+                        mapToObj(i -> toMenuItemRequestResponse(menu.tryGetItem(i), i)).
+                        toList()
+        );
         response.setTags(toTagsResponse(menu.getTags()));
         return response;
     }
