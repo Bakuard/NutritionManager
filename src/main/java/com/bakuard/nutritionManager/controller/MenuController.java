@@ -244,7 +244,7 @@ public class MenuController {
                             }
                     ))
             String sortRule,
-            @RequestParam(value = "productCategories", required = false)
+            @RequestParam(value = "dishNames", required = false)
             @Parameter(description = """
                      Массив наименований блюд. В выборку попадут только те меню, которые имеют в своем
                       составе хотя бы одно из указанных блюд. Если параметр имеет значение null или является
