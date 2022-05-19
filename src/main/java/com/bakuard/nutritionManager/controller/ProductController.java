@@ -305,7 +305,7 @@ public class ProductController {
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> shops,
-            @RequestParam(value = "varieties", required = false)
+            @RequestParam(value = "grades", required = false)
             @Parameter(description = """
                      Массив сортов продуктов. В выборку попадут только те продукты,
                       которые имеют с любой из указанных сортов. Если параметр
@@ -315,7 +315,7 @@ public class ProductController {
                       отображаемый символ.
                      """,
                      schema = @Schema(defaultValue = "null"))
-            List<String> varieties,
+            List<String> grades,
             @RequestParam(value = "manufacturers", required = false)
             @Parameter(description = """
                      Массив производителей продуктов. В выборку попадут только те продукты,
@@ -341,9 +341,9 @@ public class ProductController {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
 
         logger.info("Get products by filter: page={}, size={}, userId={}, sortRule={}, onlyFridge={}, " +
-                        "category={}, shops={}, varieties={}, manufacturers={}, tags={}",
+                        "category={}, shops={}, grades={}, manufacturers={}, tags={}",
                 page, size, userId, sortRule, onlyFridge,
-                category, shops, varieties, manufacturers, tags);
+                category, shops, grades, manufacturers, tags);
 
         Criteria criteria = mapper.toProductCriteria(
                 page,
@@ -353,7 +353,7 @@ public class ProductController {
                 onlyFridge,
                 category,
                 shops,
-                varieties,
+                grades,
                 manufacturers,
                 tags
         );

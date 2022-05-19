@@ -444,27 +444,24 @@ public class DtoMapper {
 
 
     public ExceptionResponse toExceptionResponse(HttpStatus httpStatus, String keyMessage) {
-        return new ExceptionResponse(
-                httpStatus,
-                getMessage(keyMessage, "unexpected error"),
-                getMessage("errorTitle", "Error")
-        );
+        ExceptionResponse response = new ExceptionResponse(httpStatus);
+        ConstraintResponse constraintResponse = new ConstraintResponse();
+        constraintResponse.setTitle(getMessage("constraintTitle", "Reason"));
+        constraintResponse.setMessage(getMessage(keyMessage, "Unexpected exception"));
+        response.addReason(constraintResponse);
+        return response;
     }
 
     public ExceptionResponse toExceptionResponse(ValidateException e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        String userMessageKey = e.getUserMessageKey().orElse(null);
-        if(userMessageKey != null && userMessageKey.startsWith("AuthService")) {
+
+        if(e.containsConstraint(Constraint.CORRECT_JWS) || e.containsConstraint(Constraint.CORRECT_CREDENTIALS)) {
             httpStatus = HttpStatus.FORBIDDEN;
         } else if(e.containsConstraint(Constraint.ENTITY_MUST_EXISTS_IN_DB)) {
             httpStatus = HttpStatus.NOT_FOUND;
         }
 
-        ExceptionResponse response = new ExceptionResponse(
-                httpStatus,
-                getMessage(userMessageKey, null),
-                getMessage("errorTitle", "Error")
-        );
+        ExceptionResponse response = new ExceptionResponse(httpStatus);
         e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
         return response;
     }

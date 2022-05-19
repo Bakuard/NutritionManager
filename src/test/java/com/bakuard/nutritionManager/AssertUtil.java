@@ -14,60 +14,6 @@ import java.util.stream.IntStream;
 public class AssertUtil {
 
     public static void assertValidateException(Action action,
-                                               String userMessageKey,
-                                               Constraint... expectedConstraints) {
-        try {
-            action.act();
-            Assertions.fail("Expected exception, but nothing be thrown");
-        } catch(Exception e) {
-            if(!(e instanceof ValidateException)) {
-                Assertions.fail("Unexpected exception type " + e.getClass().getName() + "\n" + e.getMessage());
-            }
-
-            ValidateException ex = (ValidateException) e;
-
-            for(Constraint constraint : expectedConstraints) {
-                if(!ex.containsConstraint(constraint)) {
-                    Assertions.fail("Expected constraint " + constraint + " is missing");
-                }
-            }
-
-            for(Constraint constraint : Constraint.values()) {
-                if(Arrays.stream(expectedConstraints).noneMatch(c -> c == constraint) &&
-                        ex.containsConstraint(constraint)) {
-                    Assertions.fail("Unexpected constraint " + constraint);
-                }
-            }
-
-            if(!userMessageKey.equals(ex.getUserMessageKey().orElse(null))) {
-                Assertions.fail("Unexpected user message key. Expected: " + userMessageKey +
-                        ". Actual: " + ex.getUserMessageKey()
-                );
-            }
-        }
-    }
-
-    public static void assertValidateException(Action action,
-                                               String userMessageKey) {
-        try {
-            action.act();
-            Assertions.fail("Expected exception, but nothing be thrown");
-        } catch(Exception e) {
-            if(!(e instanceof ValidateException)) {
-                Assertions.fail("Unexpected exception type " + e.getClass().getName() + "\n" + e.getMessage());
-            }
-
-            ValidateException ex = (ValidateException) e;
-
-            if(!userMessageKey.equals(ex.getUserMessageKey().orElse(null))) {
-                Assertions.fail("Unexpected user message key. Expected: " + userMessageKey +
-                        ". Actual: " + ex.getUserMessageKey()
-                );
-            }
-        }
-    }
-
-    public static void assertValidateException(Action action,
                                                Constraint... expectedConstraints) {
         try {
             action.act();
