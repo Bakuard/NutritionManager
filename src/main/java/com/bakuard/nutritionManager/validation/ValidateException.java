@@ -9,8 +9,6 @@ import java.util.function.Consumer;
  */
 public class ValidateException extends RuntimeException implements Iterable<RuleException> {
 
-    private String userMessageKey;
-
     public ValidateException() {}
 
     public ValidateException(String message) {
@@ -25,11 +23,6 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
         super(cause);
     }
 
-    public ValidateException setUserMessageKey(String key) {
-        userMessageKey = key;
-        return this;
-    }
-
     public ValidateException addReason(Exception e) {
         if(e != null) addSuppressed(e);
         return this;
@@ -38,10 +31,6 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
     public ValidateException addReason(Result result) {
         if(result != null) addReason(result.check());
         return this;
-    }
-
-    public Optional<String> getUserMessageKey() {
-        return Optional.ofNullable(userMessageKey);
     }
 
     public boolean containsConstraint(Constraint constraint) {
@@ -105,16 +94,6 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
             Throwable[] suppressed = current.getSuppressed();
             for(int i = suppressed.length - 1; i >= 0; --i) stack.addFirst(suppressed[i]);
         }
-    }
-
-    @Override
-    public String getMessage() {
-        StringBuilder result = new StringBuilder();
-
-        if(userMessageKey != null) result.append("Key=").append(userMessageKey);
-        if(super.getMessage() != null) result.append(super.getMessage());
-
-        return result.toString();
     }
 
 }

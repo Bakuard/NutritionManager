@@ -28,14 +28,10 @@ public class ExceptionResponse {
     @Schema(description = "Все пречины из-за которых запрос не смог завершится корректно")
     private List<ConstraintResponse> reasons;
 
-    public ExceptionResponse(HttpStatus status,
-                             String message,
-                             String title) {
+    public ExceptionResponse(HttpStatus status) {
         timestamp = LocalDateTime.now();
         httpStatus = status.getReasonPhrase();
         httpErrorCode = status.value();
-        this.message = message;
-        this.title = title;
         reasons = new ArrayList<>();
     }
 
