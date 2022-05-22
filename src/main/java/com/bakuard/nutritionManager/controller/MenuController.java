@@ -327,21 +327,30 @@ public class MenuController {
     )
     @Transactional
     @GetMapping("/getAllDishIngredientProducts")
-    public ResponseEntity<DishProductsListResponse> getAllDishIngredientProducts(
-            @RequestParam("dishName")
-            @Parameter(description = "Уникальное наименование блюда. Не может быть null.", required = true)
-            String dishName,
+    public ResponseEntity<MenuDishProductsListResponse> getAllDishIngredientProducts(
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
             UUID menuId,
+            @RequestParam(value = "dishName", required = false)
+            @Parameter(description = """
+                    Наименование одного из блюд указанного меню. Особые случаи: <br/>
+                    1. Если данный параметр не указан (для него задано значение null) и в составе меню
+                     ЕСТЬ блюда - в качестве значения по умолчанию будет взято первое блюдо из списка блюд
+                     этого меню. <br/>
+                    2. Если данный параметр не указан (для него задано значение null) и в составе меню
+                     НЕТ блюд - данный параметр будет проигнорирован. <br/>
+                    2. Если данный параметр ЗАДАН и в составе меню нет блюда с таким именем - кидает исключение.
+                    """)
+            String dishName,
             @RequestParam(value = "menuQuantity", required = false)
             @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
             BigDecimal menuQuantity) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        logger.info("Get all ingredient products for dishName={}, menuId={}, menuQuantity={}",
-                dishName, menuId, menuQuantity);
+        logger.info("Get all ingredient products for menuId={}, dishName={}, menuQuantity={}",
+                menuId, dishName, menuQuantity);
 
-        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, menuId, dishName, menuQuantity);
+        MenuDishProductsListResponse response = mapper.toMenuDishProductsListResponse(
+                userId, menuId, dishName, menuQuantity);
 
         return ResponseEntity.ok(response);
     }

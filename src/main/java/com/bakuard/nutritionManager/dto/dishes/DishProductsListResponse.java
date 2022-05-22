@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Возвращаемый список продуктов блюда.")
+@Schema(description = "Возвращаемый список продуктов кажддого ингредиента блюда.")
 public class DishProductsListResponse {
 
     @Schema(description = "Уникальный идентфикатор блюда.")
     private UUID dishId;
+    @Schema(description = "Наименование блюда")
+    private String dishName;
     @Schema(description = "Кол-во порций блюда на которое рассчитывается список докупаемых продуктов.")
     private BigDecimal servingNumber;
     @Schema(description = """
@@ -30,6 +32,14 @@ public class DishProductsListResponse {
 
     public void setDishId(UUID dishId) {
         this.dishId = dishId;
+    }
+
+    public String getDishName() {
+        return dishName;
+    }
+
+    public void setDishName(String dishName) {
+        this.dishName = dishName;
     }
 
     public BigDecimal getServingNumber() {
@@ -54,21 +64,23 @@ public class DishProductsListResponse {
         if (o == null || getClass() != o.getClass()) return false;
         DishProductsListResponse that = (DishProductsListResponse) o;
         return Objects.equals(dishId, that.dishId) &&
+                Objects.equals(dishName, that.dishName) &&
                 Objects.equals(servingNumber, that.servingNumber) &&
                 Objects.equals(categories, that.categories);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishId, servingNumber, categories);
+        return Objects.hash(dishId, dishName, servingNumber, categories);
     }
 
     @Override
     public String toString() {
         return "DishProductsListResponse{" +
                 "dishId=" + dishId +
+                ", dishName='" + dishName + '\'' +
                 ", servingNumber=" + servingNumber +
-                ", ingredients=" + categories +
+                ", categories=" + categories +
                 '}';
     }
 
