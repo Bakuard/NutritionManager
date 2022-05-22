@@ -187,9 +187,7 @@ public class DtoMapper {
 
     public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID dishId, BigDecimal servingNumber) {
         Dish dish = dishRepository.tryGetById(userId, dishId);
-
-        servingNumber = servingNumber == null ? BigDecimal.ONE : servingNumber;
-        return toDishProductsListResponse(dish, servingNumber);
+        return toDishProductsListResponse(dish, servingNumber == null ? BigDecimal.ONE : servingNumber);
     }
 
     public Optional<BigDecimal> toDishPrice(UUID userId, DishPriceRequest dto) {
@@ -260,12 +258,30 @@ public class DtoMapper {
         return menus.map(this::toMenuForListResponse);
     }
 
-    public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID menuId, String dishName, BigDecimal quantity) {
+    public MenuDishProductsListResponse toMenuDishProductsListResponse(UUID userId,
+                                                                       UUID menuId,
+                                                                       String dishName,
+                                                                       BigDecimal quantity) {
         Menu menu = menuRepository.tryGetById(userId, menuId);
-        MenuItem menuItem = menu.tryGetItem(dishName);
 
-        quantity = quantity == null ? BigDecimal.ONE : quantity;
-        return toDishProductsListResponse(menuItem.getDish(), menuItem.getNecessaryQuantity(quantity));
+        MenuDishProductsListResponse response = new MenuDishProductsListResponse();
+        response.setMenuId(menuId);
+        response.setMenuName(menu.getName());
+        response.setMenuQuantity(quantity == null ? BigDecimal.ONE : quantity);
+        response.setDishes(menu.getItems().stream().
+                map(this::toDishNameAndIdResponse).
+                toList());
+        if(dishName != null) {
+            MenuItem menuItem = menu.tryGetItem(dishName);
+            BigDecimal dishQuantity = menuItem.getNecessaryQuantity(quantity == null ? BigDecimal.ONE : quantity);
+            response.setDishProducts(toDishProductsListResponse(menuItem.getDish(), dishQuantity));
+        } else if(menu.getMenuItemNumbers() > 0) {
+            MenuItem menuItem = menu.getItems().get(0);
+            BigDecimal dishQuantity = menuItem.getNecessaryQuantity(quantity == null ? BigDecimal.ONE : quantity);
+            response.setDishProducts(toDishProductsListResponse(menuItem.getDish(), dishQuantity));
+        }
+
+        return response;
     }
 
     public Optional<BigDecimal> toMenuPrice(UUID userId, MenuPriceRequest dto) {
@@ -522,40 +538,6 @@ public class DtoMapper {
         return response;
     }
 
-    private DishProductsListResponse toDishProductsListResponse(Dish dish, BigDecimal servingNumber) {
-        DishProductsListResponse response = new DishProductsListResponse();
-        response.setDishId(dish.getId());
-        response.setServingNumber(servingNumber);
-        response.setCategories(
-                IntStream.range(0, dish.getIngredientNumber()).
-                        mapToObj(ingredientIndex -> {
-                            DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
-
-                            List<Dish.IngredientProduct> products = dish.getProducts(ingredientIndex, 0).
-                                    orElseThrow().getContent();
-
-                            DishIngredientForListResponse ir = new DishIngredientForListResponse();
-                            ir.setIngredientIndex(ingredientIndex);
-                            ir.setProductCategory(ingredient.getName());
-                            ir.setProducts(
-                                    products.stream().
-                                            map(ingredientProduct ->
-                                                    toProductAsDishIngredientResponse(dish,
-                                                            ingredientProduct,
-                                                            ingredientProduct.productIndex() == 0,
-                                                            servingNumber)
-                                            ).
-                                            toList()
-                            );
-
-                            return ir;
-                        }).
-                        toList()
-        );
-
-        return response;
-    }
-
     private DishForListResponse toDishForListResponse(Dish dish) {
         DishForListResponse response = new DishForListResponse();
         response.setId(dish.getId());
@@ -623,6 +605,48 @@ public class DtoMapper {
             temp.getOperands().forEach(stack::addLast);
         }
 
+        return response;
+    }
+
+    private DishProductsListResponse toDishProductsListResponse(Dish dish, BigDecimal servingNumber) {
+        DishProductsListResponse response = new DishProductsListResponse();
+        response.setDishId(dish.getId());
+        response.setDishName(dish.getName());
+        response.setServingNumber(servingNumber);
+        response.setCategories(
+                IntStream.range(0, dish.getIngredientNumber()).
+                        mapToObj(ingredientIndex -> {
+                            DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
+
+                            List<Dish.IngredientProduct> products = dish.getProducts(ingredientIndex, 0).
+                                    orElseThrow().getContent();
+
+                            DishIngredientForListResponse ir = new DishIngredientForListResponse();
+                            ir.setIngredientIndex(ingredientIndex);
+                            ir.setProductCategory(ingredient.getName());
+                            ir.setProducts(
+                                    products.stream().
+                                            map(ingredientProduct ->
+                                                    toProductAsDishIngredientResponse(dish,
+                                                            ingredientProduct,
+                                                            ingredientProduct.productIndex() == 0,
+                                                            servingNumber)
+                                            ).
+                                            toList()
+                            );
+
+                            return ir;
+                        }).
+                        toList()
+        );
+
+        return response;
+    }
+
+    private DishNameAndIdResponse toDishNameAndIdResponse(MenuItem item) {
+        DishNameAndIdResponse response = new DishNameAndIdResponse();
+        response.setDishId(item.getDish().getId());
+        response.setDishName(item.getDishName());
         return response;
     }
 
