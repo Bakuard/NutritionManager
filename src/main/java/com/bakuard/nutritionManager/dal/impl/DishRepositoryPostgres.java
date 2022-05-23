@@ -96,6 +96,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                        Users.passwordHash as userPassHash,
                                        Users.email as userEmail,
                                        Users.salt as userSalt,
+                                       DishIngredients.ingredientId as ingredientId,
                                        DishIngredients.name as ingredientName,
                                        DishIngredients.quantity as ingredientQuantity,
                                        DishIngredients.filter as ingredientFilter
@@ -117,7 +118,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 (ResultSet rs) -> {
                     Dish.Builder builder = null;
                     HashSet<String> tags = new HashSet<>();
-                    HashSet<String> ingredients = new HashSet<>();
+                    HashSet<UUID> ingredients = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -147,13 +148,18 @@ public class DishRepositoryPostgres implements DishRepository {
                             tags.add(tagValue);
                         }
 
-                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+                        UUID ingredientId = (UUID) rs.getObject("ingredientId");
                         if(!rs.wasNull()) {
-                            String ingredientName = rs.getString("ingredientName");
-                            Filter filter = toFilter(rs.getString("ingredientFilter"));
-                            if(!ingredients.contains(ingredientName)) {
-                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
-                                ingredients.add(ingredientName);
+                            if(!ingredients.contains(ingredientId)) {
+                                builder.addIngredient(
+                                        new DishIngredient.Builder().
+                                                setId(ingredientId).
+                                                setName(rs.getString("ingredientName")).
+                                                setQuantity(rs.getBigDecimal("ingredientQuantity")).
+                                                setFilter(toFilter(rs.getString("ingredientFilter"))).
+                                                setConfig(appConfig)
+                                );
+                                ingredients.add(ingredientId);
                             }
                         }
                     }
@@ -181,6 +187,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                        Users.passwordHash as userPassHash,
                                        Users.email as userEmail,
                                        Users.salt as userSalt,
+                                       DishIngredients.ingredientId as ingredientId,
                                        DishIngredients.name as ingredientName,
                                        DishIngredients.quantity as ingredientQuantity,
                                        DishIngredients.filter as ingredientFilter
@@ -202,7 +209,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 (ResultSet rs) -> {
                     Dish.Builder builder = null;
                     HashSet<String> tags = new HashSet<>();
-                    HashSet<String> ingredients = new HashSet<>();
+                    HashSet<UUID> ingredients = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -232,13 +239,18 @@ public class DishRepositoryPostgres implements DishRepository {
                             tags.add(tagValue);
                         }
 
-                        BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+                        UUID ingredientId = (UUID) rs.getObject("ingredientId");
                         if(!rs.wasNull()) {
-                            String ingredientName = rs.getString("ingredientName");
-                            Filter filter = toFilter(rs.getString("ingredientFilter"));
-                            if(!ingredients.contains(ingredientName)) {
-                                builder.addIngredient(ingredientName, filter, ingredientQuantity);
-                                ingredients.add(ingredientName);
+                            if(!ingredients.contains(ingredientId)) {
+                                builder.addIngredient(
+                                        new DishIngredient.Builder().
+                                                setId(ingredientId).
+                                                setName(rs.getString("ingredientName")).
+                                                setQuantity(rs.getBigDecimal("ingredientQuantity")).
+                                                setFilter(toFilter(rs.getString("ingredientFilter"))).
+                                                setConfig(appConfig)
+                                );
+                                ingredients.add(ingredientId);
                             }
                         }
                     }
@@ -297,6 +309,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query =
                 select(field("D.*"),
+                        field("DishIngredients.ingredientId as ingredientId"),
                         field("DishIngredients.name as ingredientName"),
                         field("DishIngredients.quantity as ingredientQuantity"),
                         field("DishIngredients.filter as ingredientFilter"),
@@ -518,7 +531,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         Dish.Builder builder = null;
         HashSet<String> tags = new HashSet<>();
-        HashSet<String> ingredients = new HashSet<>();
+        HashSet<UUID> ingredients = new HashSet<>();
         UUID lastDishId = null;
         while(rs.next()) {
             UUID dishId = (UUID)rs.getObject("dishId");
@@ -554,13 +567,18 @@ public class DishRepositoryPostgres implements DishRepository {
                 tags.add(tagValue);
             }
 
-            BigDecimal ingredientQuantity = rs.getBigDecimal("ingredientQuantity");
+            UUID ingredientId = (UUID) rs.getObject("ingredientId");
             if(!rs.wasNull()) {
-                String ingredientName = rs.getString("ingredientName");
-                Filter filter = toFilter(rs.getString("ingredientFilter"));
-                if(!ingredients.contains(ingredientName)) {
-                    builder.addIngredient(ingredientName, filter, ingredientQuantity);
-                    ingredients.add(ingredientName);
+                if(!ingredients.contains(ingredientId)) {
+                    builder.addIngredient(
+                            new DishIngredient.Builder().
+                                    setId(ingredientId).
+                                    setName(rs.getString("ingredientName")).
+                                    setQuantity(rs.getBigDecimal("ingredientQuantity")).
+                                    setFilter(toFilter(rs.getString("ingredientFilter"))).
+                                    setConfig(appConfig)
+                    );
+                    ingredients.add(ingredientId);
                 }
             }
         }
@@ -620,8 +638,8 @@ public class DishRepositoryPostgres implements DishRepository {
 
         statement.batchUpdate(
                 """
-                        INSERT INTO DishIngredients(dishId, name, quantity, filter, filterQuery, index)
-                          VALUES(?,?,?,jsonb(?),?,?);
+                        INSERT INTO DishIngredients(ingredientId, dishId, name, quantity, filter, filterQuery, index)
+                          VALUES(?,?,?,?,jsonb(?),?,?);
                         """,
                 new BatchPreparedStatementSetter() {
 
@@ -633,12 +651,13 @@ public class DishRepositoryPostgres implements DishRepository {
                                 where(productRepository.switchFilter(ingredient.getFilter())).
                                 getSQL();
 
-                        ps.setObject(1, dish.getId());
-                        ps.setString(2, ingredient.getName());
-                        ps.setBigDecimal(3, ingredient.getNecessaryQuantity(BigDecimal.ONE));
-                        ps.setString(4, toJson(ingredient.getFilter()));
-                        ps.setString(5, filterQuery);
-                        ps.setInt(6, i);
+                        ps.setObject(1, ingredient.getId());
+                        ps.setObject(2, dish.getId());
+                        ps.setString(3, ingredient.getName());
+                        ps.setBigDecimal(4, ingredient.getNecessaryQuantity(BigDecimal.ONE));
+                        ps.setString(5, toJson(ingredient.getFilter()));
+                        ps.setString(6, filterQuery);
+                        ps.setInt(7, i);
                     }
 
                     @Override
@@ -717,8 +736,8 @@ public class DishRepositoryPostgres implements DishRepository {
 
         statement.batchUpdate(
                 """
-                        INSERT INTO DishIngredients(dishId, name, quantity, filter, filterQuery, index)
-                          VALUES(?,?,?,jsonb(?),?,?);
+                        INSERT INTO DishIngredients(ingredientId, dishId, name, quantity, filter, filterQuery, index)
+                          VALUES(?,?,?,?,jsonb(?),?,?);
                         """,
                 new BatchPreparedStatementSetter() {
 
@@ -730,12 +749,13 @@ public class DishRepositoryPostgres implements DishRepository {
                                 where(productRepository.switchFilter(ingredient.getFilter())).
                                 getSQL();
 
-                        ps.setObject(1, newVersion.getId());
-                        ps.setString(2, ingredient.getName());
-                        ps.setBigDecimal(3, ingredient.getNecessaryQuantity(BigDecimal.ONE));
-                        ps.setString(4, toJson(ingredient.getFilter()));
-                        ps.setString(5, filterQuery);
-                        ps.setInt(6, i);
+                        ps.setObject(1, ingredient.getId());
+                        ps.setObject(2, newVersion.getId());
+                        ps.setString(3, ingredient.getName());
+                        ps.setBigDecimal(4, ingredient.getNecessaryQuantity(BigDecimal.ONE));
+                        ps.setString(5, toJson(ingredient.getFilter()));
+                        ps.setString(6, filterQuery);
+                        ps.setInt(7, i);
                     }
 
                     @Override

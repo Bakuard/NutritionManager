@@ -183,6 +183,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                    Users.passwordHash as userPasswordHash,
                                    Users.email as userEmail,
                                    Users.salt as userSalt,
+                                   DishIngredients.ingredientId as ingredientId,
                                    DishIngredients.name as ingredientName,
                                    DishIngredients.quantity as ingredientQuantity,
                                    DishIngredients.filter as ingredientFilter
@@ -301,6 +302,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                    Users.passwordHash as userPasswordHash,
                                    Users.email as userEmail,
                                    Users.salt as userSalt,
+                                   DishIngredients.ingredientId as ingredientId,
                                    DishIngredients.name as ingredientName,
                                    DishIngredients.quantity as ingredientQuantity,
                                    DishIngredients.filter as ingredientFilter
@@ -459,6 +461,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                        Users.passwordHash as userPasswordHash,
                                        Users.email as userEmail,
                                        Users.salt as userSalt,
+                                       DishIngredients.ingredientId as ingredientId,
                                        DishIngredients.name as ingredientName,
                                        DishIngredients.quantity as ingredientQuantity,
                                        DishIngredients.filter as ingredientFilter

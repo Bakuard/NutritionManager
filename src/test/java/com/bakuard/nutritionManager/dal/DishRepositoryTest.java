@@ -6,10 +6,8 @@ import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.impl.DishRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
-import com.bakuard.nutritionManager.model.Dish;
-import com.bakuard.nutritionManager.model.Product;
+import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
@@ -249,30 +247,44 @@ class DishRepositoryTest {
                 addTag("2 tag").
                 addTag("new tag").
                 addTag("tag new").
-                addIngredient("ingredient 1",
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("common tag")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
-                                ),
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("tag B"))
-                                )
-                        ),
-                        BigDecimal.TEN).
-                addIngredient("ingredient 3",
-                        Filter.and(
-                                Filter.user(user.getId()),
-                                Filter.anyCategory("name A", "name B", "name C"),
-                                Filter.anyShop("shop B", "shop A"),
-                                Filter.anyGrade("variety B")
-                        ),
-                        new BigDecimal("5.4")).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(0)).
+                                setFilter(
+                                        Filter.orElse(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("common tag")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop A"),
+                                                        Filter.anyGrade("variety A"),
+                                                        Filter.anyManufacturer("manufacturer A")
+                                                ),
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("tag B"))
+                                                )
+                                        )
+                                ).
+                                setName("ingredient 1").
+                                setQuantity(BigDecimal.TEN).
+                                setConfig(appConfiguration)
+                ).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(1)).
+                                setFilter(
+                                        Filter.and(
+                                                Filter.user(user.getId()),
+                                                Filter.anyCategory("name A", "name B", "name C"),
+                                                Filter.anyShop("shop B", "shop A"),
+                                                Filter.anyGrade("variety B")
+                                        )
+                                ).
+                                setName("ingredient 3").
+                                setQuantity(new BigDecimal("5.4")).
+                                setConfig(appConfiguration)
+                ).
                 tryBuild();
         boolean actual = commit(() -> dishRepository.save(updatedDish));
 
@@ -307,30 +319,44 @@ class DishRepositoryTest {
                 addTag("2 tag").
                 addTag("new tag").
                 addTag("tag new").
-                addIngredient("ingredient 1",
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("common tag")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
-                                ),
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("tag B"))
-                                )
-                        ),
-                        BigDecimal.TEN).
-                addIngredient("ingredient 3",
-                        Filter.and(
-                                Filter.user(user.getId()),
-                                Filter.anyCategory("name A", "name B", "name C"),
-                                Filter.anyShop("shop B", "shop A"),
-                                Filter.anyGrade("variety B")
-                        ),
-                        new BigDecimal("5.4")).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(0)).
+                                setFilter(
+                                        Filter.orElse(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("common tag")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop A"),
+                                                        Filter.anyGrade("variety A"),
+                                                        Filter.anyManufacturer("manufacturer A")
+                                                ),
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("tag B"))
+                                                )
+                                        )
+                                ).
+                                setName("ingredient 1").
+                                setQuantity(BigDecimal.TEN).
+                                setConfig(appConfiguration)
+                ).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(2)).
+                                setFilter(
+                                        Filter.and(
+                                                Filter.user(user.getId()),
+                                                Filter.anyCategory("name A", "name B", "name C"),
+                                                Filter.anyShop("shop B", "shop A"),
+                                                Filter.anyGrade("variety B")
+                                        )
+                                ).
+                                setName("ingredient 3").
+                                setQuantity(new BigDecimal("5.4")).
+                                setConfig(appConfiguration)
+                ).
                 tryBuild();
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
@@ -367,30 +393,44 @@ class DishRepositoryTest {
                 addTag("2 tag").
                 addTag("new tag").
                 addTag("tag new").
-                addIngredient("ingredient 1",
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("common tag")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
-                                ),
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("tag B"))
-                                )
-                        ),
-                        BigDecimal.TEN).
-                addIngredient("ingredient 3",
-                        Filter.and(
-                                Filter.user(user.getId()),
-                                Filter.anyCategory("name A", "name B", "name C"),
-                                Filter.anyShop("shop B", "shop A"),
-                                Filter.anyGrade("variety B")
-                        ),
-                        new BigDecimal("5.4")).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(0)).
+                                setFilter(
+                                        Filter.orElse(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("common tag")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop A"),
+                                                        Filter.anyGrade("variety A"),
+                                                        Filter.anyManufacturer("manufacturer A")
+                                                ),
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("tag B"))
+                                                )
+                                        )
+                                ).
+                                setName("ingredient 1").
+                                setQuantity(BigDecimal.TEN).
+                                setConfig(appConfiguration)
+                ).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(0)).
+                                setFilter(
+                                        Filter.and(
+                                                Filter.user(user.getId()),
+                                                Filter.anyCategory("name A", "name B", "name C"),
+                                                Filter.anyShop("shop B", "shop A"),
+                                                Filter.anyGrade("variety B")
+                                        )
+                                ).
+                                setName("ingredient 3").
+                                setQuantity(new BigDecimal("5.4")).
+                                setConfig(appConfiguration)
+                ).
                 tryBuild();
 
         AssertUtil.assertValidateException(
@@ -1801,46 +1841,67 @@ class DishRepositoryTest {
                 addTag("2 tag").
                 addTag("tag 1").
                 addTag("1 tag").
-                addIngredient("ingredient 1",
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("common tag")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
-                                ),
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("tag B"))
-                                )
-                        ),
-                        BigDecimal.TEN).
-                addIngredient("ingredient 2",
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("value 1")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A")
-                                ),
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyManufacturer("manufacturer B")
-                                )
-                        ),
-                        new BigDecimal("2.5")).
-                addIngredient("ingredient 3",
-                        Filter.and(
-                                Filter.user(user.getId()),
-                                Filter.minTags(new Tag("value 1"), new Tag("value 2")),
-                                Filter.anyCategory("name A"),
-                                Filter.anyShop("shop B"),
-                                Filter.anyGrade("variety B")
-                        ),
-                        new BigDecimal("0.1")).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(0)).
+                                setFilter(
+                                    Filter.orElse(
+                                            Filter.and(
+                                                    Filter.user(user.getId()),
+                                                    Filter.minTags(new Tag("common tag")),
+                                                    Filter.anyCategory("name A"),
+                                                    Filter.anyShop("shop A"),
+                                                    Filter.anyGrade("variety A"),
+                                                    Filter.anyManufacturer("manufacturer A")
+                                            ),
+                                            Filter.and(
+                                                    Filter.user(user.getId()),
+                                                    Filter.minTags(new Tag("tag B"))
+                                            )
+                                    )
+                                ).
+                                setName("ingredient 1").
+                                setQuantity(BigDecimal.TEN).
+                                setConfig(appConfiguration)
+                ).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(1)).
+                                setFilter(
+                                        Filter.orElse(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("value 1")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop A"),
+                                                        Filter.anyGrade("variety A")
+                                                ),
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.anyManufacturer("manufacturer B")
+                                                )
+                                        )
+                                ).
+                                setName("ingredient 2").
+                                setQuantity(new BigDecimal("2.5")).
+                                setConfig(appConfiguration)
+                ).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(2)).
+                                setFilter(
+                                        Filter.and(
+                                                Filter.user(user.getId()),
+                                                Filter.minTags(new Tag("value 1"), new Tag("value 2")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop B"),
+                                                Filter.anyGrade("variety B")
+                                        )
+                                ).
+                                setName("ingredient 3").
+                                setQuantity(new BigDecimal("0.1")).
+                                setConfig(appConfiguration)
+                ).
                 tryBuild();
     }
 
@@ -1861,46 +1922,67 @@ class DishRepositoryTest {
                         addTag("tag 1").
                         addTag("tag A").
                         addTag("common tag").
-                        addIngredient("ingredient 1",
-                                Filter.orElse(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("common tag")),
-                                                Filter.anyCategory("name A"),
-                                                Filter.anyShop("shop A"),
-                                                Filter.anyGrade("variety A"),
-                                                Filter.anyManufacturer("manufacturer A")
-                                        ),
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("tag B"))
-                                        )
-                                ),
-                                BigDecimal.TEN).
-                        addIngredient("ingredient 2",
-                                Filter.orElse(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("value 1")),
-                                                Filter.anyCategory("name A"),
-                                                Filter.anyShop("shop A"),
-                                                Filter.anyGrade("variety A")
-                                        ),
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyManufacturer("manufacturer B")
-                                        )
-                                ),
-                                new BigDecimal("2.5")).
-                        addIngredient("ingredient 3",
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("value 1"), new Tag("value 2")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop B"),
-                                        Filter.anyGrade("variety B")
-                                ),
-                                new BigDecimal("0.1")).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1001)).
+                                        setFilter(
+                                                Filter.orElse(
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("common tag")),
+                                                                Filter.anyCategory("name A"),
+                                                                Filter.anyShop("shop A"),
+                                                                Filter.anyGrade("variety A"),
+                                                                Filter.anyManufacturer("manufacturer A")
+                                                        ),
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("tag B"))
+                                                        )
+                                                )
+                                        ).
+                                        setName("ingredient 1").
+                                        setQuantity(BigDecimal.TEN).
+                                        setConfig(appConfiguration)
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1002)).
+                                        setFilter(
+                                                Filter.orElse(
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("value 1")),
+                                                                Filter.anyCategory("name A"),
+                                                                Filter.anyShop("shop A"),
+                                                                Filter.anyGrade("variety A")
+                                                        ),
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.anyManufacturer("manufacturer B")
+                                                        )
+                                                )
+                                        ).
+                                        setName("ingredient 2").
+                                        setQuantity(new BigDecimal("2.5")).
+                                        setConfig(appConfiguration)
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1003)).
+                                        setFilter(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("value 1"), new Tag("value 2")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop B"),
+                                                        Filter.anyGrade("variety B")
+                                                )
+                                        ).
+                                        setName("ingredient 3").
+                                        setQuantity(new BigDecimal("0.1")).
+                                        setConfig(appConfiguration)
+                        ).
                         tryBuild()
         );
 
@@ -1918,22 +2000,29 @@ class DishRepositoryTest {
                         addTag("tag 2").
                         addTag("tag A").
                         addTag("common tag").
-                        addIngredient("ingredient 1",
-                                Filter.orElse(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("common tag")),
-                                                Filter.anyCategory("name A"),
-                                                Filter.anyShop("shop A"),
-                                                Filter.anyGrade("variety A"),
-                                                Filter.anyManufacturer("manufacturer A")
-                                        ),
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("tag B"))
-                                        )
-                                ),
-                                BigDecimal.TEN).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1004)).
+                                        setFilter(
+                                                Filter.orElse(
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("common tag")),
+                                                                Filter.anyCategory("name A"),
+                                                                Filter.anyShop("shop A"),
+                                                                Filter.anyGrade("variety A"),
+                                                                Filter.anyManufacturer("manufacturer A")
+                                                        ),
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("tag B"))
+                                                        )
+                                                )
+                                        ).
+                                        setName("ingredient 1").
+                                        setQuantity(BigDecimal.TEN).
+                                        setConfig(appConfiguration)
+                        ).
                         tryBuild()
         );
 
@@ -1951,43 +2040,64 @@ class DishRepositoryTest {
                         addTag("tag 3").
                         addTag("tag B").
                         addTag("common tag").
-                        addIngredient("ingredient 1",
-                                Filter.orElse(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("tag B"))
-                                        ),
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("common tag")),
-                                                Filter.anyCategory("name A"),
-                                                Filter.anyShop("shop A"),
-                                                Filter.anyGrade("variety A"),
-                                                Filter.anyManufacturer("manufacturer A")
-                                        )
-                                ),
-                                BigDecimal.TEN).
-                        addIngredient("ingredient 2",
-                                Filter.orElse(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyShop("shop B")
-                                        ),
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyManufacturer("manufacturer B")
-                                        )
-                                ),
-                                new BigDecimal("2.5")).
-                        addIngredient("ingredient 3",
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new Tag("value 1"), new Tag("value 2")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop B"),
-                                        Filter.anyGrade("variety B")
-                                ),
-                                new BigDecimal("0.1")).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1005)).
+                                        setFilter(
+                                                Filter.orElse(
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("tag B"))
+                                                        ),
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("common tag")),
+                                                                Filter.anyCategory("name A"),
+                                                                Filter.anyShop("shop A"),
+                                                                Filter.anyGrade("variety A"),
+                                                                Filter.anyManufacturer("manufacturer A")
+                                                        )
+                                                )
+                                        ).
+                                        setName("ingredient 1").
+                                        setQuantity(BigDecimal.TEN).
+                                        setConfig(appConfiguration)
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1006)).
+                                        setFilter(
+                                                Filter.orElse(
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.anyShop("shop B")
+                                                        ),
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.anyManufacturer("manufacturer B")
+                                                        )
+                                                )
+                                        ).
+                                        setName("ingredient 2").
+                                        setQuantity(new BigDecimal("2.5")).
+                                        setConfig(appConfiguration)
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1007)).
+                                        setFilter(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new Tag("value 1"), new Tag("value 2")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop B"),
+                                                        Filter.anyGrade("variety B")
+                                                )
+                                        ).
+                                        setName("ingredient 3").
+                                        setQuantity(new BigDecimal("0.1")).
+                                        setConfig(appConfiguration)
+                        ).
                         tryBuild()
         );
 
@@ -2005,31 +2115,45 @@ class DishRepositoryTest {
                         addTag("tag 4").
                         addTag("tag B").
                         addTag("common tag").
-                        addIngredient("ingredient 1",
-                                Filter.orElse(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.minTags(new Tag("tag B"))
-                                        ),
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyShop("shop C"),
-                                                Filter.anyGrade("variety D")
-                                        )
-                                ),
-                                BigDecimal.TEN).
-                        addIngredient("ingredient 2",
-                                Filter.orElse(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyShop("variety C")
-                                        ),
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyManufacturer("manufacturer B")
-                                        )
-                                ),
-                                new BigDecimal("2.5")).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1008)).
+                                        setFilter(
+                                                Filter.orElse(
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.minTags(new Tag("tag B"))
+                                                        ),
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.anyShop("shop C"),
+                                                                Filter.anyGrade("variety D")
+                                                        )
+                                                )
+                                        ).
+                                        setName("ingredient 1").
+                                        setQuantity(BigDecimal.TEN).
+                                        setConfig(appConfiguration)
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1009)).
+                                        setFilter(
+                                                Filter.orElse(
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.anyShop("variety C")
+                                                        ),
+                                                        Filter.and(
+                                                                Filter.user(user.getId()),
+                                                                Filter.anyManufacturer("manufacturer B")
+                                                        )
+                                                )
+                                        ).
+                                        setName("ingredient 2").
+                                        setQuantity(new BigDecimal("2.5")).
+                                        setConfig(appConfiguration)
+                        ).
                         tryBuild()
         );
 

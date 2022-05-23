@@ -888,17 +888,6 @@ public class Dish implements Entity<Dish> {
             return this;
         }
 
-        public Builder addIngredient(String name, Filter filter, BigDecimal quantity) {
-            ingredients.add(
-                    new DishIngredient.Builder().
-                            setName(name).
-                            setFilter(filter).
-                            setQuantity(quantity).
-                            setConfig(config)
-            );
-            return this;
-        }
-
         public Builder addTag(String tag) {
             tags.add(tag);
             return this;
