@@ -615,28 +615,32 @@ public class DtoMapper {
         response.setServingNumber(servingNumber);
         response.setCategories(
                 IntStream.range(0, dish.getIngredientNumber()).
-                        mapToObj(ingredientIndex -> {
-                            DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
+                        mapToObj(ingredientIndex -> toDishIngredientForListResponse(dish, ingredientIndex, servingNumber)).
+                        toList()
+        );
 
-                            List<Dish.IngredientProduct> products = dish.getProducts(ingredientIndex, 0).
-                                    orElseThrow().getContent();
+        return response;
+    }
 
-                            DishIngredientForListResponse ir = new DishIngredientForListResponse();
-                            ir.setIngredientIndex(ingredientIndex);
-                            ir.setProductCategory(ingredient.getName());
-                            ir.setProducts(
-                                    products.stream().
-                                            map(ingredientProduct ->
-                                                    toProductAsDishIngredientResponse(dish,
-                                                            ingredientProduct,
-                                                            ingredientProduct.productIndex() == 0,
-                                                            servingNumber)
-                                            ).
-                                            toList()
-                            );
+    private DishIngredientForListResponse toDishIngredientForListResponse(Dish dish,
+                                                                          int ingredientIndex,
+                                                                          BigDecimal servingNumber) {
+        DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
 
-                            return ir;
-                        }).
+        List<Dish.IngredientProduct> products = dish.getProducts(ingredientIndex, 0).
+                orElseThrow().getContent();
+
+        DishIngredientForListResponse response = new DishIngredientForListResponse();
+        response.setIngredientIndex(ingredientIndex);
+        response.setProductCategory(ingredient.getName());
+        response.setProducts(
+                products.stream().
+                        map(ingredientProduct ->
+                                toProductAsDishIngredientResponse(dish,
+                                        ingredientProduct,
+                                        ingredientProduct.productIndex() == 0,
+                                        servingNumber)
+                        ).
                         toList()
         );
 
