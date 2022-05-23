@@ -376,7 +376,7 @@ public class MenuController {
             }
     )
     @Transactional
-    @GetMapping("/getAllDishIngredientProducts")
+    @GetMapping("/getIngredientProductsOfAllDishes")
     public ResponseEntity<MenuDishesProductsListResponse> getAllDishIngredientProducts(
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)

@@ -144,25 +144,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -219,25 +219,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -294,25 +294,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -369,25 +369,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -444,25 +444,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -519,25 +519,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -609,25 +609,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -699,25 +699,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -764,25 +764,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -839,25 +839,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -915,25 +915,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -998,25 +998,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1065,25 +1065,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1145,9 +1145,9 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 tryBuild();
@@ -1174,9 +1174,9 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 tryBuild();
@@ -1203,9 +1203,9 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 tryBuild();
@@ -1232,9 +1232,9 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 tryBuild();
@@ -1341,25 +1341,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1383,25 +1383,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1430,25 +1430,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1484,25 +1484,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1622,25 +1622,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1664,25 +1664,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1711,25 +1711,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1758,25 +1758,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1887,25 +1887,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1929,25 +1929,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -1976,25 +1976,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2032,25 +2032,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2173,25 +2173,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2215,25 +2215,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2262,25 +2262,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2321,25 +2321,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2595,25 +2595,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2637,25 +2637,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2689,25 +2689,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2767,25 +2767,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2909,25 +2909,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -2978,25 +2978,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3059,25 +3059,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3152,25 +3152,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3221,25 +3221,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3302,25 +3302,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3395,25 +3395,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3464,25 +3464,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3548,25 +3548,25 @@ class MenuTest {
                 addItem(
                         menuItem(
                                 dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5)),
-                                        ingredient(filter(user, 1), new BigDecimal(2)),
-                                        ingredient(filter(user, 2), new BigDecimal(6))),
+                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
+                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
                                 new BigDecimal(5))
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN),
-                                        ingredient(filter(user, 4), new BigDecimal(2)),
-                                        ingredient(filter(user, 5), BigDecimal.TEN)),
+                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
+                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
+                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
                                 BigDecimal.ONE)
                 ).
                 addItem(
                         menuItem(
                                 dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE),
-                                        ingredient(filter(user, 7), BigDecimal.ONE),
-                                        ingredient(filter(user, 8), new BigDecimal(3))),
+                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
+                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
+                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
                                 BigDecimal.TEN)
                 ).
                 tryBuild();
@@ -3626,16 +3626,15 @@ class MenuTest {
                 addTag("tag A").
                 addTag("common tag");
 
-        for(int i = 0; i < ingredients.length; i++) {
-            builder.addIngredient(ingredients[i].setName("ingredient#" + i));
-        }
+        Arrays.stream(ingredients).forEach(builder::addIngredient);
 
         return builder.tryBuild();
     }
 
-    private DishIngredient.Builder ingredient(Filter filter, BigDecimal quantity) {
+    private DishIngredient.Builder ingredient(Filter filter, BigDecimal quantity, int ingredientIndex) {
         return new DishIngredient.Builder().
-                setName("ingredient").
+                setId(toUUID(ingredientIndex)).
+                setName("ingredient#" + ingredientIndex).
                 setFilter(filter).
                 setQuantity(quantity).
                 setConfig(conf);
