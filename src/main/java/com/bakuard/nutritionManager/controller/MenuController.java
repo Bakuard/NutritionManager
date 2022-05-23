@@ -356,6 +356,47 @@ public class MenuController {
     }
 
     @Operation(summary = """
+            Возвращает список продуктов для каждого ингредиента каждого блюда. Необходимое кол-во
+             каждого продукта рассчитывается с учетом кол-ва блюда в указанном меню и кол-ва этого меню.
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти блюдо с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @GetMapping("/getAllDishIngredientProducts")
+    public ResponseEntity<MenuDishesProductsListResponse> getAllDishIngredientProducts(
+            @RequestParam("menuId")
+            @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
+            UUID menuId,
+            @RequestParam(value = "menuQuantity", required = false)
+            @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
+            BigDecimal menuQuantity
+    ) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        logger.info("Get all ingredient products of all dishes for menuId={}, menuQuantity={}",
+                menuId, menuQuantity);
+
+        MenuDishesProductsListResponse response = mapper.toMenuDishesProductsListResponse(
+                userId, menuId, menuQuantity
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = """
             Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
              кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню.
             """,
