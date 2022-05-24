@@ -7,7 +7,7 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 
 import org.junit.jupiter.api.Assertions;
@@ -596,7 +596,7 @@ class DishTest {
     public void getProduct5() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Pageable.firstEmptyPage());
+        Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Page.empty());
         Dish dish = dish(1, user(), repository).
                 addIngredient(ingredient(filter(user, 0), 0)).
                 tryBuild();
@@ -1031,7 +1031,7 @@ class DishTest {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
         ).thenReturn(0);
@@ -1297,7 +1297,7 @@ class DishTest {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).
-                thenReturn(Pageable.firstEmptyPage());
+                thenReturn(Page.empty());
         Mockito.when(repository.getProductsNumber(Mockito.any())).
                 thenReturn(0);
         Dish dish = dish(1, user, repository).
@@ -1329,7 +1329,7 @@ class DishTest {
                 thenReturn(3);
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
@@ -1371,7 +1371,7 @@ class DishTest {
                 thenReturn(3);
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
@@ -1541,7 +1541,7 @@ class DishTest {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).
-                thenReturn(Pageable.firstEmptyPage());
+                thenReturn(Page.empty());
         Mockito.when(repository.getProductsNumber(Mockito.any())).
                 thenReturn(0);
         Dish dish = dish(1, user, repository).
@@ -1573,7 +1573,7 @@ class DishTest {
                 thenReturn(3);
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
@@ -1615,7 +1615,7 @@ class DishTest {
                 thenReturn(3);
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
@@ -1784,7 +1784,7 @@ class DishTest {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).
-                thenReturn(Pageable.firstEmptyPage());
+                thenReturn(Page.empty());
         Mockito.when(repository.getProductsNumber(Mockito.any())).
                 thenReturn(0);
         Dish dish = dish(1, user, repository).
@@ -1818,7 +1818,7 @@ class DishTest {
 
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
@@ -1834,7 +1834,7 @@ class DishTest {
 
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
@@ -1880,7 +1880,7 @@ class DishTest {
 
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(0, filter(user, 1))))
         ).thenReturn(
@@ -1903,7 +1903,7 @@ class DishTest {
 
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 0))))
-        ).thenReturn(Pageable.firstEmptyPage());
+        ).thenReturn(Page.empty());
         Mockito.when(
                 repository.getProducts(Mockito.eq(criteria(100000, filter(user, 1))))
         ).thenReturn(
@@ -2166,7 +2166,7 @@ class DishTest {
     
     private Criteria criteria(int productIndex, Filter filter) {
         return new Criteria().
-                setPageable(Pageable.ofIndex(30, productIndex)).
+                setPageable(PageableByNumber.ofIndex(30, productIndex)).
                 setFilter(filter).
                 setSort(Sort.products().asc("price"));
     }
@@ -2191,7 +2191,7 @@ class DishTest {
     private Page<Product> productPage(User user,
                                       int productIndex,
                                       BiFunction<User, Integer, Product.Builder> productFactory) {
-        Page.Metadata metadata = Pageable.ofIndex(30, productIndex).
+        Page.Metadata metadata = PageableByNumber.ofIndex(30, productIndex).
                 createPageMetadata(1000, 30);
 
         int offset = metadata.getOffset().intValue();
@@ -2205,7 +2205,7 @@ class DishTest {
     private Page<Product> productPage(User user,
                                       BiFunction<User, Integer, Product.Builder> productFactory,
                                       int... productIds) {
-        Page.Metadata metadata = Pageable.of(30 , 0).
+        Page.Metadata metadata = PageableByNumber.of(30 , 0).
                 createPageMetadata(productIds.length, 30);
 
         List<Product> products = Arrays.stream(productIds).
@@ -2220,6 +2220,7 @@ class DishTest {
                                                      int productIndex) {
         return new Dish.IngredientProduct(
                 Optional.ofNullable(builder.tryBuild()),
+                toUUID(ingredientIndex),
                 ingredientIndex,
                 productIndex
         );
@@ -2227,7 +2228,12 @@ class DishTest {
 
     private Dish.IngredientProduct emptyIngredientProduct(int ingredientIndex,
                                                           int productIndex) {
-        return new Dish.IngredientProduct(Optional.empty(), ingredientIndex, productIndex);
+        return new Dish.IngredientProduct(
+                Optional.empty(),
+                toUUID(ingredientIndex),
+                ingredientIndex,
+                productIndex
+        );
     }
 
 

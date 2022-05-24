@@ -12,7 +12,7 @@ import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -1104,7 +1104,7 @@ class MenuRepositoryTest {
         Page<Menu> actual = menuRepository.getMenus(
                 new Criteria().
                         setFilter(Filter.user(otherUser.getId())).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
@@ -1125,11 +1125,11 @@ class MenuRepositoryTest {
         Page<Menu> actual = menuRepository.getMenus(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(4, 0).
+        Page<Menu> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(4, 30).
                 createPage(menus);
         AssertUtil.assertEquals(expected, actual);
@@ -1154,11 +1154,11 @@ class MenuRepositoryTest {
                                         Filter.minTags(new Tag("unknown tag"))
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -1180,11 +1180,11 @@ class MenuRepositoryTest {
                                         Filter.minTags(new Tag("common tag"), new Tag("tagA"))
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(2, 0).
+        Page<Menu> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1209,11 +1209,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("unknown dish")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
     
     @Test
@@ -1235,11 +1235,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#50")
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(2, 0).
+        Page<Menu> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1267,11 +1267,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("unknown dish")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
     
     @Test
@@ -1296,11 +1296,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#2")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
     
     @Test
@@ -1325,11 +1325,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#100")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(4, 0).
+        Page<Menu> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1358,11 +1358,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#100")
                                 )
                         ).
-                        setPageable(Pageable.of(2, 1)).
+                        setPageable(PageableByNumber.of(2, 1)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(2, 1).
+        Page<Menu> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 30).
                 createPage(menus.subList(2, 4));
         AssertUtil.assertEquals(expected, actual);
@@ -1439,10 +1439,10 @@ class MenuRepositoryTest {
         Page<Tag> actual = menuRepository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+        Assertions.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -1458,10 +1458,10 @@ class MenuRepositoryTest {
         Page<Tag> actual = menuRepository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<Tag> expected = Pageable.of(2, 1).
+        Page<Tag> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(7, 1000).
                 createPage(getAllTags(menus).subList(2, 4));
         Assertions.assertEquals(expected, actual);
@@ -1538,10 +1538,10 @@ class MenuRepositoryTest {
         Page<String> actual = menuRepository.getNames(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+        Assertions.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -1557,10 +1557,10 @@ class MenuRepositoryTest {
         Page<String> actual = menuRepository.getNames(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<String> expected = Pageable.of(2, 1).
+        Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 1000).
                 createPage(getAllNames(menus).subList(2, 4));
         Assertions.assertEquals(expected, actual);

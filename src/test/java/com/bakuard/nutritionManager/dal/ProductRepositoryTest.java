@@ -11,7 +11,7 @@ import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -1250,11 +1250,11 @@ class ProductRepositoryTest {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
         List<Product> products = createAndSaveProducts(user1);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(6, 0)).
+                        setPageable(PageableByNumber.of(6, 0)).
                         setFilter(Filter.user(user2.getId()))
         );
 
@@ -1272,13 +1272,13 @@ class ProductRepositoryTest {
     void getProducts3() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(5, 0).
+        Page<Product> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(6, 200).
                 createPage(products.subList(0, 5));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(5, 0)).
+                        setPageable(PageableByNumber.of(5, 0)).
                         setFilter(Filter.user(user.getId())).
                         setSort(Sort.productDefaultSort())
         );
@@ -1297,13 +1297,13 @@ class ProductRepositoryTest {
     void getProducts4() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(5, 1).
+        Page<Product> expected = PageableByNumber.of(5, 1).
                 createPageMetadata(6, 200).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(5, 1)).
+                        setPageable(PageableByNumber.of(5, 1)).
                         setFilter(Filter.user(user.getId())).
                         setSort(Sort.productDefaultSort())
         );
@@ -1322,13 +1322,13 @@ class ProductRepositoryTest {
     void getProducts5() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(2, 0).
+        Page<Product> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(3, 200).
                 createPage(products.subList(3, 5));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1352,13 +1352,13 @@ class ProductRepositoryTest {
     void getProducts6() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(2, 1).
+        Page<Product> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 1)).
+                        setPageable(PageableByNumber.of(2, 1)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1383,7 +1383,7 @@ class ProductRepositoryTest {
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(6, 0)).
+                        setPageable(PageableByNumber.of(6, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1392,7 +1392,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+        Assertions.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -1410,13 +1410,13 @@ class ProductRepositoryTest {
     void getProducts8() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(1, 0).
+        Page<Product> expected = PageableByNumber.of(1, 0).
                 createPageMetadata(1, 200).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(1, 0)).
+                        setPageable(PageableByNumber.of(1, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1443,11 +1443,11 @@ class ProductRepositoryTest {
     void getProducts9() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(6, 0)).
+                        setPageable(PageableByNumber.of(6, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1478,13 +1478,13 @@ class ProductRepositoryTest {
     void getProducts10() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(2, 0).
+        Page<Product> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1515,11 +1515,11 @@ class ProductRepositoryTest {
     void getProducts11() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1547,13 +1547,13 @@ class ProductRepositoryTest {
     void getProducts12() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(3, 0).
+        Page<Product> expected = PageableByNumber.of(3, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(4, 6));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(3, 0)).
+                        setPageable(PageableByNumber.of(3, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1582,11 +1582,11 @@ class ProductRepositoryTest {
     void getProducts13() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1616,11 +1616,11 @@ class ProductRepositoryTest {
     void getProducts14() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1650,13 +1650,13 @@ class ProductRepositoryTest {
     void getProducts15() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(2, 0).
+        Page<Product> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(3, 0)).
+                        setPageable(PageableByNumber.of(3, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1686,11 +1686,11 @@ class ProductRepositoryTest {
     void getProducts16() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(3, 0)).
+                        setPageable(PageableByNumber.of(3, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1722,11 +1722,11 @@ class ProductRepositoryTest {
     void getProducts17() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(6, 0)).
+                        setPageable(PageableByNumber.of(6, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1759,13 +1759,13 @@ class ProductRepositoryTest {
     void getProducts18() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.of(2, 0).
+        Page<Product> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1798,11 +1798,11 @@ class ProductRepositoryTest {
     void getProducts19() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setFilter(
                                 Filter.and(
                                         Filter.user(user.getId()),
@@ -1845,7 +1845,7 @@ class ProductRepositoryTest {
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(5, 0)).
+                        setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
@@ -1869,7 +1869,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Page<Product> expected = Pageable.of(5, 0).
+        Page<Product> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1902,7 +1902,7 @@ class ProductRepositoryTest {
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(5, 0)).
+                        setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
@@ -1928,7 +1928,7 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        Page<Product> expected = Pageable.of(5, 0).
+        Page<Product> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(1, 200).
                 createPage(products.subList(3, 4));
         AssertUtil.assertEquals(expected, actual);
@@ -1958,7 +1958,7 @@ class ProductRepositoryTest {
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(5, 0)).
+                        setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
@@ -1981,7 +1981,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Page<Product> expected = Pageable.of(5, 0).
+        Page<Product> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(4, 200).
                 createPage(
                         List.of(
@@ -2020,7 +2020,7 @@ class ProductRepositoryTest {
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
-                        setPageable(Pageable.of(5, 0)).
+                        setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
                                 Filter.orElse(
                                         Filter.and(
@@ -2043,7 +2043,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Page<Product> expected = Pageable.firstEmptyPage();
+        Page<Product> expected = Page.empty();
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -2142,10 +2142,10 @@ class ProductRepositoryTest {
         Page<Tag> actual = repository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+        Assertions.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -2159,14 +2159,14 @@ class ProductRepositoryTest {
     void getTags3() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Tag> expected = Pageable.of(5, 0).
+        Page<Tag> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(9, 200).
                 createPage(createTags(products).subList(0, 5));
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2183,14 +2183,14 @@ class ProductRepositoryTest {
     void getTags4() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Tag> expected = Pageable.of(4, 2).
+        Page<Tag> expected = PageableByNumber.of(4, 2).
                 createPageMetadata(9, 200).
                 createPage(createTags(products).subList(8, 9));
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(4, 2))
+                        setPageable(PageableByNumber.of(4, 2))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2207,7 +2207,7 @@ class ProductRepositoryTest {
     void getTags5() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<Tag> expected = Pageable.of(5, 0).
+        Page<Tag> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(5, 200).
                 createPage(List.of(
                         new Tag("common tag"),
@@ -2225,7 +2225,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name A")
                                 )
                         ).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2242,7 +2242,7 @@ class ProductRepositoryTest {
     void getTags6() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<Tag> expected = Pageable.of(4, 1).
+        Page<Tag> expected = PageableByNumber.of(4, 1).
                 createPageMetadata(5, 200).
                 createPage(List.of(
                         new Tag("value 3")
@@ -2256,7 +2256,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name A")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 1))
+                        setPageable(PageableByNumber.of(4, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2354,12 +2354,12 @@ class ProductRepositoryTest {
             """)
     void getShops2() {
         User user = createAndSaveUser(1);
-        Page<String> expected = Pageable.firstEmptyPage();
+        Page<String> expected = Page.empty();
 
         Page<String> actual = repository.getShops(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2375,14 +2375,14 @@ class ProductRepositoryTest {
     void getShops3() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(3, 0).
+        Page<String> expected = PageableByNumber.of(3, 0).
                 createPageMetadata(3, 200).
                 createPage(List.of("shop A", "shop B", "shop C"));
 
         Page<String> actual = repository.getShops(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(3, 0))
+                        setPageable(PageableByNumber.of(3, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2398,14 +2398,14 @@ class ProductRepositoryTest {
     void getShops4() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(2, 1).
+        Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(List.of("shop C"));
 
         Page<String> actual = repository.getShops(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2421,7 +2421,7 @@ class ProductRepositoryTest {
     void getShops5() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(2, 0).
+        Page<String> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("shop A", "shop B"));
 
@@ -2433,7 +2433,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name A")
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0))
+                        setPageable(PageableByNumber.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2449,7 +2449,7 @@ class ProductRepositoryTest {
     void getShops6() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(5, 0).
+        Page<String> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("shop A", "shop B"));
 
@@ -2461,7 +2461,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name A")
                                 )
                         ).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2559,12 +2559,12 @@ class ProductRepositoryTest {
             """)
     void getGrades2() {
         User user = createAndSaveUser(1);
-        Page<String> expected = Pageable.firstEmptyPage();
+        Page<String> expected = Page.empty();
 
         Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2580,14 +2580,14 @@ class ProductRepositoryTest {
     void getGrades3() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(4, 0).
+        Page<String> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
 
         Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(4, 0))
+                        setPageable(PageableByNumber.of(4, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2603,14 +2603,14 @@ class ProductRepositoryTest {
     void getGrades4() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(3, 1).
+        Page<String> expected = PageableByNumber.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(List.of("variety D"));
 
         Page<String> actual = repository.getGrades(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(3, 1))
+                        setPageable(PageableByNumber.of(3, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2626,7 +2626,7 @@ class ProductRepositoryTest {
     void getGrades5() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(2, 0).
+        Page<String> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
@@ -2638,7 +2638,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name A")
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0))
+                        setPageable(PageableByNumber.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2654,7 +2654,7 @@ class ProductRepositoryTest {
     void getGrades6() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(4, 0).
+        Page<String> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("variety A", "variety B"));
 
@@ -2666,7 +2666,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name A")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0))
+                        setPageable(PageableByNumber.of(4, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2739,12 +2739,12 @@ class ProductRepositoryTest {
             """)
     void getCategories2() {
         User user = createAndSaveUser(1);
-        Page<String> expected = Pageable.firstEmptyPage();
+        Page<String> expected = Page.empty();
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 0))
+                        setPageable(PageableByNumber.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2760,14 +2760,14 @@ class ProductRepositoryTest {
     void getCategories3() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(5, 0).
+        Page<String> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("name A", "name B"));
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2783,14 +2783,14 @@ class ProductRepositoryTest {
     void getCategories4() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(1, 1).
+        Page<String> expected = PageableByNumber.of(1, 1).
                 createPageMetadata(2, 200).
                 createPage(List.of("name B"));
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(1, 1))
+                        setPageable(PageableByNumber.of(1, 1))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2888,12 +2888,12 @@ class ProductRepositoryTest {
             """)
     void getManufacturers2() {
         User user = createAndSaveUser(1);
-        Page<String> expected = Pageable.firstEmptyPage();
+        Page<String> expected = Page.empty();
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2909,14 +2909,14 @@ class ProductRepositoryTest {
     void getManufacturers3() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(2, 0).
+        Page<String> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 0))
+                        setPageable(PageableByNumber.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2932,14 +2932,14 @@ class ProductRepositoryTest {
     void getManufacturers4() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(5, 0).
+        Page<String> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2955,7 +2955,7 @@ class ProductRepositoryTest {
     void getManufacturers5() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(2, 0).
+        Page<String> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
@@ -2967,7 +2967,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name B")
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0))
+                        setPageable(PageableByNumber.of(2, 0))
         );
 
         Assertions.assertEquals(expected, actual);
@@ -2983,7 +2983,7 @@ class ProductRepositoryTest {
     void getManufacturers6() {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
-        Page<String> expected = Pageable.of(5, 0).
+        Page<String> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(1, 200).
                 createPage(List.of("manufacturer A"));
 
@@ -2995,7 +2995,7 @@ class ProductRepositoryTest {
                                         Filter.anyCategory("name A")
                                 )
                         ).
-                        setPageable(Pageable.of(5, 0))
+                        setPageable(PageableByNumber.of(5, 0))
         );
 
         Assertions.assertEquals(expected, actual);

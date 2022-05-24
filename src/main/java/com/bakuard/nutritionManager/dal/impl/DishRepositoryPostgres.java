@@ -9,7 +9,7 @@ import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
@@ -302,10 +302,10 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<Dish> getDishes(Criteria criteria) {
         int dishesNumber = getDishesNumber(criteria);
-        Page.Metadata metadata = criteria.getPageable().
+        Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
                 createPageMetadata(dishesNumber, 30);
 
-        if(metadata.isEmpty()) return Pageable.firstEmptyPage();
+        if(metadata.isEmpty()) return Page.empty();
 
         String query =
                 select(field("D.*"),
@@ -346,7 +346,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
-        Page.Metadata metadata = criteria.getPageable().
+        Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
                 createPageMetadata(tagsNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -380,7 +380,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<String> getUnits(Criteria criteria) {
         int unitsNumber = getUnitsNumber(criteria);
-        Page.Metadata metadata = criteria.getPageable().
+        Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
                 createPageMetadata(unitsNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -412,7 +412,7 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Page<String> getNames(Criteria criteria) {
         int namesNumber = getNamesNumber(criteria);
-        Page.Metadata metadata = criteria.getPageable().
+        Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
                 createPageMetadata(namesNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());

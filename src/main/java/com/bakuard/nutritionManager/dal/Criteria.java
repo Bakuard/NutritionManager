@@ -37,6 +37,10 @@ public class Criteria {
         return pageable;
     }
 
+    public <T extends Pageable> T getPageable(Class<T> type) {
+        return type.cast(pageable);
+    }
+
     public Sort getSort() {
         return sort;
     }
@@ -51,6 +55,14 @@ public class Criteria {
         );
 
         return pageable;
+    }
+
+    public <T extends Pageable> T tryGetPageable(Class<T> type) {
+        Validator.check(
+                Rule.of("Criteria.pageable").notNull(pageable)
+        );
+
+        return type.cast(pageable);
     }
 
     public Sort tryGetSort() {

@@ -7,7 +7,7 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 
 import org.junit.jupiter.api.Assertions;
@@ -758,7 +758,7 @@ class MenuTest {
             """)
     public void getMenuItemProducts13() {
         ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Pageable.firstEmptyPage());
+        Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Page.empty());
         User user = user(1);
         Menu menu = menu(1, user).
                 addItem(
@@ -827,9 +827,9 @@ class MenuTest {
                 filter(user, 0), productPage(user, 0, this::product),
                 filter(user, 1), productPage(user, 3, this::product),
                 filter(user, 2), productPage(user, 2, this::product),
-                filter(user, 3), Pageable.firstEmptyPage(),
-                filter(user, 4), Pageable.firstEmptyPage(),
-                filter(user, 5), Pageable.firstEmptyPage(),
+                filter(user, 3), Page.empty(),
+                filter(user, 4), Page.empty(),
+                filter(user, 5), Page.empty(),
                 filter(user, 6), productPage(user, 10, this::product),
                 filter(user, 7), productPage(user, 15, this::product),
                 filter(user, 8), productPage(user, 11, this::product),
@@ -2894,15 +2894,15 @@ class MenuTest {
     public void getMinPrice3() {
         User user = user(1);
         ProductRepository repository = mockProductRepository(
-                filter(user, 0), Pageable.firstEmptyPage(),
-                filter(user, 1), Pageable.firstEmptyPage(),
-                filter(user, 2), Pageable.firstEmptyPage(),
-                filter(user, 3), Pageable.firstEmptyPage(),
-                filter(user, 4), Pageable.firstEmptyPage(),
-                filter(user, 5), Pageable.firstEmptyPage(),
-                filter(user, 6), Pageable.firstEmptyPage(),
-                filter(user, 7), Pageable.firstEmptyPage(),
-                filter(user, 8), Pageable.firstEmptyPage(),
+                filter(user, 0), Page.empty(),
+                filter(user, 1), Page.empty(),
+                filter(user, 2), Page.empty(),
+                filter(user, 3), Page.empty(),
+                filter(user, 4), Page.empty(),
+                filter(user, 5), Page.empty(),
+                filter(user, 6), Page.empty(),
+                filter(user, 7), Page.empty(),
+                filter(user, 8), Page.empty(),
                 0
         );
         Menu menu = menu(1, user).
@@ -2954,9 +2954,9 @@ class MenuTest {
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
                 ),
-                filter(user, 2), Pageable.firstEmptyPage(),
+                filter(user, 2), Page.empty(),
 
-                filter(user, 3), Pageable.firstEmptyPage(),
+                filter(user, 3), Page.empty(),
                 filter(user, 4), productPage(
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
@@ -2966,12 +2966,12 @@ class MenuTest {
                         product(user, 61).setPackingSize(new BigDecimal("0.25")).setPrice(new BigDecimal(150))
                 ),
 
-                filter(user, 6), Pageable.firstEmptyPage(),
+                filter(user, 6), Page.empty(),
                 filter(user, 7), productPage(
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
                 ),
-                filter(user, 8), Pageable.firstEmptyPage(),
+                filter(user, 8), Page.empty(),
                 0
         );
         Menu menu = menu(1, user).
@@ -3137,15 +3137,15 @@ class MenuTest {
     public void getMaxPrice3() {
         User user = user(1);
         ProductRepository repository = mockProductRepository(
-                filter(user, 0), Pageable.firstEmptyPage(),
-                filter(user, 1), Pageable.firstEmptyPage(),
-                filter(user, 2), Pageable.firstEmptyPage(),
-                filter(user, 3), Pageable.firstEmptyPage(),
-                filter(user, 4), Pageable.firstEmptyPage(),
-                filter(user, 5), Pageable.firstEmptyPage(),
-                filter(user, 6), Pageable.firstEmptyPage(),
-                filter(user, 7), Pageable.firstEmptyPage(),
-                filter(user, 8), Pageable.firstEmptyPage(),
+                filter(user, 0), Page.empty(),
+                filter(user, 1), Page.empty(),
+                filter(user, 2), Page.empty(),
+                filter(user, 3), Page.empty(),
+                filter(user, 4), Page.empty(),
+                filter(user, 5), Page.empty(),
+                filter(user, 6), Page.empty(),
+                filter(user, 7), Page.empty(),
+                filter(user, 8), Page.empty(),
                 10000
         );
         Menu menu = menu(1, user).
@@ -3197,9 +3197,9 @@ class MenuTest {
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
                 ),
-                filter(user, 2), Pageable.firstEmptyPage(),
+                filter(user, 2), Page.empty(),
 
-                filter(user, 3), Pageable.firstEmptyPage(),
+                filter(user, 3), Page.empty(),
                 filter(user, 4), productPage(
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
@@ -3209,12 +3209,12 @@ class MenuTest {
                         product(user, 61).setPackingSize(new BigDecimal("0.25")).setPrice(new BigDecimal(150))
                 ),
 
-                filter(user, 6), Pageable.firstEmptyPage(),
+                filter(user, 6), Page.empty(),
                 filter(user, 7), productPage(
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
                 ),
-                filter(user, 8), Pageable.firstEmptyPage(),
+                filter(user, 8), Page.empty(),
                 10000
         );
         Menu menu = menu(1, user).
@@ -3380,15 +3380,15 @@ class MenuTest {
     public void getAveragePrice3() {
         User user = user(1);
         ProductRepository repository = mockProductRepository(
-                filter(user, 0), Pageable.firstEmptyPage(),
-                filter(user, 1), Pageable.firstEmptyPage(),
-                filter(user, 2), Pageable.firstEmptyPage(),
-                filter(user, 3), Pageable.firstEmptyPage(),
-                filter(user, 4), Pageable.firstEmptyPage(),
-                filter(user, 5), Pageable.firstEmptyPage(),
-                filter(user, 6), Pageable.firstEmptyPage(),
-                filter(user, 7), Pageable.firstEmptyPage(),
-                filter(user, 8), Pageable.firstEmptyPage(),
+                filter(user, 0), Page.empty(),
+                filter(user, 1), Page.empty(),
+                filter(user, 2), Page.empty(),
+                filter(user, 3), Page.empty(),
+                filter(user, 4), Page.empty(),
+                filter(user, 5), Page.empty(),
+                filter(user, 6), Page.empty(),
+                filter(user, 7), Page.empty(),
+                filter(user, 8), Page.empty(),
                 0, 10000
         );
         Menu menu = menu(1, user).
@@ -3440,9 +3440,9 @@ class MenuTest {
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
                 ),
-                filter(user, 2), Pageable.firstEmptyPage(),
+                filter(user, 2), Page.empty(),
 
-                filter(user, 3), Pageable.firstEmptyPage(),
+                filter(user, 3), Page.empty(),
                 filter(user, 4), productPage(
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
@@ -3452,12 +3452,12 @@ class MenuTest {
                         product(user, 61).setPackingSize(new BigDecimal("0.25")).setPrice(new BigDecimal(150))
                 ),
 
-                filter(user, 6), Pageable.firstEmptyPage(),
+                filter(user, 6), Page.empty(),
                 filter(user, 7), productPage(
                         product(user, 0).setPackingSize(new BigDecimal(2)).setPrice(new BigDecimal(50)),
                         product(user, 10).setPackingSize(new BigDecimal(5)).setPrice(new BigDecimal(150))
                 ),
-                filter(user, 8), Pageable.firstEmptyPage(),
+                filter(user, 8), Page.empty(),
                 0, 10000
         );
         Menu menu = menu(1, user).
@@ -3754,7 +3754,7 @@ class MenuTest {
 
     private Criteria criteria(Filter filter, int pageNumber) {
         return new Criteria().
-                setPageable(Pageable.of(30, pageNumber)).
+                setPageable(PageableByNumber.of(30, pageNumber)).
                 setFilter(filter).
                 setSort(Sort.products().asc("price"));
     }
@@ -3766,7 +3766,7 @@ class MenuTest {
     private Page<Product> productPage(User user,
                                       int productIndex,
                                       BiFunction<User, Integer, Product.Builder> productFactory) {
-        Page.Metadata metadata = Pageable.ofIndex(30, productIndex).
+        Page.Metadata metadata = PageableByNumber.ofIndex(30, productIndex).
                 createPageMetadata(1000, 30);
 
         int offset = metadata.getOffset().intValue();
@@ -3778,7 +3778,7 @@ class MenuTest {
     }
 
     private Page<Product> productPage(Product.Builder... products) {
-        Page.Metadata metadata = Pageable.of(30 , 0).
+        Page.Metadata metadata = PageableByNumber.of(30 , 0).
                 createPageMetadata(products.length, 30);
 
         List<Product> resultProducts = Arrays.stream(products).

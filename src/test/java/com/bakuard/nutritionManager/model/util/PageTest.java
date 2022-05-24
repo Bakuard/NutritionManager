@@ -14,7 +14,7 @@ class PageTest {
     @Test
     @DisplayName("getTotalPages(): totalItems is 0 => return 0")
     public void getTotalPages1() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 0).
                 createPageMetadata(0, 200);
 
@@ -29,7 +29,7 @@ class PageTest {
                  => return 1
                 """)
     public void getTotalPages2() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 0).
                 createPageMetadata(9, 200);
 
@@ -44,7 +44,7 @@ class PageTest {
                  => return 1
                 """)
     public void getTotalPages3() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 0).
                 createPageMetadata(10, 200);
 
@@ -59,7 +59,7 @@ class PageTest {
              => return totalItems
             """)
     public void getTotalPage4() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(1, 0).
                 createPageMetadata(10, 200);
 
@@ -74,7 +74,7 @@ class PageTest {
              => return correct positive value
             """)
     public void getTotalPage5() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 0).
                 createPageMetadata(101, 200);
 
@@ -88,7 +88,7 @@ class PageTest {
              => actualNumber = 0
             """)
     public void getActualNumber1() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, -1).
                 createPageMetadata(1, 200);
 
@@ -102,7 +102,7 @@ class PageTest {
              => actualNumber = maxPageNumber
             """)
     public void getActualNumber2() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 1000).
                 createPageMetadata(101, 200);
 
@@ -116,7 +116,7 @@ class PageTest {
              => actualNumber = 0
             """)
     public void getActualNumber3() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 1).
                 createPageMetadata(0, 200);
 
@@ -130,7 +130,7 @@ class PageTest {
              => actualSize = 1
             """)
     public void getActualSize1() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(0, 0).
                 createPageMetadata(10, 200);
 
@@ -144,7 +144,7 @@ class PageTest {
              => actualSize = 0
             """)
     public void getActualSize2() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 1).
                 createPageMetadata(0, 200);
 
@@ -159,7 +159,7 @@ class PageTest {
              => actualSize = 200
             """)
     public void getActualSize3() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(1000, 1).
                 createPageMetadata(1000, 200);
 
@@ -174,7 +174,7 @@ class PageTest {
              => actualSize = totalItems
             """)
     public void getActualSize4() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(1000, 1).
                 createPageMetadata(100, 200);
 
@@ -190,7 +190,7 @@ class PageTest {
              => actualSize = totalItems
             """)
     public void getActualSize5() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 10).
                 createPageMetadata(101, 200);
 
@@ -204,7 +204,7 @@ class PageTest {
              => offset is 0
             """)
     public void getOffset1() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(1, 0).
                 createPageMetadata(0, 200);
 
@@ -220,7 +220,7 @@ class PageTest {
              => correct offset
             """)
     public void getOffset2() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 0).
                 createPageMetadata(100, 200);
 
@@ -236,7 +236,7 @@ class PageTest {
              => correct offset
             """)
     public void getOffset3() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 5).
                 createPageMetadata(100, 200);
 
@@ -253,7 +253,7 @@ class PageTest {
              => correct offset
             """)
     public void getOffset4() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 9).
                 createPageMetadata(100, 200);
 
@@ -270,7 +270,7 @@ class PageTest {
              => correct offset
             """)
     public void getOffset5() {
-        Page.Metadata metadata = Pageable.
+        Page.Metadata metadata = PageableByNumber.
                 of(10, 9).
                 createPageMetadata(91, 200);
 
@@ -285,7 +285,7 @@ class PageTest {
              => return empty Optional
             """)
     public void getByGlobalIndex1() {
-        Page<Integer> page = Pageable.
+        Page<Integer> page = PageableByNumber.
                 ofIndex(10, 0).
                 createPageMetadata(100, 200).
                 createPage(createFullList(0, 10));
@@ -302,7 +302,7 @@ class PageTest {
              => return empty Optional
             """)
     public void getByGlobalIndex2() {
-        Page<Integer> lastPage = Pageable.
+        Page<Integer> lastPage = PageableByNumber.
                 ofIndex(10, 99).
                 createPageMetadata(100, 200).
                 createPage(createFullList(0, 10));
@@ -319,7 +319,7 @@ class PageTest {
              => return empty Optional
             """)
     public void getByGlobalIndex3() {
-        Page<Integer> lastPage = Pageable.
+        Page<Integer> lastPage = PageableByNumber.
                 ofIndex(10, 99).
                 createPageMetadata(100, 200).
                 createPage(createFullList(0, 10));
@@ -335,7 +335,7 @@ class PageTest {
              => return empty Optional
             """)
     public void getByGlobalIndex4() {
-        Page<Integer> page = Pageable.
+        Page<Integer> page = PageableByNumber.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
@@ -351,7 +351,7 @@ class PageTest {
              => return empty Optional
             """)
     public void getByGlobalIndex5() {
-        Page<Integer> page = Pageable.
+        Page<Integer> page = PageableByNumber.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
@@ -367,7 +367,7 @@ class PageTest {
              => return first page item
             """)
     public void getByGlobalIndex6() {
-        Page<Integer> page = Pageable.
+        Page<Integer> page = PageableByNumber.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
@@ -383,7 +383,7 @@ class PageTest {
              => return last page item
             """)
     public void getByGlobalIndex7() {
-        Page<Integer> page = Pageable.
+        Page<Integer> page = PageableByNumber.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
@@ -399,7 +399,7 @@ class PageTest {
              => return middle page item
             """)
     public void getByGlobalIndex8() {
-        Page<Integer> page = Pageable.
+        Page<Integer> page = PageableByNumber.
                 ofIndex(10, 15).
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
@@ -415,13 +415,107 @@ class PageTest {
              => return empty Optional
             """)
     public void getByGlobalIndex9() {
-        Page<Integer> page = Pageable.
+        Page<Integer> page = PageableByNumber.
                 ofIndex(10, 15).
                 createPageMetadata(0, 200).
                 createPage(List.of());
 
         Optional<Integer> actual = page.getByGlobalIndex(15);
         Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getByGlobalIndex(globalIndex):
+             globalIndex is null
+             => exception
+            """)
+    public void getByGlobalIndex10() {
+        Page<Integer> page = PageableByNumber.
+                ofIndex(10, 15).
+                createPageMetadata(0, 200).
+                createPage(List.of());
+
+        Assertions.assertThrows(NullPointerException.class, () -> page.getByGlobalIndex(null));
+    }
+
+    @Test
+    @DisplayName("""
+            getGlobalIndexFor(predicate):
+             predicate is null
+             => exception
+            """)
+    public void getGlobalIndexFor1() {
+        Page<Integer> page = PageableByNumber.
+                ofIndex(10, 15).
+                createPageMetadata(0, 200).
+                createPage(List.of());
+
+        Assertions.assertThrows(NullPointerException.class, () -> page.getGlobalIndexFor(null));
+    }
+
+    @Test
+    @DisplayName("""
+            getGlobalIndexFor(predicate):
+             page is empty
+             => return -1
+            """)
+    public void getGlobalIndexFor2() {
+        Page<Integer> page = Page.empty();
+
+        BigInteger actual = page.getGlobalIndexFor(i -> i == 15);
+        Assertions.assertEquals(BigInteger.valueOf(-1), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getGlobalIndexFor(predicate):
+             page isn't empty,
+             page don't contains item that matches the predicate
+             => return -1
+            """)
+    public void getGlobalIndexFor3() {
+        Page<Integer> page = PageableByNumber.
+                ofIndex(10, 15).
+                createPageMetadata(100, 200).
+                createPage(createFullList(10, 10));
+
+        BigInteger actual = page.getGlobalIndexFor(i -> i == -100);
+        Assertions.assertEquals(BigInteger.valueOf(-1), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getGlobalIndexFor(predicate):
+             page isn't empty,
+             page contains one item that matches the predicate
+             => return correct result
+            """)
+    public void getGlobalIndexFor4() {
+        Page<Integer> page = PageableByNumber.
+                ofIndex(10, 15).
+                createPageMetadata(100, 200).
+                createPage(createFullList(10, 10));
+
+        BigInteger actual = page.getGlobalIndexFor(i -> i == 12);
+        Assertions.assertEquals(BigInteger.valueOf(12), actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getGlobalIndexFor(predicate):
+             page isn't empty,
+             page contains several items that matches the predicate
+             => return correct result for first item
+            """)
+    public void getGlobalIndexFor5() {
+        Page<Integer> page = PageableByNumber.
+                ofIndex(10, 15).
+                createPageMetadata(100, 200).
+                createPage(createFullList(10, 10));
+
+        BigInteger actual = page.getGlobalIndexFor(i -> (i % 2) != 0);
+        Assertions.assertEquals(BigInteger.valueOf(11), actual);
     }
 
 

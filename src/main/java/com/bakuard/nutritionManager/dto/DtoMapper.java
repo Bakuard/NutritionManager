@@ -19,7 +19,7 @@ import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.MinTagsFilter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.RuleException;
 import com.bakuard.nutritionManager.validation.ValidateException;
@@ -350,7 +350,7 @@ public class DtoMapper {
         else filter = Filter.and(filters);
 
         return new Criteria().
-                setPageable(Pageable.of(size, page)).
+                setPageable(PageableByNumber.of(size, page)).
                 setSort(Sort.products(sortRule != null ? List.of(sortRule) : List.of())).
                 setFilter(filter);
     }
@@ -376,7 +376,7 @@ public class DtoMapper {
         else filter = Filter.and(filters);
 
         return new Criteria().
-                setPageable(Pageable.of(size, page)).
+                setPageable(PageableByNumber.of(size, page)).
                 setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
                 setFilter(filter);
     }
@@ -402,7 +402,7 @@ public class DtoMapper {
         else filter = Filter.and(filters);
 
         return new Criteria().
-                setPageable(Pageable.of(size, page)).
+                setPageable(PageableByNumber.of(size, page)).
                 setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
                 setFilter(filter);
     }
@@ -410,7 +410,7 @@ public class DtoMapper {
 
     public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
-                setPageable(Pageable.of(1000, 0)).
+                setPageable(PageableByNumber.of(1000, 0)).
                 setFilter(Filter.user(userId));
 
         Page<String> manufacturers = productRepository.getManufacturers(criteria);
@@ -431,7 +431,7 @@ public class DtoMapper {
 
     public DishFieldsResponse toDishFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
-                setPageable(Pageable.of(1000, 0)).
+                setPageable(PageableByNumber.of(1000, 0)).
                 setFilter(Filter.user(userId));
 
         Page<Tag> tags = dishRepository.getTags(criteria);
@@ -450,7 +450,7 @@ public class DtoMapper {
 
     public MenuFieldsResponse toMenuFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
-                setPageable(Pageable.of(1000, 0)).
+                setPageable(PageableByNumber.of(1000, 0)).
                 setFilter(Filter.user(userId));
 
         Page<Tag> menuTags = menuRepository.getTags(criteria);

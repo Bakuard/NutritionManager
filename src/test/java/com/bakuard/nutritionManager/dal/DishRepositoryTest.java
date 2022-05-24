@@ -11,7 +11,7 @@ import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -1115,11 +1115,11 @@ class DishRepositoryTest {
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
                         setFilter(Filter.user(actualUser.getId())).
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.firstEmptyPage();
+        Page<Dish> expected = Page.empty();
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -1137,11 +1137,11 @@ class DishRepositoryTest {
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.of(4, 0).
+        Page<Dish> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(4, 30).
                 createPage(dishes);
         AssertUtil.assertEquals(expected, actual);
@@ -1161,11 +1161,11 @@ class DishRepositoryTest {
         Page<Dish> actual = dishRepository.getDishes(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(3, 1)).
+                        setPageable(PageableByNumber.of(3, 1)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.of(3, 1).
+        Page<Dish> expected = PageableByNumber.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(dishes.subList(3, 4));
         AssertUtil.assertEquals(expected, actual);
@@ -1190,11 +1190,11 @@ class DishRepositoryTest {
                                         Filter.minTags(new Tag("unknown tag"))
                                 )
                         ).
-                        setPageable(Pageable.of(3, 0)).
+                        setPageable(PageableByNumber.of(3, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.firstEmptyPage();
+        Page<Dish> expected = Page.empty();
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -1217,11 +1217,11 @@ class DishRepositoryTest {
                                         Filter.minTags(new Tag("common tag"), new Tag("tag B"))
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.of(2, 0).
+        Page<Dish> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(2, 4));
         AssertUtil.assertEquals(expected, actual);
@@ -1247,11 +1247,11 @@ class DishRepositoryTest {
                                         Filter.anyIngredient("name A", "name C", "name D")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.of(4, 0).
+        Page<Dish> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(3, 200).
                 createPage(dishes.subList(0, 3));
         AssertUtil.assertEquals(expected, actual);
@@ -1277,11 +1277,11 @@ class DishRepositoryTest {
                                         Filter.anyIngredient("name C", "name D", "name E")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.firstEmptyPage();
+        Page<Dish> expected = Page.empty();
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -1308,11 +1308,11 @@ class DishRepositoryTest {
                                         Filter.anyIngredient("name A", "name Z")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.of(4, 0).
+        Page<Dish> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1341,11 +1341,11 @@ class DishRepositoryTest {
                                         Filter.anyIngredient("name C", "name D")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.dishDefaultSort())
         );
 
-        Page<Dish> expected = Pageable.firstEmptyPage();
+        Page<Dish> expected = Page.empty();
         AssertUtil.assertEquals(expected, actual);
     }
 
@@ -1420,10 +1420,10 @@ class DishRepositoryTest {
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
                         setFilter(Filter.user(actualUser.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<Tag> expected = Pageable.firstEmptyPage();
+        Page<Tag> expected = Page.empty();
         Assertions.assertEquals(expected, actual);
     }
 
@@ -1440,10 +1440,10 @@ class DishRepositoryTest {
         Page<Tag> actual = dishRepository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<Tag> expected = Pageable.of(2, 1).
+        Page<Tag> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(7, 200).
                 createPage(getAllTags(dishes).subList(2, 4));
         Assertions.assertEquals(expected, actual);
@@ -1520,10 +1520,10 @@ class DishRepositoryTest {
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
                         setFilter(Filter.user(actualUser.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<String> expected = Pageable.firstEmptyPage();
+        Page<String> expected = Page.empty();
         Assertions.assertEquals(expected, actual);
     }
 
@@ -1540,10 +1540,10 @@ class DishRepositoryTest {
         Page<String> actual = dishRepository.getUnits(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<String> expected = Pageable.of(2, 1).
+        Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(getAllUnits(dishes).subList(2, 3));
         Assertions.assertEquals(expected, actual);
@@ -1620,10 +1620,10 @@ class DishRepositoryTest {
         Page<String> actual = dishRepository.getNames(
                 new Criteria().
                         setFilter(Filter.user(actualUser.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<String> expected = Pageable.firstEmptyPage();
+        Page<String> expected = Page.empty();
         Assertions.assertEquals(expected, actual);
     }
 
@@ -1640,10 +1640,10 @@ class DishRepositoryTest {
         Page<String> actual = dishRepository.getNames(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<String> expected = Pageable.of(2, 1).
+        Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 200).
                 createPage(getAllNames(dishes).subList(2, 4));
         Assertions.assertEquals(expected, actual);
