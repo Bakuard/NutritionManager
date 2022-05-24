@@ -103,7 +103,6 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 connection -> connection.prepareStatement("""
                         SELECT Menus.*,
                                MenuItems.*,
-                               Dishes.name as dishName,
                                MenuTags.*,
                                Users.userId,
                                Users.name as userName,
@@ -113,8 +112,6 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             FROM Menus
                             LEFT JOIN MenuItems
                                 ON Menus.menuId = MenuItems.menuId
-                            LEFT JOIN Dishes
-                                ON MenuItems.dishId = Dishes.dishId
                             LEFT JOIN MenuTags
                                 ON Menus.menuId = MenuTags.menuId
                             LEFT JOIN Users
@@ -129,7 +126,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 rs -> {
                     Menu.Builder builder = null;
                     HashSet<String> tags = new HashSet<>();
-                    HashSet<String> items = new HashSet<>();
+                    HashSet<UUID> items = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -156,14 +153,15 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             tags.add(tagValue);
                         }
 
-                        String dishName = rs.getString("dishName");
-                        if(!rs.wasNull() && !items.contains(dishName)) {
+                        UUID itemId = (UUID) rs.getObject("itemId");
+                        if(!rs.wasNull() && !items.contains(itemId)) {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
+                                            setId(itemId).
                                             setConfig(appConfig).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
-                            items.add(dishName);
+                            items.add(itemId);
                         }
                     }
 
@@ -223,7 +221,6 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 connection -> connection.prepareStatement("""
                         SELECT Menus.*,
                                MenuItems.*,
-                               Dishes.name as dishName,
                                MenuTags.*,
                                Users.userId,
                                Users.name as userName,
@@ -233,8 +230,6 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             FROM Menus
                             LEFT JOIN MenuItems
                                 ON Menus.menuId = MenuItems.menuId
-                            LEFT JOIN Dishes
-                                ON MenuItems.dishId = Dishes.dishId
                             LEFT JOIN MenuTags
                                 ON Menus.menuId = MenuTags.menuId
                             LEFT JOIN Users
@@ -249,7 +244,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 rs -> {
                     Menu.Builder builder = null;
                     HashSet<String> tags = new HashSet<>();
-                    HashSet<String> items = new HashSet<>();
+                    HashSet<UUID> items = new HashSet<>();
 
                     while(rs.next()) {
                         if(builder == null) {
@@ -276,14 +271,15 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             tags.add(tagValue);
                         }
 
-                        String dishName = rs.getString("dishName");
-                        if(!rs.wasNull() && !items.contains(dishName)) {
+                        UUID itemId = (UUID) rs.getObject("itemId");
+                        if(!rs.wasNull() && !items.contains(itemId)) {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
+                                            setId(itemId).
                                             setConfig(appConfig).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
-                            items.add(dishName);
+                            items.add(itemId);
                         }
                     }
 
@@ -362,8 +358,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
         String query =
                 select(field("M.*"),
+                        field("MenuItems.itemId as itemId"),
                         field("MenuItems.quantity as itemQuantity"),
-                        field("Dishes.name as dishName"),
                         field("MenuTags.tagValue as tagValue"),
                         field("Users.userId as userId"),
                         field("Users.name as userName"),
@@ -385,8 +381,6 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             on(field("M.menuId").eq(field("MenuTags.menuId"))).
                         leftJoin("MenuItems").
                             on(field("M.menuId").eq(field("MenuItems.menuId"))).
-                        leftJoin("Dishes").
-                            on(field("MenuItems.dishId").eq(field("Dishes.dishId"))).
                         orderBy(getOrderFields(criteria.getSort(), "M")).
                         getSQL().
                         replace("\"{M}\"", "as M");
@@ -398,7 +392,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
                     Menu.Builder builder = null;
                     HashSet<String> tags = new HashSet<>();
-                    HashSet<String> items = new HashSet<>();
+                    HashSet<UUID> items = new HashSet<>();
                     UUID lastMenuId = null;
                     while(rs.next()) {
                         UUID menuId = (UUID)rs.getObject("menuId");
@@ -431,14 +425,15 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             tags.add(tagValue);
                         }
 
-                        String dishName = rs.getString("dishName");
-                        if(!rs.wasNull() && !items.contains(dishName)) {
+                        UUID itemId = (UUID) rs.getObject("itemId");
+                        if(!rs.wasNull() && !items.contains(itemId)) {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
+                                            setId(itemId).
                                             setConfig(appConfig).
                                             setQuantity(rs.getBigDecimal("itemQuantity"))
                             );
-                            items.add(dishName);
+                            items.add(itemId);
                         }
                     }
 
@@ -667,9 +662,9 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
         int[] rows = statement.batchUpdate(
                 """
-                        INSERT INTO MenuItems(menuId, dishId, quantity, index)
+                        INSERT INTO MenuItems(itemId, menuId, dishId, quantity, index)
                             (
-                                SELECT ?, Dishes.dishId, ?, ?
+                                SELECT ?, ?, Dishes.dishId, ?, ?
                                     FROM Dishes
                                     WHERE Dishes.name = ? AND Dishes.userId = ?
                             );
@@ -680,11 +675,12 @@ public class MenuRepositoryPostgres implements MenuRepository {
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         MenuItem item = menu.getItems().get(i);
 
-                        ps.setObject(1, menu.getId());
-                        ps.setBigDecimal(2, item.getNecessaryQuantity(BigDecimal.ONE));
-                        ps.setInt(3, i);
-                        ps.setString(4, item.getDishName());
-                        ps.setObject(5, menu.getUser().getId());
+                        ps.setObject(1, item.getId());
+                        ps.setObject(2, menu.getId());
+                        ps.setBigDecimal(3, item.getNecessaryQuantity(BigDecimal.ONE));
+                        ps.setInt(4, i);
+                        ps.setString(5, item.getDishName());
+                        ps.setObject(6, menu.getUser().getId());
                     }
 
                     @Override
@@ -765,9 +761,9 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
         int[] rows = statement.batchUpdate(
                 """
-                        INSERT INTO MenuItems(menuId, dishId, quantity, index)
+                        INSERT INTO MenuItems(itemId, menuId, dishId, quantity, index)
                             (
-                                SELECT ?, Dishes.dishId, ?, ?
+                                SELECT ?, ?, Dishes.dishId, ?, ?
                                     FROM Dishes
                                     WHERE Dishes.name = ? AND Dishes.userId = ?
                             );
@@ -778,11 +774,12 @@ public class MenuRepositoryPostgres implements MenuRepository {
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         MenuItem item = newVersion.getItems().get(i);
 
-                        ps.setObject(1, newVersion.getId());
-                        ps.setBigDecimal(2, item.getNecessaryQuantity(BigDecimal.ONE));
-                        ps.setInt(3, i);
-                        ps.setString(4, item.getDishName());
-                        ps.setObject(5, newVersion.getUser().getId());
+                        ps.setObject(1, item.getId());
+                        ps.setObject(2, newVersion.getId());
+                        ps.setBigDecimal(3, item.getNecessaryQuantity(BigDecimal.ONE));
+                        ps.setInt(4, i);
+                        ps.setString(5, item.getDishName());
+                        ps.setObject(6, newVersion.getUser().getId());
                     }
 
                     @Override

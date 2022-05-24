@@ -247,9 +247,9 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107))).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
-                addItem(createMenuItem(dish10000, new BigDecimal(7))).
+                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
+                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
                 tryBuild();
         commit(() -> {
             dishRepository.save(dish0);
@@ -287,9 +287,9 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107))).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
-                addItem(createMenuItem(dish10000, new BigDecimal(7))).
+                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
+                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
                 tryBuild();
         commit(() -> {
             dishRepository.save(dish0);
@@ -329,9 +329,9 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107))).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
-                addItem(createMenuItem(dish10000, new BigDecimal(7))).
+                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
+                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
                 tryBuild();
         commit(() -> {
             dishRepository.save(dish0);
@@ -407,7 +407,7 @@ class MenuRepositoryTest {
                 addTag("tag#1").
                 addItem(
                         createMenuItem(createDish(user, 1000, 0, 1, 2),
-                                new BigDecimal("10.1"))
+                                new BigDecimal("10.1"), 0)
                 ).
                 tryBuild();
 
@@ -441,7 +441,7 @@ class MenuRepositoryTest {
                 addTag("tag#1").
                 addItem(
                         createMenuItem(createDish(user, 1000, 0, 1, 2),
-                                new BigDecimal("10.1"))
+                                new BigDecimal("10.1"), 0)
                 ).
                 tryBuild();
 
@@ -1625,11 +1625,11 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("tag#" + menuId).
-                addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"))).
-                addItem(createMenuItem(dishes.get(1), new BigDecimal("10.1"))).
-                addItem(createMenuItem(dishes.get(2), new BigDecimal("5"))).
-                addItem(createMenuItem(dishes.get(3), new BigDecimal("2"))).
-                addItem(createMenuItem(dishes.get(4), new BigDecimal("0.4"))).
+                addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"), 1000)).
+                addItem(createMenuItem(dishes.get(1), new BigDecimal("10.1"), 1001)).
+                addItem(createMenuItem(dishes.get(2), new BigDecimal("5"), 1002)).
+                addItem(createMenuItem(dishes.get(3), new BigDecimal("2"), 1003)).
+                addItem(createMenuItem(dishes.get(4), new BigDecimal("0.4"), 1004)).
                 tryBuild();
 
         commit(() -> dishes.forEach(dish -> dishRepository.save(dish)));
@@ -1661,24 +1661,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#0").
                         addTag("tagA").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish0)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish50)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish0, BigDecimal.TEN, 2001)).
+                        addItem(createMenuItem(dish50, new BigDecimal("3.5"), 2002)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2003)).
                         tryBuild()
         );
 
@@ -1693,24 +1678,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#1").
                         addTag("tagA").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish1)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish50)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish1, BigDecimal.TEN, 2011)).
+                        addItem(createMenuItem(dish50, new BigDecimal("3.5"), 2012)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2013)).
                         tryBuild()
         );
 
@@ -1725,24 +1695,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#2").
                         addTag("tagB").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish2)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish60)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish2, BigDecimal.TEN, 2101)).
+                        addItem(createMenuItem(dish60, new BigDecimal("3.5"), 2102)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2103)).
                         tryBuild()
         );
 
@@ -1757,24 +1712,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#3").
                         addTag("tagB").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish3)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish60)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish3, BigDecimal.TEN, 2051)).
+                        addItem(createMenuItem(dish60, new BigDecimal("3.5"), 2052)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2053)).
                         tryBuild()
         );
 
@@ -1884,8 +1824,9 @@ class MenuRepositoryTest {
                 tryBuild();
     }
 
-    private MenuItem.LoadBuilder createMenuItem(Dish dish, BigDecimal quantity) {
+    private MenuItem.LoadBuilder createMenuItem(Dish dish, BigDecimal quantity, int itemId) {
         return new MenuItem.LoadBuilder().
+                setId(toUUID(itemId)).
                 setConfig(appConfiguration).
                 setDish(dish).
                 setQuantity(quantity);
