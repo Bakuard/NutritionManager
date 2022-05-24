@@ -42,6 +42,7 @@ class DishIngredientTest {
             """)
     public void getNecessaryQuantity1() {
         DishIngredient ingredient = new DishIngredient(
+                toUUID(0),
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
@@ -65,6 +66,7 @@ class DishIngredientTest {
             """)
     public void getNecessaryQuantity2() {
         DishIngredient ingredient = new DishIngredient(
+                toUUID(0),
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
@@ -88,6 +90,7 @@ class DishIngredientTest {
             """)
     public void getNecessaryQuantity3() {
         DishIngredient ingredient = new DishIngredient(
+                toUUID(0),
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),
@@ -111,6 +114,7 @@ class DishIngredientTest {
             """)
     public void getNecessaryQuantity4() {
         DishIngredient ingredient = new DishIngredient(
+                toUUID(0),
                 "some ingredient",
                 Filter.and(
                         Filter.anyCategory("categoryA"),

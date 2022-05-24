@@ -718,7 +718,7 @@ public class Dish implements Entity<Dish> {
                 unit.equals(other.unit) &&
                 Objects.equals(description, other.description) &&
                 Objects.equals(imageUrl, other.imageUrl) &&
-                ingredients.equals(other.ingredients) &&
+                equals(ingredients, other.ingredients) &&
                 tags.equals(other.tags) &&
                 config == other.config &&
                 productRepository == other.productRepository;
@@ -756,6 +756,12 @@ public class Dish implements Entity<Dish> {
                 ", ingredients=" + ingredients +
                 ", tags=" + tags +
                 '}';
+    }
+
+
+    private boolean equals(List<DishIngredient> a, List<DishIngredient> b) {
+        return a.size() == b.size() &&
+                IntStream.range(0, a.size()).allMatch(i -> a.get(i).equalsFullState(b.get(i)));
     }
 
 
@@ -879,17 +885,6 @@ public class Dish implements Entity<Dish> {
 
         public Builder addIngredient(DishIngredient.Builder ingredient) {
             ingredients.add(ingredient);
-            return this;
-        }
-
-        public Builder addIngredient(String name, Filter filter, BigDecimal quantity) {
-            ingredients.add(
-                    new DishIngredient.Builder().
-                            setName(name).
-                            setFilter(filter).
-                            setQuantity(quantity).
-                            setConfig(config)
-            );
             return this;
         }
 

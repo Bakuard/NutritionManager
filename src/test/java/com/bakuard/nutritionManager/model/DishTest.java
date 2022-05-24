@@ -2157,6 +2157,7 @@ class DishTest {
 
     private DishIngredient.Builder ingredient(Filter filter, int ingredientIndex) {
         return new DishIngredient.Builder().
+                setId(toUUID(ingredientIndex)).
                 setName("some ingredient " + ingredientIndex).
                 setFilter(filter).
                 setQuantity(BigDecimal.TEN).

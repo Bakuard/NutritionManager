@@ -95,6 +95,7 @@ CREATE TABLE MenuTags (
 );
 
 CREATE TABLE DishIngredients (
+    ingredientId UUID NOT NULL,
     dishId UUID NOT NULL,
     name VARCHAR(256) NOT NULL,
     quantity NUMERIC(16, 6) NOT NULL,
@@ -102,17 +103,20 @@ CREATE TABLE DishIngredients (
     filterQuery VARCHAR(2096) NOT NULL,
     index INT NOT NULL,
     FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
-    PRIMARY KEY(dishId, name)
+    PRIMARY KEY(ingredientId),
+    UNIQUE(dishId, name)
 );
 
 CREATE TABLE MenuItems (
+    itemId UUID NOT NULL,
     menuId UUID NOT NULL,
     dishId UUID NOT NULL,
     quantity NUMERIC(16, 6) NOT NULL,
     index INT NOT NULL,
     FOREIGN KEY(menuId) REFERENCES Menus(menuId) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY(dishId) REFERENCES Dishes(dishId) ON DELETE CASCADE ON UPDATE CASCADE,
-    PRIMARY KEY(menuId, dishId)
+    PRIMARY KEY(itemId),
+    UNIQUE(menuId, dishId)
 );
 
 CREATE TABLE JwsBlackList (
