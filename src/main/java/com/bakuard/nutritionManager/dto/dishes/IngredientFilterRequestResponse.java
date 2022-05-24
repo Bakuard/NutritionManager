@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Schema(description = "Фильтр задающий множество взаимозаменяемых продуктов для ингредиента блюда")
-public class DishIngredientFilterRequestResponse {
+public class IngredientFilterRequestResponse {
 
     @Schema(description = """
             Категория продуктов. Ограничения:<br/>
@@ -47,7 +47,7 @@ public class DishIngredientFilterRequestResponse {
             """)
     private List<String> tags;
 
-    public DishIngredientFilterRequestResponse() {}
+    public IngredientFilterRequestResponse() {}
 
     public String getCategory() {
         return category;
@@ -93,7 +93,7 @@ public class DishIngredientFilterRequestResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishIngredientFilterRequestResponse that = (DishIngredientFilterRequestResponse) o;
+        IngredientFilterRequestResponse that = (IngredientFilterRequestResponse) o;
         return Objects.equals(category, that.category) &&
                 Objects.equals(shops, that.shops) &&
                 Objects.equals(grades, that.grades) &&

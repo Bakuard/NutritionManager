@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dto.menus;
 
-import com.bakuard.nutritionManager.dto.dishes.DishProductsListResponse;
+import com.bakuard.nutritionManager.dto.dishes.DishProductsResponse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -30,7 +30,7 @@ public class MenuDishProductsListResponse {
             Список продуктов для каждого ингредиента выбранного блюда данного меню. Особые случаи: <br/>
             1. Если меню не содержит ни одного блюда - данное поле будет иметь значение null.
             """)
-    private DishProductsListResponse dishProducts;
+    private DishProductsResponse dishProducts;
 
     public MenuDishProductsListResponse() {
 
@@ -68,11 +68,11 @@ public class MenuDishProductsListResponse {
         this.dishes = dishes;
     }
 
-    public DishProductsListResponse getDishProducts() {
+    public DishProductsResponse getDishProducts() {
         return dishProducts;
     }
 
-    public void setDishProducts(DishProductsListResponse dishProducts) {
+    public void setDishProducts(DishProductsResponse dishProducts) {
         this.dishProducts = dishProducts;
     }
 

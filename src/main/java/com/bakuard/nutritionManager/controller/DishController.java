@@ -11,6 +11,7 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.util.Page;
 
 import com.bakuard.nutritionManager.service.ImageUploaderService;
+import dishes.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +35,7 @@ import java.util.UUID;
 
 @Tag(name = "Контроллер блюд")
 @RestController
-@RequestMapping("/dishes")
+@RequestMapping("/com/bakuard/nutritionManager/dto/dishes")
 public class DishController {
 
     private static final Logger logger = LoggerFactory.getLogger(DishController.class.getName());
@@ -325,7 +326,7 @@ public class DishController {
     )
     @Transactional
     @GetMapping("/getAllIngredientProducts")
-    public ResponseEntity<DishProductsListResponse> getAllIngredientProducts(
+    public ResponseEntity<DishProductsResponse> getAllIngredientProducts(
             @RequestParam("dishId")
             @Parameter(description = "Уникальный идентификатор блюда. Не может быть null.", required = true)
             UUID dishId,
@@ -335,7 +336,7 @@ public class DishController {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishId={} and ServingNumber={}", dishId, servingNumber);
 
-        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, dishId, servingNumber);
+        DishProductsResponse response = mapper.toDishProductsListResponse(userId, dishId, servingNumber);
 
         return ResponseEntity.ok(response);
     }

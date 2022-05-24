@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     authorizeRequests().
                         antMatchers(
                                 "/products/**",
-                                "/dishes/**",
+                                "/com/bakuard/nutritionManager/dto/dishes/**",
                                 "/menus/**",
                                 "/auth/getUserByJws",
                                 "/auth/logout",

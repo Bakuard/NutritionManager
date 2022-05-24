@@ -43,7 +43,7 @@ public class DishAddRequest {
             2. Каждый элемент списка ингредиентов не должен быть null. <br/>
             3. Наименования всех ингрдеиентов должны быть уникальны. <br/>
             """)
-    private List<DishIngredientRequestResponse> ingredients;
+    private List<IngredientAddRequest> ingredients;
     @Schema(description = """
             Теги указанные для данного блюда. Допускается пустой список тегов. Ограничения:<br/>
             1. Список тегов не может быть null.<br/>
@@ -97,11 +97,11 @@ public class DishAddRequest {
         this.imageUrl = imageUrl;
     }
 
-    public List<DishIngredientRequestResponse> getIngredients() {
+    public List<IngredientAddRequest> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<DishIngredientRequestResponse> ingredients) {
+    public void setIngredients(List<IngredientAddRequest> ingredients) {
         this.ingredients = ingredients;
     }
 

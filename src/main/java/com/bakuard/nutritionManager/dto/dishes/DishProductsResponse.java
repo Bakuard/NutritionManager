@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Возвращаемый список продуктов кажддого ингредиента блюда.")
-public class DishProductsListResponse {
+@Schema(description = "Возвращаемый список продуктов каждого ингредиента блюда.")
+public class DishProductsResponse {
 
     @Schema(description = "Уникальный идентфикатор блюда.")
     private UUID dishId;
@@ -20,9 +20,9 @@ public class DishProductsListResponse {
             Каждый элемент списка - перечень всех продуктов для конкретного ингредиента блюда. Особые случаи: <br/>
             1. Если ни одному ингредиенту блюда не соответствует ни один продукт - возвращает пустой список. <br/>
             """)
-    private List<DishIngredientForListResponse> categories;
+    private List<IngredientProductsResponse> categories;
 
-    public DishProductsListResponse() {
+    public DishProductsResponse() {
 
     }
 
@@ -50,11 +50,11 @@ public class DishProductsListResponse {
         this.servingNumber = servingNumber;
     }
 
-    public List<DishIngredientForListResponse> getCategories() {
+    public List<IngredientProductsResponse> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<DishIngredientForListResponse> categories) {
+    public void setCategories(List<IngredientProductsResponse> categories) {
         this.categories = categories;
     }
 
@@ -62,7 +62,7 @@ public class DishProductsListResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishProductsListResponse that = (DishProductsListResponse) o;
+        DishProductsResponse that = (DishProductsResponse) o;
         return Objects.equals(dishId, that.dishId) &&
                 Objects.equals(dishName, that.dishName) &&
                 Objects.equals(servingNumber, that.servingNumber) &&

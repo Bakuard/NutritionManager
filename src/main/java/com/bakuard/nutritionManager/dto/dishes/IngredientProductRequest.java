@@ -8,7 +8,7 @@ import java.util.Objects;
         Используется для выбора конкретного продукта относящегося к конкретному ингредиенту блюда. Эти данные
          применяются при формировании списка докупаемых продуктов к блюду.
         """)
-public class DishIngredientProductRequest {
+public class IngredientProductRequest {
 
     @Schema(description = """
             Индекс ингредиента блюда. Особые случаи: <br/>
@@ -24,7 +24,7 @@ public class DishIngredientProductRequest {
             """)
     private int productIndex;
 
-    public DishIngredientProductRequest() {
+    public IngredientProductRequest() {
 
     }
 
@@ -48,7 +48,7 @@ public class DishIngredientProductRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishIngredientProductRequest that = (DishIngredientProductRequest) o;
+        IngredientProductRequest that = (IngredientProductRequest) o;
         return ingredientIndex == that.ingredientIndex &&
                 productIndex == that.productIndex;
     }

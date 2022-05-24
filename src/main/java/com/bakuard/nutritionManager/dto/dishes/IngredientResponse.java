@@ -4,10 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 
 @Schema(description = "Данные ингредиента блюда")
-public class DishIngredientRequestResponse {
+public class IngredientResponse {
 
+    @Schema(description = """
+            Уникальный идентификатор ингредиента блюда.
+            """)
+    private UUID id;
     @Schema(description = """
             Порядковый номер ингредиента в списке ингредиентов блюда.
             """)
@@ -22,10 +27,18 @@ public class DishIngredientRequestResponse {
             Фильтр задающий множество взаимозаменяемых продуктов для данного ингредиента. Ограничения:<br/>
             1. Не может быть null. <br/>
             """)
-    private DishIngredientFilterRequestResponse filter;
+    private IngredientFilterRequestResponse filter;
 
-    public DishIngredientRequestResponse() {
+    public IngredientResponse() {
 
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public int getIndex() {
@@ -44,11 +57,11 @@ public class DishIngredientRequestResponse {
         this.quantity = quantity;
     }
 
-    public DishIngredientFilterRequestResponse getFilter() {
+    public IngredientFilterRequestResponse getFilter() {
         return filter;
     }
 
-    public void setFilter(DishIngredientFilterRequestResponse filter) {
+    public void setFilter(IngredientFilterRequestResponse filter) {
         this.filter = filter;
     }
 
@@ -56,21 +69,23 @@ public class DishIngredientRequestResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishIngredientRequestResponse that = (DishIngredientRequestResponse) o;
+        IngredientResponse that = (IngredientResponse) o;
         return index == that.index &&
+                Objects.equals(id, that.id) &&
                 Objects.equals(quantity, that.quantity) &&
                 Objects.equals(filter, that.filter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(index, quantity, filter);
+        return Objects.hash(id, index, quantity, filter);
     }
 
     @Override
     public String toString() {
-        return "DishIngredientRequestResponse{" +
-                "index=" + index +
+        return "IngredientResponse{" +
+                "id=" + id +
+                ", index=" + index +
                 ", quantity=" + quantity +
                 ", filter=" + filter +
                 '}';

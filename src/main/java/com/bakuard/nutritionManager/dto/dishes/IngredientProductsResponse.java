@@ -8,7 +8,7 @@ import java.util.Objects;
 @Schema(description = """
         Содержит данные о всех продуктах соответствующих одному конкретному ингредиенту блюда.
         """)
-public class DishIngredientForListResponse {
+public class IngredientProductsResponse {
 
     @Schema(description = "Индекс текущего ингредиента.")
     private int ingredientIndex;
@@ -20,7 +20,7 @@ public class DishIngredientForListResponse {
             """)
     private List<ProductAsDishIngredientResponse> products;
 
-    public DishIngredientForListResponse() {
+    public IngredientProductsResponse() {
 
     }
 
@@ -52,7 +52,7 @@ public class DishIngredientForListResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DishIngredientForListResponse that = (DishIngredientForListResponse) o;
+        IngredientProductsResponse that = (IngredientProductsResponse) o;
         return ingredientIndex == that.ingredientIndex &&
                 Objects.equals(productCategory, that.productCategory) &&
                 Objects.equals(products, that.products);

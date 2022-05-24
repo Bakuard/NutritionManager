@@ -4,7 +4,6 @@ import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dto.DtoMapper;
-import com.bakuard.nutritionManager.dto.dishes.DishProductsListResponse;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;

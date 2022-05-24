@@ -30,7 +30,7 @@ public class DishResponse {
     @Schema(description = "Путь к изображению данного блюда.")
     private URL imageUrl;
     @Schema(description = "Ингредиенты блюда")
-    private List<DishIngredientRequestResponse> ingredients;
+    private List<IngredientResponse> ingredients;
     @Schema(description = "Теги блюда. Если блюдо не содержит тегов - данный список будет пустым.")
     private List<String> tags;
 
@@ -98,11 +98,11 @@ public class DishResponse {
         this.imageUrl = imageUrl;
     }
 
-    public List<DishIngredientRequestResponse> getIngredients() {
+    public List<IngredientResponse> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<DishIngredientRequestResponse> ingredients) {
+    public void setIngredients(List<IngredientResponse> ingredients) {
         this.ingredients = ingredients;
     }
 
