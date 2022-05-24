@@ -517,7 +517,7 @@ class DishTest {
              ingredientIndex < 0
              => return empty Optional
             """)
-    public void getProduct1() {
+    public void getProductByIndex1() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = dish(1, user(), repository).
@@ -535,7 +535,7 @@ class DishTest {
              ingredientIndex = dish ingredients number
              => return empty Optional
             """)
-    public void getProduct2() {
+    public void getProductByIndex2() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = dish(1, user(), repository).
@@ -553,7 +553,7 @@ class DishTest {
              ingredientIndex > dish ingredients number
              => return empty Optional
             """)
-    public void getProduct3() {
+    public void getProductByIndex3() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Dish dish = dish(1, user(), repository).
@@ -571,7 +571,7 @@ class DishTest {
              productIndex < 0
              => return item where IngredientProduct.product() return empty Optional
             """)
-    public void getProduct4() {
+    public void getProductByIndex4() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
@@ -593,7 +593,7 @@ class DishTest {
              there are not products matching this ingredient
              => return item where IngredientProduct.product() return empty Optional
             """)
-    public void getProduct5() {
+    public void getProductByIndex5() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(repository.getProducts(Mockito.any())).thenReturn(Page.empty());
@@ -613,7 +613,7 @@ class DishTest {
              productIndex belongs to interval [0, ingredient products set size - 1]
              => return correct result
             """)
-    public void getProduct6() {
+    public void getProductByIndex6() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
@@ -637,7 +637,7 @@ class DishTest {
              productIndex = ingredient products number
              => return item where IngredientProduct.product() return empty Optional
             """)
-    public void getProduct7() {
+    public void getProductByIndex7() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
@@ -660,7 +660,7 @@ class DishTest {
              productIndex > ingredient products number
              => return item where IngredientProduct.product() return empty Optional
             """)
-    public void getProduct8() {
+    public void getProductByIndex8() {
         User user = user();
         ProductRepository repository = Mockito.mock(ProductRepository.class);
         Mockito.when(
@@ -674,6 +674,15 @@ class DishTest {
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 6);
 
         Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getProduct(ingredientId, productId):
+             
+            """)
+    public void getProductById1() {
+
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.model.util;
 
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,6 +50,48 @@ public class PageableById implements Pageable {
      */
     public UUID getSearchedId() {
         return searchedId;
+    }
+
+    /**
+     * Создает и возращает объект представляющий метаданные об исходной выборке будущей страницы. Создание метаданых
+     * страницы отделены от создания самой страницы (которая уже непосредственно содержит объекты из исходной
+     * выборки), т.к. для получения непосредственно самих объектов для заполнения страницы могут заранее понадобиться
+     * её метаданные.
+     * @param totalItems общее кол-во всех элементов содержащихся в исходной выборке для которой проводится пагинация.
+     * @param expectedPageNumber ожидаемый номер страницы. Фактический номер страницы, полученной с помощью данного
+     *                           объекта, будет отличаться, если страница с указанным номером выходит за границы
+     *                           выборки.
+     * @param maxPageSize максимально допустимый размер страницы. Фактический размер страницы не может быть больше
+     *                    данного значения и при необходимости может быть урезан до данного значения.
+     * @return возвращает метаданные исходной выборки и страницы.
+     * @throws NullPointerException если totalItems или pageNumber равен null.
+     * @throws IllegalArgumentException если totalItems меньше нуля или maxPageSize < 1.
+     */
+    public Page.Metadata createPageMetaData(int totalItems, int expectedPageNumber, int maxPageSize) {
+        return createPageMetaData(
+                BigInteger.valueOf(totalItems),
+                BigInteger.valueOf(expectedPageNumber),
+                maxPageSize
+        );
+    }
+
+    /**
+     * Создает и возращает объект представляющий метаданные об исходной выборке будущей страницы. Создание метаданых
+     * страницы отделены от создания самой страницы (которая уже непосредственно содержит объекты из исходной
+     * выборки), т.к. для получения непосредственно самих объектов для заполнения страницы могут заранее понадобиться
+     * её метаданные.
+     * @param totalItems общее кол-во всех элементов содержащихся в исходной выборке для которой проводится пагинация.
+     * @param expectedPageNumber ожидаемый номер страницы. Фактический номер страницы, полученной с помощью данного
+     *                           объекта, будет отличаться, если страница с указанным номером выходит за границы
+     *                           выборки.
+     * @param maxPageSize максимально допустимый размер страницы. Фактический размер страницы не может быть больше
+     *                    данного значения и при необходимости может быть урезан до данного значения.
+     * @return возвращает метаданные исходной выборки и страницы.
+     * @throws NullPointerException если totalItems или pageNumber равен null.
+     * @throws IllegalArgumentException если totalItems меньше нуля или maxPageSize < 1.
+     */
+    public Page.Metadata createPageMetaData(BigInteger totalItems, BigInteger expectedPageNumber, int maxPageSize) {
+        return new Page.Metadata(expectedPageNumber, expectedPageSize, totalItems, maxPageSize);
     }
 
     @Override
