@@ -172,6 +172,11 @@ public class MenuItem implements Entity<MenuItem> {
 
         }
 
+        public Builder generateId() {
+            id = UUID.randomUUID();
+            return this;
+        }
+
         public Builder setId(UUID id) {
             this.id = id;
             return this;

@@ -26,7 +26,7 @@ public class MenuResponse {
     @Schema(description = "Описание данного меню.")
     private String description;
     @Schema(description = "Блюда входящие в состав данного меню.")
-    private List<MenuItemRequestResponse> items;
+    private List<ItemResponse> items;
     @Schema(description = "Теги данного меню. Если для меню не заданно ни одного тега - данный список будет пустым.")
     private List<String> tags;
 
@@ -78,11 +78,11 @@ public class MenuResponse {
         this.description = description;
     }
 
-    public List<MenuItemRequestResponse> getItems() {
+    public List<ItemResponse> getItems() {
         return items;
     }
 
-    public void setItems(List<MenuItemRequestResponse> items) {
+    public void setItems(List<ItemResponse> items) {
         this.items = items;
     }
 

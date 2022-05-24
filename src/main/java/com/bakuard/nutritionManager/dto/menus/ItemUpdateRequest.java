@@ -4,10 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 
 @Schema(description = "Данные о блюде входящем в состав меню.")
-public class MenuItemRequestResponse {
+public class ItemUpdateRequest {
 
+    @Schema(description = """
+            Уникальный идентификатор элемента меню.
+            """)
+    private UUID id;
     @Schema(description = """
             Наименование блюда. Ограничения: <br/>
             1. Не может быть null. <br/>
@@ -26,8 +31,16 @@ public class MenuItemRequestResponse {
             """)
     private int itemIndex;
 
-    public MenuItemRequestResponse() {
+    public ItemUpdateRequest() {
 
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getDishName() {
@@ -58,21 +71,23 @@ public class MenuItemRequestResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MenuItemRequestResponse that = (MenuItemRequestResponse) o;
+        ItemUpdateRequest that = (ItemUpdateRequest) o;
         return itemIndex == that.itemIndex &&
+                Objects.equals(id, that.id) &&
                 Objects.equals(dishName, that.dishName) &&
                 Objects.equals(servingNumber, that.servingNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishName, servingNumber, itemIndex);
+        return Objects.hash(id, dishName, servingNumber, itemIndex);
     }
 
     @Override
     public String toString() {
-        return "MenuItemRequestResponse{" +
-                "dishName='" + dishName + '\'' +
+        return "ItemUpdateRequest{" +
+                "id=" + id +
+                ", dishName='" + dishName + '\'' +
                 ", servingNumber=" + servingNumber +
                 ", itemIndex=" + itemIndex +
                 '}';

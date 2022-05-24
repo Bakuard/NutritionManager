@@ -336,7 +336,7 @@ public class DishController {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishId={} and ServingNumber={}", dishId, servingNumber);
 
-        DishProductsResponse response = mapper.toDishProductsListResponse(userId, dishId, servingNumber);
+        DishProductsResponse response = mapper.toDishProductsResponse(userId, dishId, servingNumber);
 
         return ResponseEntity.ok(response);
     }
