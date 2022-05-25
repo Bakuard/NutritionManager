@@ -458,13 +458,13 @@ class PageTest {
     @DisplayName("""
             getGlobalIndexFor(predicate):
              page is empty
-             => return -1
+             => return empty Optional
             """)
     public void getGlobalIndexFor2() {
         Page<Integer> page = Page.empty();
 
-        BigInteger actual = page.getGlobalIndexFor(i -> i == 15);
-        Assertions.assertEquals(BigInteger.valueOf(-1), actual);
+        Optional<BigInteger> actual = page.getGlobalIndexFor(i -> i == 15);
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -472,7 +472,7 @@ class PageTest {
             getGlobalIndexFor(predicate):
              page isn't empty,
              page don't contains item that matches the predicate
-             => return -1
+             => return empty Optional
             """)
     public void getGlobalIndexFor3() {
         Page<Integer> page = PageableByNumber.
@@ -480,8 +480,8 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        BigInteger actual = page.getGlobalIndexFor(i -> i == -100);
-        Assertions.assertEquals(BigInteger.valueOf(-1), actual);
+        Optional<BigInteger> actual = page.getGlobalIndexFor(i -> i == -100);
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -497,8 +497,8 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        BigInteger actual = page.getGlobalIndexFor(i -> i == 12);
-        Assertions.assertEquals(BigInteger.valueOf(12), actual);
+        Optional<BigInteger> actual = page.getGlobalIndexFor(i -> i == 12);
+        Assertions.assertEquals(BigInteger.valueOf(12), actual.orElseThrow());
     }
 
     @Test
@@ -514,8 +514,8 @@ class PageTest {
                 createPageMetadata(100, 200).
                 createPage(createFullList(10, 10));
 
-        BigInteger actual = page.getGlobalIndexFor(i -> (i % 2) != 0);
-        Assertions.assertEquals(BigInteger.valueOf(11), actual);
+        Optional<BigInteger> actual = page.getGlobalIndexFor(i -> (i % 2) != 0);
+        Assertions.assertEquals(BigInteger.valueOf(11), actual.orElseThrow());
     }
 
 

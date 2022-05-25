@@ -9,9 +9,8 @@ import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.util.Page;
-
 import com.bakuard.nutritionManager.service.ImageUploaderService;
-import dishes.*;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,7 +34,7 @@ import java.util.UUID;
 
 @Tag(name = "Контроллер блюд")
 @RestController
-@RequestMapping("/com/bakuard/nutritionManager/dto/dishes")
+@RequestMapping("/dishes")
 public class DishController {
 
     private static final Logger logger = LoggerFactory.getLogger(DishController.class.getName());

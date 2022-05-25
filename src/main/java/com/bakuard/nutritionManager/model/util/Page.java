@@ -114,21 +114,23 @@ public final class Page<T> {
     /**
      * Возвращает глобальный индекс первого из элементов находящихся на данной странице и удовлетворяющего
      * заданному ограничению predicate. Если среди элементов этой страницы ни один не соответствует заданному
-     * ограничению - возвращает -1. <br/>
+     * ограничению - возвращает пустой Optional. <br/>
      * Глобальный индекс элемента - это его порядковый номер (нумерация начинается с нуля) во всей выборке,
      * по которой проводится пагинация.
      * @param predicate ограничения задающие
      * @return глобальный индекс элемента удовлетворяющего заданному ограничению.
      * @throws NullPointerException если predicate равен null.
      */
-    public BigInteger getGlobalIndexFor(Predicate<T> predicate) {
+    public Optional<BigInteger> getGlobalIndexFor(Predicate<T> predicate) {
         Objects.requireNonNull(predicate, "predicate can't be null.");
 
         int index = 0;
         while(index < content.size() && !predicate.test(content.get(index))) ++index;
 
-        if(index < content.size()) return metadata.getOffset().add(BigInteger.valueOf(index));
-        else return BigInteger.valueOf(-1);
+        BigInteger result = null;
+        if(index < content.size()) result = metadata.getOffset().add(BigInteger.valueOf(index));
+
+        return Optional.ofNullable(result);
     }
 
     /**

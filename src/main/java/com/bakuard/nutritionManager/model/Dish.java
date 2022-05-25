@@ -320,6 +320,10 @@ public class Dish implements Entity<Dish> {
      *         2. productId является null. <br/>
      */
     public Optional<IngredientProduct> getProduct(UUID ingredientId, UUID productId) {
+        Validator.check(
+                Rule.of("Dish.productId").notNull(productId)
+        );
+
         return getIngredient(ingredientId).
                 map(ingredient -> {
                     Page<Product> page = getProductPageBy(ingredient, productId);
@@ -330,7 +334,9 @@ public class Dish implements Entity<Dish> {
                             product,
                             ingredient.getId(),
                             getIngredientIndexBy(ingredient.getId()),
-                            page.getGlobalIndexFor(p -> product.isPresent() && p.getId().equals(productId)).intValue()
+                            page.getGlobalIndexFor(p -> product.isPresent() && p.getId().equals(productId)).
+                                    orElse(BigInteger.ONE.negate()).
+                                    intValue()
                     );
                 });
     }

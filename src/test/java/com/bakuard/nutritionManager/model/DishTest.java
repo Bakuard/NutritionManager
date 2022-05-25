@@ -7,6 +7,7 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
+import com.bakuard.nutritionManager.model.util.PageableById;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 
@@ -679,10 +680,163 @@ class DishTest {
     @Test
     @DisplayName("""
             getProduct(ingredientId, productId):
-             
+             ingredientId is null
+             => exception
             """)
     public void getProductById1() {
+        User user = user();
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(criteria(6, filter(user, 0))))
+                ).
+                thenReturn(productPage(user, this::product, 0, 1, 2, 3, 4));
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                tryBuild();
 
+        AssertUtil.assertValidateException(
+                () -> dish.getProduct(null, toUUID(0)),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getProduct(ingredientId, productId):
+             productId is null
+             => exception
+            """)
+    public void getProductById2() {
+        User user = user();
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                        repository.getProducts(Mockito.eq(criteria(6, filter(user, 0))))
+                ).
+                thenReturn(productPage(user, this::product, 0, 1, 2, 3, 4));
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                tryBuild();
+
+        AssertUtil.assertValidateException(
+                () -> dish.getProduct(toUUID(0), null),
+                Constraint.NOT_NULL
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getProduct(ingredientId, productId):
+             dish doesn't contains ingredient with ingredientId
+             => return empty Optional
+            """)
+    public void getProductById3() {
+        User user = user();
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(10, filter(user, 0))))
+        ).thenReturn(productPageById(user, this::product, 10,0,1,2,3,4,5,6,7,8,9,10));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
+        ).thenReturn(11);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(13, filter(user, 1))))
+        ).thenReturn(productPageById(user, this::product, 13,11,12,13,14));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
+        ).thenReturn(4);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(400, filter(user, 2))))
+        ).thenReturn(productPageById(user, this::product, 400,100,200,300,400,500,600,700));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
+        ).thenReturn(7);
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
+                tryBuild();
+
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(1000), toUUID(10));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @DisplayName("""
+            getProduct(ingredientId, productId):
+             dish doesn't contains product with productId
+             => return item where IngredientProduct#product() return empty Optional
+            """)
+    public void getProductById4() {
+        User user = user();
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(1000, filter(user, 0))))
+        ).thenReturn(Page.empty());
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
+        ).thenReturn(11);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(13, filter(user, 1))))
+        ).thenReturn(productPageById(user, this::product, 13,11,12,13,14));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
+        ).thenReturn(4);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(400, filter(user, 2))))
+        ).thenReturn(productPageById(user, this::product, 400,100,200,300,400,500,600,700));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
+        ).thenReturn(7);
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
+                tryBuild();
+
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(0), toUUID(1000));
+
+        Dish.IngredientProduct expected = emptyIngredientProduct(0, -1);
+        Assertions.assertEquals(expected, actual.orElseThrow());
+    }
+
+    @Test
+    @DisplayName("""
+            getProduct(ingredientId, productId):
+             dish contains product with productId and ingredient with ingredientId
+             => return correct result
+            """)
+    public void getProductById5() {
+        User user = user();
+        ProductRepository repository = Mockito.mock(ProductRepository.class);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(10, filter(user, 0))))
+        ).thenReturn(productPageById(user, this::product, 10,0,1,2,3,4,5,6,7,8,9,10));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 0))))
+        ).thenReturn(11);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(13, filter(user, 1))))
+        ).thenReturn(productPageById(user, this::product, 13,11,12,13,14));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 1))))
+        ).thenReturn(4);
+        Mockito.when(
+                repository.getProducts(Mockito.eq(criteriaById(400, filter(user, 2))))
+        ).thenReturn(productPageById(user, this::product, 400,100,200,300,400,500,600,700));
+        Mockito.when(
+                repository.getProductsNumber(Mockito.eq(criteriaNumber(filter(user, 2))))
+        ).thenReturn(7);
+        Dish dish = dish(1, user(), repository).
+                addIngredient(ingredient(filter(user, 0), 0)).
+                addIngredient(ingredient(filter(user, 1), 1)).
+                addIngredient(ingredient(filter(user, 2), 2)).
+                tryBuild();
+
+        Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(0), toUUID(10));
+
+        Dish.IngredientProduct expected = ingredientProduct(product(user, 10),0, 10);
+        Assertions.assertEquals(expected, actual.orElseThrow());
     }
 
     @Test
@@ -2180,6 +2334,13 @@ class DishTest {
                 setSort(Sort.products().asc("price"));
     }
 
+    private Criteria criteriaById(int productId, Filter filter) {
+        return new Criteria().
+                setPageable(PageableById.of(30, toUUID(productId))).
+                setSort(Sort.products().asc("price")).
+                setFilter(filter);
+    }
+
     private Criteria criteriaNumber(Filter filter) {
         return new Criteria().setFilter(filter);
     }
@@ -2216,6 +2377,26 @@ class DishTest {
                                       int... productIds) {
         Page.Metadata metadata = PageableByNumber.of(30 , 0).
                 createPageMetadata(productIds.length, 30);
+
+        List<Product> products = Arrays.stream(productIds).
+                mapToObj(i -> productFactory.apply(user, i).tryBuild()).
+                toList();
+
+        return metadata.createPage(products);
+    }
+
+    private Page<Product> productPageById(User user,
+                                          BiFunction<User, Integer, Product.Builder> productFactory,
+                                          int searchedId,
+                                          int... productIds) {
+        PageableById pageable = PageableById.of(30 , toUUID(searchedId));
+        int index = IntStream.range(0, productIds.length).
+                filter(i -> productIds[i] == searchedId).
+                findFirst().
+                orElse(-1);
+        Page.Metadata metadata = pageable.createPageMetaData(productIds.length,
+                index % productIds.length,
+                30);
 
         List<Product> products = Arrays.stream(productIds).
                 mapToObj(i -> productFactory.apply(user, i).tryBuild()).
