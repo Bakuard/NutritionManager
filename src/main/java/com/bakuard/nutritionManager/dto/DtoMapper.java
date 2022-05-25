@@ -19,7 +19,7 @@ import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.MinTagsFilter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.RuleException;
 import com.bakuard.nutritionManager.validation.ValidateException;
@@ -133,7 +133,7 @@ public class DtoMapper {
         List<DishIngredient> ingredients = dish.getIngredients();
         response.setIngredients(
                 IntStream.range(0, ingredients.size()).
-                        mapToObj(i -> toDishIngredientRequestResponse(ingredients.get(i), i)).
+                        mapToObj(i -> toIngredientResponse(ingredients.get(i), i)).
                         toList()
         );
 
@@ -156,7 +156,7 @@ public class DtoMapper {
 
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
-                    DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
+                    IngredientAddRequest ingredient = dto.getIngredients().get(i);
                     builder.addIngredient(toDishIngredient(userId, ingredient, i));
                 });
 
@@ -181,7 +181,7 @@ public class DtoMapper {
 
         IntStream.range(0, dto.getIngredients().size()).
                 forEach(i -> {
-                    DishIngredientRequestResponse ingredient = dto.getIngredients().get(i);
+                    IngredientUpdateRequest ingredient = dto.getIngredients().get(i);
                     builder.addIngredient(toDishIngredient(userId, ingredient, i));
                 });
 
@@ -194,9 +194,9 @@ public class DtoMapper {
         return dishes.map(this::toDishForListResponse);
     }
 
-    public DishProductsListResponse toDishProductsListResponse(UUID userId, UUID dishId, BigDecimal servingNumber) {
+    public DishProductsResponse toDishProductsResponse(UUID userId, UUID dishId, BigDecimal servingNumber) {
         Dish dish = dishRepository.tryGetById(userId, dishId);
-        return toDishProductsListResponse(dish, servingNumber == null ? BigDecimal.ONE : servingNumber);
+        return toDishProductsResponse(dish, servingNumber == null ? BigDecimal.ONE : servingNumber);
     }
 
     public Optional<BigDecimal> toDishPrice(UUID userId, DishPriceRequest dto) {
@@ -220,7 +220,7 @@ public class DtoMapper {
         response.setDescription(menu.getDescription());
         response.setItems(
                 IntStream.range(0, menu.getMenuItemNumbers()).
-                        mapToObj(i -> toMenuItemRequestResponse(menu.tryGetItem(i), i)).
+                        mapToObj(i -> toMenuItemResponse(menu.tryGetItem(i), i)).
                         toList()
         );
         response.setTags(toTagsResponse(menu.getTags()));
@@ -284,11 +284,11 @@ public class DtoMapper {
         if(dishName != null) {
             MenuItem menuItem = menu.tryGetItem(dishName);
             BigDecimal dishQuantity = menuItem.getNecessaryQuantity(quantityOp.orElse(BigDecimal.ONE));
-            response.setDishProducts(toDishProductsListResponse(menuItem.getDish(), dishQuantity));
+            response.setDishProducts(toDishProductsResponse(menuItem.getDish(), dishQuantity));
         } else if(menu.getMenuItemNumbers() > 0) {
             MenuItem menuItem = menu.getItems().get(0);
             BigDecimal dishQuantity = menuItem.getNecessaryQuantity(quantityOp.orElse(BigDecimal.ONE));
-            response.setDishProducts(toDishProductsListResponse(menuItem.getDish(), dishQuantity));
+            response.setDishProducts(toDishProductsResponse(menuItem.getDish(), dishQuantity));
         }
 
         return response;
@@ -306,7 +306,7 @@ public class DtoMapper {
         response.setMenuQuantity(quantityOp.orElse(BigDecimal.ONE));
         response.setDishesProducts(
                 menu.getItems().stream().
-                        map(item -> toDishProductsListResponse(
+                        map(item -> toDishProductsResponse(
                                 item.getDish(), item.getNecessaryQuantity(quantityOp.orElse(BigDecimal.ONE)))
                         ).
                         toList()
@@ -331,7 +331,7 @@ public class DtoMapper {
                                       UUID userId,
                                       String sortRule,
                                       boolean onlyFridge,
-                                      String category,
+                                      List<String> categories,
                                       List<String> shops,
                                       List<String> grades,
                                       List<String> manufacturers,
@@ -339,7 +339,7 @@ public class DtoMapper {
         List<Filter> filters = new ArrayList<>();
         filters.add(Filter.user(userId));
         if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
-        if(category != null) filters.add(Filter.anyCategory(category));
+        if(categories != null && !categories.isEmpty()) filters.add(Filter.anyCategory(categories));
         if(shops != null && !shops.isEmpty()) filters.add(Filter.anyShop(shops));
         if(grades != null && !grades.isEmpty()) filters.add(Filter.anyGrade(grades));
         if(manufacturers != null && !manufacturers.isEmpty()) filters.add(Filter.anyManufacturer(manufacturers));
@@ -350,8 +350,8 @@ public class DtoMapper {
         else filter = Filter.and(filters);
 
         return new Criteria().
-                setPageable(Pageable.of(size, page)).
-                setSort(Sort.products(sortRule != null ? List.of(sortRule) : List.of())).
+                setPageable(PageableByNumber.of(size, page)).
+                setSort(Sort.products(Arrays.asList(sortRule))).
                 setFilter(filter);
     }
 
@@ -376,7 +376,7 @@ public class DtoMapper {
         else filter = Filter.and(filters);
 
         return new Criteria().
-                setPageable(Pageable.of(size, page)).
+                setPageable(PageableByNumber.of(size, page)).
                 setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
                 setFilter(filter);
     }
@@ -402,7 +402,7 @@ public class DtoMapper {
         else filter = Filter.and(filters);
 
         return new Criteria().
-                setPageable(Pageable.of(size, page)).
+                setPageable(PageableByNumber.of(size, page)).
                 setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
                 setFilter(filter);
     }
@@ -410,7 +410,7 @@ public class DtoMapper {
 
     public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
-                setPageable(Pageable.of(1000, 0)).
+                setPageable(PageableByNumber.of(1000, 0)).
                 setFilter(Filter.user(userId));
 
         Page<String> manufacturers = productRepository.getManufacturers(criteria);
@@ -431,7 +431,7 @@ public class DtoMapper {
 
     public DishFieldsResponse toDishFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
-                setPageable(Pageable.of(1000, 0)).
+                setPageable(PageableByNumber.of(1000, 0)).
                 setFilter(Filter.user(userId));
 
         Page<Tag> tags = dishRepository.getTags(criteria);
@@ -450,7 +450,7 @@ public class DtoMapper {
 
     public MenuFieldsResponse toMenuFieldsResponse(UUID userId) {
         Criteria criteria = new Criteria().
-                setPageable(Pageable.of(1000, 0)).
+                setPageable(PageableByNumber.of(1000, 0)).
                 setFilter(Filter.user(userId));
 
         Page<Tag> menuTags = menuRepository.getTags(criteria);
@@ -581,15 +581,25 @@ public class DtoMapper {
         return response;
     }
 
-    private DishIngredient.Builder toDishIngredient(UUID userId, DishIngredientRequestResponse dto, int index) {
+    private DishIngredient.Builder toDishIngredient(UUID userId, IngredientUpdateRequest dto, int index) {
         return new DishIngredient.Builder().
+                setId(dto.getId()).
                 setConfig(appConfiguration).
                 setName("Ингредиент №" + index + " - " + dto.getFilter().getCategory()).
                 setQuantity(dto.getQuantity()).
                 setFilter(toDishIngredientFilter(userId, dto.getFilter()));
     }
 
-    private Filter toDishIngredientFilter(UUID userId, DishIngredientFilterRequestResponse dto) {
+    private DishIngredient.Builder toDishIngredient(UUID userId, IngredientAddRequest dto, int index) {
+        return new DishIngredient.Builder().
+                generateId().
+                setConfig(appConfiguration).
+                setName("Ингредиент №" + index + " - " + dto.getFilter().getCategory()).
+                setQuantity(dto.getQuantity()).
+                setFilter(toDishIngredientFilter(userId, dto.getFilter()));
+    }
+
+    private Filter toDishIngredientFilter(UUID userId, IngredientFilterRequestResponse dto) {
         List<Filter> filters = new ArrayList<>();
         filters.add(Filter.user(userId));
         filters.add(Filter.anyCategory(dto.getCategory()));
@@ -609,16 +619,17 @@ public class DtoMapper {
         return Filter.and(filters);
     }
 
-    private DishIngredientRequestResponse toDishIngredientRequestResponse(DishIngredient ingredient, int index) {
-        DishIngredientRequestResponse response = new DishIngredientRequestResponse();
+    private IngredientResponse toIngredientResponse(DishIngredient ingredient, int index) {
+        IngredientResponse response = new IngredientResponse();
+        response.setId(ingredient.getId());
         response.setIndex(index);
         response.setQuantity(ingredient.getNecessaryQuantity(BigDecimal.ONE));
         response.setFilter(toDishIngredientFilterRequestResponse(ingredient.getFilter()));
         return response;
     }
 
-    private DishIngredientFilterRequestResponse toDishIngredientFilterRequestResponse(Filter filter) {
-        DishIngredientFilterRequestResponse response = new DishIngredientFilterRequestResponse();
+    private IngredientFilterRequestResponse toDishIngredientFilterRequestResponse(Filter filter) {
+        IngredientFilterRequestResponse response = new IngredientFilterRequestResponse();
 
         ArrayDeque<Filter> stack = new ArrayDeque<>();
         stack.addLast(filter);
@@ -639,29 +650,29 @@ public class DtoMapper {
         return response;
     }
 
-    private DishProductsListResponse toDishProductsListResponse(Dish dish, BigDecimal servingNumber) {
-        DishProductsListResponse response = new DishProductsListResponse();
+    private DishProductsResponse toDishProductsResponse(Dish dish, BigDecimal servingNumber) {
+        DishProductsResponse response = new DishProductsResponse();
         response.setDishId(dish.getId());
         response.setDishName(dish.getName());
         response.setServingNumber(servingNumber);
         response.setCategories(
                 IntStream.range(0, dish.getIngredientNumber()).
-                        mapToObj(ingredientIndex -> toDishIngredientForListResponse(dish, ingredientIndex, servingNumber)).
+                        mapToObj(ingredientIndex -> toIngredientProductsResponse(dish, ingredientIndex, servingNumber)).
                         toList()
         );
 
         return response;
     }
 
-    private DishIngredientForListResponse toDishIngredientForListResponse(Dish dish,
-                                                                          int ingredientIndex,
-                                                                          BigDecimal servingNumber) {
+    private IngredientProductsResponse toIngredientProductsResponse(Dish dish,
+                                                                    int ingredientIndex,
+                                                                    BigDecimal servingNumber) {
         DishIngredient ingredient = dish.getIngredient(ingredientIndex).orElseThrow();
 
         List<Dish.IngredientProduct> products = dish.getProducts(ingredientIndex, 0).
                 orElseThrow().getContent();
 
-        DishIngredientForListResponse response = new DishIngredientForListResponse();
+        IngredientProductsResponse response = new IngredientProductsResponse();
         response.setIngredientIndex(ingredientIndex);
         response.setProductCategory(ingredient.getName());
         response.setProducts(
@@ -685,16 +696,27 @@ public class DtoMapper {
         return response;
     }
 
-    private MenuItemRequestResponse toMenuItemRequestResponse(MenuItem item, int itemIndex) {
-        MenuItemRequestResponse result = new MenuItemRequestResponse();
+    private ItemResponse toMenuItemResponse(MenuItem item, int itemIndex) {
+        ItemResponse result = new ItemResponse();
         result.setDishName(item.getDishName());
         result.setServingNumber(item.getNecessaryQuantity(BigDecimal.ONE));
         result.setItemIndex(itemIndex);
         return result;
     }
 
-    private MenuItem.Builder toMenuItem(UUID userId, MenuItemRequestResponse dto) {
+    private MenuItem.Builder toMenuItem(UUID userId, ItemUpdateRequest dto) {
         return new MenuItem.Builder().
+                setId(dto.getId()).
+                setDishName(dto.getDishName()).
+                setQuantity(dto.getServingNumber()).
+                setConfig(appConfiguration).
+                setRepository(dishRepository).
+                setUserId(userId);
+    }
+
+    private MenuItem.Builder toMenuItem(UUID userId, ItemAddRequest dto) {
+        return new MenuItem.Builder().
+                generateId().
                 setDishName(dto.getDishName()).
                 setQuantity(dto.getServingNumber()).
                 setConfig(appConfiguration).
@@ -710,7 +732,7 @@ public class DtoMapper {
         response.setImageUrl(menu.getImageUrl());
         response.setItems(
                 IntStream.range(0, menu.getMenuItemNumbers()).
-                        mapToObj(i -> toMenuItemRequestResponse(menu.tryGetItem(i), i)).
+                        mapToObj(i -> toMenuItemResponse(menu.tryGetItem(i), i)).
                         toList()
         );
         response.setTags(toTagsResponse(menu.getTags()));

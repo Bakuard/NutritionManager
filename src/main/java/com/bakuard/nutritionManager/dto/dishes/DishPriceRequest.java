@@ -34,7 +34,7 @@ public class DishPriceRequest {
             2. Если для одного и того же ингредиента указанно несколько продуктов, то будет выбран первый продукт
              указанный в данном списке. <br/>
             """)
-    private List<DishIngredientProductRequest> products;
+    private List<IngredientProductRequest> products;
 
     public DishPriceRequest() {
 
@@ -56,11 +56,11 @@ public class DishPriceRequest {
         this.servingNumber = servingNumber;
     }
 
-    public List<DishIngredientProductRequest> getProducts() {
+    public List<IngredientProductRequest> getProducts() {
         return products;
     }
 
-    public void setProducts(List<DishIngredientProductRequest> products) {
+    public void setProducts(List<IngredientProductRequest> products) {
         this.products = products;
     }
 

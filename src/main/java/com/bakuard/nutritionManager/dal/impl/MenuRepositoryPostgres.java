@@ -7,7 +7,7 @@ import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
@@ -351,10 +351,10 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public Page<Menu> getMenus(Criteria criteria) {
         int menusNumber = getMenusNumber(criteria);
-        Page.Metadata metadata = criteria.getPageable().
+        Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
                 createPageMetadata(menusNumber, 30);
 
-        if(metadata.isEmpty()) return Pageable.firstEmptyPage();
+        if(metadata.isEmpty()) return Page.empty();
 
         String query =
                 select(field("M.*"),
@@ -491,7 +491,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
-        Page.Metadata metadata = criteria.getPageable().
+        Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
                 createPageMetadata(tagsNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -525,7 +525,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public Page<String> getNames(Criteria criteria) {
         int namesNumber = getNamesNumber(criteria);
-        Page.Metadata metadata = criteria.getPageable().
+        Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
                 createPageMetadata(namesNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());

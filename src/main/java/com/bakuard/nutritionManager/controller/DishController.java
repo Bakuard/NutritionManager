@@ -9,8 +9,8 @@ import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.util.Page;
-
 import com.bakuard.nutritionManager.service.ImageUploaderService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -325,7 +325,7 @@ public class DishController {
     )
     @Transactional
     @GetMapping("/getAllIngredientProducts")
-    public ResponseEntity<DishProductsListResponse> getAllIngredientProducts(
+    public ResponseEntity<DishProductsResponse> getAllIngredientProducts(
             @RequestParam("dishId")
             @Parameter(description = "Уникальный идентификатор блюда. Не может быть null.", required = true)
             UUID dishId,
@@ -335,7 +335,7 @@ public class DishController {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishId={} and ServingNumber={}", dishId, servingNumber);
 
-        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, dishId, servingNumber);
+        DishProductsResponse response = mapper.toDishProductsResponse(userId, dishId, servingNumber);
 
         return ResponseEntity.ok(response);
     }

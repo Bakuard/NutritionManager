@@ -6,7 +6,7 @@ import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -175,7 +175,7 @@ class DishIngredientTest {
 
     private Criteria createCriteria(int expectedPageNumber) {
         return new Criteria().
-                setPageable(Pageable.ofIndex(5, expectedPageNumber)).
+                setPageable(PageableByNumber.ofIndex(5, expectedPageNumber)).
                 setFilter(
                         Filter.and(
                                 Filter.anyCategory("categoryA"),

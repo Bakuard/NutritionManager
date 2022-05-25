@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
@@ -16,6 +17,22 @@ import java.util.stream.IntStream;
  * @param <T> типо объектов из которых состоит исходная выборка, к котоой применяется пагинация.
  */
 public final class Page<T> {
+
+    /**
+     * Создает и возвращает пустую страницу представляющую первую страницу пустой выборки. Номер данной страницы
+     * будут равен 0, а максимальный ожидаемый размер 1.
+     * @param <T> тип объектов из которых состоит выборка.
+     * @return пустую страницы представляющую первую страницу пустой выборки.
+     */
+    public static <T> Page<T> empty() {
+        return new Page.Metadata(
+                BigInteger.ZERO,
+                1,
+                BigInteger.ZERO,
+                1
+        ).createPage(List.of());
+    }
+
 
     private final ImmutableList<T> content;
     private final Metadata metadata;
@@ -74,8 +91,11 @@ public final class Page<T> {
      *    вернет пустой Optional. <br/>
      * @param globalIndex глобальный индекс элемента (порядковый номер элемента во всей выборке).
      * @return объект хранящийся на данной странице или пустой Optional.
+     * @throws NullPointerException если globalIndex является null.
      */
     public Optional<T> getByGlobalIndex(BigInteger globalIndex) {
+        Objects.requireNonNull(globalIndex, "globalIndex can't be null");
+
         T result = null;
 
         if(!metadata.isEmpty()) {
@@ -87,6 +107,28 @@ public final class Page<T> {
                 result = content.get(index);
             }
         }
+
+        return Optional.ofNullable(result);
+    }
+
+    /**
+     * Возвращает глобальный индекс первого из элементов находящихся на данной странице и удовлетворяющего
+     * заданному ограничению predicate. Если среди элементов этой страницы ни один не соответствует заданному
+     * ограничению - возвращает пустой Optional. <br/>
+     * Глобальный индекс элемента - это его порядковый номер (нумерация начинается с нуля) во всей выборке,
+     * по которой проводится пагинация.
+     * @param predicate ограничения задающие
+     * @return глобальный индекс элемента удовлетворяющего заданному ограничению.
+     * @throws NullPointerException если predicate равен null.
+     */
+    public Optional<BigInteger> getGlobalIndexFor(Predicate<T> predicate) {
+        Objects.requireNonNull(predicate, "predicate can't be null.");
+
+        int index = 0;
+        while(index < content.size() && !predicate.test(content.get(index))) ++index;
+
+        BigInteger result = null;
+        if(index < content.size()) result = metadata.getOffset().add(BigInteger.valueOf(index));
 
         return Optional.ofNullable(result);
     }
@@ -154,32 +196,32 @@ public final class Page<T> {
 
     /**
      * Объекты данного класса содержат метаданные о всей исходной выборке и конкретной странице определяемой
-     * {@link Pageable}.
+     * {@link PageableByNumber}.
      */
     public static class Metadata {
 
         private static final int minPageSize = 1;
 
 
-        private final Pageable pageable;
         private final BigInteger totalItems;
         private final BigInteger commonPageSize;
         private final BigInteger maxPageNumber;
         private final int actualSize;
         private final BigInteger actualNumber;
 
-        Metadata(Pageable pageable, BigInteger totalItems, int maxPageSize) {
+        Metadata(BigInteger expectedPageNumber,
+                 int expectedPageSize,
+                 BigInteger totalItems,
+                 int maxPageSize) {
             if(maxPageSize < 1)
                 throw new IllegalArgumentException("maxPageSize must be greater or equal 1");
-
-            this.pageable = pageable;
 
             this.totalItems = Objects.requireNonNull(totalItems, "totalItems can't be null");
             if(totalItems.signum() < 0)
                 throw new IllegalArgumentException("totalItems can't be negative. totalItems = " + totalItems);
 
             commonPageSize = BigInteger.valueOf(
-                    Math.min(Math.max(pageable.getExpectedPageSize(), minPageSize), maxPageSize)
+                    Math.min(Math.max(expectedPageSize, minPageSize), maxPageSize)
             );
 
             maxPageNumber = totalItems.
@@ -187,7 +229,7 @@ public final class Page<T> {
                     divide(commonPageSize).
                     max(BigInteger.ZERO);
 
-            actualNumber = pageable.getExpectedPageNumber().
+            actualNumber = expectedPageNumber.
                     max(BigInteger.ZERO).
                     min(maxPageNumber);
 
@@ -195,14 +237,6 @@ public final class Page<T> {
                     subtract(getOffset()).
                     min(commonPageSize).
                     intValue();
-        }
-
-        /**
-         * Возвращает объект {@link Pageable} на основе которого была получена данная страница.
-         * @return объект {@link Pageable} на основе которого быда получена данная страница.
-         */
-        public Pageable getPageable() {
-            return pageable;
         }
 
         /**
@@ -218,10 +252,10 @@ public final class Page<T> {
 
         /**
          * Фактический номер страницы. Фактический номер страницы равен ожидаемому номеру страницы указанному в
-         * {@link Pageable} за исключением следующих случаев:<br/>
-         * 1. Если ожидаемый номер страницы указанный в {@link Pageable} меньше нуля, то фактический номер страницы
+         * {@link PageableByNumber} за исключением следующих случаев:<br/>
+         * 1. Если ожидаемый номер страницы указанный в {@link PageableByNumber} меньше нуля, то фактический номер страницы
          *    будет равен нулю.<br/>
-         * 3. Если искомая выборка не пуста и ожидаемый номер страницы указанный в {@link Pageable} больше или равен
+         * 3. Если искомая выборка не пуста и ожидаемый номер страницы указанный в {@link PageableByNumber} больше или равен
          *    {@link #getTotalPages()}, то фактический номер страницы будет равен {@link #getTotalPages()} минус 1.
          * 2. Если искомая выборка пуста - то фактический номер страницы будет равен 0.<br/>
          * @return фактический номер страницы.
@@ -232,11 +266,11 @@ public final class Page<T> {
 
         /**
          * Фактический размер страницы. Фактический размер страницы равен ожидаемому размеру страницы указанному в
-         * {@link Pageable} за исключением следующих случаев:<br/>
-         * 1. Если ожидаемый размер страницы указанный в {@link Pageable} меньше или равен нулю, то фактический размер
+         * {@link PageableByNumber} за исключением следующих случаев:<br/>
+         * 1. Если ожидаемый размер страницы указанный в {@link PageableByNumber} меньше или равен нулю, то фактический размер
          *    страницы будет равен 1.<br/>
          * 2. Если искомая выборка пуста - то фактический размер страницы будет равен 0.<br/>
-         * 3. Если ожидаемый размер страницы указанный в {@link Pageable} больше 200 или больше оставшегося кол-ва
+         * 3. Если ожидаемый размер страницы указанный в {@link PageableByNumber} больше 200 или больше оставшегося кол-ва
          *    элементов в выборке, то фактический размер страницы будет равен наименьшему из этих двух значений.
          * @return фактический размер страницы.
          */
@@ -314,9 +348,8 @@ public final class Page<T> {
 
         @Override
         public String toString() {
-            return "Info{" +
-                    "pageable=" + pageable +
-                    ", offset=" + getOffset() +
+            return "Metadata{" +
+                    "offset=" + getOffset() +
                     ", totalItems=" + totalItems +
                     ", commonPageSize=" + commonPageSize +
                     ", maxPageNumber=" + maxPageNumber +
