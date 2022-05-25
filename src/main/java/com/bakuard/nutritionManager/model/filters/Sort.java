@@ -134,10 +134,8 @@ public class Sort {
                 () -> new ValidateException("Unknown sort direction"),
                 Rule.of("Sort.direction").notNull(direction).
                         and(r -> {
-                            switch(direction) {
-                                case "asc": d.set(true);
-                                case "desc": d.set(false);
-                            }
+                            if("asc".equalsIgnoreCase(direction)) d.set(true);
+                            else if("desc".equalsIgnoreCase(direction)) d.set(false);
 
                             if(d.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
                             else return r.success(Constraint.CONTAINS_ITEM);

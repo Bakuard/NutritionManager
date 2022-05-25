@@ -351,7 +351,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.products(sortRule != null ? List.of(sortRule) : List.of())).
+                setSort(Sort.products(Arrays.asList(sortRule))).
                 setFilter(filter);
     }
 
