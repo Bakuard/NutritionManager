@@ -57,7 +57,7 @@ class ProductRepositoryTest {
         hikariConfig.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         hikariConfig.setUsername(appConfiguration.getDatabaseUser());
         hikariConfig.setPassword(appConfiguration.getDatabasePassword());
-        hikariConfig.addDataSourceProperty("databaseName", appConfiguration.getDatabaseName());
+        hikariConfig.addDataSourceProperty("databaseName", "NutritionManagerUnitTest");
         hikariConfig.setAutoCommit(false);
         hikariConfig.addDataSourceProperty("portNumber", "5432");
         hikariConfig.addDataSourceProperty("serverName", "localhost");
@@ -1421,9 +1421,9 @@ class ProductRepositoryTest {
                                 Filter.and(
                                         Filter.user(user.getId()),
                                         Filter.minTags(new Tag("tag B"), new Tag("common tag")),
-                                        Filter.anyCategory("name B"),
-                                        Filter.anyShop("shop C"),
-                                        Filter.anyGrade("variety D")
+                                        Filter.anyCategory("name B", "unknown name", "unknown name 2"),
+                                        Filter.anyShop("shop C", "unknown shop", "unknown shop 2"),
+                                        Filter.anyGrade("variety D", "unknown variety", "unknown variety 2")
                                 )
                         ).
                         setSort(Sort.productDefaultSort())
@@ -1548,8 +1548,8 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(2, 200).
-                createPage(products.subList(4, 6));
+                createPageMetadata(3, 200).
+                createPage(products.subList(3, 6));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1558,8 +1558,8 @@ class ProductRepositoryTest {
                                 Filter.and(
                                         Filter.user(user.getId()),
                                         Filter.greater(BigDecimal.ZERO),
-                                        Filter.anyCategory("name B"),
-                                        Filter.anyShop("shop C")
+                                        Filter.anyCategory("name B", "name A"),
+                                        Filter.anyShop("shop B", "shop C")
                                 )
                         ).
                         setSort(Sort.productDefaultSort())
@@ -1650,9 +1650,9 @@ class ProductRepositoryTest {
     void getProducts15() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
-                createPage(products.subList(0, 2));
+        Page<Product> expected = PageableByNumber.of(3, 0).
+                createPageMetadata(3, 200).
+                createPage(products.subList(0, 3));
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1661,8 +1661,8 @@ class ProductRepositoryTest {
                                 Filter.and(
                                         Filter.user(user.getId()),
                                         Filter.minTags(new Tag("common tag")),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A")
+                                        Filter.anyShop("shop A", "shop B"),
+                                        Filter.anyGrade("variety A", "variety B")
                                 )
                         ).
                         setSort(Sort.productDefaultSort())

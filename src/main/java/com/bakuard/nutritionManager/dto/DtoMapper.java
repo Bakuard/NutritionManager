@@ -331,7 +331,7 @@ public class DtoMapper {
                                       UUID userId,
                                       String sortRule,
                                       boolean onlyFridge,
-                                      String category,
+                                      List<String> categories,
                                       List<String> shops,
                                       List<String> grades,
                                       List<String> manufacturers,
@@ -339,7 +339,7 @@ public class DtoMapper {
         List<Filter> filters = new ArrayList<>();
         filters.add(Filter.user(userId));
         if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
-        if(category != null) filters.add(Filter.anyCategory(category));
+        if(categories != null && !categories.isEmpty()) filters.add(Filter.anyCategory(categories));
         if(shops != null && !shops.isEmpty()) filters.add(Filter.anyShop(shops));
         if(grades != null && !grades.isEmpty()) filters.add(Filter.anyGrade(grades));
         if(manufacturers != null && !manufacturers.isEmpty()) filters.add(Filter.anyManufacturer(manufacturers));

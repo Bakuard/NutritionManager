@@ -348,8 +348,8 @@ public final class Page<T> {
 
         @Override
         public String toString() {
-            return "Info{" +
-                    ", offset=" + getOffset() +
+            return "Metadata{" +
+                    "offset=" + getOffset() +
                     ", totalItems=" + totalItems +
                     ", commonPageSize=" + commonPageSize +
                     ", maxPageNumber=" + maxPageNumber +
