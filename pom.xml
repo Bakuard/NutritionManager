@@ -114,7 +114,25 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>1.6.8</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.bakuard</groupId>
+            <artifactId>arialUnicode</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.19.1</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>maven_inner_repository</id>
+            <url>file://${project.basedir}/mavenInnerRepository</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
