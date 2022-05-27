@@ -698,6 +698,7 @@ public class DtoMapper {
 
     private ItemResponse toMenuItemResponse(MenuItem item, int itemIndex) {
         ItemResponse result = new ItemResponse();
+        result.setId(item.getId());
         result.setDishName(item.getDishName());
         result.setServingNumber(item.getNecessaryQuantity(BigDecimal.ONE));
         result.setItemIndex(itemIndex);
