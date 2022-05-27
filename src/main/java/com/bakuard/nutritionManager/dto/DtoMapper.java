@@ -377,7 +377,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
+                setSort(Sort.dishes(Arrays.asList(sortRule))).
                 setFilter(filter);
     }
 
@@ -403,7 +403,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.dishes(sortRule != null ? List.of(sortRule) : List.of())).
+                setSort(Sort.menus(Arrays.asList(sortRule))).
                 setFilter(filter);
     }
 
