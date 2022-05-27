@@ -1,28 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
-			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			  xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
-			  name="productReportTemplate"
-			  pageWidth="595" pageHeight="842"
-			  columnWidth="555"
-			  leftMargin="20" rightMargin="20"
-			  topMargin="20" bottomMargin="20"
-			  resourceBundle="reportTemplates/dishProductsStrings"
-			  uuid="148fa5a6-9c31-420e-aa9f-63663dcd1410">
-	<field name="creationReportData"/>
-	<field name="totalPrice"/>
-	<field name="shopGroup"/>
-	<field name="productGroup"/>
-	<field name="productName"/>
-	<field name="grade"/>
-	<field name="price"/>
-	<field name="packingSize"/>
-	<field name="unit"/>
-	<field name="manufacturer"/>
-	<field name="quantity"/>
-	<field name="necessaryQuantity"/>
-	<field name="lackQuantity"/>
-	<field name="lackQuantityPrice"/>
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="produtctReportTemplate" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" resourceBundle="reportTemplates/menuProductsStrings" uuid="148fa5a6-9c31-420e-aa9f-63663dcd1410">
+	<field name="creationReportData" class="java.lang.String"/>
+	<field name="totalPrice" class="java.lang.String"/>
+	<field name="shopGroup" class="java.lang.String"/>
+	<field name="productGroup" class="java.lang.String"/>
+	<field name="productName" class="java.lang.String"/>
+	<field name="grade" class="java.lang.String"/>
+	<field name="price" class="java.lang.String"/>
+	<field name="packingSize" class="java.lang.String"/>
+	<field name="unit" class="java.lang.String"/>
+	<field name="manufacturer" class="java.lang.String"/>
+	<field name="quantity" class="java.lang.String"/>
+	<field name="necessaryQuantity" class="java.lang.String"/>
+	<field name="lackQuantity" class="java.lang.String"/>
+	<field name="lackQuantityPrice" class="java.lang.String"/>
+	<field name="useInDishes" class="java.lang.String"/>
 	<group name="shopGroup">
 		<groupExpression><![CDATA[$F{shopGroup}]]></groupExpression>
 		<groupHeader>
@@ -69,7 +62,7 @@
 		</band>
 	</title>
 	<detail>
-		<band height="200" splitType="Stretch">
+		<band height="231" splitType="Stretch">
 			<textField>
 				<reportElement x="22" y="10" width="510" height="30" uuid="d36527c9-d7d2-4908-8dd5-94f7bf1dca63"/>
 				<textElement verticalAlignment="Middle" markup="styled">
@@ -125,6 +118,22 @@
 					<font fontName="ArialUnicode" size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{lackQuantityPrice} + $F{lackQuantityPrice}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="22" y="190" width="508" height="30" uuid="06da452c-008d-4616-a904-d69c1542da9f">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+					<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+					<bottomPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+					<rightPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="12"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{useInDishes} + $F{useInDishes}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
