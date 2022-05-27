@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="produtctReportTemplate" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" resourceBundle="reportTemplates/menuProductsStrings" uuid="148fa5a6-9c31-420e-aa9f-63663dcd1410">
-	<field name="creationReportData" class="java.lang.String"/>
-	<field name="totalPrice" class="java.lang.String"/>
-	<field name="shopGroup" class="java.lang.String"/>
-	<field name="productGroup" class="java.lang.String"/>
-	<field name="productName" class="java.lang.String"/>
-	<field name="grade" class="java.lang.String"/>
-	<field name="price" class="java.lang.String"/>
-	<field name="packingSize" class="java.lang.String"/>
-	<field name="unit" class="java.lang.String"/>
-	<field name="manufacturer" class="java.lang.String"/>
-	<field name="quantity" class="java.lang.String"/>
-	<field name="necessaryQuantity" class="java.lang.String"/>
-	<field name="lackQuantity" class="java.lang.String"/>
-	<field name="lackQuantityPrice" class="java.lang.String"/>
-	<field name="useInDishes" class="java.lang.String"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			  xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+			  name="menuProductsReportTemplate"
+			  pageWidth="595" pageHeight="842"
+			  columnWidth="555"
+			  leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20"
+			  resourceBundle="reportTemplates/menuProductsStrings"
+			  uuid="148fa5a6-9c31-420e-aa9f-63663dcd1410">
+	<field name="creationReportData"/>
+	<field name="totalPrice"/>
+	<field name="shopGroup"/>
+	<field name="productGroup"/>
+	<field name="productName"/>
+	<field name="grade"/>
+	<field name="price"/>
+	<field name="packingSize"/>
+	<field name="unit"/>
+	<field name="manufacturer"/>
+	<field name="quantity"/>
+	<field name="necessaryQuantity"/>
+	<field name="lackQuantity"/>
+	<field name="lackQuantityPrice"/>
+	<field name="useInDishes"/>
 	<group name="shopGroup">
 		<groupExpression><![CDATA[$F{shopGroup}]]></groupExpression>
 		<groupHeader>
