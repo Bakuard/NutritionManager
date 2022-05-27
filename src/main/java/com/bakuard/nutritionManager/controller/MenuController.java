@@ -395,43 +395,4 @@ public class MenuController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = """
-            Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню.
-            """,
-            description = """
-            Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню. Особые случаи: <br/>
-            1. Если ни одно блюдо не содержит ни одного ингредиента - возвращает null. <br/>
-            2. Если ни одному ингредиенту ни одного блюда не соответствует ни один продукт - возвращает null. <br/>
-            3. Если какому-либо ингредиенту какого-либо блюда не соответствует ни одного продукта - то он не принимает
-             участия в расчете стоимости меню. <br/>
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти меню с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
-    @PostMapping("/getLackProductPrice")
-    public ResponseEntity<BigDecimal> getLackProductPrice(@RequestBody MenuPriceRequest dto) {
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        logger.info("Pick products list for menu dishes: userId={}, dto={}", userId, dto);
-
-        BigDecimal response = mapper.toMenuPrice(userId, dto).orElse(null);
-
-        return ResponseEntity.ok(response);
-    }
-
 }

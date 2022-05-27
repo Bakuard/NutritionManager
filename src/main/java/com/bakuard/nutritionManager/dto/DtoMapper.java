@@ -20,9 +20,11 @@ import com.bakuard.nutritionManager.model.filters.MinTagsFilter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
+import com.bakuard.nutritionManager.service.report.ReportService;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.RuleException;
 import com.bakuard.nutritionManager.validation.ValidateException;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -118,6 +120,57 @@ public class DtoMapper {
         return products.map(this::toProductResponse);
     }
 
+    public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
+        Criteria criteria = new Criteria().
+                setPageable(PageableByNumber.of(1000, 0)).
+                setFilter(Filter.user(userId));
+
+        Page<String> manufacturers = productRepository.getManufacturers(criteria);
+        Page<String> grades = productRepository.getGrades(criteria);
+        Page<String> shops = productRepository.getShops(criteria);
+        Page<String> categories = productRepository.getCategories(criteria);
+        Page<Tag> tags = productRepository.getTags(criteria);
+
+        ProductFieldsResponse response = new ProductFieldsResponse();
+        response.setTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
+        response.setGrades(grades.getContent().stream().map(FieldResponse::new).toList());
+        response.setManufacturers(manufacturers.getContent().stream().map(FieldResponse::new).toList());
+        response.setShops(shops.getContent().stream().map(FieldResponse::new).toList());
+        response.setCategories(categories.getContent().stream().map(FieldResponse::new).toList());
+
+        return response;
+    }
+
+    public Criteria toProductCriteria(int page,
+                                      int size,
+                                      UUID userId,
+                                      String sortRule,
+                                      boolean onlyFridge,
+                                      List<String> categories,
+                                      List<String> shops,
+                                      List<String> grades,
+                                      List<String> manufacturers,
+                                      List<String> tags) {
+        List<Filter> filters = new ArrayList<>();
+        filters.add(Filter.user(userId));
+        if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
+        if(categories != null && !categories.isEmpty()) filters.add(Filter.anyCategory(categories));
+        if(shops != null && !shops.isEmpty()) filters.add(Filter.anyShop(shops));
+        if(grades != null && !grades.isEmpty()) filters.add(Filter.anyGrade(grades));
+        if(manufacturers != null && !manufacturers.isEmpty()) filters.add(Filter.anyManufacturer(manufacturers));
+        if(tags != null && !tags.isEmpty()) filters.add(Filter.minTags(toTags(tags)));
+
+        Filter filter = null;
+        if(filters.size() == 1) filter = filters.get(0);
+        else filter = Filter.and(filters);
+
+        return new Criteria().
+                setPageable(PageableByNumber.of(size, page)).
+                setSort(Sort.products(Arrays.asList(sortRule))).
+                setFilter(filter);
+    }
+
+
 
     public DishResponse toDishResponse(Dish dish) {
         DishResponse response = new DishResponse();
@@ -199,16 +252,66 @@ public class DtoMapper {
         return toDishProductsResponse(dish, servingNumber == null ? BigDecimal.ONE : servingNumber);
     }
 
-    public Optional<BigDecimal> toDishPrice(UUID userId, DishPriceRequest dto) {
+    public ReportService.DishProductsReportData toDishProductsReportData(UUID userId, DishReportRequest dto) {
         Dish dish = dishRepository.tryGetById(userId, dto.getDishId());
 
-        List<Dish.ProductConstraint> indexes = dto.getProducts().stream().
+        List<Dish.ProductConstraint> constraints = dto.getProducts().stream().
                 map(pr -> new Dish.ProductConstraint(pr.getIngredientIndex(), pr.getProductIndex())).
                 toList();
-        List<Dish.IngredientProduct> ingredients = dish.getProductForEachIngredient(indexes);
 
-        return dish.getLackProductPrice(ingredients, dto.getServingNumber());
+        return new ReportService.DishProductsReportData(
+                dish,
+                dto.getServingNumber(),
+                constraints,
+                LocaleContextHolder.getLocale()
+        );
     }
+
+    public DishFieldsResponse toDishFieldsResponse(UUID userId) {
+        Criteria criteria = new Criteria().
+                setPageable(PageableByNumber.of(1000, 0)).
+                setFilter(Filter.user(userId));
+
+        Page<Tag> tags = dishRepository.getTags(criteria);
+        Page<String> units = dishRepository.getUnits(criteria);
+        Page<String> names = dishRepository.getNames(criteria);
+        Page<String> categories = productRepository.getCategories(criteria);
+
+        DishFieldsResponse response = new DishFieldsResponse();
+        response.setDishTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
+        response.setDishUnits(units.getContent().stream().map(FieldResponse::new).toList());
+        response.setDishNames(names.getContent().stream().map(FieldResponse::new).toList());
+        response.setProductCategories(categories.getContent().stream().map(FieldResponse::new).toList());
+
+        return response;
+    }
+
+    public Criteria toDishCriteria(int page,
+                                   int size,
+                                   UUID userId,
+                                   String sortRule,
+                                   List<String> productCategories,
+                                   List<String> tags) {
+        List<Filter> filters = new ArrayList<>();
+        filters.add(Filter.user(userId));
+
+        if(productCategories != null && !productCategories.isEmpty()) {
+            filters.add(Filter.anyIngredient(productCategories));
+        }
+        if(tags != null && !tags.isEmpty()) {
+            filters.add(Filter.minTags(toTags(tags)));
+        }
+
+        Filter filter = null;
+        if(filters.size() == 1) filter = filters.get(0);
+        else filter = Filter.and(filters);
+
+        return new Criteria().
+                setPageable(PageableByNumber.of(size, page)).
+                setSort(Sort.dishes(Arrays.asList(sortRule))).
+                setFilter(filter);
+    }
+
 
 
     public MenuResponse toMenuResponse(Menu menu) {
@@ -267,6 +370,59 @@ public class DtoMapper {
         return menus.map(this::toMenuForListResponse);
     }
 
+    public MenuFieldsResponse toMenuFieldsResponse(UUID userId) {
+        Criteria criteria = new Criteria().
+                setPageable(PageableByNumber.of(1000, 0)).
+                setFilter(Filter.user(userId));
+
+        Page<Tag> menuTags = menuRepository.getTags(criteria);
+        Page<String> menuNames = menuRepository.getNames(criteria);
+        Page<String> dishNames = dishRepository.getNames(criteria);
+
+        MenuFieldsResponse response = new MenuFieldsResponse();
+        response.setMenuTags(menuTags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
+        response.setMenuNames(menuNames.getContent().stream().map(FieldResponse::new).toList());
+        response.setDishNames(dishNames.getContent().stream().map(FieldResponse::new).toList());
+
+        return response;
+    }
+
+    public ReportService.MenuProductsReportData toMenuProductsReportData(UUID userId, MenuReportRequest dto) {
+        Menu menu = menuRepository.tryGetById(userId, dto.getMenuId());
+
+        List<Menu.ProductConstraint> constraints = dto.getProducts().stream().
+                map(d -> new Menu.ProductConstraint(d.getDishName(), d.getIngredientIndex(), d.getProductIndex())).
+                toList();
+
+        return new ReportService.MenuProductsReportData(
+                menu,
+                dto.getQuantity(),
+                constraints,
+                LocaleContextHolder.getLocale()
+        );
+    }
+
+    public MenuDishesProductsListResponse toMenuDishesProductsListResponse(UUID userId,
+                                                                           UUID menuId,
+                                                                           BigDecimal quantity) {
+        Menu menu = menuRepository.tryGetById(userId, menuId);
+        Optional<BigDecimal> quantityOp = Optional.ofNullable(quantity);
+
+        MenuDishesProductsListResponse response = new MenuDishesProductsListResponse();
+        response.setMenuId(menuId);
+        response.setMenuName(menu.getName());
+        response.setMenuQuantity(quantityOp.orElse(BigDecimal.ONE));
+        response.setDishesProducts(
+                menu.getItems().stream().
+                        map(item -> toDishProductsResponse(
+                                item.getDish(), item.getNecessaryQuantity(quantityOp.orElse(BigDecimal.ONE)))
+                        ).
+                        toList()
+        );
+
+        return response;
+    }
+
     public MenuDishProductsListResponse toMenuDishProductsListResponse(UUID userId,
                                                                        UUID menuId,
                                                                        String dishName,
@@ -292,93 +448,6 @@ public class DtoMapper {
         }
 
         return response;
-    }
-
-    public MenuDishesProductsListResponse toMenuDishesProductsListResponse(UUID userId,
-                                                                           UUID menuId,
-                                                                           BigDecimal quantity) {
-        Menu menu = menuRepository.tryGetById(userId, menuId);
-        Optional<BigDecimal> quantityOp = Optional.ofNullable(quantity);
-
-        MenuDishesProductsListResponse response = new MenuDishesProductsListResponse();
-        response.setMenuId(menuId);
-        response.setMenuName(menu.getName());
-        response.setMenuQuantity(quantityOp.orElse(BigDecimal.ONE));
-        response.setDishesProducts(
-                menu.getItems().stream().
-                        map(item -> toDishProductsResponse(
-                                item.getDish(), item.getNecessaryQuantity(quantityOp.orElse(BigDecimal.ONE)))
-                        ).
-                        toList()
-        );
-
-        return response;
-    }
-
-    public Optional<BigDecimal> toMenuPrice(UUID userId, MenuPriceRequest dto) {
-        Menu menu = menuRepository.tryGetById(userId, dto.getMenuId());
-
-        List<Menu.ProductConstraint> constraints = dto.getProducts().stream().
-                map(d -> new Menu.ProductConstraint(d.getDishName(), d.getIngredientIndex(), d.getProductIndex())).
-                toList();
-        List<Menu.MenuItemProduct> items = menu.getMenuItemProducts(constraints);
-        return menu.getLackProductsPrice(items, dto.getQuantity());
-    }
-
-
-    public Criteria toProductCriteria(int page,
-                                      int size,
-                                      UUID userId,
-                                      String sortRule,
-                                      boolean onlyFridge,
-                                      List<String> categories,
-                                      List<String> shops,
-                                      List<String> grades,
-                                      List<String> manufacturers,
-                                      List<String> tags) {
-        List<Filter> filters = new ArrayList<>();
-        filters.add(Filter.user(userId));
-        if(onlyFridge) filters.add(Filter.greater(BigDecimal.ZERO));
-        if(categories != null && !categories.isEmpty()) filters.add(Filter.anyCategory(categories));
-        if(shops != null && !shops.isEmpty()) filters.add(Filter.anyShop(shops));
-        if(grades != null && !grades.isEmpty()) filters.add(Filter.anyGrade(grades));
-        if(manufacturers != null && !manufacturers.isEmpty()) filters.add(Filter.anyManufacturer(manufacturers));
-        if(tags != null && !tags.isEmpty()) filters.add(Filter.minTags(toTags(tags)));
-
-        Filter filter = null;
-        if(filters.size() == 1) filter = filters.get(0);
-        else filter = Filter.and(filters);
-
-        return new Criteria().
-                setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.products(Arrays.asList(sortRule))).
-                setFilter(filter);
-    }
-
-    public Criteria toDishCriteria(int page,
-                                   int size,
-                                   UUID userId,
-                                   String sortRule,
-                                   List<String> productCategories,
-                                   List<String> tags) {
-        List<Filter> filters = new ArrayList<>();
-        filters.add(Filter.user(userId));
-
-        if(productCategories != null && !productCategories.isEmpty()) {
-            filters.add(Filter.anyIngredient(productCategories));
-        }
-        if(tags != null && !tags.isEmpty()) {
-            filters.add(Filter.minTags(toTags(tags)));
-        }
-
-        Filter filter = null;
-        if(filters.size() == 1) filter = filters.get(0);
-        else filter = Filter.and(filters);
-
-        return new Criteria().
-                setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.dishes(Arrays.asList(sortRule))).
-                setFilter(filter);
     }
 
     public Criteria toMenuCriteria(int page,
@@ -408,63 +477,6 @@ public class DtoMapper {
     }
 
 
-    public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
-        Criteria criteria = new Criteria().
-                setPageable(PageableByNumber.of(1000, 0)).
-                setFilter(Filter.user(userId));
-
-        Page<String> manufacturers = productRepository.getManufacturers(criteria);
-        Page<String> grades = productRepository.getGrades(criteria);
-        Page<String> shops = productRepository.getShops(criteria);
-        Page<String> categories = productRepository.getCategories(criteria);
-        Page<Tag> tags = productRepository.getTags(criteria);
-
-        ProductFieldsResponse response = new ProductFieldsResponse();
-        response.setTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
-        response.setGrades(grades.getContent().stream().map(FieldResponse::new).toList());
-        response.setManufacturers(manufacturers.getContent().stream().map(FieldResponse::new).toList());
-        response.setShops(shops.getContent().stream().map(FieldResponse::new).toList());
-        response.setCategories(categories.getContent().stream().map(FieldResponse::new).toList());
-
-        return response;
-    }
-
-    public DishFieldsResponse toDishFieldsResponse(UUID userId) {
-        Criteria criteria = new Criteria().
-                setPageable(PageableByNumber.of(1000, 0)).
-                setFilter(Filter.user(userId));
-
-        Page<Tag> tags = dishRepository.getTags(criteria);
-        Page<String> units = dishRepository.getUnits(criteria);
-        Page<String> names = dishRepository.getNames(criteria);
-        Page<String> categories = productRepository.getCategories(criteria);
-
-        DishFieldsResponse response = new DishFieldsResponse();
-        response.setDishTags(tags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
-        response.setDishUnits(units.getContent().stream().map(FieldResponse::new).toList());
-        response.setDishNames(names.getContent().stream().map(FieldResponse::new).toList());
-        response.setProductCategories(categories.getContent().stream().map(FieldResponse::new).toList());
-
-        return response;
-    }
-
-    public MenuFieldsResponse toMenuFieldsResponse(UUID userId) {
-        Criteria criteria = new Criteria().
-                setPageable(PageableByNumber.of(1000, 0)).
-                setFilter(Filter.user(userId));
-
-        Page<Tag> menuTags = menuRepository.getTags(criteria);
-        Page<String> menuNames = menuRepository.getNames(criteria);
-        Page<String> dishNames = dishRepository.getNames(criteria);
-
-        MenuFieldsResponse response = new MenuFieldsResponse();
-        response.setMenuTags(menuTags.getContent().stream().map(t -> new FieldResponse(t.getValue())).toList());
-        response.setMenuNames(menuNames.getContent().stream().map(FieldResponse::new).toList());
-        response.setDishNames(dishNames.getContent().stream().map(FieldResponse::new).toList());
-
-        return response;
-    }
-
 
     public <T> SuccessResponse<T> toSuccessResponse(String keyMessage, T body) {
         return new SuccessResponse<>(
@@ -490,6 +502,7 @@ public class DtoMapper {
     }
 
 
+
     public ExceptionResponse toExceptionResponse(HttpStatus httpStatus, String keyMessage) {
         ExceptionResponse response = new ExceptionResponse(httpStatus);
         ConstraintResponse constraintResponse = new ConstraintResponse();
@@ -512,6 +525,7 @@ public class DtoMapper {
         e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
         return response;
     }
+
 
 
     private ConstraintResponse toConstraintResponse(RuleException ruleException) {

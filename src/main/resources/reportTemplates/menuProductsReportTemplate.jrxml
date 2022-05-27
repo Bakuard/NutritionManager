@@ -32,7 +32,7 @@
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font fontName="ArialUnicode" size="16"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$R{shopTitle}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$R{shopTitle} + $F{shopGroup}]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>

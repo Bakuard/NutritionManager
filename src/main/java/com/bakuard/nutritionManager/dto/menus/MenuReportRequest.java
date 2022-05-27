@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Данные запроса на получение стоимости меню.")
-public class MenuPriceRequest {
+@Schema(description = "Данные запроса на получение отчета по докупаемым продуктам к меню.")
+public class MenuReportRequest {
 
     @Schema(description = """
             Уникальный идентификатор меню в формате UUID. Ограничения: <br/>
@@ -37,7 +37,7 @@ public class MenuPriceRequest {
             """)
     private List<DishProductRequest> products;
 
-    public MenuPriceRequest() {
+    public MenuReportRequest() {
 
     }
 
@@ -69,7 +69,7 @@ public class MenuPriceRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MenuPriceRequest that = (MenuPriceRequest) o;
+        MenuReportRequest that = (MenuReportRequest) o;
         return Objects.equals(menuId, that.menuId) &&
                 Objects.equals(quantity, that.quantity) &&
                 Objects.equals(products, that.products);

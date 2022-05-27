@@ -5,9 +5,8 @@ import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
-
 import net.sf.jasperreports.engine.*;
-
+import net.sf.jasperreports.engine.util.JRLoader;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
@@ -22,10 +21,14 @@ public class ReportService {
     private List<JasperReport> reportTemplates;
 
     public ReportService() {
+
+    }
+
+    public void loadTemplates() {
         try {
             reportTemplates = List.of(
-                    loadTemplate("reportTemplates/dishProductsReportTemplate.jasper"),
-                    loadTemplate("reportTemplates/menuProductsReportTemplate.jasper")
+                    loadTemplate("reportTemplates/dishProductsReportTemplate.jrxml"),
+                    loadTemplate("reportTemplates/menuProductsReportTemplate.jrxml")
             );
         } catch(IOException | JRException e) {
             throw new RuntimeException("Fail to load report templates", e);
@@ -51,6 +54,10 @@ public class ReportService {
                     getCompiledReport("dishProductsReportTemplate"),
                     parameters,
                     new DishProductsDataSource(data.dish(), data.servingNumber(), data.constraints())
+            );
+            JasperExportManager.exportReportToPdfFile(
+                    filledReport,
+                    "C:/Users/BooBo/Desktop/report.pdf"
             );
 
             return JasperExportManager.exportReportToPdf(filledReport);
@@ -80,8 +87,7 @@ public class ReportService {
 
 
     private JasperReport loadTemplate(String path) throws IOException, JRException {
-        return JasperCompileManager.
-                compileReport(new ClassPathResource(path).getInputStream());
+        return JasperCompileManager.compileReport(new ClassPathResource(path).getInputStream());
     }
 
     private JasperReport getCompiledReport(String name) {
