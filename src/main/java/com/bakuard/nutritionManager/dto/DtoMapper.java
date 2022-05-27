@@ -583,7 +583,7 @@ public class DtoMapper {
 
     private DishIngredient.Builder toDishIngredient(UUID userId, IngredientUpdateRequest dto, int index) {
         return new DishIngredient.Builder().
-                setId(dto.getId()).
+                setOrGenerateId(dto.getId()).
                 setConfig(appConfiguration).
                 setName("Ингредиент №" + index + " - " + dto.getFilter().getCategory()).
                 setQuantity(dto.getQuantity()).
@@ -707,7 +707,7 @@ public class DtoMapper {
 
     private MenuItem.Builder toMenuItem(UUID userId, ItemUpdateRequest dto) {
         return new MenuItem.Builder().
-                setId(dto.getId()).
+                setOrGenerateId(dto.getId()).
                 setDishName(dto.getDishName()).
                 setQuantity(dto.getServingNumber()).
                 setConfig(appConfiguration).

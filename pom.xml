@@ -13,7 +13,7 @@
 
     <groupId>com.bakuard</groupId>
     <artifactId>nutritionManager</artifactId>
-    <version>0.10.12</version>
+    <version>0.10.13</version>
     <name>nutritionManager</name>
 
     <properties>

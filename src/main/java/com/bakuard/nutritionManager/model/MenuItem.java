@@ -182,6 +182,11 @@ public class MenuItem implements Entity<MenuItem> {
             return this;
         }
 
+        public Builder setOrGenerateId(UUID id) {
+            this.id = id == null ? UUID.randomUUID() : id;
+            return this;
+        }
+
         public Builder setDishName(String dishName) {
             this.dishName = dishName;
             return this;
