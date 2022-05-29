@@ -197,7 +197,7 @@ public class SpringConfig implements WebMvcConfigurer {
                 info(
                         new Info().
                                 title("Nutrition Manager API").
-                                version("0.8.0").
+                                version("0.11.0").
                                 contact(new Contact().email("purplespicemerchant@gmail.com"))
                 );
     }
