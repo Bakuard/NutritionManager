@@ -5,8 +5,9 @@ import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
+
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.util.JRLoader;
+
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
@@ -54,10 +55,6 @@ public class ReportService {
                     getCompiledReport("dishProductsReportTemplate"),
                     parameters,
                     new DishProductsDataSource(data.dish(), data.servingNumber(), data.constraints())
-            );
-            JasperExportManager.exportReportToPdfFile(
-                    filledReport,
-                    "C:/Users/BooBo/Desktop/report.pdf"
             );
 
             return JasperExportManager.exportReportToPdf(filledReport);

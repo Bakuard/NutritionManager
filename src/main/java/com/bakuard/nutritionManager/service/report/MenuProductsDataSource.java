@@ -48,26 +48,26 @@ public class MenuProductsDataSource implements JRDataSource {
 
         switch(jrField.getName()) {
             case "creationReportData" -> result = LocalDate.now().toString();
-            case "totalPrice" -> result = menu.getLackProductsPrice(itemProducts, menuNumber).
-                    orElseThrow().
-                    toPlainString();
+            case "totalPrice" -> result = format(
+                    menu.getLackProductsPrice(itemProducts, menuNumber).orElseThrow()
+            );
             case "shopGroup" -> result = current.getKey().getContext().getShop();
             case "productGroup", "productName" -> result = current.getKey().getContext().getCategory();
             case "grade" -> result = current.getKey().getContext().getGrade();
-            case "price" -> result = current.getKey().getContext().getPrice().toPlainString();
-            case "packingSize" -> result = current.getKey().getContext().getPackingSize().toPlainString();
+            case "price" -> result = format(current.getKey().getContext().getPrice());
+            case "packingSize" -> result = format(current.getKey().getContext().getPackingSize());
             case "unit" -> result = current.getKey().getContext().getUnit();
             case "manufacturer" -> result = current.getKey().getContext().getManufacturer();
-            case "quantity" -> result = current.getKey().getQuantity().toPlainString();
-            case "necessaryQuantity" -> result = menu.getNecessaryQuantity(current.getValue(), menuNumber).
-                    orElseThrow().
-                    toPlainString();
-            case "lackQuantity" -> result = menu.getLackPackageQuantity(current.getValue(), menuNumber).
-                    orElseThrow().
-                    toPlainString();
-            case "lackQuantityPrice" -> result = menu.getLackPackageQuantityPrice(current.getValue(), menuNumber).
-                    orElseThrow().
-                    toPlainString();
+            case "quantity" -> result = format(current.getKey().getQuantity());
+            case "necessaryQuantity" -> result = format(
+                    menu.getNecessaryQuantity(current.getValue(), menuNumber).orElseThrow()
+            );
+            case "lackQuantity" -> result = format(
+                    menu.getLackPackageQuantity(current.getValue(), menuNumber).orElseThrow()
+            );
+            case "lackQuantityPrice" -> result = format(
+                    menu.getLackPackageQuantityPrice(current.getValue(), menuNumber).orElseThrow()
+            );
             case "useInDishes" -> result = menu.getMenuItems(current.getValue()).stream().
                     map(item -> item.getDish().getName()).
                     reduce((a, b) -> String.join(", ", a, b)).
@@ -75,6 +75,11 @@ public class MenuProductsDataSource implements JRDataSource {
         }
 
         return result;
+    }
+
+
+    private String format(BigDecimal value) {
+        return value.stripTrailingZeros().toPlainString();
     }
 
 }

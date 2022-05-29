@@ -64,7 +64,7 @@ public class Menu implements Entity<Menu> {
         this.id = id;
         this.user = user;
         this.name = name.trim();
-        this.description = description.trim();
+        this.description = description;
         this.imageUrl = imageURlContainer.get();
         this.items = menuItemsContainer.get();
         this.tags = tagContainer.get();

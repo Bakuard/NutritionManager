@@ -20,7 +20,7 @@ public class MenuReportRequest {
             1. Не может быть null. <br/>
             2. Значение должно быть больше 0. <br/>
             """)
-    private BigDecimal quantity;
+    private BigDecimal menuNumber;
     @Schema(description = """
             Каждый элемент этого списка указывает - какой продукт выбрать для конкретного ингредиента одного
              из блюд меню. Данный список может быть пустым. <br/>
@@ -49,12 +49,12 @@ public class MenuReportRequest {
         this.menuId = menuId;
     }
 
-    public BigDecimal getQuantity() {
-        return quantity;
+    public BigDecimal getMenuNumber() {
+        return menuNumber;
     }
 
-    public void setQuantity(BigDecimal quantity) {
-        this.quantity = quantity;
+    public void setMenuNumber(BigDecimal menuNumber) {
+        this.menuNumber = menuNumber;
     }
 
     public List<DishProductRequest> getProducts() {
@@ -71,20 +71,20 @@ public class MenuReportRequest {
         if (o == null || getClass() != o.getClass()) return false;
         MenuReportRequest that = (MenuReportRequest) o;
         return Objects.equals(menuId, that.menuId) &&
-                Objects.equals(quantity, that.quantity) &&
+                Objects.equals(menuNumber, that.menuNumber) &&
                 Objects.equals(products, that.products);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(menuId, quantity, products);
+        return Objects.hash(menuId, menuNumber, products);
     }
 
     @Override
     public String toString() {
         return "MenuProductsListRequest{" +
                 "menuId=" + menuId +
-                ", quantity=" + quantity +
+                ", menuNumber=" + menuNumber +
                 ", products=" + products +
                 '}';
     }

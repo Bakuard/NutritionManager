@@ -207,13 +207,15 @@ public class DtoMapper {
                 setConfig(appConfiguration).
                 setRepository(productRepository);
 
-        IntStream.range(0, dto.getIngredients().size()).
-                forEach(i -> {
-                    IngredientAddRequest ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
-                });
+        if(dto.getIngredients() != null) {
+            IntStream.range(0, dto.getIngredients().size()).
+                    forEach(i -> {
+                        IngredientAddRequest ingredient = dto.getIngredients().get(i);
+                        builder.addIngredient(toDishIngredient(userId, ingredient, i));
+                    });
+        }
 
-        dto.getTags().forEach(builder::addTag);
+        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
 
         return builder.tryBuild();
     }
@@ -232,13 +234,15 @@ public class DtoMapper {
                 setConfig(appConfiguration).
                 setRepository(productRepository);
 
-        IntStream.range(0, dto.getIngredients().size()).
-                forEach(i -> {
-                    IngredientUpdateRequest ingredient = dto.getIngredients().get(i);
-                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
-                });
+        if(dto.getIngredients() != null) {
+            IntStream.range(0, dto.getIngredients().size()).
+                    forEach(i -> {
+                        IngredientUpdateRequest ingredient = dto.getIngredients().get(i);
+                        builder.addIngredient(toDishIngredient(userId, ingredient, i));
+                    });
+        }
 
-        dto.getTags().forEach(builder::addTag);
+        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
 
         return builder.tryBuild();
     }
@@ -341,9 +345,9 @@ public class DtoMapper {
                 setImageUrl(dto.getImageUrl()).
                 setConfig(appConfiguration);
 
-        dto.getTags().forEach(builder::addTag);
+        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
 
-        dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
+        if(dto.getItems() != null) dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
 
         return builder.tryBuild();
     }
@@ -359,9 +363,9 @@ public class DtoMapper {
                 setImageUrl(dto.getImageUrl()).
                 setConfig(appConfiguration);
 
-        dto.getTags().forEach(builder::addTag);
+        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
 
-        dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
+        if(dto.getItems() != null) dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
 
         return builder.tryBuild();
     }
@@ -396,7 +400,7 @@ public class DtoMapper {
 
         return new ReportService.MenuProductsReportData(
                 menu,
-                dto.getQuantity(),
+                dto.getMenuNumber(),
                 constraints,
                 LocaleContextHolder.getLocale()
         );

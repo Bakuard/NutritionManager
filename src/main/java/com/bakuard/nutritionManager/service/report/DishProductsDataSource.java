@@ -45,29 +45,34 @@ public class DishProductsDataSource implements JRDataSource {
 
         switch(jrField.getName()) {
             case "creationReportData" -> result = LocalDate.now().toString();
-            case "totalPrice" -> result = dish.getLackProductPrice(ingredientProducts, servingNumber).
-                    orElseThrow().
-                    toPlainString();
+            case "totalPrice" -> result = format(
+                    dish.getLackProductPrice(ingredientProducts, servingNumber).orElseThrow()
+            );
             case "shopGroup" -> result = current.getKey().getContext().getShop();
             case "productGroup", "productName" -> result = current.getKey().getContext().getCategory();
             case "grade" -> result = current.getKey().getContext().getGrade();
-            case "price" -> result = current.getKey().getContext().getPrice().toPlainString();
-            case "packingSize" -> result = current.getKey().getContext().getPackingSize().toPlainString();
+            case "price" -> result = format(current.getKey().getContext().getPrice());
+            case "packingSize" -> result = format(current.getKey().getContext().getPackingSize());
             case "unit" -> result = current.getKey().getContext().getUnit();
             case "manufacturer" -> result = current.getKey().getContext().getManufacturer();
-            case "quantity" -> result = current.getKey().getQuantity().toPlainString();
-            case "necessaryQuantity" -> result = dish.getNecessaryQuantity(current.getValue(), servingNumber).
-                    orElseThrow().
-                    toPlainString();
-            case "lackQuantity" -> result = dish.getLackPackageQuantity(current.getValue(), servingNumber).
-                    orElseThrow().
-                    toPlainString();
-            case "lackQuantityPrice" -> result = dish.getLackPackageQuantityPrice(current.getValue(), servingNumber).
-                    orElseThrow().
-                    toPlainString();
+            case "quantity" -> result = format(current.getKey().getQuantity());
+            case "necessaryQuantity" -> result = format(
+                    dish.getNecessaryQuantity(current.getValue(), servingNumber).orElseThrow()
+            );
+            case "lackQuantity" -> result = format(
+                    dish.getLackPackageQuantity(current.getValue(), servingNumber).orElseThrow()
+            );
+            case "lackQuantityPrice" -> result = format(
+                    dish.getLackPackageQuantityPrice(current.getValue(), servingNumber).orElseThrow()
+            );
         }
 
         return result;
+    }
+
+
+    private String format(BigDecimal value) {
+        return value.stripTrailingZeros().toPlainString();
     }
 
 }

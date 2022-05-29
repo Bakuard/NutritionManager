@@ -4,12 +4,14 @@ import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dto.DtoMapper;
+import com.bakuard.nutritionManager.dto.dishes.DishReportRequest;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.service.ImageUploaderService;
+import com.bakuard.nutritionManager.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,6 +21,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -41,14 +47,17 @@ public class MenuController {
     private MenuRepository repository;
 
     private ImageUploaderService imageUploaderService;
+    private ReportService reportService;
 
     @Autowired
     public MenuController(DtoMapper mapper,
                           MenuRepository repository,
-                          ImageUploaderService imageUploaderService) {
+                          ImageUploaderService imageUploaderService,
+                          ReportService reportService) {
         this.mapper = mapper;
         this.repository = repository;
         this.imageUploaderService = imageUploaderService;
+        this.reportService = reportService;
     }
 
     @Operation(summary = "Загружает изображение меню и возвращает его URL",
@@ -393,6 +402,49 @@ public class MenuController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = """
+            Составляет и возвращает отчет содержащий перечень всех недостающих продуктов и их кол-во, а также
+             суммарную их стоимость. Этот список создается на основе выбранных пользователем продуктов для каждого
+             ингредиента каждого блюда.
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти меню с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PostMapping("/createReport")
+    public ResponseEntity<Resource> createReport(@RequestBody MenuReportRequest dto) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        logger.info("create menu report: userId={}, dto={}", userId, dto);
+
+        ReportService.MenuProductsReportData reportInputData = mapper.toMenuProductsReportData(userId, dto);
+        byte[] reportOutputData = reportService.createMenuProductsReport(reportInputData);
+
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=productsList.pdf");
+        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        header.add("Pragma", "no-cache");
+        header.add("Expires", "0");
+
+        return ResponseEntity.ok().
+                headers(header).
+                contentLength(reportOutputData.length).
+                contentType(MediaType.APPLICATION_OCTET_STREAM).
+                body(new ByteArrayResource(reportOutputData));
     }
 
 }
