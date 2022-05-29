@@ -7,7 +7,8 @@ import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.filters.UserFilter;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableById;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.*;
 
 import java.math.BigDecimal;
@@ -189,6 +190,23 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
+     * Возвращает кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента. Особые
+     * случаи: <br/>
+     * 1. Если блюдо не содержит ингредиента с таким идентификатором - возвращает пустой Optional. <br/>
+     * @param ingredientId уникальный идентификатор ингредиента для которого рассчитывается кол-во взаимозаменяемых продуктов.
+     * @return кол-во всех продуктов, которые могут использоваться в качестве данного ингредиента или пустой Optional.
+     * @throws ValidateException если ingredientId равен null.
+     */
+    public Optional<Integer> getProductsNumber(UUID ingredientId) {
+        return getIngredient(ingredientId).
+                map(
+                        ingredient -> productRepository.getProductsNumber(
+                                new Criteria().setFilter(ingredient.getFilter())
+                        )
+                );
+    }
+
+    /**
      * Возвращает ингредиент по его индексу. Особые случаи: <br/>
      * 1. Если блюдо не содержит ингредиента с таким индексом - возвращает пустой Optional. <br/>
      * @param ingredientIndex индекс искомого ингредиента.
@@ -202,6 +220,23 @@ public class Dish implements Entity<Dish> {
         }
 
         return Optional.ofNullable(ingredient);
+    }
+
+    /**
+     * Возвращает ингредиент по его уникальному идентификатору. Особые случаи: <br/>
+     * 1. Если блюдо не содержит ингредиента с таким индексом - возвращает пустой Optional. <br/>
+     * @param ingredientId уникальный идентификатор ингредиента.
+     * @return ингредиент блюда или пустой Optional.
+     * @throws ValidateException если ingredientId равен null.
+     */
+    public Optional<DishIngredient> getIngredient(UUID ingredientId) {
+        Validator.check(
+                Rule.of("Dish.ingredientId").notNull(ingredientId)
+        );
+
+        return ingredients.stream().
+                filter(i -> i.getId().equals(ingredientId)).
+                findFirst();
     }
 
     /**
@@ -221,6 +256,23 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
+     * Возвращает ингредиент по его уникальному идентификатору.
+     * @param ingredientId уникальный идентификатор ингредиента.
+     * @return ингредиент блюда или пустой Optional.
+     * @throws ValidateException если выполняется хотябы одно из следующих условий: <br/>
+     *         1. ingredientId равен null. <br/>
+     *         2. У блюда нет ингредиента с таким идентификатором. <br/>
+     */
+    public DishIngredient tryGetIngredient(UUID ingredientId) {
+        return getIngredient(ingredientId).
+                orElseThrow(
+                        () -> new ValidateException(
+                                "Unknown ingredient with id=" + ingredientId + " and dishId=" + id
+                        ).addReason(Rule.of("Dish.ingredientId").failure(Constraint.CONTAINS_ITEM))
+                );
+    }
+
+    /**
      * Возвращает все ингредиенты данного блюда в виде списка доступного только для чтения.
      * @return все ингрединты данного блюда.
      */
@@ -235,16 +287,57 @@ public class Dish implements Entity<Dish> {
      * 1. Если блюдо не содержит ингредиента с индексом ingredientIndex - возвращает пустой Optional. <br/>
      * 2. Если указанный ингредиент не имеет продукта с индексом productIndex - то {@link IngredientProduct#product()}
      *    будет возвращать пустой Optional.<br/>
-     * @param ingredientIndex индекс ингредиента для которого возвращается один из возможных взаимозаменяемых продуктов.
-     * @param productIndex порядковый номер продукта.
-     * @return продукт по его порядковому номеру.
+     * @param ingredientIndex порядковый номер (индекс) ингредиента.
+     * @param productIndex порядковый номер (индекс) продукта.
+     * @return данные о продукте.
      */
     public Optional<IngredientProduct> getProduct(int ingredientIndex, int productIndex) {
         return getIngredient(ingredientIndex).
                 map(ingredient -> {
                     Page<Product> page = getProductPageBy(ingredient, productIndex);
                     Optional<Product> product = page.getByGlobalIndex(BigInteger.valueOf(productIndex));
-                    return new IngredientProduct(product, ingredientIndex, productIndex);
+                    return new IngredientProduct(
+                            product,
+                            ingredient.getId(),
+                            ingredientIndex,
+                            productIndex
+                    );
+                });
+    }
+
+    /**
+     * Возвращает продукт из множества всех взаимозаменяемых продуктов для данного ингредиента по его
+     * идентификатору. Множество продуктов для данного ингредиента упорядоченно по цене в порядке возрастания.
+     * Особые случаи:<br/>
+     * 1. Если блюдо не содержит ингредиента с идентификатором ingredientId - возвращает пустой Optional. <br/>
+     * 2. Если указанный ингредиент не имеет продукта с идентификатором productId - то {@link IngredientProduct#product()}
+     *    будет возвращать пустой Optional.<br/>
+     * @param ingredientId уникальный идентификатор ингредиента блюда.
+     * @param productId уникальный идентификатор продукта.
+     * @return данные о продукте.
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
+     *         1. ingredientId является null. <br/>
+     *         2. productId является null. <br/>
+     */
+    public Optional<IngredientProduct> getProduct(UUID ingredientId, UUID productId) {
+        Validator.check(
+                Rule.of("Dish.productId").notNull(productId)
+        );
+
+        return getIngredient(ingredientId).
+                map(ingredient -> {
+                    Page<Product> page = getProductPageBy(ingredient, productId);
+                    Optional<Product> product = page.getContent().stream().
+                            filter(p -> p.getId().equals(productId)).
+                            findFirst();
+                    return new IngredientProduct(
+                            product,
+                            ingredient.getId(),
+                            getIngredientIndexBy(ingredient.getId()),
+                            page.getGlobalIndexFor(p -> product.isPresent() && p.getId().equals(productId)).
+                                    orElse(BigInteger.ONE.negate()).
+                                    intValue()
+                    );
                 });
     }
 
@@ -262,21 +355,58 @@ public class Dish implements Entity<Dish> {
                 map(ingredient -> {
                     Page<Product> productPage =  productRepository.getProducts(
                             new Criteria().
-                                    setPageable(Pageable.of(30, pageNumber)).
+                                    setPageable(PageableByNumber.of(30, pageNumber)).
                                     setSort(ingredientProductsSort).
                                     setFilter(ingredient.getFilter())
                     );
 
                     return productPage.map(
                             (product, index) ->
-                                    new IngredientProduct(Optional.ofNullable(product), ingredientIndex, index.intValue())
+                                    new IngredientProduct(
+                                            Optional.ofNullable(product),
+                                            ingredient.getId(),
+                                            ingredientIndex,
+                                            index.intValue()
+                                    )
                     );
                 });
     }
 
     /**
-     * Возвращает данные о выбранном продукте для каждого ингрдиента блюда. Индекс элемента в итоговом списке
-     * соответствует индексу ингедиента к которому этот элемент относится. Особые случаи:<br/>
+     * Возвращает часть выборки продуктов соответствующих указанному ингредиенту. Все продукты в выборке
+     * упорядоченны по цене в порядке возрастания. Особые случаи: <br/>
+     * 1. Если ингредиенту не соответствует ни один продукт - возвращает пустой объект {@link Page}. <br/>
+     * 2. Если среди ингредиентов блюда нет ингредиента с таким идентификатором - возвращает пустой Optional. <br/>
+     * @param ingredientId уникальный идентификатор ингредиента.
+     * @param pageNumber номер страницы выборки.
+     * @return страницу из выборки продуктов соответствующих указанному ингредиенту.
+     * @throws ValidateException если ingredientId равен null.
+     */
+    public Optional<Page<IngredientProduct>> getProducts(UUID ingredientId, int pageNumber) {
+        return getIngredient(ingredientId).
+                map(ingredient -> {
+                    Page<Product> productPage =  productRepository.getProducts(
+                            new Criteria().
+                                    setPageable(PageableByNumber.of(30, pageNumber)).
+                                    setSort(ingredientProductsSort).
+                                    setFilter(ingredient.getFilter())
+                    );
+
+                    return productPage.map(
+                            (product, index) ->
+                                    new IngredientProduct(
+                                            Optional.ofNullable(product),
+                                            ingredientId,
+                                            getIngredientIndexBy(ingredientId),
+                                            index.intValue()
+                                    )
+                    );
+                });
+    }
+
+    /**
+     * Возвращает данные о выбранном продукте для каждого ингредиента блюда. Индекс элемента в итоговом списке
+     * соответствует индексу ингредиента к которому этот элемент относится. Особые случаи:<br/>
      * 1. Если блюдо не содержит ингредиентов - возвращает пустой список. <br/>
      * 2. Если {@link ProductConstraint#ingredientIndex()} некоторого элемента < 0 - этот элемент будет отброшен и
      *    не будет принимать участия в формировании итогового результата. <br/>
@@ -679,7 +809,7 @@ public class Dish implements Entity<Dish> {
                     Optional<Product> product = page.getByGlobalIndex(
                             page.getMetadata().getTotalItems().subtract(BigInteger.ONE)
                     );
-                    return new IngredientProduct(product, ingredientIndex, productIndex);
+                    return new IngredientProduct(product, ingredient.getId(), ingredientIndex, productIndex);
                 }).
                 toList();
 
@@ -718,7 +848,7 @@ public class Dish implements Entity<Dish> {
                 unit.equals(other.unit) &&
                 Objects.equals(description, other.description) &&
                 Objects.equals(imageUrl, other.imageUrl) &&
-                ingredients.equals(other.ingredients) &&
+                equals(ingredients, other.ingredients) &&
                 tags.equals(other.tags) &&
                 config == other.config &&
                 productRepository == other.productRepository;
@@ -759,6 +889,12 @@ public class Dish implements Entity<Dish> {
     }
 
 
+    private boolean equals(List<DishIngredient> a, List<DishIngredient> b) {
+        return a.size() == b.size() &&
+                IntStream.range(0, a.size()).allMatch(i -> a.get(i).equalsFullState(b.get(i)));
+    }
+
+
     private Product retrieveProduct(List<IngredientProduct> ingredientProducts) {
         return ingredientProducts.stream().
                 filter(i -> i.product().isPresent()).
@@ -793,19 +929,38 @@ public class Dish implements Entity<Dish> {
 
     private Page<Product> getProductPageBy(DishIngredient ingredient, int productIndex) {
         Criteria criteria = new Criteria().
-                setPageable(Pageable.ofIndex(30, productIndex)).
+                setPageable(PageableByNumber.ofIndex(30, productIndex)).
                 setSort(ingredientProductsSort).
                 setFilter(ingredient.getFilter());
 
         return productRepository.getProducts(criteria);
     }
 
+    private Page<Product> getProductPageBy(DishIngredient ingredient, UUID productId) {
+        Criteria criteria = new Criteria().
+                setPageable(PageableById.of(30, productId)).
+                setSort(ingredientProductsSort).
+                setFilter(ingredient.getFilter());
+
+        return productRepository.getProducts(criteria);
+    }
+
+    private int getIngredientIndexBy(UUID ingredientId) {
+        return IntStream.range(0, ingredients.size()).
+                filter(i -> ingredients.get(i).getId().equals(ingredientId)).
+                findFirst().
+                orElse(-1);
+    }
+
 
     public record ProductConstraint(int ingredientIndex, int productIndex) {}
 
+    public record ProductConstraintWithId(UUID ingredientId, UUID productId) {}
 
-    public record IngredientProduct(Optional<Product> product, int ingredientIndex, int productIndex) {}
-
+    public record IngredientProduct(Optional<Product> product,
+                                    UUID ingredientId,
+                                    int ingredientIndex,
+                                    int productIndex) {}
 
     /**
      * Реализация паттерна "Builder" для блюда ({@link Dish}).
@@ -879,17 +1034,6 @@ public class Dish implements Entity<Dish> {
 
         public Builder addIngredient(DishIngredient.Builder ingredient) {
             ingredients.add(ingredient);
-            return this;
-        }
-
-        public Builder addIngredient(String name, Filter filter, BigDecimal quantity) {
-            ingredients.add(
-                    new DishIngredient.Builder().
-                            setName(name).
-                            setFilter(filter).
-                            setQuantity(quantity).
-                            setConfig(config)
-            );
             return this;
         }
 

@@ -9,8 +9,9 @@ import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.util.Page;
-
 import com.bakuard.nutritionManager.service.ImageUploaderService;
+import com.bakuard.nutritionManager.service.report.ReportService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -42,14 +47,17 @@ public class DishController {
     private DtoMapper mapper;
     private DishRepository dishRepository;
     private ImageUploaderService imageUploaderService;
+    private ReportService reportService;
 
     @Autowired
     public DishController(DtoMapper mapper,
                           DishRepository dishRepository,
-                          ImageUploaderService imageUploaderService) {
+                          ImageUploaderService imageUploaderService,
+                          ReportService reportService) {
         this.mapper = mapper;
         this.dishRepository = dishRepository;
         this.imageUploaderService = imageUploaderService;
+        this.reportService = reportService;
     }
 
     @Operation(summary = "Загружает изображение блюда и возвращает его URL",
@@ -325,7 +333,7 @@ public class DishController {
     )
     @Transactional
     @GetMapping("/getAllIngredientProducts")
-    public ResponseEntity<DishProductsListResponse> getAllIngredientProducts(
+    public ResponseEntity<DishProductsResponse> getAllIngredientProducts(
             @RequestParam("dishId")
             @Parameter(description = "Уникальный идентификатор блюда. Не может быть null.", required = true)
             UUID dishId,
@@ -335,22 +343,15 @@ public class DishController {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products for dishId={} and ServingNumber={}", dishId, servingNumber);
 
-        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, dishId, servingNumber);
+        DishProductsResponse response = mapper.toDishProductsResponse(userId, dishId, servingNumber);
 
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = """
-            Рассчитывает и возвращает стоимость блюда, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента.
-            """,
-            description = """
-            Рассчитывает и возвращает стоимость блюда, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента. Особые случаи: <br/>
-            1. Если блюдо не содержит ни одного ингредиента - возвращает null. <br/>
-            2. Если ни одному ингредиенту не соответствует ни один продукт - возвращает null. <br/>
-            3. Если какому-либо ингредиенту блюда не соответствует ни одного продукта - то он не принимает
-             участия в расчете стоимости блюда. <br/>
+            Составляет и возвращает отчет содержащий перечень всех недостающих продуктов и их кол-во, а также
+             суммарную их стоимость. Этот список создается на основе выбранных пользователем продуктов для каждого
+             ингредиента.
             """,
             responses = {
                     @ApiResponse(responseCode = "200"),
@@ -369,14 +370,25 @@ public class DishController {
             }
     )
     @Transactional
-    @PostMapping("/getLackProductPrice")
-    public ResponseEntity<BigDecimal> getLackProductPrice(@RequestBody DishPriceRequest dto) {
+    @PostMapping("/createReport")
+    public ResponseEntity<Resource> createReport(@RequestBody DishReportRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        logger.info("Pick products list for dish: userId={}, dto={}", userId, dto);
+        logger.info("create dish report: userId={}, dto={}", userId, dto);
 
-        BigDecimal response = mapper.toDishPrice(userId, dto).orElse(null);
+        ReportService.DishProductsReportData reportInputData = mapper.toDishProductsReportData(userId, dto);
+        byte[] reportOutputData = reportService.createDishProductsReport(reportInputData);
 
-        return ResponseEntity.ok(response);
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=productsList.pdf");
+        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        header.add("Pragma", "no-cache");
+        header.add("Expires", "0");
+
+        return ResponseEntity.ok().
+                headers(header).
+                contentLength(reportOutputData.length).
+                contentType(MediaType.APPLICATION_OCTET_STREAM).
+                body(new ByteArrayResource(reportOutputData));
     }
 
 }

@@ -69,20 +69,20 @@ public class JwsService {
             claims = parseJws(jws, accessKeyPair);
         } catch(JwtException e) {
             throw new ValidateException("Incorrect access jws", e).
-                    setUserMessageKey("JwsService.parseAccessJws");
+                    addReason(Rule.of("JwsService.parseAccessJws").failure(Constraint.CORRECT_JWS));
         }
 
         UUID accessJwsId = UUID.fromString(claims.getId());
         if(blackList.inBlackList(accessJwsId)) {
             throw new ValidateException("Incorrect access jws").
-                    setUserMessageKey("JwsService.parseAccessJws");
+                    addReason(Rule.of("JwsService.parseAccessJws").failure(Constraint.CORRECT_JWS));
         }
 
         return UUID.fromString(claims.getSubject());
     }
 
     public String generateRegistrationJws(String email) {
-        LocalDateTime expiration = LocalDateTime.now().plusHours(lifeTimeInMinutes);
+        LocalDateTime expiration = LocalDateTime.now().plusMinutes(lifeTimeInMinutes);
 
         return Jwts.builder().
                 setExpiration(Date.from(expiration.atZone(ZoneId.systemDefault()).toInstant())).
@@ -99,12 +99,12 @@ public class JwsService {
             return claims.get("email", String.class);
         } catch(JwtException e) {
             throw new ValidateException("Incorrect registration jws", e).
-                    setUserMessageKey("JwsService.parseRegistrationJws");
+                    addReason(Rule.of("JwsService.parseRegistrationJws").failure(Constraint.CORRECT_JWS));
         }
     }
 
     public String generateChangeCredentialsJws(String email) {
-        LocalDateTime expiration = LocalDateTime.now().plusHours(lifeTimeInMinutes);
+        LocalDateTime expiration = LocalDateTime.now().plusMinutes(lifeTimeInMinutes);
 
         return Jwts.builder().
                 setExpiration(Date.from(expiration.atZone(ZoneId.systemDefault()).toInstant())).
@@ -121,7 +121,7 @@ public class JwsService {
             return claims.get("email", String.class);
         } catch(JwtException e) {
             throw new ValidateException("Incorrect change credential jws", e).
-                    setUserMessageKey("JwsService.parseChangeCredentialsJws");
+                    addReason(Rule.of("JwsService.parseChangeCredentialsJws").failure(Constraint.CORRECT_JWS));
         }
     }
 

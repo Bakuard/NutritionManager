@@ -289,11 +289,15 @@ public class ProductController {
             boolean onlyFridge,
             @RequestParam(value = "category", required = false)
             @Parameter(description = """
-                    Категория продуктов. В выборку попадут только продукты имеющие указанную категорию.
-                     Если имеет значение null - в выборку попадут продукты любых категорий.
+                     Массив категорий продуктов. В выборку попадут только те продукты,
+                      которые связаны с любой из указанных категорий. Если параметр
+                      имеет значение null или является пустым массивом - в выборку попадут
+                      продукты связанные с любыми категориями.
+                      Если массив задается - все элементы должны содержать как минимум
+                      один отображаемый символ.
                     """,
                     schema = @Schema(defaultValue = "null"))
-            String category,
+            List<String> categories,
             @RequestParam(value = "shops", required = false)
             @Parameter(description = """
                      Массив магазинов продуктов. В выборку попадут только те продукты,
@@ -305,7 +309,7 @@ public class ProductController {
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> shops,
-            @RequestParam(value = "varieties", required = false)
+            @RequestParam(value = "grades", required = false)
             @Parameter(description = """
                      Массив сортов продуктов. В выборку попадут только те продукты,
                       которые имеют с любой из указанных сортов. Если параметр
@@ -315,7 +319,7 @@ public class ProductController {
                       отображаемый символ.
                      """,
                      schema = @Schema(defaultValue = "null"))
-            List<String> varieties,
+            List<String> grades,
             @RequestParam(value = "manufacturers", required = false)
             @Parameter(description = """
                      Массив производителей продуктов. В выборку попадут только те продукты,
@@ -341,9 +345,9 @@ public class ProductController {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
 
         logger.info("Get products by filter: page={}, size={}, userId={}, sortRule={}, onlyFridge={}, " +
-                        "category={}, shops={}, varieties={}, manufacturers={}, tags={}",
+                        "categories={}, shops={}, grades={}, manufacturers={}, tags={}",
                 page, size, userId, sortRule, onlyFridge,
-                category, shops, varieties, manufacturers, tags);
+                categories, shops, grades, manufacturers, tags);
 
         Criteria criteria = mapper.toProductCriteria(
                 page,
@@ -351,9 +355,9 @@ public class ProductController {
                 userId,
                 sortRule,
                 onlyFridge,
-                category,
+                categories,
                 shops,
-                varieties,
+                grades,
                 manufacturers,
                 tags
         );

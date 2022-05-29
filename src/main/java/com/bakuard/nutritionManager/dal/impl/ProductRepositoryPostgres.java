@@ -8,6 +8,7 @@ import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.model.util.Page;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
@@ -164,7 +165,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<Product> getProducts(Criteria criteria) {
         int productsNumber = getProductsNumber(criteria);
-        Page.Metadata metadata = criteria.tryGetPageable().
+        Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
                 createPageMetadata(productsNumber, 30);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -266,7 +267,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
-        Page.Metadata metadata = criteria.tryGetPageable().
+        Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
                 createPageMetadata(tagsNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -300,7 +301,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getShops(Criteria criteria) {
         int shopsNumber = getShopsNumber(criteria);
-        Page.Metadata metadata = criteria.tryGetPageable().
+        Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
                 createPageMetadata(shopsNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -332,7 +333,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getGrades(Criteria criteria) {
         int gradesNumber = getGradesNumber(criteria);
-        Page.Metadata metadata = criteria.tryGetPageable().
+        Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
                 createPageMetadata(gradesNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -364,7 +365,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getCategories(Criteria criteria) {
         int categoriesNumber = getCategoriesNumber(criteria);
-        Page.Metadata metadata = criteria.tryGetPageable().
+        Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
                 createPageMetadata(categoriesNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
@@ -396,7 +397,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Page<String> getManufacturers(Criteria criteria) {
         int manufacturersNumber = getManufacturersNumber(criteria);
-        Page.Metadata metadata = criteria.tryGetPageable().
+        Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
                 createPageMetadata(manufacturersNumber, 1000);
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());

@@ -20,28 +20,21 @@ public class AuthService {
     }
 
     public Pair<String, User> enter(String name, String password) {
-        User user = null;
-        try {
-            user = userRepository.tryGetByName(name);
-        } catch(ValidateException e) {
-            throw new ValidateException("Incorrect credentials").
-                    addReason(e).
-                    setUserMessageKey("AuthService.enter");
-        }
+        User user = userRepository.tryGetByName(name);
 
         if(user.isCorrectPassword(password)) {
             String jws = jwsService.generateAccessJws(user);
             return new Pair<>(jws, user);
         } else {
             throw new ValidateException("Incorrect credentials").
-                    setUserMessageKey("AuthService.enter");
+                    addReason(Rule.of("AuthService.enter").failure(Constraint.CORRECT_CREDENTIALS));
         }
     }
 
     public void verifyEmailForRegistration(String email) {
         if(userRepository.getByEmail(email).isPresent()) {
             throw new ValidateException().
-                    setUserMessageKey("AuthService.verifyEmailForRegistration");
+                    addReason(Rule.of("AuthService.verifyEmailForRegistration").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
         }
 
         String jws = jwsService.generateRegistrationJws(email);
@@ -54,83 +47,62 @@ public class AuthService {
     }
 
     public Pair<String, User> registration(String jws, String name, String password) {
-        try {
-            String email = jwsService.parseRegistrationJws(jws);
+        String email = jwsService.parseRegistrationJws(jws);
 
-            User user = new User.Builder().
-                    generateId().
-                    setName(name).
-                    setEmail(email).
-                    setPassword(password).
-                    tryBuild();
-            userRepository.save(user);
+        User user = new User.Builder().
+                generateId().
+                setName(name).
+                setEmail(email).
+                setPassword(password).
+                tryBuild();
+        userRepository.save(user);
 
-            String accessJws = jwsService.generateAccessJws(user);
-            return new Pair<>(accessJws, user);
-        } catch(ValidateException e) {
-            throw new ValidateException("Fail to register new user=" + name).
-                    addReason(e).
-                    setUserMessageKey("AuthService.registration");
-        }
+        String accessJws = jwsService.generateAccessJws(user);
+        return new Pair<>(accessJws, user);
     }
 
     public Pair<String, User> changeCredential(String jws, String name, String password) {
-        try {
-            String email = jwsService.parseChangeCredentialsJws(jws);
+        String email = jwsService.parseChangeCredentialsJws(jws);
 
-            User user = userRepository.tryGetByEmail(email);
-            user.setPassword(password);
-            user.setName(name);
-            userRepository.save(user);
+        User user = userRepository.tryGetByEmail(email);
+        user.setPassword(password);
+        user.setName(name);
+        userRepository.save(user);
 
-            String accessJws = jwsService.generateAccessJws(user);
-            return new Pair<>(accessJws, user);
-        } catch(ValidateException e) {
-            throw new ValidateException("Fail to change credential for user=" + name).
-                    addReason(e).
-                    setUserMessageKey("AuthService.changeCredential");
-        }
+        String accessJws = jwsService.generateAccessJws(user);
+        return new Pair<>(accessJws, user);
     }
 
     public User changeLoginAndEmail(String jws, String newName, String newEmail, String currentPassword) {
-        try {
-            UUID userId = jwsService.parseAccessJws(jws);
+        UUID userId = jwsService.parseAccessJws(jws);
 
-            User user = userRepository.tryGetById(userId);
-            if(!user.isCorrectPassword(currentPassword)) {
-                throw new ValidateException("Incorrect password");
-            }
-            user.setName(newName);
-            user.setEmail(newEmail);
-
-            userRepository.save(user);
-
-            return user;
-        } catch(ValidateException e) {
-            throw new ValidateException("Fail to change login and email for user").
-                    addReason(e).
-                    setUserMessageKey("AuthService.changeLoginAndEmail");
+        User user = userRepository.tryGetById(userId);
+        if(!user.isCorrectPassword(currentPassword)) {
+            throw new ValidateException("Incorrect password").
+                    addReason(Rule.of("AuthService.changeLoginAndEmail").failure(Constraint.CORRECT_CREDENTIALS));
         }
+        user.setName(newName);
+        user.setEmail(newEmail);
+
+        userRepository.save(user);
+
+        return user;
     }
 
     public User changePassword(String jws, String currentPassword, String newPassword) {
-        try {
-            UUID userId = jwsService.parseAccessJws(jws);
+        UUID userId = jwsService.parseAccessJws(jws);
 
-            User user = userRepository.tryGetById(userId);
-            if(!user.isCorrectPassword(currentPassword)) {
-                throw new ValidateException("Incorrect password");
-            }
-            user.setPassword(newPassword);
-
-            userRepository.save(user);
-
-            return user;
-        } catch(ValidateException e) {
+        User user = userRepository.tryGetById(userId);
+        if(!user.isCorrectPassword(currentPassword)) {
             throw new ValidateException("Incorrect password").
-                    addReason(e).
-                    setUserMessageKey("AuthService.changePassword");
+                    addReason(Rule.of("AuthService.changePassword").failure(Constraint.CORRECT_CREDENTIALS));
+
         }
+        user.setPassword(newPassword);
+
+        userRepository.save(user);
+
+        return user;
     }
 
     public User getUserByJws(String jws) {

@@ -4,13 +4,14 @@ import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dto.DtoMapper;
-import com.bakuard.nutritionManager.dto.dishes.DishProductsListResponse;
+import com.bakuard.nutritionManager.dto.dishes.DishReportRequest;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.service.ImageUploaderService;
+import com.bakuard.nutritionManager.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +21,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -42,14 +47,17 @@ public class MenuController {
     private MenuRepository repository;
 
     private ImageUploaderService imageUploaderService;
+    private ReportService reportService;
 
     @Autowired
     public MenuController(DtoMapper mapper,
                           MenuRepository repository,
-                          ImageUploaderService imageUploaderService) {
+                          ImageUploaderService imageUploaderService,
+                          ReportService reportService) {
         this.mapper = mapper;
         this.repository = repository;
         this.imageUploaderService = imageUploaderService;
+        this.reportService = reportService;
     }
 
     @Operation(summary = "Загружает изображение меню и возвращает его URL",
@@ -244,7 +252,7 @@ public class MenuController {
                             }
                     ))
             String sortRule,
-            @RequestParam(value = "productCategories", required = false)
+            @RequestParam(value = "dishNames", required = false)
             @Parameter(description = """
                      Массив наименований блюд. В выборку попадут только те меню, которые имеют в своем
                       составе хотя бы одно из указанных блюд. Если параметр имеет значение null или является
@@ -327,36 +335,79 @@ public class MenuController {
     )
     @Transactional
     @GetMapping("/getAllDishIngredientProducts")
-    public ResponseEntity<DishProductsListResponse> getAllDishIngredientProducts(
-            @RequestParam("dishName")
-            @Parameter(description = "Уникальное наименование блюда. Не может быть null.", required = true)
-            String dishName,
+    public ResponseEntity<MenuDishProductsListResponse> getAllDishIngredientProducts(
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
             UUID menuId,
+            @RequestParam(value = "dishName", required = false)
+            @Parameter(description = """
+                    Наименование одного из блюд указанного меню. Особые случаи: <br/>
+                    1. Если данный параметр не указан (для него задано значение null) и в составе меню
+                     ЕСТЬ блюда - в качестве значения по умолчанию будет взято первое блюдо из списка блюд
+                     этого меню. <br/>
+                    2. Если данный параметр не указан (для него задано значение null) и в составе меню
+                     НЕТ блюд - данный параметр будет проигнорирован. <br/>
+                    2. Если данный параметр ЗАДАН и в составе меню нет блюда с таким именем - кидает исключение.
+                    """)
+            String dishName,
             @RequestParam(value = "menuQuantity", required = false)
             @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
             BigDecimal menuQuantity) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        logger.info("Get all ingredient products for dishName={}, menuId={}, menuQuantity={}",
-                dishName, menuId, menuQuantity);
+        logger.info("Get all ingredient products for menuId={}, dishName={}, menuQuantity={}",
+                menuId, dishName, menuQuantity);
 
-        DishProductsListResponse response = mapper.toDishProductsListResponse(userId, menuId, dishName, menuQuantity);
+        MenuDishProductsListResponse response = mapper.toMenuDishProductsListResponse(
+                userId, menuId, dishName, menuQuantity);
 
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = """
-            Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню.
+            Возвращает список продуктов для каждого ингредиента каждого блюда. Необходимое кол-во
+             каждого продукта рассчитывается с учетом кол-ва блюда в указанном меню и кол-ва этого меню.
             """,
-            description = """
-            Рассчитывает и возвращает стоимость меню, которая представляет собой суммарную стоимость недостающего
-             кол-ва продукта выбранного для каждого ингредиента каждого блюда этого меню. Особые случаи: <br/>
-            1. Если ни одно блюдо не содержит ни одного ингредиента - возвращает null. <br/>
-            2. Если ни одному ингредиенту ни одного блюда не соответствует ни один продукт - возвращает null. <br/>
-            3. Если какому-либо ингредиенту какого-либо блюда не соответствует ни одного продукта - то он не принимает
-             участия в расчете стоимости меню. <br/>
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Если не удалось найти блюдо с таким ID",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @GetMapping("/getIngredientProductsOfAllDishes")
+    public ResponseEntity<MenuDishesProductsListResponse> getAllDishIngredientProducts(
+            @RequestParam("menuId")
+            @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
+            UUID menuId,
+            @RequestParam(value = "menuQuantity", required = false)
+            @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
+            BigDecimal menuQuantity
+    ) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        logger.info("Get all ingredient products of all dishes for menuId={}, menuQuantity={}",
+                menuId, menuQuantity);
+
+        MenuDishesProductsListResponse response = mapper.toMenuDishesProductsListResponse(
+                userId, menuId, menuQuantity
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = """
+            Составляет и возвращает отчет содержащий перечень всех недостающих продуктов и их кол-во, а также
+             суммарную их стоимость. Этот список создается на основе выбранных пользователем продуктов для каждого
+             ингредиента каждого блюда.
             """,
             responses = {
                     @ApiResponse(responseCode = "200"),
@@ -375,14 +426,25 @@ public class MenuController {
             }
     )
     @Transactional
-    @PostMapping("/getLackProductPrice")
-    public ResponseEntity<BigDecimal> getLackProductPrice(@RequestBody MenuPriceRequest dto) {
+    @PostMapping("/createReport")
+    public ResponseEntity<Resource> createReport(@RequestBody MenuReportRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        logger.info("Pick products list for menu dishes: userId={}, dto={}", userId, dto);
+        logger.info("create menu report: userId={}, dto={}", userId, dto);
 
-        BigDecimal response = mapper.toMenuPrice(userId, dto).orElse(null);
+        ReportService.MenuProductsReportData reportInputData = mapper.toMenuProductsReportData(userId, dto);
+        byte[] reportOutputData = reportService.createMenuProductsReport(reportInputData);
 
-        return ResponseEntity.ok(response);
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=productsList.pdf");
+        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        header.add("Pragma", "no-cache");
+        header.add("Expires", "0");
+
+        return ResponseEntity.ok().
+                headers(header).
+                contentLength(reportOutputData.length).
+                contentType(MediaType.APPLICATION_OCTET_STREAM).
+                body(new ByteArrayResource(reportOutputData));
     }
 
 }

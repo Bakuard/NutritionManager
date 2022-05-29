@@ -25,14 +25,15 @@ public class Sort {
     }
 
     public static Sort products(List<String> sortRules) {
-        if(sortRules == null || sortRules.isEmpty()) {
+        if(sortRules == null) {
             return productDefaultSort();
         } else {
             Sort sort = products();
             sortRules.stream().
+                    filter(Objects::nonNull).
                     map(sortRule -> sortRule.split("_")).
                     forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
-            return sort;
+            return sort.getParametersNumber() > 0 ? sort : productDefaultSort();
         }
     }
 
@@ -41,14 +42,15 @@ public class Sort {
     }
 
     public static Sort dishes(List<String> sortRules) {
-        if(sortRules == null || sortRules.isEmpty()) {
+        if(sortRules == null) {
             return dishDefaultSort();
         } else {
             Sort sort = dishes();
             sortRules.stream().
+                    filter(Objects::nonNull).
                     map(sortRule -> sortRule.split("_")).
                     forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
-            return sort;
+            return sort.getParametersNumber() > 0 ? sort : dishDefaultSort();
         }
     }
 
@@ -62,9 +64,10 @@ public class Sort {
         } else {
             Sort sort = menus();
             sortRules.stream().
+                    filter(Objects::nonNull).
                     map(sortRule -> sortRule.split("_")).
                     forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
-            return sort;
+            return sort.getParametersNumber() > 0 ? sort : menuDefaultSort();
         }
     }
 
@@ -134,10 +137,8 @@ public class Sort {
                 () -> new ValidateException("Unknown sort direction"),
                 Rule.of("Sort.direction").notNull(direction).
                         and(r -> {
-                            switch(direction) {
-                                case "asc": d.set(true);
-                                case "desc": d.set(false);
-                            }
+                            if("asc".equalsIgnoreCase(direction)) d.set(true);
+                            else if("desc".equalsIgnoreCase(direction)) d.set(false);
 
                             if(d.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
                             else return r.success(Constraint.CONTAINS_ITEM);

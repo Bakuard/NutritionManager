@@ -8,14 +8,16 @@ import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Ингредиент блюда. В качестве ингредиента можно задать не только один конкретный продукт, а множетсво
  * взаимозаменяемых продуктов, каждый из которых можно использовать в качестве данного ингредиента блюда.
  * Указанное множество продуктов упорядоченно по цене в порядке возрастания.
  */
-public class DishIngredient {
+public class DishIngredient implements Entity<DishIngredient> {
 
+    private final UUID id;
     private final String name;
     private final Filter filter;
     private final BigDecimal quantity;
@@ -26,6 +28,7 @@ public class DishIngredient {
      * @param other копируемый ингредиент.
      */
     public DishIngredient(DishIngredient other) {
+        this.id = other.id;
         this.name = other.name;
         this.filter = other.filter;
         this.quantity = other.quantity;
@@ -34,6 +37,7 @@ public class DishIngredient {
 
     /**
      * Создает новый ингредиент блюда.
+     * @param id уникальный идентификатор ингредиента блюда.
      * @param name наименование ингредиента.
      * @param filter ограничение задающее множество взаимозаменяемых продуктов, каждый из которых может
      *               выступать в качестве данного ингредиента.
@@ -44,21 +48,33 @@ public class DishIngredient {
      *              2. Если имя ингредиента не содержит ни одного отображаемого символа.<br/>
      *              3. Если указанное кол-во ингредиента не является положительным числом.
      */
-    public DishIngredient(String name,
+    public DishIngredient(UUID id,
+                          String name,
                           Filter filter,
                           BigDecimal quantity,
                           AppConfigData config) {
         Validator.check(
+                Rule.of("DishIngredient.id").notNull(id),
                 Rule.of("DishIngredient.name").notNull(name).and(v -> v.notBlank(name)),
                 Rule.of("DishIngredient.filter").notNull(filter),
                 Rule.of("DishIngredient.quantity").notNull(quantity).and(v -> v.positiveValue(quantity)),
                 Rule.of("DishIngredient.config").notNull(config)
         );
 
+        this.id = id;
         this.name = name;
         this.filter = filter;
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.config = config;
+    }
+
+    /**
+     * Возвращает уникальный идентификатор ингредиента блюда.
+     * @return уникальный идентификатор ингредиента блюда.
+     */
+    @Override
+    public UUID getId() {
+        return id;
     }
 
     /**
@@ -93,29 +109,36 @@ public class DishIngredient {
     }
 
     @Override
+    public boolean equalsFullState(DishIngredient other) {
+        return id.equals(other.id) &&
+                name.equals(other.name) &&
+                filter.equals(other.filter) &&
+                quantity.equals(other.quantity) &&
+                config == other.config;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DishIngredient that = (DishIngredient) o;
-        return name.equals(that.name) &&
-                filter.equals(that.filter) &&
-                quantity.equals(that.quantity);
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, filter, quantity);
+        return id.hashCode();
     }
 
     @Override
     public String toString() {
         return "DishIngredient{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", filter=" + filter +
                 ", quantity=" + quantity +
                 '}';
     }
-
 
 
     /**
@@ -123,6 +146,7 @@ public class DishIngredient {
      */
     public static class Builder implements AbstractBuilder<DishIngredient> {
 
+        private UUID id;
         private String name;
         private Filter filter;
         private BigDecimal quantity;
@@ -130,6 +154,36 @@ public class DishIngredient {
 
         public Builder() {
 
+        }
+
+        /**
+         * Генерирует и устанавливает уникальный идентификатор для создаваемого ингредиента.
+         * @return этот же объект.
+         */
+        public Builder generateId() {
+            id = UUID.randomUUID();
+            return this;
+        }
+
+        /**
+         * Устанавливает уникальный идентификатор для создаваемого ингредиента.
+         * @param id уникальный идентификатор для создаваемого ингредиента.
+         * @return этот же объект.
+         */
+        public Builder setId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        /**
+         * Устанавливает уникальный идентификатор для создаваемого ингредиента. Если аргумент имеет значение
+         * null - генерирует, а затем устанавливает уникальный идентификатор для создаваемого ингредиента.
+         * @param id уникальный идентификатор для создаваемого ингредиента.
+         * @return этот же объект.
+         */
+        public Builder setOrGenerateId(UUID id) {
+             this.id = id == null ? UUID.randomUUID() : id;
+             return this;
         }
 
         /**
@@ -189,6 +243,7 @@ public class DishIngredient {
         @Override
         public DishIngredient tryBuild() throws ValidateException {
             return new DishIngredient(
+                    id,
                     name,
                     filter,
                     quantity,

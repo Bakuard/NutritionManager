@@ -54,7 +54,7 @@ class UserRepositoryTest {
         hikariConfig.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         hikariConfig.setUsername(appConfiguration.getDatabaseUser());
         hikariConfig.setPassword(appConfiguration.getDatabasePassword());
-        hikariConfig.addDataSourceProperty("databaseName", appConfiguration.getDatabaseName());
+        hikariConfig.addDataSourceProperty("databaseName", "NutritionManagerUnitTest");
         hikariConfig.setAutoCommit(false);
         hikariConfig.addDataSourceProperty("portNumber", "5432");
         hikariConfig.addDataSourceProperty("serverName", "localhost");

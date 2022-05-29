@@ -14,6 +14,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.ImageRepository;
+import com.bakuard.nutritionManager.validation.Constraint;
+import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -67,7 +69,7 @@ public class ImageUploaderService implements DisposableBean {
             return uploadImage(userId, image, "productimages");
         } catch(Exception e) {
             throw new ValidateException("Fail to upload product image", e).
-                    setUserMessageKey("ImageUploaderService.uploadProductImage");
+                    addReason(Rule.of("ImageUploaderService.uploadProductImage").failure(Constraint.SUCCESSFUL_UPLOAD));
         }
     }
 
@@ -76,7 +78,7 @@ public class ImageUploaderService implements DisposableBean {
             return uploadImage(userId, image, "dishimages");
         } catch(Exception e) {
             throw new ValidateException("Fail to upload dish image", e).
-                    setUserMessageKey("ImageUploaderService.uploadDishImage");
+                    addReason(Rule.of("ImageUploaderService.uploadDishImage").failure(Constraint.SUCCESSFUL_UPLOAD));
         }
     }
 
@@ -85,7 +87,7 @@ public class ImageUploaderService implements DisposableBean {
             return uploadImage(userId, image, "menuimages");
         } catch(Exception e) {
             throw new ValidateException("Fail to upload menu image", e).
-                    setUserMessageKey("ImageUploaderService.uploadMenuImage");
+                    addReason(Rule.of("ImageUploaderService.uploadMenuImage").failure(Constraint.SUCCESSFUL_UPLOAD));
         }
     }
 

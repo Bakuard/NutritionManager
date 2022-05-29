@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.dto.menus;
 
-import com.bakuard.nutritionManager.dto.users.UserResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -25,7 +24,7 @@ public class MenuForListResponse {
     @Schema(description = "Путь к изображению данного меню.")
     private URL imageUrl;
     @Schema(description = "Блюда входящие в состав данного меню.")
-    private List<MenuItemRequestResponse> items;
+    private List<ItemResponse> items;
     @Schema(description = "Теги данного меню. Если для меню не заданно ни одного тега - данный список будет пустым.")
     private List<String> tags;
 
@@ -69,11 +68,11 @@ public class MenuForListResponse {
         this.imageUrl = imageUrl;
     }
 
-    public List<MenuItemRequestResponse> getItems() {
+    public List<ItemResponse> getItems() {
         return items;
     }
 
-    public void setItems(List<MenuItemRequestResponse> items) {
+    public void setItems(List<ItemResponse> items) {
         this.items = items;
     }
 

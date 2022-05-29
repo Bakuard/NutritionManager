@@ -64,7 +64,7 @@ public class Menu implements Entity<Menu> {
         this.id = id;
         this.user = user;
         this.name = name.trim();
-        this.description = description.trim();
+        this.description = description;
         this.imageUrl = imageURlContainer.get();
         this.items = menuItemsContainer.get();
         this.tags = tagContainer.get();
@@ -272,6 +272,33 @@ public class Menu implements Entity<Menu> {
         }
 
         return Optional.ofNullable(result);
+    }
+
+    /**
+     * Возвращает все элементы меню (блюда и их кол-во) в которые входит указанный продукт. Все элементы
+     * products должны относится к одному продукту. Особые случаи: <br/>
+     * 1. Если products является пустым - возвращает пустой список. <br/>
+     * 2. Если {@link MenuItemProduct#product()} каждого элемента списка возвращает пустой Optional - возвращает пустой
+     *    список. <br/>
+     * 3. Если какой-либо из элементов списка {@link MenuItemProduct#product()} возвращает пустой Optional -
+     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/><br/>
+     * Метод не проверят содержимое объекта products (список не содержит null, для всех элементов списка
+     * используется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно с помощью
+     * метода {@link #groupByProduct(List)}.
+     * @param products данные о продукте используемом для нескольких ингредиентов нескольких блюд.
+     * @return все элементы меню (блюда и их кол-во) в которые входит указанный продукт.
+     * @throws ValidateException если products имеет значение null.
+     */
+    public List<MenuItem> getMenuItems(List<MenuItemProduct> products) {
+        Validator.check(
+                Rule.of("Menu.products").notNull(products)
+        );
+
+        return products.stream().
+                filter(item -> item.product().isPresent()).
+                map(item -> items.get(item.itemIndex())).
+                distinct().
+                toList();
     }
 
     /**

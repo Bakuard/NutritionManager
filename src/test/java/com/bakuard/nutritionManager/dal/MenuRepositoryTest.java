@@ -12,7 +12,7 @@ import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.Pageable;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -64,7 +64,7 @@ class MenuRepositoryTest {
         hikariConfig.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         hikariConfig.setUsername(appConfiguration.getDatabaseUser());
         hikariConfig.setPassword(appConfiguration.getDatabasePassword());
-        hikariConfig.addDataSourceProperty("databaseName", appConfiguration.getDatabaseName());
+        hikariConfig.addDataSourceProperty("databaseName", "NutritionManagerUnitTest");
         hikariConfig.setAutoCommit(false);
         hikariConfig.addDataSourceProperty("portNumber", "5432");
         hikariConfig.addDataSourceProperty("serverName", "localhost");
@@ -235,9 +235,9 @@ class MenuRepositoryTest {
         Menu menu = createMenu(user, 100);
         commit(() -> menuRepository.save(menu));
 
-        Dish dish0 = createDish(user, 0);
-        Dish dish1000 = createDish(user, 1000);
-        Dish dish10000 = createDish(user, 10000);
+        Dish dish0 = createDish(user, 0, 0, 1, 2);
+        Dish dish1000 = createDish(user, 1000, 3, 4, 5);
+        Dish dish10000 = createDish(user, 10000, 6, 7, 8);
         Menu updatedMenu = new Menu.Builder().
                 setId(toUUID(100)).
                 setUser(user).
@@ -247,9 +247,9 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107))).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
-                addItem(createMenuItem(dish10000, new BigDecimal(7))).
+                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
+                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
                 tryBuild();
         commit(() -> {
             dishRepository.save(dish0);
@@ -275,9 +275,9 @@ class MenuRepositoryTest {
         Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
-        Dish dish0 = createDish(user, 0);
-        Dish dish1000 = createDish(user, 1000);
-        Dish dish10000 = createDish(user, 10000);
+        Dish dish0 = createDish(user, 0, 0, 1, 2);
+        Dish dish1000 = createDish(user, 1000, 3, 4, 5);
+        Dish dish10000 = createDish(user, 10000, 6, 7, 8);
         Menu updatedMenu = new Menu.Builder().
                 setId(toUUID(100)).
                 setUser(user).
@@ -287,9 +287,9 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107))).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
-                addItem(createMenuItem(dish10000, new BigDecimal(7))).
+                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
+                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
                 tryBuild();
         commit(() -> {
             dishRepository.save(dish0);
@@ -317,9 +317,9 @@ class MenuRepositoryTest {
         Menu expected = createMenu(user, 100);
         commit(() -> menuRepository.save(expected));
 
-        Dish dish0 = createDish(user, 0);
-        Dish dish1000 = createDish(user, 1000);
-        Dish dish10000 = createDish(user, 10000);
+        Dish dish0 = createDish(user, 0, 0, 1, 2);
+        Dish dish1000 = createDish(user, 1000, 3, 4, 5);
+        Dish dish10000 = createDish(user, 10000, 6, 7, 8);
         Menu updatedMenu = new Menu.Builder().
                 setId(toUUID(100)).
                 setUser(user).
@@ -329,9 +329,9 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107))).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"))).
-                addItem(createMenuItem(dish10000, new BigDecimal(7))).
+                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
+                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
+                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
                 tryBuild();
         commit(() -> {
             dishRepository.save(dish0);
@@ -394,7 +394,7 @@ class MenuRepositoryTest {
             """)
     public void save12() {
         User otherUser = createAndSaveUser(1);
-        commit(() -> dishRepository.save(createDish(otherUser, 1000)));
+        commit(() -> dishRepository.save(createDish(otherUser, 1000, 0, 1, 2)));
         User user = createAndSaveUser(2);
         Menu menu = new Menu.Builder().
                 setId(toUUID(1)).
@@ -405,7 +405,10 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("tag#1").
-                addItem(createMenuItem(createDish(user, 1000), new BigDecimal("10.1"))).
+                addItem(
+                        createMenuItem(createDish(user, 1000, 0, 1, 2),
+                                new BigDecimal("10.1"), 0)
+                ).
                 tryBuild();
 
         AssertUtil.assertValidateException(
@@ -424,7 +427,7 @@ class MenuRepositoryTest {
             """)
     public void save13() {
         User otherUser = createAndSaveUser(1);
-        commit(() -> dishRepository.save(createDish(otherUser, 1000)));
+        commit(() -> dishRepository.save(createDish(otherUser, 1000, 0, 1, 2)));
         User user = createAndSaveUser(2);
         commit(() -> menuRepository.save(createMenu(user, 1)));
         Menu updatedMenu = new Menu.Builder().
@@ -436,7 +439,10 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("tag#1").
-                addItem(createMenuItem(createDish(user, 1000), new BigDecimal("10.1"))).
+                addItem(
+                        createMenuItem(createDish(user, 1000, 0, 1, 2),
+                                new BigDecimal("10.1"), 0)
+                ).
                 tryBuild();
 
         AssertUtil.assertValidateException(
@@ -1098,7 +1104,7 @@ class MenuRepositoryTest {
         Page<Menu> actual = menuRepository.getMenus(
                 new Criteria().
                         setFilter(Filter.user(otherUser.getId())).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
@@ -1119,11 +1125,11 @@ class MenuRepositoryTest {
         Page<Menu> actual = menuRepository.getMenus(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(4, 0).
+        Page<Menu> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(4, 30).
                 createPage(menus);
         AssertUtil.assertEquals(expected, actual);
@@ -1148,11 +1154,11 @@ class MenuRepositoryTest {
                                         Filter.minTags(new Tag("unknown tag"))
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -1174,11 +1180,11 @@ class MenuRepositoryTest {
                                         Filter.minTags(new Tag("common tag"), new Tag("tagA"))
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(2, 0).
+        Page<Menu> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1203,11 +1209,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("unknown dish")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
     
     @Test
@@ -1229,11 +1235,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#50")
                                 )
                         ).
-                        setPageable(Pageable.of(2, 0)).
+                        setPageable(PageableByNumber.of(2, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(2, 0).
+        Page<Menu> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1261,11 +1267,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("unknown dish")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
     
     @Test
@@ -1290,11 +1296,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#2")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Pageable.firstEmptyPage(), actual);
+        AssertUtil.assertEquals(Page.empty(), actual);
     }
     
     @Test
@@ -1319,11 +1325,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#100")
                                 )
                         ).
-                        setPageable(Pageable.of(4, 0)).
+                        setPageable(PageableByNumber.of(4, 0)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(4, 0).
+        Page<Menu> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
         AssertUtil.assertEquals(expected, actual);
@@ -1352,11 +1358,11 @@ class MenuRepositoryTest {
                                         Filter.anyDish("dish#100")
                                 )
                         ).
-                        setPageable(Pageable.of(2, 1)).
+                        setPageable(PageableByNumber.of(2, 1)).
                         setSort(Sort.menuDefaultSort())
         );
 
-        Page<Menu> expected = Pageable.of(2, 1).
+        Page<Menu> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 30).
                 createPage(menus.subList(2, 4));
         AssertUtil.assertEquals(expected, actual);
@@ -1433,10 +1439,10 @@ class MenuRepositoryTest {
         Page<Tag> actual = menuRepository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+        Assertions.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -1452,10 +1458,10 @@ class MenuRepositoryTest {
         Page<Tag> actual = menuRepository.getTags(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<Tag> expected = Pageable.of(2, 1).
+        Page<Tag> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(7, 1000).
                 createPage(getAllTags(menus).subList(2, 4));
         Assertions.assertEquals(expected, actual);
@@ -1532,10 +1538,10 @@ class MenuRepositoryTest {
         Page<String> actual = menuRepository.getNames(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Pageable.firstEmptyPage(), actual);
+        Assertions.assertEquals(Page.empty(), actual);
     }
 
     @Test
@@ -1551,10 +1557,10 @@ class MenuRepositoryTest {
         Page<String> actual = menuRepository.getNames(
                 new Criteria().
                         setFilter(Filter.user(user.getId())).
-                        setPageable(Pageable.of(2, 1))
+                        setPageable(PageableByNumber.of(2, 1))
         );
 
-        Page<String> expected = Pageable.of(2, 1).
+        Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 1000).
                 createPage(getAllNames(menus).subList(2, 4));
         Assertions.assertEquals(expected, actual);
@@ -1603,11 +1609,11 @@ class MenuRepositoryTest {
 
     private Menu createMenu(User user, int menuId) {
         List<Dish> dishes = List.of(
-                createDish(user, 0),
-                createDish(user, 2),
-                createDish(user, 1),
-                createDish(user, 4),
-                createDish(user, 3)
+                createDish(user, 0, 100, 101, 102),
+                createDish(user, 2, 103, 104, 105),
+                createDish(user, 1, 106, 107, 108),
+                createDish(user, 4, 109, 110, 111),
+                createDish(user, 3, 112, 113, 114)
         );
 
         Menu menu = new Menu.Builder().
@@ -1619,11 +1625,11 @@ class MenuRepositoryTest {
                 setConfig(appConfiguration).
                 addTag("common tag").
                 addTag("tag#" + menuId).
-                addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"))).
-                addItem(createMenuItem(dishes.get(1), new BigDecimal("10.1"))).
-                addItem(createMenuItem(dishes.get(2), new BigDecimal("5"))).
-                addItem(createMenuItem(dishes.get(3), new BigDecimal("2"))).
-                addItem(createMenuItem(dishes.get(4), new BigDecimal("0.4"))).
+                addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"), 1000)).
+                addItem(createMenuItem(dishes.get(1), new BigDecimal("10.1"), 1001)).
+                addItem(createMenuItem(dishes.get(2), new BigDecimal("5"), 1002)).
+                addItem(createMenuItem(dishes.get(3), new BigDecimal("2"), 1003)).
+                addItem(createMenuItem(dishes.get(4), new BigDecimal("0.4"), 1004)).
                 tryBuild();
 
         commit(() -> dishes.forEach(dish -> dishRepository.save(dish)));
@@ -1634,13 +1640,13 @@ class MenuRepositoryTest {
     private List<Menu> createAndSaveMenus(User user) {
         Dish dish0, dish1, dish2, dish3, dish50, dish60, dish100;
         List<Dish> dishes = List.of(
-                dish0 = createDish(user, 0),
-                dish1 = createDish(user, 1),
-                dish2 = createDish(user, 2),
-                dish3 = createDish(user, 3),
-                dish50 = createDish(user, 50),
-                dish60 = createDish(user, 60),
-                dish100 = createDish(user, 100)
+                dish0 = createDish(user, 0, 1000, 1001, 1002),
+                dish1 = createDish(user, 1, 10001, 10002, 10003),
+                dish2 = createDish(user, 2, 100001, 100002, 100003),
+                dish3 = createDish(user, 3, 1000001, 1000002, 1000003),
+                dish50 = createDish(user, 50, 10000001, 10000002, 10000003),
+                dish60 = createDish(user, 60, 100000001, 100000002, 100000003),
+                dish100 = createDish(user, 100, 1000000001, 1000000002, 1000000003)
         );
 
         List<Menu> menus = new ArrayList<>();
@@ -1655,24 +1661,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#0").
                         addTag("tagA").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish0)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish50)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish0, BigDecimal.TEN, 2001)).
+                        addItem(createMenuItem(dish50, new BigDecimal("3.5"), 2002)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2003)).
                         tryBuild()
         );
 
@@ -1687,24 +1678,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#1").
                         addTag("tagA").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish1)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish50)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish1, BigDecimal.TEN, 2011)).
+                        addItem(createMenuItem(dish50, new BigDecimal("3.5"), 2012)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2013)).
                         tryBuild()
         );
 
@@ -1719,24 +1695,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#2").
                         addTag("tagB").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish2)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish60)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish2, BigDecimal.TEN, 2101)).
+                        addItem(createMenuItem(dish60, new BigDecimal("3.5"), 2102)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2103)).
                         tryBuild()
         );
 
@@ -1751,24 +1712,9 @@ class MenuRepositoryTest {
                         addTag("common tag").
                         addTag("tag#3").
                         addTag("tagB").
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(BigDecimal.TEN).
-                                        setDish(dish3)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal("3.5")).
-                                        setDish(dish60)
-                        ).
-                        addItem(
-                                new MenuItem.LoadBuilder().
-                                        setConfig(appConfiguration).
-                                        setQuantity(new BigDecimal(2)).
-                                        setDish(dish100)
-                        ).
+                        addItem(createMenuItem(dish3, BigDecimal.TEN, 2051)).
+                        addItem(createMenuItem(dish60, new BigDecimal("3.5"), 2052)).
+                        addItem(createMenuItem(dish100, new BigDecimal(2), 2053)).
                         tryBuild()
         );
 
@@ -1797,7 +1743,7 @@ class MenuRepositoryTest {
     }
 
 
-    private Dish createDish(User user, int dishId) {
+    private Dish createDish(User user, int dishId, int ingredient1, int ingredient2, int ingredient3) {
         return new Dish.Builder().
                 setId(toUUID(dishId)).
                 setUser(user).
@@ -1814,51 +1760,73 @@ class MenuRepositoryTest {
                 addTag("2 tag").
                 addTag("tag 1").
                 addTag("1 tag").
-                addIngredient("ingredient 1",
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new com.bakuard.nutritionManager.model.Tag("common tag")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A"),
-                                        Filter.anyManufacturer("manufacturer A")
-                                ),
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new com.bakuard.nutritionManager.model.Tag("tag B"))
-                                )
-                        ),
-                        BigDecimal.TEN).
-                addIngredient("ingredient 2",
-                        Filter.orElse(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.minTags(new com.bakuard.nutritionManager.model.Tag("value 1")),
-                                        Filter.anyCategory("name A"),
-                                        Filter.anyShop("shop A"),
-                                        Filter.anyGrade("variety A")
-                                ),
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyManufacturer("manufacturer B")
-                                )
-                        ),
-                        new BigDecimal("2.5")).
-                addIngredient("ingredient 3",
-                        Filter.and(
-                                Filter.user(user.getId()),
-                                Filter.minTags(new com.bakuard.nutritionManager.model.Tag("value 1"), new Tag("value 2")),
-                                Filter.anyCategory("name A"),
-                                Filter.anyShop("shop B"),
-                                Filter.anyGrade("variety B")
-                        ),
-                        new BigDecimal("0.1")).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(ingredient1)).
+                                setFilter(
+                                        Filter.orElse(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new com.bakuard.nutritionManager.model.Tag("common tag")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop A"),
+                                                        Filter.anyGrade("variety A"),
+                                                        Filter.anyManufacturer("manufacturer A")
+                                                ),
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new com.bakuard.nutritionManager.model.Tag("tag B"))
+                                                )
+                                        )
+                                ).
+                                setName("ingredient 1").
+                                setQuantity(BigDecimal.TEN).
+                                setConfig(appConfiguration)
+                ).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(ingredient2)).
+                                setFilter(
+                                        Filter.orElse(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.minTags(new com.bakuard.nutritionManager.model.Tag("value 1")),
+                                                        Filter.anyCategory("name A"),
+                                                        Filter.anyShop("shop A"),
+                                                        Filter.anyGrade("variety A")
+                                                ),
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.anyManufacturer("manufacturer B")
+                                                )
+                                        )
+                                ).
+                                setName("ingredient 2").
+                                setQuantity(new BigDecimal("2.5")).
+                                setConfig(appConfiguration)
+                ).
+                addIngredient(
+                        new DishIngredient.Builder().
+                                setId(toUUID(ingredient3)).
+                                setFilter(
+                                        Filter.and(
+                                                Filter.user(user.getId()),
+                                                Filter.minTags(new com.bakuard.nutritionManager.model.Tag("value 1"), new Tag("value 2")),
+                                                Filter.anyCategory("name A"),
+                                                Filter.anyShop("shop B"),
+                                                Filter.anyGrade("variety B")
+                                        )
+                                ).
+                                setName("ingredient 3").
+                                setQuantity(new BigDecimal("0.1")).
+                                setConfig(appConfiguration)
+                ).
                 tryBuild();
     }
 
-    private MenuItem.LoadBuilder createMenuItem(Dish dish, BigDecimal quantity) {
+    private MenuItem.LoadBuilder createMenuItem(Dish dish, BigDecimal quantity, int itemId) {
         return new MenuItem.LoadBuilder().
+                setId(toUUID(itemId)).
                 setConfig(appConfiguration).
                 setDish(dish).
                 setQuantity(quantity);

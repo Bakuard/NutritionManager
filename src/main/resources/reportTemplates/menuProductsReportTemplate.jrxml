@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			  xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+			  name="menuProductsReportTemplate"
+			  pageWidth="595" pageHeight="842"
+			  columnWidth="555"
+			  leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20"
+			  resourceBundle="reportTemplates/menuProductsStrings"
+			  uuid="148fa5a6-9c31-420e-aa9f-63663dcd1410">
+	<field name="creationReportData"/>
+	<field name="totalPrice"/>
+	<field name="shopGroup"/>
+	<field name="productGroup"/>
+	<field name="productName"/>
+	<field name="grade"/>
+	<field name="price"/>
+	<field name="packingSize"/>
+	<field name="unit"/>
+	<field name="manufacturer"/>
+	<field name="quantity"/>
+	<field name="necessaryQuantity"/>
+	<field name="lackQuantity"/>
+	<field name="lackQuantityPrice"/>
+	<field name="useInDishes"/>
+	<group name="shopGroup">
+		<groupExpression><![CDATA[$F{shopGroup}]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<textField isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="20" y="0" width="510" height="28" forecolor="#FFFFFF" backcolor="#043148" uuid="680363f8-c25b-45fb-9795-e855cefdb767"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="ArialUnicode" size="16"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$R{shopTitle} + $F{shopGroup}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="5">
+				<line>
+					<reportElement x="20" y="0" width="510" height="1" uuid="a76701ee-03af-46af-87af-f894e558f99f"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="productGroup">
+		<groupExpression><![CDATA[$F{productGroup}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="20" y="0" width="510" height="40" backcolor="#C6C924" uuid="a82eeca9-19c2-48af-8d4b-0642bc2f2ef6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="26" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{reportTitle}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="40" width="220" height="16" uuid="5c1b0422-5dbe-43df-a37b-cceb94a94b6e"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{dataTitle} + $F{creationReportData}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="231" splitType="Stretch">
+			<textField>
+				<reportElement x="22" y="10" width="510" height="30" uuid="d36527c9-d7d2-4908-8dd5-94f7bf1dca63"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{productName} + $F{productName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="40" width="510" height="20" uuid="26c8c356-e4f0-42cc-9c7c-455e1e30c259"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{grade} + $F{grade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="80" width="510" height="20" uuid="585b5377-7e66-4835-a5bd-1e942e87ee11"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{price} + $F{price} + $R{priceFor} + $F{packingSize} + " " + $F{unit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="60" width="510" height="20" uuid="9ec771e9-f770-45c2-b706-314cb31c6486"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{manufacturer} + $F{manufacturer}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="100" width="510" height="20" uuid="fc8bddfa-75e6-454e-88b3-72f0589555e3"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{quantity} + $F{quantity} + " " + $F{unit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="120" width="510" height="20" uuid="010c27ea-fa56-4051-9416-6013818789e2"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{necessaryQuantity} + $F{necessaryQuantity}+ " " + $F{unit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="140" width="510" height="20" uuid="5e118d26-49dc-43c6-8983-f1ada723d271"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{lackQuantity} + $F{lackQuantity} + $R{lackQuantityFor} + $F{packingSize} + " " + $F{unit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="160" width="510" height="20" uuid="602bb932-425e-42f9-b682-d22e7c94b725"/>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="ArialUnicode" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{lackQuantityPrice} + $F{lackQuantityPrice}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="22" y="190" width="508" height="30" uuid="06da452c-008d-4616-a904-d69c1542da9f">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+					<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+					<bottomPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+					<rightPen lineWidth="1.5" lineStyle="Solid" lineColor="#043148"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="12"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{useInDishes} + $F{useInDishes}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="330" y="0" width="200" height="15" uuid="dc6ea193-b20c-4967-9c5c-7c8172aed3be"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{pageNumber} + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch">
+			<textField>
+				<reportElement x="20" y="0" width="200" height="30" uuid="dc6ea193-b20c-4967-9c5c-7c8172aed3be"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{totalPrice} + $F{totalPrice}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

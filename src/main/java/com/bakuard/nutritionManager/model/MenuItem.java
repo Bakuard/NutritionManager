@@ -7,41 +7,50 @@ import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 import java.util.UUID;
 
-public class MenuItem {
+/**
+ * Элемент меню. Представляет собой конкретное блюдо и кол-во, в котором это блюдо входит в меню.
+ */
+public class MenuItem implements Entity<MenuItem> {
 
+    private final UUID id;
     private final Dish dish;
     private final BigDecimal quantity;
     private final AppConfigData config;
 
     public MenuItem(MenuItem other) {
+        id = other.id;
         dish = other.dish;
         quantity = other.quantity;
         config = other.config;
     }
 
-    private MenuItem(Dish dish,
+    private MenuItem(UUID id,
+                     Dish dish,
                      BigDecimal quantity,
                      AppConfigData config) {
         Validator.check(
+                Rule.of("MenuItem.id").notNull(id),
                 Rule.of("MenuItem.dish").notNull(dish),
                 Rule.of("MenuItem.quantity").notNull(quantity).and(r -> r.positiveValue(quantity)),
                 Rule.of("MenuItem.config").notNull(config)
         );
 
+        this.id = id;
         this.dish = dish;
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.config = config;
     }
 
-    private MenuItem(String dishName,
+    private MenuItem(UUID id,
+                     String dishName,
                      BigDecimal quantity,
                      AppConfigData config,
                      DishRepository repository,
                      UUID userId) {
         Validator.check(
+                Rule.of("MenuItem.id").notNull(id),
                 Rule.of("MenuItem.dishName").notNull(dishName),
                 Rule.of("MenuItem.quantity").notNull(quantity).and(r -> r.positiveValue(quantity)),
                 Rule.of("MenuItem.config").notNull(config),
@@ -49,9 +58,19 @@ public class MenuItem {
                 Rule.of("MenuItem.userId").notNull(userId)
         );
 
+        this.id = id;
         this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
         this.config = config;
         this.dish = repository.tryGetByName(userId, dishName);
+    }
+
+    /**
+     * Возвращает уникальный идентификатор элемента меню.
+     * @return уникальный идентификатор элемента меню.
+     */
+    @Override
+    public UUID getId() {
+        return id;
     }
 
     public String getDishName() {
@@ -71,23 +90,31 @@ public class MenuItem {
     }
 
     @Override
+    public boolean equalsFullState(MenuItem other) {
+        return id.equals(other.id) &&
+                dish.equalsFullState(other.dish) &&
+                quantity.equals(other.quantity) &&
+                config == other.config;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MenuItem menuItem = (MenuItem) o;
-        return dish.equals(menuItem.dish) &&
-                quantity.equals(menuItem.quantity);
+        MenuItem other = (MenuItem) o;
+        return id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dish, quantity);
+        return id.hashCode();
     }
 
     @Override
     public String toString() {
         return "MenuItem{" +
-                "dish={id=" + dish.getId() + ", name=" + dish.getName() + '}' +
+                "id=" + id +
+                ", dish={id=" + dish.getId() + ", name=" + dish.getName() + '}' +
                 ", quantity=" + quantity +
                 '}';
     }
@@ -95,12 +122,18 @@ public class MenuItem {
 
     public static class LoadBuilder implements AbstractBuilder<MenuItem> {
 
+        private UUID id;
         private Dish dish;
         private BigDecimal quantity;
         private AppConfigData config;
 
         public LoadBuilder() {
 
+        }
+
+        public LoadBuilder setId(UUID id) {
+            this.id = id;
+            return this;
         }
 
         public LoadBuilder setDish(Dish dish) {
@@ -120,7 +153,7 @@ public class MenuItem {
 
         @Override
         public MenuItem tryBuild() throws ValidateException {
-            return new MenuItem(dish, quantity, config);
+            return new MenuItem(id, dish, quantity, config);
         }
 
     }
@@ -128,6 +161,7 @@ public class MenuItem {
 
     public static class Builder implements AbstractBuilder<MenuItem> {
 
+        private UUID id;
         private String dishName;
         private BigDecimal quantity;
         private AppConfigData config;
@@ -136,6 +170,21 @@ public class MenuItem {
 
         public Builder() {
 
+        }
+
+        public Builder generateId() {
+            id = UUID.randomUUID();
+            return this;
+        }
+
+        public Builder setId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setOrGenerateId(UUID id) {
+            this.id = id == null ? UUID.randomUUID() : id;
+            return this;
         }
 
         public Builder setDishName(String dishName) {
@@ -165,7 +214,7 @@ public class MenuItem {
 
         @Override
         public MenuItem tryBuild() throws ValidateException {
-            return new MenuItem(dishName, quantity, config, repository, userId);
+            return new MenuItem(id, dishName, quantity, config, repository, userId);
         }
 
     }

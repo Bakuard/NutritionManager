@@ -36,7 +36,7 @@ public class MenuUpdateRequest {
             2. Все элементы списка не должны быть null. <br/>
             3. Два и более элемента меню не могут относиться к одному и тому же блюду. <br/>
             """)
-    private List<MenuItemRequestResponse> items;
+    private List<ItemUpdateRequest> items;
     @Schema(description = """
             Теги указанные для данного меню. Допускается пустой список тегов. Ограничения:<br/>
             1. Список тегов не может быть null.<br/>
@@ -82,11 +82,11 @@ public class MenuUpdateRequest {
         this.description = description;
     }
 
-    public List<MenuItemRequestResponse> getItems() {
+    public List<ItemUpdateRequest> getItems() {
         return items;
     }
 
-    public void setItems(List<MenuItemRequestResponse> items) {
+    public void setItems(List<ItemUpdateRequest> items) {
         this.items = items;
     }
 

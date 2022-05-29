@@ -7,29 +7,29 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.2</version>
+        <version>2.7.0</version>
         <relativePath/>
     </parent>
 
     <groupId>com.bakuard</groupId>
     <artifactId>nutritionManager</artifactId>
-    <version>0.9.0</version>
+    <version>0.11.0</version>
     <name>nutritionManager</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring.boot.version>2.6.4</spring.boot.version>
-        <jjwt.version>0.11.2</jjwt.version>
-        <junit.jupiter.version>5.4.2</junit.jupiter.version>
+        <spring.boot.version>2.7.0</spring.boot.version>
+        <jjwt.version>0.11.5</jjwt.version>
+        <junit.jupiter.version>5.8.2</junit.jupiter.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>30.1.1-jre</version>
+            <version>31.1-jre</version>
         </dependency>
 
         <dependency>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.180</version>
+            <version>1.12.220</version>
         </dependency>
 
         <dependency>
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.3.1</version>
+            <version>4.5.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -114,7 +114,25 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>1.6.8</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.bakuard</groupId>
+            <artifactId>arialUnicode</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.19.1</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>maven_inner_repository</id>
+            <url>file://${project.basedir}/mavenInnerRepository</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
