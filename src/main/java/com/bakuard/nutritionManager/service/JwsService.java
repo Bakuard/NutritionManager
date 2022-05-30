@@ -125,7 +125,7 @@ public class JwsService {
         }
     }
 
-    public void invalidateJws(String accessJws) {
+    public UUID invalidateJws(String accessJws) {
         Claims claims = parseJws(accessJws, accessKeyPair);
 
         UUID accessJwsId = UUID.fromString(claims.getId());
@@ -135,6 +135,8 @@ public class JwsService {
                 toLocalDateTime();
 
         blackList.addToBlackList(accessJwsId, expiration);
+
+        return UUID.fromString(claims.getSubject());
     }
 
     @Transactional

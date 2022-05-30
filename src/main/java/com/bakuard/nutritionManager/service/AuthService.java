@@ -32,6 +32,8 @@ public class AuthService {
     }
 
     public void verifyEmailForRegistration(String email) {
+        Validator.check(Rule.of("AuthService.email").notNull(email));
+
         if(userRepository.getByEmail(email).isPresent()) {
             throw new ValidateException().
                     addReason(Rule.of("AuthService.verifyEmailForRegistration").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
@@ -42,6 +44,8 @@ public class AuthService {
     }
 
     public void verifyEmailForChangeCredentials(String email) {
+        Validator.check(Rule.of("AuthService.email").notNull(email));
+
         String jws = jwsService.generateChangeCredentialsJws(email);
         emailService.confirmEmailForChangeCredentials(jws, email);
     }
@@ -73,9 +77,7 @@ public class AuthService {
         return new Pair<>(accessJws, user);
     }
 
-    public User changeLoginAndEmail(String jws, String newName, String newEmail, String currentPassword) {
-        UUID userId = jwsService.parseAccessJws(jws);
-
+    public User changeLoginAndEmail(UUID userId, String newName, String newEmail, String currentPassword) {
         User user = userRepository.tryGetById(userId);
         if(!user.isCorrectPassword(currentPassword)) {
             throw new ValidateException("Incorrect password").
@@ -89,9 +91,7 @@ public class AuthService {
         return user;
     }
 
-    public User changePassword(String jws, String currentPassword, String newPassword) {
-        UUID userId = jwsService.parseAccessJws(jws);
-
+    public User changePassword(UUID userId, String currentPassword, String newPassword) {
         User user = userRepository.tryGetById(userId);
         if(!user.isCorrectPassword(currentPassword)) {
             throw new ValidateException("Incorrect password").
@@ -110,8 +110,8 @@ public class AuthService {
         return userRepository.tryGetById(userId);
     }
 
-    public void logout(String jws) {
-        jwsService.invalidateJws(jws);
+    public UUID logout(String jws) {
+        return jwsService.invalidateJws(jws);
     }
 
 }
