@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Schema(description = """
         Данные используемые в запросе на добавление меню. Не допускается, чтобы у пользователя было два и более
@@ -68,20 +69,22 @@ public class MenuAddRequest {
         this.description = description;
     }
 
-    public List<ItemAddRequest> getItems() {
-        return items;
+    public Optional<List<ItemAddRequest>> getItems() {
+        return Optional.ofNullable(items);
     }
 
-    public void setItems(List<ItemAddRequest> items) {
+    public MenuAddRequest setItems(List<ItemAddRequest> items) {
         this.items = items;
+        return this;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public Optional<List<String>> getTags() {
+        return Optional.ofNullable(tags);
     }
 
-    public void setTags(List<String> tags) {
+    public MenuAddRequest setTags(List<String> tags) {
         this.tags = tags;
+        return this;
     }
 
     @Override

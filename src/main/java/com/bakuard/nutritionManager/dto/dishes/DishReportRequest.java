@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Schema(description = "Данные запроса на получение отчета по докупаемым продуктам к блюду")
@@ -56,12 +57,13 @@ public class DishReportRequest {
         this.servingNumber = servingNumber;
     }
 
-    public List<IngredientProductRequest> getProducts() {
-        return products;
+    public Optional<List<IngredientProductRequest>> getProducts() {
+        return Optional.ofNullable(products);
     }
 
-    public void setProducts(List<IngredientProductRequest> products) {
+    public DishReportRequest setProducts(List<IngredientProductRequest> products) {
         this.products = products;
+        return this;
     }
 
     @Override

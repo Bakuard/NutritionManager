@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Schema(description = "Фильтр задающий множество взаимозаменяемых продуктов для ингредиента блюда")
 public class IngredientFilterRequestResponse {
@@ -57,36 +58,40 @@ public class IngredientFilterRequestResponse {
         this.category = category;
     }
 
-    public List<String> getShops() {
-        return shops;
+    public Optional<List<String>> getShops() {
+        return Optional.ofNullable(shops);
     }
 
-    public void setShops(List<String> shops) {
+    public IngredientFilterRequestResponse setShops(List<String> shops) {
         this.shops = shops;
+        return this;
     }
 
-    public List<String> getGrades() {
-        return grades;
+    public Optional<List<String>> getGrades() {
+        return Optional.ofNullable(grades);
     }
 
-    public void setGrades(List<String> grades) {
+    public IngredientFilterRequestResponse setGrades(List<String> grades) {
         this.grades = grades;
+        return this;
     }
 
-    public List<String> getManufacturers() {
-        return manufacturers;
+    public Optional<List<String>> getManufacturers() {
+        return Optional.ofNullable(manufacturers);
     }
 
-    public void setManufacturers(List<String> manufacturers) {
+    public IngredientFilterRequestResponse setManufacturers(List<String> manufacturers) {
         this.manufacturers = manufacturers;
+        return this;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public Optional<List<String>> getTags() {
+        return Optional.ofNullable(tags);
     }
 
-    public void setTags(List<String> tags) {
+    public IngredientFilterRequestResponse setTags(List<String> tags) {
         this.tags = tags;
+        return this;
     }
 
     @Override

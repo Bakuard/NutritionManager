@@ -90,7 +90,7 @@ public class DtoMapper {
                 setDescription(dto.getDescription()).
                 setImageUrl(dto.getImageUrl());
 
-        dto.getTags().forEach(builder::addTag);
+        dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
         return builder.tryBuild();
     }
@@ -111,7 +111,7 @@ public class DtoMapper {
                 setDescription(dto.getDescription()).
                 setImageUrl(dto.getImageUrl());
 
-        dto.getTags().forEach(builder::addTag);
+        dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
         return builder.tryBuild();
     }
@@ -207,15 +207,16 @@ public class DtoMapper {
                 setConfig(appConfiguration).
                 setRepository(productRepository);
 
-        if(dto.getIngredients() != null) {
-            IntStream.range(0, dto.getIngredients().size()).
-                    forEach(i -> {
-                        IngredientAddRequest ingredient = dto.getIngredients().get(i);
-                        builder.addIngredient(toDishIngredient(userId, ingredient, i));
-                    });
-        }
+        dto.getIngredients().
+                ifPresent(ingredients ->
+                        IntStream.range(0, ingredients.size()).
+                                forEach(i -> {
+                                    IngredientAddRequest ingredient = ingredients.get(i);
+                                    builder.addIngredient(toDishIngredient(userId, ingredient, i));
+                                })
+                );
 
-        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
+        dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
         return builder.tryBuild();
     }
@@ -234,15 +235,15 @@ public class DtoMapper {
                 setConfig(appConfiguration).
                 setRepository(productRepository);
 
-        if(dto.getIngredients() != null) {
-            IntStream.range(0, dto.getIngredients().size()).
+        dto.getIngredients().ifPresent(ingredients ->
+            IntStream.range(0, ingredients.size()).
                     forEach(i -> {
-                        IngredientUpdateRequest ingredient = dto.getIngredients().get(i);
+                        IngredientUpdateRequest ingredient = ingredients.get(i);
                         builder.addIngredient(toDishIngredient(userId, ingredient, i));
-                    });
-        }
+                    })
+        );
 
-        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
+        dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
         return builder.tryBuild();
     }
@@ -259,9 +260,11 @@ public class DtoMapper {
     public ReportService.DishProductsReportData toDishProductsReportData(UUID userId, DishReportRequest dto) {
         Dish dish = dishRepository.tryGetById(userId, dto.getDishId());
 
-        List<Dish.ProductConstraint> constraints = dto.getProducts().stream().
-                map(pr -> new Dish.ProductConstraint(pr.getIngredientIndex(), pr.getProductIndex())).
-                toList();
+        List<Dish.ProductConstraint> constraints = dto.getProducts().
+                map(products -> products.stream().
+                        map(pr -> new Dish.ProductConstraint(pr.getIngredientIndex(), pr.getProductIndex())).
+                        toList()
+                ).orElse(List.of());
 
         return new ReportService.DishProductsReportData(
                 dish,
@@ -345,9 +348,9 @@ public class DtoMapper {
                 setImageUrl(dto.getImageUrl()).
                 setConfig(appConfiguration);
 
-        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
+        dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
-        if(dto.getItems() != null) dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
+        dto.getItems().ifPresent(items -> items.forEach(item -> builder.addItem(toMenuItem(userId, item))));
 
         return builder.tryBuild();
     }
@@ -363,9 +366,9 @@ public class DtoMapper {
                 setImageUrl(dto.getImageUrl()).
                 setConfig(appConfiguration);
 
-        if(dto.getTags() != null) dto.getTags().forEach(builder::addTag);
+        dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
-        if(dto.getItems() != null) dto.getItems().forEach(item -> builder.addItem(toMenuItem(userId, item)));
+        dto.getItems().ifPresent(items -> items.forEach(item -> builder.addItem(toMenuItem(userId, item))));
 
         return builder.tryBuild();
     }
@@ -394,9 +397,13 @@ public class DtoMapper {
     public ReportService.MenuProductsReportData toMenuProductsReportData(UUID userId, MenuReportRequest dto) {
         Menu menu = menuRepository.tryGetById(userId, dto.getMenuId());
 
-        List<Menu.ProductConstraint> constraints = dto.getProducts().stream().
-                map(d -> new Menu.ProductConstraint(d.getDishName(), d.getIngredientIndex(), d.getProductIndex())).
-                toList();
+        List<Menu.ProductConstraint> constraints = dto.getProducts().map(
+                products -> products.stream().
+                        map(d -> new Menu.ProductConstraint(d.getDishName(),
+                                d.getIngredientIndex(),
+                                d.getProductIndex())
+                        ).toList()
+        ).orElse(List.of());
 
         return new ReportService.MenuProductsReportData(
                 menu,
@@ -621,18 +628,18 @@ public class DtoMapper {
         List<Filter> filters = new ArrayList<>();
         filters.add(Filter.user(userId));
         filters.add(Filter.anyCategory(dto.getCategory()));
-        if(dto.getGrades() != null && !dto.getGrades().isEmpty()) {
-            filters.add(Filter.anyGrade(dto.getGrades()));
-        }
-        if(dto.getShops() != null && !dto.getShops().isEmpty()) {
-            filters.add(Filter.anyShop(dto.getShops()));
-        }
-        if(dto.getManufacturers() != null && !dto.getManufacturers().isEmpty()) {
-            filters.add(Filter.anyManufacturer(dto.getManufacturers()));
-        }
-        if(dto.getTags() != null && !dto.getTags().isEmpty()) {
-            filters.add(Filter.minTags(toTags(dto.getTags())));
-        }
+        dto.getGrades().
+                filter(grades -> !grades.isEmpty()).
+                ifPresent(grades -> filters.add(Filter.anyGrade(grades)));
+        dto.getShops().
+                filter(shops -> !shops.isEmpty()).
+                ifPresent(shops -> filters.add(Filter.anyShop(shops)));
+        dto.getManufacturers().
+                filter(manufacturers -> !manufacturers.isEmpty()).
+                ifPresent(manufacturers -> filters.add(Filter.anyManufacturer(manufacturers)));
+        dto.getTags().
+                filter(tags -> !tags.isEmpty()).
+                ifPresent(tags -> filters.add(Filter.minTags(toTags(tags))));
 
         return Filter.and(filters);
     }

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Schema(description = """
         Данные используемые в запросе на добавление продукта. Не допускается, чтобы один пользователь
@@ -161,8 +162,8 @@ public class ProductAddRequest {
         this.imageUrl = imageUrl;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public Optional<List<String>> getTags() {
+        return Optional.ofNullable(tags);
     }
 
     public void setTags(List<String> tags) {

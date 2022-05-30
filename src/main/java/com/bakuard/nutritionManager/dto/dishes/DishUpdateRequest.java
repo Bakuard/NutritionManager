@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Schema(description = """
@@ -110,20 +111,22 @@ public class DishUpdateRequest {
         this.imageUrl = imageUrl;
     }
 
-    public List<IngredientUpdateRequest> getIngredients() {
-        return ingredients;
+    public Optional<List<IngredientUpdateRequest>> getIngredients() {
+        return Optional.ofNullable(ingredients);
     }
 
-    public void setIngredients(List<IngredientUpdateRequest> ingredients) {
+    public DishUpdateRequest setIngredients(List<IngredientUpdateRequest> ingredients) {
         this.ingredients = ingredients;
+        return this;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public Optional<List<String>> getTags() {
+        return Optional.ofNullable(tags);
     }
 
-    public void setTags(List<String> tags) {
+    public DishUpdateRequest setTags(List<String> tags) {
         this.tags = tags;
+        return this;
     }
 
     @Override
