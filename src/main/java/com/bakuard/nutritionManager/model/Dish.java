@@ -432,22 +432,9 @@ public class Dish implements Entity<Dish> {
      *         2. Если один из элементов constraints имеет значение null. <br/>
      */
     public List<IngredientProduct> getProductForEachIngredient(List<ProductConstraint> constraints) {
-        Validator.check(
-                Rule.of("Dish.constrains").notNull(constraints).
-                        and(r -> r.notContainsNull(constraints))
-        );
-
-        return IntStream.range(0, ingredients.size()).
-                mapToObj(ingredientIndex -> {
-                    int productIndex = constraints.stream().
-                            filter(c -> c.ingredientIndex() == ingredientIndex).
-                            mapToInt(ProductConstraint::productIndex).
-                            filter(pIndex -> pIndex >= 0 && pIndex < getProductsNumber(ingredientIndex).orElseThrow()).
-                            findFirst().
-                            orElse(0);
-
-                    return getProduct(ingredientIndex, productIndex).orElseThrow();
-                }).
+        return checkAndCorrectConstraints(constraints).
+                stream().
+                map(c -> getProduct(c.ingredientIndex(), c.productIndex()).orElseThrow()).
                 toList();
     }
 
@@ -894,6 +881,26 @@ public class Dish implements Entity<Dish> {
                 IntStream.range(0, a.size()).allMatch(i -> a.get(i).equalsFullState(b.get(i)));
     }
 
+
+    private List<ProductConstraint> checkAndCorrectConstraints(List<ProductConstraint> constraints) {
+        Validator.check(
+                Rule.of("Dish.constrains").notNull(constraints).
+                        and(r -> r.notContainsNull(constraints))
+        );
+
+        return IntStream.range(0, ingredients.size()).
+                mapToObj(ingredientIndex -> {
+                    int productIndex = constraints.stream().
+                            filter(c -> c.ingredientIndex() == ingredientIndex).
+                            mapToInt(ProductConstraint::productIndex).
+                            filter(pIndex -> pIndex >= 0 && pIndex < getProductsNumber(ingredientIndex).orElseThrow()).
+                            findFirst().
+                            orElse(0);
+
+                    return new ProductConstraint(ingredientIndex, productIndex);
+                }).
+                toList();
+    }
 
     private Product retrieveProduct(List<IngredientProduct> ingredientProducts) {
         return ingredientProducts.stream().
