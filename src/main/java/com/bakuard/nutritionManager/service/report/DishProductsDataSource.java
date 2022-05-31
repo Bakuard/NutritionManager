@@ -57,13 +57,13 @@ public class DishProductsDataSource implements JRDataSource {
             case "manufacturer" -> result = current.product().getContext().getManufacturer();
             case "quantity" -> result = format(current.product().getQuantity());
             case "necessaryQuantity" -> result = format(
-                    dish.getNecessaryQuantity(current, servingNumber).orElseThrow()
+                    dish.getNecessaryQuantity(current, servingNumber)
             );
             case "lackQuantity" -> result = format(
-                    dish.getLackPackageQuantity(current, servingNumber).orElseThrow()
+                    dish.getLackPackageQuantity(current, servingNumber)
             );
             case "lackQuantityPrice" -> result = format(
-                    dish.getLackPackageQuantityPrice(current, servingNumber).orElseThrow()
+                    dish.getLackPackageQuantityPrice(current, servingNumber)
             );
         }
 

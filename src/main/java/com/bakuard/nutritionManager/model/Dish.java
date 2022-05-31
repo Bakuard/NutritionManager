@@ -479,8 +479,8 @@ public class Dish implements Entity<Dish> {
      *              2. если servingNumber меньше или равно нулю.<br/>
      *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getNecessaryQuantity(ProductGroup productGroup,
-                                                     BigDecimal servingNumber) {
+    public BigDecimal getNecessaryQuantity(ProductGroup productGroup,
+                                           BigDecimal servingNumber) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(r -> r.positiveValue(servingNumber)),
@@ -489,7 +489,8 @@ public class Dish implements Entity<Dish> {
 
         return productGroup.ingredients().stream().
                 map(i -> calculateNecessaryQuantityInUnits(i, servingNumber)).
-                reduce(BigDecimal::add);
+                reduce(BigDecimal::add).
+                orElseThrow();
     }
 
     /**
@@ -506,10 +507,10 @@ public class Dish implements Entity<Dish> {
      *              2. если servingNumber меньше или равно нулю.<br/>
      *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getNecessaryPackageQuantity(ProductGroup productGroup,
-                                                            BigDecimal servingNumber) {
-        return getNecessaryQuantity(productGroup, servingNumber).
-                map(necessaryQuantity ->  calculatePackagesNumber(productGroup.product(), necessaryQuantity));
+    public BigDecimal getNecessaryPackageQuantity(ProductGroup productGroup,
+                                                  BigDecimal servingNumber) {
+        BigDecimal necessaryQuantity = getNecessaryQuantity(productGroup, servingNumber);
+        return calculatePackagesNumber(productGroup.product(), necessaryQuantity);
     }
 
     /**
@@ -526,12 +527,10 @@ public class Dish implements Entity<Dish> {
      *              2. если servingNumber меньше или равно нулю.<br/>
      *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getNecessaryPackageQuantityPrice(ProductGroup productGroup,
-                                                                 BigDecimal servingNumber) {
-        return getNecessaryPackageQuantity(productGroup, servingNumber).
-                map(necessaryPackageQuantity ->
-                        calculateProductPrice(productGroup.product(), necessaryPackageQuantity)
-                );
+    public BigDecimal getNecessaryPackageQuantityPrice(ProductGroup productGroup,
+                                                       BigDecimal servingNumber) {
+        BigDecimal necessaryPackageQuantity = getNecessaryPackageQuantity(productGroup, servingNumber);
+        return calculateProductPrice(productGroup.product(), necessaryPackageQuantity);
     }
 
     /**
@@ -588,14 +587,12 @@ public class Dish implements Entity<Dish> {
      *              2. если servingNumber меньше или равно нулю.<br/>
      *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getLackPackageQuantity(ProductGroup productGroup,
-                                                       BigDecimal servingNumber) {
-        return getNecessaryQuantity(productGroup, servingNumber).
-                map(necessaryQuantityInUnits -> {
-                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(
-                            productGroup.product(), necessaryQuantityInUnits);
-                    return calculatePackagesNumber(productGroup.product(), lackQuantityInUnits);
-                });
+    public BigDecimal getLackPackageQuantity(ProductGroup productGroup,
+                                             BigDecimal servingNumber) {
+        BigDecimal necessaryQuantityInUnits = getNecessaryQuantity(productGroup, servingNumber);
+        BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(
+                productGroup.product(), necessaryQuantityInUnits);
+        return calculatePackagesNumber(productGroup.product(), lackQuantityInUnits);
     }
 
     /**
@@ -639,16 +636,10 @@ public class Dish implements Entity<Dish> {
      *              2. если servingNumber меньше или равно нулю.<br/>
      *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getLackPackageQuantityPrice(ProductGroup productGroup,
-                                                            BigDecimal servingNumber) {
-        Validator.check(
-                Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(r -> r.positiveValue(servingNumber)),
-                Rule.of("Dish.ingredients").notNull(ingredients)
-        );
-
-        return getLackPackageQuantity(productGroup, servingNumber).
-                map(lackQuantityInPackages -> calculateProductPrice(productGroup.product(), lackQuantityInPackages));
+    public BigDecimal getLackPackageQuantityPrice(ProductGroup productGroup,
+                                                  BigDecimal servingNumber) {
+        BigDecimal lackQuantityInPackages = getLackPackageQuantity(productGroup, servingNumber);
+        return calculateProductPrice(productGroup.product(), lackQuantityInPackages);
     }
 
     /**
@@ -684,7 +675,7 @@ public class Dish implements Entity<Dish> {
         List<ProductGroup> groups = groupByProduct(ingredients);
 
         return groups.stream().
-                map(value -> getLackPackageQuantityPrice(value, servingNumber).orElseThrow()).
+                map(value -> getLackPackageQuantityPrice(value, servingNumber)).
                 reduce(BigDecimal::add);
     }
 
@@ -727,7 +718,7 @@ public class Dish implements Entity<Dish> {
         List<IngredientProduct> ingredientProducts = getProductForEachIngredient(constraints);
 
         return groupByProduct(ingredientProducts).stream().
-                map(value -> getNecessaryPackageQuantityPrice(value, BigDecimal.ONE).orElseThrow()).
+                map(value -> getNecessaryPackageQuantityPrice(value, BigDecimal.ONE)).
                 reduce(BigDecimal::add);
     }
 
@@ -761,7 +752,7 @@ public class Dish implements Entity<Dish> {
                 toList();
 
         return groupByProduct(ingredientProducts).stream().
-                map(value -> getNecessaryPackageQuantityPrice(value, BigDecimal.ONE).orElseThrow()).
+                map(value -> getNecessaryPackageQuantityPrice(value, BigDecimal.ONE)).
                 reduce(BigDecimal::add);
     }
 
@@ -862,14 +853,6 @@ public class Dish implements Entity<Dish> {
                 toList();
     }
 
-    private Product retrieveProduct(List<IngredientProduct> ingredientProducts) {
-        return ingredientProducts.stream().
-                filter(i -> i.product().isPresent()).
-                map(i -> i.product().orElseThrow()).
-                findAny().
-                orElseThrow();
-    }
-
     private BigDecimal calculateNecessaryQuantityInUnits(IngredientProduct ingredientProduct, BigDecimal servingNumber) {
         return ingredients.get(ingredientProduct.ingredientIndex()).getNecessaryQuantity(servingNumber);
     }
@@ -933,8 +916,12 @@ public class Dish implements Entity<Dish> {
      * Содержит данные о продукте и ингредиентах, в качестве которых он используется. Гарантии класса:<br/>
      * 1. Поле product не является null. <br/>
      * 2. ingredients не является null. <br/>
-     * 3. Поле ingredients этого класса содержит как мнимум один элемент. <br/>
+     * 3. Поле ingredients этого класса содержит как минимум один элемент. <br/>
      * 4. Метод {@link IngredientProduct#product()} каждого элемента этого списка возвращает НЕ пустой Optional. <br/>
+     * 5. Метод {@link IngredientProduct#product()} каждого элемента возвращает тот же объект, который равен
+     *    объекту возвращаемому методом {@link ProductGroup#product()}.
+     * @param product продукт
+     * @param ingredients ингредиенты, в качесте котрых используется указанный продукт
      */
     public record ProductGroup(Product product, List<IngredientProduct> ingredients) {}
 
