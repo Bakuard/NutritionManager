@@ -441,116 +441,97 @@ public class Dish implements Entity<Dish> {
     /**
      * Групирует продукты относящиеся к разным ингредиентам по одинаковым продуктам. Если
      * {@link IngredientProduct#product()} какого-то ингредиента возвращает пустой Optional -
-     * он не будет участвовать в формировании итогового результата.<br/><br/>
+     * он не будет участвовать в формировании итогового результата.<br/>
+     * Особые случаи: <br/>
+     * 1. Если ingredientProducts пуст - метод также возвращает пустой список. <br/>
+     * 2. Если метод {@link IngredientProduct#product()} каждого элемента входного списка возвращает
+     *    пустой Optional - данный метод возвращает пустой список. <br/><br/>
      * Данный метод полагается, что передаваемый список был корректно сформирован вызывающим кодом, например,
      * вызовом метода {@link #getProductForEachIngredient(List)}.
      * @param ingredientProducts данные об одном конкретном продукте для каждого ингредиента блюда.
      * @return продукты разных ингредиентов сгрупированные по одинаковым продуктам.
      * @throws ValidateException если menuItemProducts является null.
      */
-    public Map<Product, List<IngredientProduct>> groupByProduct(List<IngredientProduct> ingredientProducts) {
+    public List<ProductGroup> groupByProduct(List<IngredientProduct> ingredientProducts) {
         Validator.check(
                 Rule.of("Dish.ingredients").notNull(ingredientProducts)
         );
 
         return ingredientProducts.stream().
                 filter(i -> i.product().isPresent()).
-                collect(Collectors.groupingBy(i -> i.product().orElseThrow()));
+                collect(Collectors.groupingBy(i -> i.product().orElseThrow())).
+                entrySet().stream().
+                map(pair -> new ProductGroup(pair.getKey(), pair.getValue())).
+                toList();
     }
 
     /**
      * В некоторых случаях один и тот же продукт может использоваться для нескольких ингредиентов блюда. Этот метод
      * возвращает общее кол-во указаннаго продукта необходимого для всех ингредиентов блюда где он используется.
-     * Особые случаи: <br/>
-     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
-     *    также вернет пустой Optional. <br/>
-     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
-     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
-     * 3. Если список пуст - возвращает пустой Optional. <br/>
      * <br/><br/>
-     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
-     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно с помощью
-     * метода: {@link #groupByProduct(List)}.
-     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * Метод не проверят содержимое объекта productGroup полагая, что данный объект был сформирован правильно с
+     * помощью метода: {@link #groupByProduct(List)}.
+     * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
      * @return общее кол-во указаннаго продукта необходимого для всех ингредиентов блюда где он используется.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
      *              2. если servingNumber меньше или равно нулю.<br/>
-     *              3. если ingredients имеет значение null.<br/>
+     *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getNecessaryQuantity(List<IngredientProduct> ingredientProducts,
+    public Optional<BigDecimal> getNecessaryQuantity(ProductGroup productGroup,
                                                      BigDecimal servingNumber) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
                         and(r -> r.positiveValue(servingNumber)),
-                Rule.of("Dish.ingredients").notNull(ingredients)
+                Rule.of("Dish.productGroup").notNull(productGroup)
         );
 
-        return ingredientProducts.stream().
-                filter(i -> i.product().isPresent()).
+        return productGroup.ingredients().stream().
                 map(i -> calculateNecessaryQuantityInUnits(i, servingNumber)).
                 reduce(BigDecimal::add);
     }
 
     /**
      * Возвращает необходимое кол-во "упаковок" продукта. Стоимость необходимого кол-ва рассчитывается
-     * с учетом фасовки продукта (размера упаковки). Особые случаи: <br/>
-     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
-     *    также вернет пустой Optional. <br/>
-     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
-     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
-     * 3. Если список пуст - возвращает пустой Optional. <br/>
-     * <br/><br/>
-     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
-     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно
+     * с учетом фасовки продукта (размера упаковки).<br/><br/>
+     * Метод не проверят содержимое объекта productGroup полагая, что данный объект был сформирован правильно
      * с помощью метода: {@link #groupByProduct(List)}.
-     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
      * @return общее кол-во упаковок указаннаго продукта необходимого для всех ингредиентов блюда где он
      *         используется.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
      *              2. если servingNumber меньше или равно нулю.<br/>
-     *              3. если ingredients имеет значение null.<br/>
+     *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getNecessaryPackageQuantity(List<IngredientProduct> ingredientProducts,
+    public Optional<BigDecimal> getNecessaryPackageQuantity(ProductGroup productGroup,
                                                             BigDecimal servingNumber) {
-        return getNecessaryQuantity(ingredientProducts, servingNumber).
-                map(necessaryQuantity -> {
-                    Product product = retrieveProduct(ingredientProducts);
-                    return calculatePackagesNumber(product, necessaryQuantity);
-                });
+        return getNecessaryQuantity(productGroup, servingNumber).
+                map(necessaryQuantity ->  calculatePackagesNumber(productGroup.product(), necessaryQuantity));
     }
 
     /**
      * Возвращает общую цену за необходимое кол-во "упаковок" продукта. Стоимость необходимого кол-ва рассчитывается
-     * с учетом фасовки продукта (размера упаковки). Особые случаи: <br/>
-     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
-     *    также вернет пустой Optional. <br/>
-     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
-     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
-     * 3. Если список пуст - возвращает пустой Optional. <br/>
-     * <br/><br/>
-     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
-     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно
+     * с учетом фасовки продукта (размера упаковки). <br/><br/>
+     * Метод не проверят содержимое объекта productGroup полагая, что данный объект был сформирован правильно
      * с помощью метода: {@link #groupByProduct(List)}.
-     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
      * @return общую цену за необходимое кол-во докупаемого продукта, БЕЗ учета кол-ва уже имеющегося в наличии
      *         у пользователя.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
      *              2. если servingNumber меньше или равно нулю.<br/>
-     *              3. если ingredients имеет значение null.<br/>
+     *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getNecessaryPackageQuantityPrice(List<IngredientProduct> ingredientProducts,
+    public Optional<BigDecimal> getNecessaryPackageQuantityPrice(ProductGroup productGroup,
                                                                  BigDecimal servingNumber) {
-        return getNecessaryPackageQuantity(ingredientProducts, servingNumber).
-                map(necessaryPackageQuantity -> {
-                    Product product = retrieveProduct(ingredientProducts);
-                    return calculateProductPrice(product, necessaryPackageQuantity);
-                });
+        return getNecessaryPackageQuantity(productGroup, servingNumber).
+                map(necessaryPackageQuantity ->
+                        calculateProductPrice(productGroup.product(), necessaryPackageQuantity)
+                );
     }
 
     /**
@@ -596,33 +577,24 @@ public class Dish implements Entity<Dish> {
      * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
      * Недостающее кол-во рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой
      * кол-во недостающих "упаковок" продукта. Данный метдо используется, когда для разных ингредиентов блюда
-     * были выбраны одинаковые продукты.
-     * <br/>
-     * Особые случаи: <br/>
-     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
-     *    также вернет пустой Optional. <br/>
-     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
-     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
-     * 3. Если список пуст - возвращает пустой Optional. <br/>
-     * <br/><br/>
-     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
-     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно с помощью
-     * метода: {@link #groupByProduct(List)}.
-     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * были выбраны одинаковые продукты. <br/><br/>
+     * Метод не проверят содержимое объекта productGroup полагая, что данный объект был сформирован правильно с
+     * помощью метода: {@link #groupByProduct(List)}.
+     * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
      * @return кол-во "упаковок" докупаемого продукта.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
      *              2. если servingNumber меньше или равно нулю.<br/>
-     *              3. если ingredients имеет значение null.<br/>
+     *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getLackPackageQuantity(List<IngredientProduct> ingredientProducts,
+    public Optional<BigDecimal> getLackPackageQuantity(ProductGroup productGroup,
                                                        BigDecimal servingNumber) {
-        return getNecessaryQuantity(ingredientProducts, servingNumber).
+        return getNecessaryQuantity(productGroup, servingNumber).
                 map(necessaryQuantityInUnits -> {
-                    Product product = retrieveProduct(ingredientProducts);
-                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(product, necessaryQuantityInUnits);
-                    return calculatePackagesNumber(product, lackQuantityInUnits);
+                    BigDecimal lackQuantityInUnits = calculateLackQuantityInUnits(
+                            productGroup.product(), necessaryQuantityInUnits);
+                    return calculatePackagesNumber(productGroup.product(), lackQuantityInUnits);
                 });
     }
 
@@ -656,27 +628,18 @@ public class Dish implements Entity<Dish> {
 
     /**
      * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта. Стоимость недостающего
-     * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки).
-     * <br/>
-     * Особые случаи: <br/>
-     * 1. Если {@link IngredientProduct#product()} каждого элемента списка возвращает пустой Optional - этот метод
-     *    также вернет пустой Optional. <br/>
-     * 2. Если какой-либо из элементов списка {@link IngredientProduct#product()} возвращает пустой Optional -
-     *    то этот элемент списка не принимает участия в формировании итогового результата. <br/>
-     * 3. Если список пуст - возвращает пустой Optional. <br/>
-     * <br/><br/>
-     * Метод не проверят содержимое объекта ingredientProducts (список не содержит null, для всех элементов списка
-     * испльзуется один и тот же продукт и т.д.) полагая, что данный объект был сформирован правильно
+     * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки). <br/><br/>
+     * Метод не проверят содержимое объекта productGroup  полагая, что данный объект был сформирован правильно
      * с помощью метода: {@link #groupByProduct(List)}.
-     * @param ingredientProducts данные о продукте используемом для нескольких ингредиентов блюда.
+     * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
      * @return общую цену за недостающее кол-во докупаемого продукта.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
      *              2. если servingNumber меньше или равно нулю.<br/>
-     *              3. если ingredients имеет значение null.<br/>
+     *              3. если productGroup имеет значение null.<br/>
      */
-    public Optional<BigDecimal> getLackPackageQuantityPrice(List<IngredientProduct> ingredientProducts,
+    public Optional<BigDecimal> getLackPackageQuantityPrice(ProductGroup productGroup,
                                                             BigDecimal servingNumber) {
         Validator.check(
                 Rule.of("Dish.servingNumber").notNull(servingNumber).
@@ -684,11 +647,8 @@ public class Dish implements Entity<Dish> {
                 Rule.of("Dish.ingredients").notNull(ingredients)
         );
 
-        return getLackPackageQuantity(ingredientProducts, servingNumber).
-                map(lackQuantityInPackages -> {
-                    Product product = retrieveProduct(ingredientProducts);
-                    return calculateProductPrice(product, lackQuantityInPackages);
-                });
+        return getLackPackageQuantity(productGroup, servingNumber).
+                map(lackQuantityInPackages -> calculateProductPrice(productGroup.product(), lackQuantityInPackages));
     }
 
     /**
@@ -721,9 +681,9 @@ public class Dish implements Entity<Dish> {
                         and(r -> r.positiveValue(servingNumber))
         );
 
-        Map<Product, List<IngredientProduct>> groups = groupByProduct(ingredients);
+        List<ProductGroup> groups = groupByProduct(ingredients);
 
-        return groups.values().stream().
+        return groups.stream().
                 map(value -> getLackPackageQuantityPrice(value, servingNumber).orElseThrow()).
                 reduce(BigDecimal::add);
     }
@@ -766,8 +726,8 @@ public class Dish implements Entity<Dish> {
 
         List<IngredientProduct> ingredientProducts = getProductForEachIngredient(constraints);
 
-        return groupByProduct(ingredientProducts).values().stream().
-                map(values -> getNecessaryPackageQuantityPrice(values, BigDecimal.ONE).orElseThrow()).
+        return groupByProduct(ingredientProducts).stream().
+                map(value -> getNecessaryPackageQuantityPrice(value, BigDecimal.ONE).orElseThrow()).
                 reduce(BigDecimal::add);
     }
 
@@ -800,8 +760,8 @@ public class Dish implements Entity<Dish> {
                 }).
                 toList();
 
-        return groupByProduct(ingredientProducts).values().stream().
-                map(values -> getNecessaryPackageQuantityPrice(values, BigDecimal.ONE).orElseThrow()).
+        return groupByProduct(ingredientProducts).stream().
+                map(value -> getNecessaryPackageQuantityPrice(value, BigDecimal.ONE).orElseThrow()).
                 reduce(BigDecimal::add);
     }
 
@@ -968,6 +928,15 @@ public class Dish implements Entity<Dish> {
                                     UUID ingredientId,
                                     int ingredientIndex,
                                     int productIndex) {}
+
+    /**
+     * Содержит данные о продукте и ингредиентах, в качестве которых он используется. Гарантии класса:<br/>
+     * 1. Поле product не является null. <br/>
+     * 2. ingredients не является null. <br/>
+     * 3. Поле ingredients этого класса содержит как мнимум один элемент. <br/>
+     * 4. Метод {@link IngredientProduct#product()} каждого элемента этого списка возвращает НЕ пустой Optional. <br/>
+     */
+    public record ProductGroup(Product product, List<IngredientProduct> ingredients) {}
 
     /**
      * Реализация паттерна "Builder" для блюда ({@link Dish}).

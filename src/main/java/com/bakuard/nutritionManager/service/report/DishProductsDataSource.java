@@ -14,8 +14,8 @@ import java.util.*;
 public class DishProductsDataSource implements JRDataSource {
 
     private List<Dish.IngredientProduct> ingredientProducts;
-    private Iterator<Map.Entry<Product, List<Dish.IngredientProduct>>> productsIterator;
-    private Map.Entry<Product, List<Dish.IngredientProduct>> current;
+    private Iterator<Dish.ProductGroup> productsIterator;
+    private Dish.ProductGroup current;
     private BigDecimal servingNumber;
     private Dish dish;
 
@@ -23,8 +23,8 @@ public class DishProductsDataSource implements JRDataSource {
                                   BigDecimal servingNumber,
                                   List<Dish.ProductConstraint> constraints) {
         ingredientProducts = dish.getProductForEachIngredient(constraints);
-        productsIterator = dish.groupByProduct(ingredientProducts).entrySet().stream().
-                sorted(Comparator.comparing(pair -> pair.getKey().getContext().getShop())).
+        productsIterator = dish.groupByProduct(ingredientProducts).stream().
+                sorted(Comparator.comparing(item -> item.product().getContext().getShop())).
                 toList().
                 iterator();
 
@@ -48,22 +48,22 @@ public class DishProductsDataSource implements JRDataSource {
             case "totalPrice" -> result = format(
                     dish.getLackProductPrice(ingredientProducts, servingNumber).orElseThrow()
             );
-            case "shopGroup" -> result = current.getKey().getContext().getShop();
-            case "productGroup", "productName" -> result = current.getKey().getContext().getCategory();
-            case "grade" -> result = current.getKey().getContext().getGrade();
-            case "price" -> result = format(current.getKey().getContext().getPrice());
-            case "packingSize" -> result = format(current.getKey().getContext().getPackingSize());
-            case "unit" -> result = current.getKey().getContext().getUnit();
-            case "manufacturer" -> result = current.getKey().getContext().getManufacturer();
-            case "quantity" -> result = format(current.getKey().getQuantity());
+            case "shopGroup" -> result = current.product().getContext().getShop();
+            case "productGroup", "productName" -> result = current.product().getContext().getCategory();
+            case "grade" -> result = current.product().getContext().getGrade();
+            case "price" -> result = format(current.product().getContext().getPrice());
+            case "packingSize" -> result = format(current.product().getContext().getPackingSize());
+            case "unit" -> result = current.product().getContext().getUnit();
+            case "manufacturer" -> result = current.product().getContext().getManufacturer();
+            case "quantity" -> result = format(current.product().getQuantity());
             case "necessaryQuantity" -> result = format(
-                    dish.getNecessaryQuantity(current.getValue(), servingNumber).orElseThrow()
+                    dish.getNecessaryQuantity(current, servingNumber).orElseThrow()
             );
             case "lackQuantity" -> result = format(
-                    dish.getLackPackageQuantity(current.getValue(), servingNumber).orElseThrow()
+                    dish.getLackPackageQuantity(current, servingNumber).orElseThrow()
             );
             case "lackQuantityPrice" -> result = format(
-                    dish.getLackPackageQuantityPrice(current.getValue(), servingNumber).orElseThrow()
+                    dish.getLackPackageQuantityPrice(current, servingNumber).orElseThrow()
             );
         }
 
