@@ -1,9 +1,5 @@
 package com.bakuard.nutritionManager.validation;
 
-import com.bakuard.nutritionManager.model.AbstractBuilder;
-import com.bakuard.nutritionManager.model.Menu;
-import com.bakuard.nutritionManager.model.MenuItem;
-
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
@@ -140,11 +136,11 @@ public class Rule {
         );
     }
 
-    public <T> Result notContains(Collection<T> checkedValue, Predicate<T> matcher) {
-        return notContains(checkedValue, matcher, null);
+    public <T> Result noneMatch(Collection<T> checkedValue, Predicate<T> matcher) {
+        return noneMatch(checkedValue, matcher, null);
     }
 
-    public <T> Result notContains(Collection<T> checkedValue, Predicate<T> matcher, String field) {
+    public <T> Result noneMatch(Collection<T> checkedValue, Predicate<T> matcher, String field) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -161,7 +157,7 @@ public class Rule {
         }
 
         return createResult(
-                Constraint.NOT_CONTAINS_BY_CONDITION,
+                Constraint.NONE_MATCH,
                 logMessage,
                 getRuleName(field),
                 state
@@ -279,11 +275,11 @@ public class Rule {
         );
     }
 
-    public <T> Result containsItem(Collection<T> collection, T item) {
-        return containsItem(collection, item, null);
+    public <T> Result anyMatch(Collection<T> collection, T item) {
+        return anyMatch(collection, item, null);
     }
 
-    public <T> Result containsItem(Collection<T> collection, T item, String field) {
+    public <T> Result anyMatch(Collection<T> collection, T item, String field) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -298,18 +294,18 @@ public class Rule {
         }
 
         return createResult(
-                Constraint.CONTAINS_ITEM,
+                Constraint.ANY_MATCH,
                 logMessage,
                 getRuleName(field),
                 state
         );
     }
 
-    public <T> Result containsItem(Collection<T> collection, Predicate<T> matcher) {
-        return containsItem(collection, matcher, null);
+    public <T> Result anyMatch(Collection<T> collection, Predicate<T> matcher) {
+        return anyMatch(collection, matcher, null);
     }
 
-    public <T> Result containsItem(Collection<T> collection, Predicate<T> matcher, String field) {
+    public <T> Result anyMatch(Collection<T> collection, Predicate<T> matcher, String field) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -324,7 +320,7 @@ public class Rule {
         }
 
         return createResult(
-                Constraint.CONTAINS_ITEM,
+                Constraint.ANY_MATCH,
                 logMessage,
                 getRuleName(field),
                 state
@@ -534,22 +530,44 @@ public class Rule {
         );
     }
 
-    public Result range(long checkedValue, long min, long max) {
-        return range(checkedValue, min, max, null);
+    public Result range(long checkedValue, long minInclusive, long maxExclusive) {
+        return range(checkedValue, minInclusive, maxExclusive, null);
     }
 
-    public Result range(long checkedValue, long min, long max, String field) {
-        Result.State state = Result.State.of(checkedValue >= min && checkedValue <= max);
+    public Result range(long checkedValue, long minInclusive, long maxExclusive, String field) {
+        Result.State state = Result.State.of(checkedValue >= minInclusive && checkedValue < maxExclusive);
         String logMessage = null;
 
         if(field == null && state == Result.State.FAIL) {
-            logMessage = "Must belong [" + min + ", " + max + "]. Actual = " + checkedValue;
+            logMessage = "Must belong [" + minInclusive + ", " + maxExclusive + "). Actual = " + checkedValue;
         } else if(state == Result.State.FAIL) {
-            logMessage = field + " must belong [" + min + ", " + max + "]. Actual = " + checkedValue;
+            logMessage = field + " must belong [" + minInclusive + ", " + maxExclusive + "). Actual = " + checkedValue;
         }
 
         return createResult(
                 Constraint.RANGE,
+                logMessage,
+                getRuleName(field),
+                state
+        );
+    }
+
+    public Result rangeClosed(long checkedValue, long minInclusive, long maxInclusive) {
+        return rangeClosed(checkedValue, minInclusive, maxInclusive, null);
+    }
+
+    public Result rangeClosed(long checkedValue, long minInclusive, long maxInclusive, String field) {
+        Result.State state = Result.State.of(checkedValue >= minInclusive && checkedValue <= maxInclusive);
+        String logMessage = null;
+
+        if(field == null && state == Result.State.FAIL) {
+            logMessage = "Must belong [" + minInclusive + ", " + maxInclusive + "]. Actual = " + checkedValue;
+        } else if(state == Result.State.FAIL) {
+            logMessage = field + " must belong [" + minInclusive + ", " + maxInclusive + "]. Actual = " + checkedValue;
+        }
+
+        return createResult(
+                Constraint.RANGE_CLOSED,
                 logMessage,
                 getRuleName(field),
                 state

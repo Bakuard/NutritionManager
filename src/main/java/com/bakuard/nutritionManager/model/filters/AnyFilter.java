@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Result;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Validator;
 
@@ -26,7 +25,7 @@ public class AnyFilter extends AbstractFilter {
                 Rule.of("AnyFilter." + type).notNull(values).
                         and(v -> v.notContainsNull(values)).
                         and(v -> v.min(values.size(), minItems)).
-                        and(v -> v.notContains(values, String::isBlank))
+                        and(v -> v.noneMatch(values, String::isBlank))
         );
 
         this.values = ImmutableList.copyOf(values);

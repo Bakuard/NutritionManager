@@ -249,7 +249,7 @@ public class Dish implements Entity<Dish> {
      */
     public DishIngredient tryGetIngredient(int ingredientIndex) {
         Validator.check(
-                Rule.of("Dish.ingredientIndex").range(ingredientIndex, 0, ingredients.size() - 1)
+                Rule.of("Dish.ingredientIndex").rangeClosed(ingredientIndex, 0, ingredients.size() - 1)
         );
 
         return ingredients.get(ingredientIndex);
@@ -268,7 +268,7 @@ public class Dish implements Entity<Dish> {
                 orElseThrow(
                         () -> new ValidateException(
                                 "Unknown ingredient with id=" + ingredientId + " and dishId=" + id
-                        ).addReason(Rule.of("Dish.ingredientId").failure(Constraint.CONTAINS_ITEM))
+                        ).addReason(Rule.of("Dish.ingredientId").failure(Constraint.ANY_MATCH))
                 );
     }
 
@@ -454,7 +454,7 @@ public class Dish implements Entity<Dish> {
      */
     public List<ProductGroup> groupByProduct(List<IngredientProduct> ingredientProducts) {
         Validator.check(
-                Rule.of("Dish.ingredients").notNull(ingredientProducts)
+                Rule.of("Dish.ingredientProducts").notNull(ingredientProducts)
         );
 
         return ingredientProducts.stream().

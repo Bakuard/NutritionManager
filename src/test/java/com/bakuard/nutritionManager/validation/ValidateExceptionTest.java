@@ -82,7 +82,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -117,7 +117,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -153,7 +153,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -188,7 +188,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -231,12 +231,12 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check(),
                 Rule.of("rule7").failure(Constraint.IS_TRUE).check(),
-                Rule.of("rule8").failure(Constraint.CONTAINS_ITEM).check()
+                Rule.of("rule8").failure(Constraint.ANY_MATCH).check()
         );
 
         RuleException ruleException = expected.get(6);
@@ -310,7 +310,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -348,7 +348,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -386,7 +386,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -424,7 +424,7 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
@@ -463,12 +463,12 @@ class ValidateExceptionTest {
         List<RuleException> expected = List.of(
                 Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
                 Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE).check(),
+                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
                 Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
                 Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
                 Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check(),
                 Rule.of("rule7").failure(Constraint.IS_TRUE).check(),
-                Rule.of("rule8").failure(Constraint.CONTAINS_ITEM).check()
+                Rule.of("rule8").failure(Constraint.ANY_MATCH).check()
         );
 
         RuleException ruleException = expected.get(6);

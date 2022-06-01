@@ -127,7 +127,7 @@ public class Menu implements Entity<Menu> {
      */
     public MenuItem tryGetItem(int itemIndex) {
         Validator.check(
-                Rule.of("Menu.itemIndex").range(itemIndex, 0, items.size() - 1)
+                Rule.of("Menu.itemIndex").rangeClosed(itemIndex, 0, items.size() - 1)
         );
 
         return items.get(itemIndex);
@@ -144,7 +144,7 @@ public class Menu implements Entity<Menu> {
         return getMenuItem(dishName).
                 orElseThrow(
                         () -> new ValidateException().
-                                addReason(Rule.of("Menu.dishName").failure(Constraint.CONTAINS_ITEM))
+                                addReason(Rule.of("Menu.dishName").failure(Constraint.ANY_MATCH))
                 );
     }
 
@@ -225,18 +225,17 @@ public class Menu implements Entity<Menu> {
      * Если {@link MenuItemProduct#product()} какого-то элемента входного списка возвращает пустой Optional -
      * он не будет участвовать в формировании итогового результата.<br/>
      * Особые случаи:<br/>
-     * 1. Если menuItemProducts пуст - метод также возвращает пустой список. <br/>
+     * 1. Если products пуст - метод также возвращает пустой список. <br/>
      * 2. Если метод {@link MenuItemProduct#product()} каждого элемента входного списка возвращает
      *    возвращает пустой Optional - данный метод возвращает пустой список. <br/><br/>
      * Данный метод полагается, что передаваемый список был корректно сформирован вызывающим кодом, например,
      * вызовом метода {@link #getMenuItemProducts(List)}.
-     * @param menuItemProducts список продуктов, где каждый продукт соответствует одному ингредиенту одного
+     * @param products список продуктов, где каждый продукт соответствует одному ингредиенту одного
      *                         блюда этого меню.
      * @return элементы меню сгрупированные по продуктам.
-     * @throws ValidateException если menuItemProducts является null.
      */
-    public List<ProductGroup> groupByProduct(List<MenuItemProduct> menuItemProducts) {
-        return menuItemProducts.stream().
+    public List<ProductGroup> groupByProduct(List<MenuItemProduct> products) {
+        return products.stream().
                 filter(i -> i.product().isPresent()).
                 collect(Collectors.groupingBy(i -> i.product().orElseThrow())).
                 entrySet().stream().

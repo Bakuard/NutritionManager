@@ -35,28 +35,6 @@ public class ProductContext {
     private final BigDecimal price;
     private final BigDecimal packingSize;
     private final ImmutableList<Tag> tags;
-    private final AppConfigData config;
-
-    private ProductContext(String category,
-                           String shop,
-                           String grade,
-                           String manufacturer,
-                           String unit,
-                           BigDecimal price,
-                           BigDecimal packingSize,
-                           ImmutableList<Tag> tags,
-                           AppConfigData config) {
-        this.category = category;
-        this.shop = shop;
-        this.grade = grade;
-        this.manufacturer = manufacturer;
-        this.unit = unit;
-        this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.tags = tags;
-        this.hashKey = calculateSha256();
-        this.config = config;
-    }
 
     private ProductContext(String category,
                            String shop,
@@ -90,7 +68,6 @@ public class ProductContext {
         this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
         this.tags = ImmutableList.copyOf(container.get());
         this.hashKey = calculateSha256();
-        this.config = config;
     }
 
     /**

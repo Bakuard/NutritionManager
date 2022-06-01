@@ -140,8 +140,8 @@ public class Sort {
                             if("asc".equalsIgnoreCase(direction)) d.set(true);
                             else if("desc".equalsIgnoreCase(direction)) d.set(false);
 
-                            if(d.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
-                            else return r.success(Constraint.CONTAINS_ITEM);
+                            if(d.isEmpty()) return r.failure(Constraint.ANY_MATCH);
+                            else return r.success(Constraint.ANY_MATCH);
                         })
         );
 
@@ -151,7 +151,7 @@ public class Sort {
     private Sort put(String parameter, boolean isAscending) {
         Validator.check(
                 Rule.of("Sort.parameter").notNull(parameter).
-                        and(r -> r.containsItem(validParameters, parameter))
+                        and(r -> r.anyMatch(validParameters, parameter))
         );
 
         parameters.add(parameter);
