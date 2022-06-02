@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
+import static com.bakuard.nutritionManager.validation.Rule.*;
 import static org.jooq.impl.DSL.*;
 
 public class MenuRepositoryPostgres implements MenuRepository {
@@ -50,9 +51,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
     @Override
     public boolean save(Menu menu) {
-        Validator.check(
-                Rule.of("MenuRepository.menu").notNull(menu)
-        );
+        Validator.check("MenuRepository.menu", notNull(menu));
 
         Menu oldMenu = getById(menu.getUser().getId(), menu.getId()).orElse(null);
 
@@ -67,7 +66,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save menu", e).
-                    addReason(Rule.of("MenuRepository.menu").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("MenuRepository.menu", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
 
         return newData;
@@ -78,7 +77,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
         Menu menu = getById(userId, menuId).
                 orElseThrow(
                         () -> new ValidateException("Unknown menu with id=" + menuId + " for userId=" + userId).
-                                addReason(Rule.of("MenuRepository.menuId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("MenuRepository.menuId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
 
         statement.update(
@@ -95,8 +94,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public Optional<Menu> getById(UUID userId, UUID menuId) {
         Validator.check(
-                Rule.of("MenuRepository.userId").notNull(userId),
-                Rule.of("MenuRepository.menuId").notNull(menuId)
+                "MenuRepository.userId", notNull(userId),
+                "MenuRepository.menuId", notNull(menuId)
         );
 
         Menu.Builder result = statement.query(
@@ -213,8 +212,8 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public Optional<Menu> getByName(UUID userId, String name) {
         Validator.check(
-                Rule.of("MenuRepository.userId").notNull(userId),
-                Rule.of("MenuRepository.name").notNull(name)
+                "MenuRepository.userId", notNull(userId),
+                "MenuRepository.name", notNull(name)
         );
 
         Menu.Builder result = statement.query(
@@ -335,7 +334,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
         return getById(userId, menuId).
                 orElseThrow(
                         () -> new ValidateException("Unknown menu with id=" + menuId + " for userId=" + userId).
-                                addReason(Rule.of("MenuRepository.menuId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("MenuRepository.menuId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -344,7 +343,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
         return getByName(userId, name).
                 orElseThrow(
                         () -> new ValidateException("Unknown menu with name=" + name + " for userId=" + userId).
-                                addReason(Rule.of("MenuRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("MenuRepository.name", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -557,14 +556,13 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public int getMenusNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("MenuRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "MenuRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = selectCount().
                 from("Menus").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
@@ -573,16 +571,15 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("MenuRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "MenuRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("MenuTags.tagValue"))).
                 from("MenuTags").
                 innerJoin("Menus").
                     on(field("Menus.menuId").eq(field("MenuTags.menuId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -597,14 +594,13 @@ public class MenuRepositoryPostgres implements MenuRepository {
     @Override
     public int getNamesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("MenuRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "MenuRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Menus.name"))).
                 from("Menus").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -694,7 +690,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
         for(int i = 0; i < rows.length; i++) {
             if(rows[i] == 0)
                 throw new ValidateException("User haven't dish with name=" + menu.getItems().get(i).getDishName()).
-                        addReason(Rule.of("MenuRepository.itemExists").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                        addReason(Rule.of("MenuRepository.itemExists", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)));
         }
     }
 
@@ -793,7 +789,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
         for(int i = 0; i < rows.length; i++) {
             if(rows[i] == 0)
                 throw new ValidateException("User haven't dish with name=" + newVersion.getItems().get(i).getDishName()).
-                        addReason(Rule.of("MenuRepository.itemExists").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB));
+                        addReason(Rule.of("MenuRepository.itemExists", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)));
         }
     }
 

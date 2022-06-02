@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
+import static com.bakuard.nutritionManager.validation.Rule.*;
 import static org.jooq.impl.DSL.*;
 
 public class ProductRepositoryPostgres implements ProductRepository {
@@ -49,9 +50,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
     @Override
     public boolean save(Product product) {
-        Validator.check(
-                Rule.of("ProductRepository.product").notNull(product)
-        );
+        Validator.check("ProductRepository.product", notNull(product));
 
         Product oldProduct = getById(product.getUser().getId(), product.getId()).orElse(null);
 
@@ -66,7 +65,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save product").
-                    addReason(Rule.of("ProductRepository.product").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("ProductRepository.product", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
 
         return newData;
@@ -77,7 +76,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Product product = getById(userId, productId).
                 orElseThrow(
                         () -> new ValidateException("Unknown product with id=" + productId + " for userId=" + userId).
-                                addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("ProductRepository.productId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
 
         statement.update(
@@ -94,8 +93,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Optional<Product> getById(UUID userId, UUID productId) {
         Validator.check(
-                Rule.of("ProductRepository.userId").notNull(userId),
-                Rule.of("ProductRepository.productId").notNull(productId)
+                "ProductRepository.userId", notNull(userId),
+                "ProductRepository.productId", notNull(productId)
         );
 
         return statement.query(
@@ -158,7 +157,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         return getById(userId, productId).
                 orElseThrow(
                         () -> new ValidateException("Unknown product with id = " + productId + " for userId=" + userId).
-                                addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("ProductRepository.productId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -429,9 +428,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getProductsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = selectCount().
@@ -445,16 +443,15 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("ProductTags.tagValue"))).
                 from("ProductTags").
                 join("Products").
                 on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -469,14 +466,13 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getShopsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Products.shop"))).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -491,9 +487,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getGradesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Products.grade"))).
@@ -513,15 +508,14 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getCategoriesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER) &&
-                                criteria.getFilter().containsOnly(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER) &&
+                                criteria.tryGetFilter().containsOnly(USER)))
         );
 
         String query = select(countDistinct(field("Products.category"))).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -536,14 +530,13 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getManufacturersNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Products.manufacturer"))).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -558,9 +551,9 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Optional<BigDecimal> getProductsSum(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> notNull(criteria.getFilter())).
+                        and(() -> isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
         String query = select(sum(field("price", BigDecimal.class)).as("totalPrice")).

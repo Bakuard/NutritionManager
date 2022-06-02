@@ -2,12 +2,14 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.DishRepository;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import static com.bakuard.nutritionManager.validation.Rule.notNull;
+import static com.bakuard.nutritionManager.validation.Rule.positiveValue;
 
 /**
  * Элемент меню. Представляет собой конкретное блюдо и кол-во, в котором это блюдо входит в меню.
@@ -31,10 +33,10 @@ public class MenuItem implements Entity<MenuItem> {
                      BigDecimal quantity,
                      AppConfigData config) {
         Validator.check(
-                Rule.of("MenuItem.id").notNull(id),
-                Rule.of("MenuItem.dish").notNull(dish),
-                Rule.of("MenuItem.quantity").notNull(quantity).and(r -> r.positiveValue(quantity)),
-                Rule.of("MenuItem.config").notNull(config)
+                "MenuItem.id", notNull(id),
+                "MenuItem.dish", notNull(dish),
+                "MenuItem.quantity", notNull(quantity).and(() -> positiveValue(quantity)),
+                "MenuItem.config", notNull(config)
         );
 
         this.id = id;
@@ -50,12 +52,12 @@ public class MenuItem implements Entity<MenuItem> {
                      DishRepository repository,
                      UUID userId) {
         Validator.check(
-                Rule.of("MenuItem.id").notNull(id),
-                Rule.of("MenuItem.dishName").notNull(dishName),
-                Rule.of("MenuItem.quantity").notNull(quantity).and(r -> r.positiveValue(quantity)),
-                Rule.of("MenuItem.config").notNull(config),
-                Rule.of("MenuItem.repository").notNull(repository),
-                Rule.of("MenuItem.userId").notNull(userId)
+                "MenuItem.id", notNull(id),
+                "MenuItem.dishName", notNull(dishName),
+                "MenuItem.quantity", notNull(quantity).and(() -> positiveValue(quantity)),
+                "MenuItem.config", notNull(config),
+                "MenuItem.repository", notNull(repository),
+                "MenuItem.userId", notNull(userId)
         );
 
         this.id = id;

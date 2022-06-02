@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static com.bakuard.nutritionManager.validation.Rule.failure;
+
 class ValidateExceptionTest {
 
     @Test
@@ -54,15 +56,15 @@ class ValidateExceptionTest {
         ValidateException validateException = new ValidateException().
                 addReason(
                         new ValidateException().
-                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
-                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
-                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check())
+                                addReason(Rule.of("someRule", failure(Constraint.NOT_BLANK))).
+                                addReason(Rule.of("someRule", failure(Constraint.NOT_BLANK))).
+                                addReason(Rule.of("someRule", failure(Constraint.NOT_BLANK)))
                 ).
                 addReason(
                         new ValidateException().
-                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
-                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check()).
-                                addReason(Rule.of("someRule").failure(Constraint.NOT_BLANK).check())
+                                addReason(Rule.of("someRule", failure(Constraint.NOT_BLANK))).
+                                addReason(Rule.of("someRule", failure(Constraint.NOT_BLANK))).
+                                addReason(Rule.of("someRule", failure(Constraint.NOT_BLANK)))
                 );
 
         Iterator<RuleException> iterator = validateException.iterator();
@@ -80,12 +82,12 @@ class ValidateExceptionTest {
             """)
     public void iterator4() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -115,12 +117,12 @@ class ValidateExceptionTest {
             """)
     public void iterator5() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -151,12 +153,12 @@ class ValidateExceptionTest {
             """)
     public void iterator6() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -186,12 +188,12 @@ class ValidateExceptionTest {
             """)
     public void iterator7() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -229,14 +231,14 @@ class ValidateExceptionTest {
             """)
     public void iterator8() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check(),
-                Rule.of("rule7").failure(Constraint.IS_TRUE).check(),
-                Rule.of("rule8").failure(Constraint.ANY_MATCH).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check(),
+                Rule.of("rule7", failure(Constraint.IS_TRUE)).check(),
+                Rule.of("rule8", failure(Constraint.ANY_MATCH)).check()
         );
 
         RuleException ruleException = expected.get(6);
@@ -308,12 +310,12 @@ class ValidateExceptionTest {
             """)
     public void forEach3() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -346,12 +348,12 @@ class ValidateExceptionTest {
             """)
     public void forEach4() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -384,12 +386,12 @@ class ValidateExceptionTest {
             """)
     public void forEach5() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -422,12 +424,12 @@ class ValidateExceptionTest {
             """)
     public void forEach6() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check()
         );
 
         ValidateException validateException = new ValidateException().
@@ -461,14 +463,14 @@ class ValidateExceptionTest {
             """)
     public void forEach7() {
         List<RuleException> expected = List.of(
-                Rule.of("rule1").failure(Constraint.NOT_BLANK).check(),
-                Rule.of("rule2").failure(Constraint.NOT_NULL).check(),
-                Rule.of("rule3").failure(Constraint.RANGE_CLOSED).check(),
-                Rule.of("rule4").failure(Constraint.NOT_CONTAINS_DUPLICATE).check(),
-                Rule.of("rule5").failure(Constraint.NOT_NEGATIVE_VALUE).check(),
-                Rule.of("rule6").failure(Constraint.POSITIVE_VALUE).check(),
-                Rule.of("rule7").failure(Constraint.IS_TRUE).check(),
-                Rule.of("rule8").failure(Constraint.ANY_MATCH).check()
+                Rule.of("rule1", failure(Constraint.NOT_BLANK)).check(),
+                Rule.of("rule2", failure(Constraint.NOT_NULL)).check(),
+                Rule.of("rule3", failure(Constraint.RANGE_CLOSED)).check(),
+                Rule.of("rule4", failure(Constraint.NOT_CONTAINS_DUPLICATE)).check(),
+                Rule.of("rule5", failure(Constraint.NOT_NEGATIVE_VALUE)).check(),
+                Rule.of("rule6", failure(Constraint.POSITIVE_VALUE)).check(),
+                Rule.of("rule7", failure(Constraint.IS_TRUE)).check(),
+                Rule.of("rule8", failure(Constraint.ANY_MATCH)).check()
         );
 
         RuleException ruleException = expected.get(6);

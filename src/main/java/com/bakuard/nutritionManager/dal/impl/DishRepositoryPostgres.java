@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
+import static com.bakuard.nutritionManager.validation.Rule.*;
 import static org.jooq.impl.DSL.*;
 
 public class DishRepositoryPostgres implements DishRepository {
@@ -57,9 +58,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
     @Override
     public boolean save(Dish dish) {
-        Validator.check(
-                Rule.of("DishRepository.dish").notNull(dish)
-        );
+        Validator.check("DishRepository.dish", notNull(dish));
 
         Dish oldDish = getById(dish.getUser().getId(), dish.getId()).orElse(null);
 
@@ -74,7 +73,7 @@ public class DishRepositoryPostgres implements DishRepository {
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save dish", e).
-                    addReason(Rule.of("DishRepository.dish").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("DishRepository.dish", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
 
         return newData;
@@ -83,8 +82,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Optional<Dish> getById(UUID userId, UUID dishId) {
         Validator.check(
-                Rule.of("DishRepository.userId").notNull(userId),
-                Rule.of("DishRepository.dishId").notNull(dishId)
+                "DishRepository.userId", notNull(userId),
+                "DishRepository.dishId", notNull(dishId)
         );
 
         return statement.query(
@@ -174,8 +173,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Optional<Dish> getByName(UUID userId, String name) {
         Validator.check(
-                Rule.of("DishRepository.userId").notNull(userId),
-                Rule.of("DishRepository.name").notNull(name)
+                "DishRepository.userId", notNull(userId),
+                "DishRepository.name", notNull(name)
         );
 
         return statement.query(
@@ -267,7 +266,7 @@ public class DishRepositoryPostgres implements DishRepository {
         Dish dish = getById(userId, dishId).
                 orElseThrow(
                         () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId).
-                                addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("DishRepository.dishId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
 
         statement.update(
@@ -286,7 +285,7 @@ public class DishRepositoryPostgres implements DishRepository {
         return getById(userId, dishId).
                 orElseThrow(
                         () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId).
-                                addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("DishRepository.dishId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -295,7 +294,7 @@ public class DishRepositoryPostgres implements DishRepository {
         return getByName(userId, name).
                 orElseThrow(
                         () -> new ValidateException("Unknown dish with name=" + name + " for userId=" + userId).
-                                addReason(Rule.of("DishRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("DishRepository.name", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -444,14 +443,13 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getDishesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = selectCount().
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
@@ -460,16 +458,15 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("DishTags.tagValue"))).
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -484,14 +481,13 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getUnitsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Dishes.unit"))).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -506,14 +502,13 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getNamesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Dishes.name"))).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(switchFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(

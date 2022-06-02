@@ -1,20 +1,19 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.collect.ImmutableList;
 
 import java.util.UUID;
 
+import static com.bakuard.nutritionManager.validation.Rule.notNull;
+
 public class UserFilter extends AbstractFilter {
 
     private final UUID userId;
 
     UserFilter(UUID userId) {
-        Validator.check(
-                Rule.of("UserFilter.userId").notNull(userId)
-        );
+        Validator.check("UserFilter.userId", notNull(userId));
 
         this.userId = userId;
     }

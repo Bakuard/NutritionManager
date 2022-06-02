@@ -2,7 +2,6 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.Container;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
@@ -10,6 +9,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
+
+import static com.bakuard.nutritionManager.validation.Rule.*;
 
 /**
  * Представляет данные об одном конкретном типе продуктов в сочетании с уточняющей информацией ({@link ProductContext});
@@ -47,13 +48,13 @@ public class Product implements Entity<Product> {
         Container<URL> url = new Container<>();
 
         Validator.check(
-                Rule.of("Product.id").notNull(id),
-                Rule.of("Product.user").notNull(user),
-                Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity)),
-                Rule.of("Product.config").notNull(config),
-                Rule.of("Product.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, url)),
-                Rule.of("Product.context").notNull(contextBuilder).
-                        and(v -> v.doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context))
+                "Product.id", notNull(id),
+                "Product.user", notNull(user),
+                "Product.quantity", notNull(quantity).and(() -> notNegative(quantity)),
+                "Product.config", notNull(config),
+                "Product.imageUrl", isNull(imageUrl).or(() -> isUrl(imageUrl, url)),
+                "Product.context", notNull(contextBuilder).
+                        and(() -> doesNotThrow(contextBuilder, AbstractBuilder::tryBuild, context))
         );
 
         this.id = id;
@@ -74,7 +75,7 @@ public class Product implements Entity<Product> {
      */
     public void addQuantity(BigDecimal quantity) {
         Validator.check(
-                Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity))
+                "Product.quantity", notNull(quantity).and(() -> notNegative(quantity))
         );
 
         this.quantity = this.quantity.add(quantity);
@@ -94,7 +95,7 @@ public class Product implements Entity<Product> {
      */
     public BigDecimal take(BigDecimal quantity) {
         Validator.check(
-                Rule.of("Product.quantity").notNull(quantity).and(r -> r.notNegative(quantity))
+                "Product.quantity", notNull(quantity).and(() -> notNegative(quantity))
         );
 
         BigDecimal remain = this.quantity.min(quantity);

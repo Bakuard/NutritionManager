@@ -7,6 +7,9 @@ import com.bakuard.nutritionManager.model.util.Pair;
 
 import java.util.UUID;
 
+import static com.bakuard.nutritionManager.validation.Rule.failure;
+import static com.bakuard.nutritionManager.validation.Rule.notNull;
+
 public class AuthService {
 
     private JwsService jwsService;
@@ -27,16 +30,16 @@ public class AuthService {
             return new Pair<>(jws, user);
         } else {
             throw new ValidateException("Incorrect credentials").
-                    addReason(Rule.of("AuthService.enter").failure(Constraint.CORRECT_CREDENTIALS));
+                    addReason(Rule.of("AuthService.enter", failure(Constraint.CORRECT_CREDENTIALS)));
         }
     }
 
     public void verifyEmailForRegistration(String email) {
-        Validator.check(Rule.of("AuthService.email").notNull(email));
+        Validator.check("AuthService.email", notNull(email));
 
         if(userRepository.getByEmail(email).isPresent()) {
             throw new ValidateException().
-                    addReason(Rule.of("AuthService.verifyEmailForRegistration").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("AuthService.verifyEmailForRegistration", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
 
         String jws = jwsService.generateRegistrationJws(email);
@@ -44,7 +47,7 @@ public class AuthService {
     }
 
     public void verifyEmailForChangeCredentials(String email) {
-        Validator.check(Rule.of("AuthService.email").notNull(email));
+        Validator.check("AuthService.email", notNull(email));
 
         String jws = jwsService.generateChangeCredentialsJws(email);
         emailService.confirmEmailForChangeCredentials(jws, email);
@@ -81,7 +84,7 @@ public class AuthService {
         User user = userRepository.tryGetById(userId);
         if(!user.isCorrectPassword(currentPassword)) {
             throw new ValidateException("Incorrect password").
-                    addReason(Rule.of("AuthService.changeLoginAndEmail").failure(Constraint.CORRECT_CREDENTIALS));
+                    addReason(Rule.of("AuthService.changeLoginAndEmail", failure(Constraint.CORRECT_CREDENTIALS)));
         }
         user.setName(newName);
         user.setEmail(newEmail);
@@ -95,7 +98,7 @@ public class AuthService {
         User user = userRepository.tryGetById(userId);
         if(!user.isCorrectPassword(currentPassword)) {
             throw new ValidateException("Incorrect password").
-                    addReason(Rule.of("AuthService.changePassword").failure(Constraint.CORRECT_CREDENTIALS));
+                    addReason(Rule.of("AuthService.changePassword", failure(Constraint.CORRECT_CREDENTIALS)));
 
         }
         user.setPassword(newPassword);

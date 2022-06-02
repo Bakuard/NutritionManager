@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
+import static com.bakuard.nutritionManager.validation.Rule.failure;
+
 public class EmailService {
 
     private final AppConfigData appConfigData;
@@ -25,7 +27,7 @@ public class EmailService {
             sendEmail("/mail/registration.html", jws, email);
         } catch(MessagingException e) {
             throw new ValidateException("Fail to confirm email for registration.", e).
-                    addReason(Rule.of("EmailService.registration").failure(Constraint.SUCCESSFUL_MAIL_SENDING));
+                    addReason(Rule.of("EmailService.registration", failure(Constraint.SUCCESSFUL_MAIL_SENDING)));
         }
     }
 
@@ -34,7 +36,7 @@ public class EmailService {
             sendEmail("/mail/changeCredentials.html", jws, email);
         } catch(MessagingException e) {
             throw new ValidateException("Fail to confirm email for change credentials.", e).
-                    addReason(Rule.of("EmailService.changeCredentials").failure(Constraint.SUCCESSFUL_MAIL_SENDING));
+                    addReason(Rule.of("EmailService.changeCredentials", failure(Constraint.SUCCESSFUL_MAIL_SENDING)));
         }
     }
 

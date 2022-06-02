@@ -19,6 +19,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.bakuard.nutritionManager.validation.Rule.*;
+
 /**
  * Представляет оределенное блюдо.
  */
@@ -73,25 +75,25 @@ public class Dish implements Entity<Dish> {
         Container<URL> urlContainer = new Container<>();
 
         Validator.check(
-                Rule.of("Dish.id").notNull(id),
-                Rule.of("Dish.user").notNull(user),
-                Rule.of("Dish.name").notNull(name).and(r -> r.notBlank(name)),
-                Rule.of("Dish.unit").notNull(unit).and(r -> r.notBlank(unit)),
-                Rule.of("Dish.servingSize").notNull(servingSize).and(r -> r.positiveValue(servingSize)),
-                Rule.of("Dish.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, urlContainer)),
-                Rule.of("Dish.ingredients").doesNotThrows(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).
-                        and(r -> {
+                "Dish.id", notNull(id),
+                "Dish.user", notNull(user),
+                "Dish.name", notNull(name).and(() -> notBlank(name)),
+                "Dish.unit", notNull(unit).and(() -> notBlank(unit)),
+                "Dish.servingSize", notNull(servingSize).and(() -> positiveValue(servingSize)),
+                "Dish.imageUrl", isNull(imageUrl).or(() -> isUrl(imageUrl, urlContainer)),
+                "Dish.ingredients", doesNotThrows(ingredients, DishIngredient.Builder::tryBuild, ingredientContainer).
+                        and(() -> {
                             boolean b = ingredientContainer.get().stream().
                                     map(i -> i.getFilter().<UserFilter>findAny(Filter.Type.USER)).
                                     allMatch(u -> u != null && user.getId().equals(u.getUserId()));
-                            if(b) return r.success(Constraint.IS_TRUE);
-                            else return r.failure(Constraint.IS_TRUE,
+                            if(b) return success(Constraint.IS_TRUE);
+                            else return failure(Constraint.IS_TRUE,
                                     "All ingredients must have UserFilter and UserFilter.getUser() must be equal Dish.getUser()");
                         }).
-                        and(r -> r.notContainsDuplicate(ingredientContainer.get(), DishIngredient::getName)),
-                Rule.of("Dish.tags").doesNotThrows(tags, Tag::new, tagContainer),
-                Rule.of("Dish.config").notNull(config),
-                Rule.of("Dish.repository").notNull(productRepository)
+                        and(() -> notContainsDuplicate(ingredientContainer.get(), DishIngredient::getName)),
+                "Dish.tags", doesNotThrows(tags, Tag::new, tagContainer),
+                "Dish.config", notNull(config),
+                "Dish.repository", notNull(productRepository)
         );
 
         this.id = id;
@@ -230,9 +232,7 @@ public class Dish implements Entity<Dish> {
      * @throws ValidateException если ingredientId равен null.
      */
     public Optional<DishIngredient> getIngredient(UUID ingredientId) {
-        Validator.check(
-                Rule.of("Dish.ingredientId").notNull(ingredientId)
-        );
+        Validator.check("Dish.ingredientId", notNull(ingredientId));
 
         return ingredients.stream().
                 filter(i -> i.getId().equals(ingredientId)).
@@ -249,7 +249,7 @@ public class Dish implements Entity<Dish> {
      */
     public DishIngredient tryGetIngredient(int ingredientIndex) {
         Validator.check(
-                Rule.of("Dish.ingredientIndex").rangeClosed(ingredientIndex, 0, ingredients.size() - 1)
+                "Dish.ingredientIndex", rangeClosed(ingredientIndex, 0, ingredients.size() - 1)
         );
 
         return ingredients.get(ingredientIndex);
@@ -268,7 +268,7 @@ public class Dish implements Entity<Dish> {
                 orElseThrow(
                         () -> new ValidateException(
                                 "Unknown ingredient with id=" + ingredientId + " and dishId=" + id
-                        ).addReason(Rule.of("Dish.ingredientId").failure(Constraint.ANY_MATCH))
+                        ).addReason(Rule.of("Dish.ingredientId", failure(Constraint.ANY_MATCH)))
                 );
     }
 
@@ -320,9 +320,7 @@ public class Dish implements Entity<Dish> {
      *         2. productId является null. <br/>
      */
     public Optional<IngredientProduct> getProduct(UUID ingredientId, UUID productId) {
-        Validator.check(
-                Rule.of("Dish.productId").notNull(productId)
-        );
+        Validator.check("Dish.productId", notNull(productId));
 
         return getIngredient(ingredientId).
                 map(ingredient -> {
@@ -453,9 +451,7 @@ public class Dish implements Entity<Dish> {
      * @throws ValidateException если menuItemProducts является null.
      */
     public List<ProductGroup> groupByProduct(List<IngredientProduct> ingredientProducts) {
-        Validator.check(
-                Rule.of("Dish.ingredientProducts").notNull(ingredientProducts)
-        );
+        Validator.check("Dish.ingredientProducts", notNull(ingredientProducts));
 
         return ingredientProducts.stream().
                 filter(i -> i.product().isPresent()).
@@ -482,9 +478,8 @@ public class Dish implements Entity<Dish> {
     public BigDecimal getNecessaryQuantity(ProductGroup productGroup,
                                            BigDecimal servingNumber) {
         Validator.check(
-                Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(r -> r.positiveValue(servingNumber)),
-                Rule.of("Dish.productGroup").notNull(productGroup)
+                "Dish.servingNumber", notNull(servingNumber).and(() -> positiveValue(servingNumber)),
+                "Dish.productGroup", notNull(productGroup)
         );
 
         return productGroup.ingredients().stream().
@@ -557,9 +552,8 @@ public class Dish implements Entity<Dish> {
     public Optional<BigDecimal> getLackPackageQuantity(IngredientProduct ingredientProduct,
                                                        BigDecimal servingNumber) {
         Validator.check(
-                Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(v -> v.positiveValue(servingNumber)),
-                Rule.of("Dish.ingredientProduct").notNull(ingredientProduct)
+                "Dish.servingNumber", notNull(servingNumber).and(() -> positiveValue(servingNumber)),
+                "Dish.ingredientProduct", notNull(ingredientProduct)
         );
 
         return ingredientProduct.product().
@@ -668,8 +662,8 @@ public class Dish implements Entity<Dish> {
     public Optional<BigDecimal> getLackProductPrice(List<IngredientProduct> ingredients,
                                                     BigDecimal servingNumber) {
         Validator.check(
-                Rule.of("Dish.servingNumber").notNull(servingNumber).
-                        and(r -> r.positiveValue(servingNumber))
+                "Dish.servingNumber",
+                notNull(servingNumber).and(() -> positiveValue(servingNumber))
         );
 
         List<ProductGroup> groups = groupByProduct(ingredients);
@@ -835,8 +829,8 @@ public class Dish implements Entity<Dish> {
 
     private List<ProductConstraint> checkAndCorrectConstraints(List<ProductConstraint> constraints) {
         Validator.check(
-                Rule.of("Dish.constrains").notNull(constraints).
-                        and(r -> r.notContainsNull(constraints))
+                "Dish.constrains", 
+                notNull(constraints).and(() -> notContainsNull(constraints))
         );
 
         return IntStream.range(0, ingredients.size()).

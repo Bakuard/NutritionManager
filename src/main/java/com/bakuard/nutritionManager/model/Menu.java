@@ -12,6 +12,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.bakuard.nutritionManager.validation.Rule.*;
+
 /**
  * Представляет собой меню - группу из неповторяющихся блюд, где для каждого блюда указанно его кол-во.
  */
@@ -51,14 +53,14 @@ public class Menu implements Entity<Menu> {
         Container<URL> imageURlContainer = new Container<>();
 
         Validator.check(
-                Rule.of("Menu.id").notNull(id),
-                Rule.of("Menu.user").notNull(user),
-                Rule.of("Menu.name").notNull(name).and(r -> r.notBlank(name)),
-                Rule.of("Menu.imageUrl").isNull(imageUrl).or(r -> r.isUrl(imageUrl, imageURlContainer)),
-                Rule.of("Menu.items").doesNotThrows(items, AbstractBuilder::tryBuild, menuItemsContainer).
-                        and(r -> r.notContainsDuplicate(menuItemsContainer.get(), MenuItem::getDishName)),
-                Rule.of("Menu.tags").doesNotThrows(tags, Tag::new, tagContainer),
-                Rule.of("Menu.config").notNull(config)
+                "Menu.id", notNull(id),
+                "Menu.user", notNull(user),
+                "Menu.name", notNull(name).and(() -> notBlank(name)),
+                "Menu.imageUrl", isNull(imageUrl).or(() -> isUrl(imageUrl, imageURlContainer)),
+                "Menu.items", doesNotThrows(items, AbstractBuilder::tryBuild, menuItemsContainer).
+                        and(() -> notContainsDuplicate(menuItemsContainer.get(), MenuItem::getDishName)),
+                "Menu.tags", doesNotThrows(tags, Tag::new, tagContainer),
+                "Menu.config", notNull(config)
         );
 
         this.id = id;
@@ -127,7 +129,7 @@ public class Menu implements Entity<Menu> {
      */
     public MenuItem tryGetItem(int itemIndex) {
         Validator.check(
-                Rule.of("Menu.itemIndex").rangeClosed(itemIndex, 0, items.size() - 1)
+                "Menu.itemIndex", rangeClosed(itemIndex, 0, items.size() - 1)
         );
 
         return items.get(itemIndex);
@@ -144,7 +146,7 @@ public class Menu implements Entity<Menu> {
         return getMenuItem(dishName).
                 orElseThrow(
                         () -> new ValidateException().
-                                addReason(Rule.of("Menu.dishName").failure(Constraint.ANY_MATCH))
+                                addReason(Rule.of("Menu.dishName", failure(Constraint.ANY_MATCH)))
                 );
     }
 
@@ -194,8 +196,7 @@ public class Menu implements Entity<Menu> {
      */
     public List<MenuItemProduct> getMenuItemProducts(List<ProductConstraint> constraints) {
         Validator.check(
-                Rule.of("Menu.constrains").notNull(constraints).
-                        and(r -> r.notContainsNull(constraints))
+                "Menu.constrains", notNull(constraints).and(() -> notContainsNull(constraints))
         );
 
         ArrayList<MenuItemProduct> result = new ArrayList<>();
@@ -263,9 +264,8 @@ public class Menu implements Entity<Menu> {
     public Optional<BigDecimal> getDishIngredientQuantity(MenuItemProduct product,
                                                           BigDecimal menuNumber) {
         Validator.check(
-                Rule.of("Menu.product").notNull(product),
-                Rule.of("Menu.menuNumber").notNull(menuNumber).
-                        and(r -> r.positiveValue(menuNumber))
+                "Menu.product", notNull(product),
+                "Menu.menuNumber", notNull(menuNumber).and(() -> positiveValue(menuNumber))
         );
 
         BigDecimal result = null;
@@ -289,9 +289,7 @@ public class Menu implements Entity<Menu> {
      * @throws ValidateException если productGroup имеет значение null.
      */
     public List<MenuItem> getMenuItems(ProductGroup productGroup) {
-        Validator.check(
-                Rule.of("Menu.productGroup").notNull(productGroup)
-        );
+        Validator.check("Menu.productGroup", notNull(productGroup));
 
         return productGroup.items().stream().
                 map(item -> items.get(item.itemIndex())).
@@ -316,9 +314,8 @@ public class Menu implements Entity<Menu> {
     public Map<MenuItem, BigDecimal> getProductQuantityForDishes(ProductGroup productGroup,
                                                                  BigDecimal menuNumber) {
         Validator.check(
-                Rule.of("Menu.productGroup").notNull(productGroup),
-                Rule.of("Menu.menuNumber").notNull(menuNumber).
-                        and(r -> r.positiveValue(menuNumber))
+                "Menu.productGroup", notNull(productGroup),
+                "Menu.menuNumber", notNull(menuNumber).and(() -> positiveValue(menuNumber))
         );
 
         Map<Integer, List<MenuItemProduct>> productsByDishes = productGroup.items().stream().
@@ -350,9 +347,8 @@ public class Menu implements Entity<Menu> {
     public BigDecimal getNecessaryQuantity(ProductGroup productGroup,
                                            BigDecimal menuNumber) {
         Validator.check(
-                Rule.of("Menu.productGroup").notNull(productGroup),
-                Rule.of("Menu.menuNumber").notNull(menuNumber).
-                        and(r -> r.positiveValue(menuNumber))
+                "Menu.productGroup", notNull(productGroup),
+                "Menu.menuNumber", notNull(menuNumber).and(() -> positiveValue(menuNumber))
         );
 
         return productGroup.items().stream().
@@ -468,9 +464,8 @@ public class Menu implements Entity<Menu> {
     public Optional<BigDecimal> getLackProductsPrice(List<MenuItemProduct> products,
                                                      BigDecimal menuNumber) {
         Validator.check(
-                Rule.of("Menu.products").notNull(products),
-                Rule.of("Menu.menuNumber").notNull(menuNumber).
-                        and(r -> r.positiveValue(menuNumber))
+                "Menu.products", notNull(products),
+                "Menu.menuNumber", notNull(menuNumber).and(() -> positiveValue(menuNumber))
         );
 
         List<ProductGroup> groups = groupByProduct(products);

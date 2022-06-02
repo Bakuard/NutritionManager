@@ -2,13 +2,14 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
+
+import static com.bakuard.nutritionManager.validation.Rule.*;
 
 /**
  * Ингредиент блюда. В качестве ингредиента можно задать не только один конкретный продукт, а множетсво
@@ -54,11 +55,11 @@ public class DishIngredient implements Entity<DishIngredient> {
                           BigDecimal quantity,
                           AppConfigData config) {
         Validator.check(
-                Rule.of("DishIngredient.id").notNull(id),
-                Rule.of("DishIngredient.name").notNull(name).and(v -> v.notBlank(name)),
-                Rule.of("DishIngredient.filter").notNull(filter),
-                Rule.of("DishIngredient.quantity").notNull(quantity).and(v -> v.positiveValue(quantity)),
-                Rule.of("DishIngredient.config").notNull(config)
+                "DishIngredient.id", notNull(id),
+                "DishIngredient.name", notNull(name).and(() -> notBlank(name)),
+                "DishIngredient.filter", notNull(filter),
+                "DishIngredient.quantity", notNull(quantity).and(() -> positiveValue(quantity)),
+                "DishIngredient.config", notNull(config)
         );
 
         this.id = id;
@@ -101,8 +102,8 @@ public class DishIngredient implements Entity<DishIngredient> {
      */
     public BigDecimal getNecessaryQuantity(BigDecimal servingNumber) {
         Validator.check(
-                Rule.of("DishIngredient.servingNumber").notNull(servingNumber).
-                        and(v -> v.positiveValue(servingNumber))
+                "DishIngredient.servingNumber",
+                notNull(servingNumber).and(() -> positiveValue(servingNumber))
         );
 
         return quantity.multiply(servingNumber, config.getMathContext());
