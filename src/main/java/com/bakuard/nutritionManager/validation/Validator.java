@@ -21,16 +21,7 @@ public class Validator {
     }
 
     public static void check(Result... results) {
-        List<RuleException> failedResults = Arrays.stream(results).
-                map(Result::check).
-                filter(Objects::nonNull).
-                toList();
-
-        if(!failedResults.isEmpty()) {
-            ValidateException exception = new ValidateException();
-            failedResults.forEach(exception::addReason);
-            throw exception;
-        }
+        check(ValidateException::new, results);
     }
 
 
