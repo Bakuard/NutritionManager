@@ -47,6 +47,8 @@ public class MenuProductsDataSource implements JRDataSource {
         String result = "";
 
         switch(jrField.getName()) {
+            case "menuName" -> result = menu.getName();
+            case "menuNumber" -> result = format(menuNumber);
             case "creationReportData" -> result = LocalDate.now().toString();
             case "totalPrice" -> result = format(
                     menu.getLackProductsPrice(itemProducts, menuNumber).orElseThrow()

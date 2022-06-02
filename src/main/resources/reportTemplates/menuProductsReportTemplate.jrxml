@@ -8,6 +8,8 @@
 			  leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20"
 			  resourceBundle="reportTemplates/menuProductsStrings"
 			  uuid="148fa5a6-9c31-420e-aa9f-63663dcd1410">
+	<field name="menuName"/>
+	<field name="menuNumber"/>
 	<field name="creationReportData"/>
 	<field name="totalPrice"/>
 	<field name="shopGroup"/>
@@ -51,7 +53,7 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="60" splitType="Stretch">
+		<band height="106" splitType="Stretch">
 			<textField>
 				<reportElement mode="Opaque" x="20" y="0" width="510" height="40" backcolor="#C6C924" uuid="a82eeca9-19c2-48af-8d4b-0642bc2f2ef6"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -59,8 +61,22 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{reportTitle}]]></textFieldExpression>
 			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement mode="Opaque" x="20" y="42" width="510" height="24" backcolor="#C6C924" uuid="49b2d801-69ec-4c62-a540-c2548abe7add"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="18"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{reportTitle2} + "\"" + $F{menuName} + "\""]]></textFieldExpression>
+			</textField>
 			<textField>
-				<reportElement x="20" y="40" width="220" height="16" uuid="5c1b0422-5dbe-43df-a37b-cceb94a94b6e"/>
+				<reportElement x="20" y="66" width="260" height="16" uuid="17346629-1c14-4bca-a9ed-000dbd938eaa"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="ArialUnicode" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{menuNumber} + $F{menuNumber}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="82" width="260" height="16" uuid="5c1b0422-5dbe-43df-a37b-cceb94a94b6e"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="ArialUnicode" size="10"/>
 				</textElement>
