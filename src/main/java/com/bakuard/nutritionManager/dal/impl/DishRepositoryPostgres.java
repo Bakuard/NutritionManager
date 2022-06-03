@@ -10,19 +10,14 @@ import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.*;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-
-import org.jooq.Condition;
-import org.jooq.Param;
 import org.jooq.SortField;
-import org.jooq.impl.DSL;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,7 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static com.bakuard.nutritionManager.validation.Rule.*;
 import static org.jooq.impl.DSL.*;
 
@@ -324,7 +319,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         from(
                             select(field("*")).
                                 from("Dishes").
-                                where(dishFilterMapper.toFilter(criteria.getFilter())).
+                                where(dishFilterMapper.toCondition(criteria.getFilter())).
                                 orderBy(getOrderFields(criteria.getSort(), "Dishes")).
                                 limit(inline(metadata.getActualSize())).
                                 offset(inline(metadata.getOffset())).
@@ -357,7 +352,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(dishFilterMapper.toFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("DishTags.tagValue").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -389,7 +384,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectDistinct(field("Dishes.unit")).
                 from("Dishes").
-                where(dishFilterMapper.toFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("Dishes.unit").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -421,7 +416,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectDistinct(field("Dishes.name")).
                 from("Dishes").
-                where(dishFilterMapper.toFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("Dishes.name").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -452,7 +447,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectCount().
                 from("Dishes").
-                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
@@ -469,7 +464,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -490,7 +485,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = select(countDistinct(field("Dishes.unit"))).
                 from("Dishes").
-                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -511,7 +506,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = select(countDistinct(field("Dishes.name"))).
                 from("Dishes").
-                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(

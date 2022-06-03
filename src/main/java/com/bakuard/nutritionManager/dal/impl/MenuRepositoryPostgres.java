@@ -3,9 +3,9 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
-import com.bakuard.nutritionManager.dal.ProductRepository;
+import com.bakuard.nutritionManager.dal.impl.mappers.MenuFilterMapper;
 import com.bakuard.nutritionManager.model.*;
-import com.bakuard.nutritionManager.model.filters.*;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
@@ -13,10 +13,7 @@ import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
-import org.jooq.Condition;
 import org.jooq.SortField;
-import org.jooq.impl.DSL;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,16 +34,15 @@ public class MenuRepositoryPostgres implements MenuRepository {
     private JdbcTemplate statement;
     private AppConfigData appConfig;
     private DishRepositoryPostgres dishRepository;
-    private ProductRepository productRepository;
+    private MenuFilterMapper menuFilterMapper;
 
     public MenuRepositoryPostgres(DataSource dataSource,
                                   AppConfigData appConfig,
-                                  DishRepositoryPostgres dishRepository,
-                                  ProductRepository productRepository) {
+                                  DishRepositoryPostgres dishRepository) {
         statement = new JdbcTemplate(dataSource);
         this.dishRepository = dishRepository;
-        this.productRepository = productRepository;
         this.appConfig = appConfig;
+        menuFilterMapper = new MenuFilterMapper();
     }
 
     @Override
@@ -368,7 +364,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                         from(
                                 select(field("*")).
                                         from("Menus").
-                                        where(switchFilter(criteria.getFilter())).
+                                        where(menuFilterMapper.toCondition(criteria.getFilter())).
                                         orderBy(getOrderFields(criteria.getSort(), "Menus")).
                                         limit(inline(metadata.getActualSize())).
                                         offset(inline(metadata.getOffset())).
@@ -499,7 +495,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 from("MenuTags").
                 join("Menus").
                     on(field("MenuTags.menuId").eq(field("Menus.menuId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(menuFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("MenuTags.tagValue").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -531,7 +527,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
         String query = selectDistinct(field("Menus.name")).
                 from("Menus").
-                where(switchFilter(criteria.getFilter())).
+                where(menuFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("Menus.name").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -562,7 +558,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
         String query = selectCount().
                 from("Menus").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(menuFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
@@ -579,7 +575,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 from("MenuTags").
                 innerJoin("Menus").
                     on(field("Menus.menuId").eq(field("MenuTags.menuId"))).
-                where(switchFilter(criteria.tryGetFilter())).
+                where(menuFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -600,7 +596,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
 
         String query = select(countDistinct(field("Menus.name"))).
                 from("Menus").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(menuFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -791,58 +787,6 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 throw new ValidateException("User haven't dish with name=" + newVersion.getItems().get(i).getDishName()).
                         addReason(Rule.of("MenuRepository.itemExists", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)));
         }
-    }
-
-
-    private Condition switchFilter(Filter filter) {
-        Condition result = null;
-
-        switch(filter.getType()) {
-            case USER -> result = userFilter((UserFilter) filter);
-            case DISHES -> result = dishesFilter((AnyFilter) filter);
-            case MIN_TAGS -> result = minTagsFilter((MinTagsFilter) filter);
-            case AND -> result = andFilter((AndFilter) filter);
-            default -> throw new UnsupportedOperationException(
-                    "Unsupported operation for " + filter.getType() + " constraint");
-        }
-
-        return result;
-    }
-
-    private Condition userFilter(UserFilter filter) {
-        return field("userId").eq(inline(filter.getUserId()));
-    }
-
-    private Condition dishesFilter(AnyFilter filter) {
-        return field("menuId").in(
-                select(field("MenuItems.menuId")).
-                        from(table("MenuItems")).
-                        innerJoin(table("Dishes")).
-                            on(field("MenuItems.dishId").eq(field("Dishes.dishId"))).
-                        where(field("Dishes.name").in(
-                                filter.getValues().stream().map(DSL::inline).toList()
-                        ))
-        );
-    }
-
-    private Condition minTagsFilter(MinTagsFilter filter) {
-        return field("menuId").in(
-                select(field("MenuTags.menuId")).
-                        from("MenuTags").
-                        where(field("MenuTags.tagValue").in(
-                                filter.getTags().stream().map(t -> inline(t.getValue())).toList()
-                        )).
-                        groupBy(field("MenuTags.menuId")).
-                        having(count(field("MenuTags.menuId")).eq(inline(filter.getTags().size())))
-        );
-    }
-
-    private Condition andFilter(AndFilter filter) {
-        Condition condition = switchFilter(filter.getOperands().get(0));
-        for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.and(switchFilter(filter.getOperands().get(i)));
-        }
-        return condition;
     }
 
 

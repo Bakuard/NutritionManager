@@ -16,7 +16,7 @@ public class DishFilterMapper {
 
     }
 
-    public Condition toFilter(Filter filter) {
+    public Condition toCondition(Filter filter) {
         switch(filter.getType()) {
             case AND -> {
                 return andFilter((AndFilter) filter);
@@ -36,9 +36,9 @@ public class DishFilterMapper {
     }
 
     private Condition andFilter(AndFilter filter) {
-        Condition condition = toFilter(filter.getOperands().get(0));
+        Condition condition = toCondition(filter.getOperands().get(0));
         for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.and(toFilter(filter.getOperands().get(i)));
+            condition = condition.and(toCondition(filter.getOperands().get(i)));
         }
         return condition;
     }
