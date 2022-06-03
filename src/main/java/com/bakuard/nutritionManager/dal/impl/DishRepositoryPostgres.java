@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
+import com.bakuard.nutritionManager.dal.impl.mappers.DishFilterMapper;
 import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterJsonMapper;
 import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterMapper;
 import com.bakuard.nutritionManager.model.Dish;
@@ -45,6 +46,7 @@ public class DishRepositoryPostgres implements DishRepository {
     private ProductRepositoryPostgres productRepository;
     private ProductFilterMapper filterMapper;
     private ProductFilterJsonMapper filterJsonMapper;
+    private DishFilterMapper dishFilterMapper;
 
     public DishRepositoryPostgres(DataSource dataSource,
                                   AppConfigData appConfig,
@@ -54,6 +56,7 @@ public class DishRepositoryPostgres implements DishRepository {
         statement = new JdbcTemplate(dataSource);
         filterMapper = new ProductFilterMapper();
         filterJsonMapper = new ProductFilterJsonMapper();
+        dishFilterMapper = new DishFilterMapper();
     }
 
     @Override
@@ -321,7 +324,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         from(
                             select(field("*")).
                                 from("Dishes").
-                                where(switchFilter(criteria.getFilter())).
+                                where(dishFilterMapper.toFilter(criteria.getFilter())).
                                 orderBy(getOrderFields(criteria.getSort(), "Dishes")).
                                 limit(inline(metadata.getActualSize())).
                                 offset(inline(metadata.getOffset())).
@@ -354,7 +357,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toFilter(criteria.getFilter())).
                 orderBy(field("DishTags.tagValue").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -386,7 +389,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectDistinct(field("Dishes.unit")).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toFilter(criteria.getFilter())).
                 orderBy(field("Dishes.unit").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -418,7 +421,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectDistinct(field("Dishes.name")).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toFilter(criteria.getFilter())).
                 orderBy(field("Dishes.name").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -449,7 +452,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectCount().
                 from("Dishes").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
@@ -466,7 +469,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(switchFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -487,7 +490,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = select(countDistinct(field("Dishes.unit"))).
                 from("Dishes").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -508,7 +511,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = select(countDistinct(field("Dishes.name"))).
                 from("Dishes").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(dishFilterMapper.toFilter(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -759,65 +762,6 @@ public class DishRepositoryPostgres implements DishRepository {
                     }
 
                 }
-        );
-    }
-
-
-    private Condition switchFilter(Filter filter) {
-        switch(filter.getType()) {
-            case AND -> {
-                return andFilter((AndFilter) filter);
-            }
-            case MIN_TAGS -> {
-                return minTagsFilter((MinTagsFilter) filter);
-            }
-            case INGREDIENTS -> {
-                return ingredientsFilter((AnyFilter) filter);
-            }
-            case USER -> {
-                return userFilter((UserFilter) filter);
-            }
-            default -> throw new UnsupportedOperationException(
-                    "Unsupported operation for " + filter.getType() + " constraint");
-        }
-    }
-
-    private Condition andFilter(AndFilter filter) {
-        Condition condition = switchFilter(filter.getOperands().get(0));
-        for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.and(switchFilter(filter.getOperands().get(i)));
-        }
-        return condition;
-    }
-
-    private Condition userFilter(UserFilter filter) {
-        return field("userId").eq(inline(filter.getUserId()));
-    }
-
-    private Condition minTagsFilter(MinTagsFilter filter) {
-        return field("dishId").in(
-                select(field("DishTags.dishId")).
-                        from("DishTags").
-                        where(field("DishTags.tagValue").in(
-                                filter.getTags().stream().map(t -> inline(t.getValue())).toList()
-                        )).
-                        groupBy(field("DishTags.dishId")).
-                        having(count(field("DishTags.dishId")).eq(inline(filter.getTags().size())))
-        );
-    }
-
-    private Condition ingredientsFilter(AnyFilter filter) {
-        List<Param<String>> arrayData = filter.getValues().stream().
-                map(DSL::inline).
-                toList();
-
-        return field("dishId").in(
-                select(field("DishIngredients.dishId")).
-                        from(table("DishIngredients")).
-                        where(
-                                "existProductsForFilter(?, DishIngredients.filterQuery)",
-                                array(arrayData)
-                        )
         );
     }
 
