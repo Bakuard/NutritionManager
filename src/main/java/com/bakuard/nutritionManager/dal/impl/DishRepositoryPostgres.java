@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
+import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterMapper;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
@@ -46,6 +47,7 @@ public class DishRepositoryPostgres implements DishRepository {
     private AppConfigData appConfig;
     private ProductRepositoryPostgres productRepository;
     private JsonFactory jsonFactory;
+    private ProductFilterMapper filterMapper;
 
     public DishRepositoryPostgres(DataSource dataSource,
                                   AppConfigData appConfig,
@@ -54,6 +56,7 @@ public class DishRepositoryPostgres implements DishRepository {
         this.productRepository = productRepository;
         statement = new JdbcTemplate(dataSource);
         jsonFactory = new JsonFactory();
+        filterMapper = new ProductFilterMapper();
     }
 
     @Override
@@ -643,7 +646,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         DishIngredient ingredient = dish.getIngredients().get(i);
                         String filterQuery = select(field("*")).
                                 from(table("Products")).
-                                where(productRepository.switchFilter(ingredient.getFilter())).
+                                where(filterMapper.toCondition(ingredient.getFilter())).
                                 getSQL();
 
                         ps.setObject(1, ingredient.getId());
@@ -741,7 +744,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         DishIngredient ingredient = newVersion.getIngredients().get(i);
                         String filterQuery = select(field("*")).
                                 from(table("Products")).
-                                where(productRepository.switchFilter(ingredient.getFilter())).
+                                where(filterMapper.toCondition(ingredient.getFilter())).
                                 getSQL();
 
                         ps.setObject(1, ingredient.getId());
