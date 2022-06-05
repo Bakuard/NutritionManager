@@ -28,8 +28,8 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
         return this;
     }
 
-    public ValidateException addReason(Result result) {
-        if(result != null) addReason(result.check());
+    public ValidateException addReason(Rule rule) {
+        if(rule != null) addReason(rule.check());
         return this;
     }
 

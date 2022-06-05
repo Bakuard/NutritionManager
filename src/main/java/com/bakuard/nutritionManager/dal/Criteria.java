@@ -8,6 +8,8 @@ import com.bakuard.nutritionManager.validation.Validator;
 
 import java.util.Objects;
 
+import static com.bakuard.nutritionManager.validation.Rule.notNull;
+
 public class Criteria {
 
     private Pageable pageable;
@@ -50,33 +52,25 @@ public class Criteria {
     }
 
     public Pageable tryGetPageable() {
-        Validator.check(
-                Rule.of("Criteria.pageable").notNull(pageable)
-        );
+        Validator.check("Criteria.pageable", notNull(pageable));
 
         return pageable;
     }
 
     public <T extends Pageable> T tryGetPageable(Class<T> type) {
-        Validator.check(
-                Rule.of("Criteria.pageable").notNull(pageable)
-        );
+        Validator.check("Criteria.pageable", notNull(pageable));
 
         return type.cast(pageable);
     }
 
     public Sort tryGetSort() {
-        Validator.check(
-                Rule.of("Criteria.sort").notNull(sort)
-        );
+        Validator.check("Criteria.sort", notNull(sort));
 
         return sort;
     }
 
     public Filter tryGetFilter() {
-        Validator.check(
-                Rule.of("Criteria.filter").notNull(filter)
-        );
+        Validator.check("Criteria.filter", notNull(filter));
 
         return filter;
     }

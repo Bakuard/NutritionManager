@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class Result {
 
@@ -50,40 +51,26 @@ public final class Result {
     private final Constraint[] constraints;
     private final State state;
     private final String logMessage;
-    private final String ruleName;
-    private final Rule rule;
     private final List<Exception> suppressedExceptions;
 
     public Result(Constraint constraint,
                   State state,
                   String logMessage,
-                  String ruleName,
-                  Rule rule,
                   List<Exception> suppressedExceptions) {
         this.constraints = new Constraint[]{Objects.requireNonNull(constraint, "constraint can't be null")};
         this.state = Objects.requireNonNull(state, "state can't be null");
         this.logMessage = logMessage;
-        this.ruleName = ruleName;
-        this.rule = rule;
         this.suppressedExceptions = suppressedExceptions;
     }
 
     private Result(Constraint[] constraints,
                    State state,
                    String logMessage,
-                   String ruleName,
-                   Rule rule,
                    List<Exception> suppressedExceptions) {
         this.constraints = constraints;
         this.state = state;
         this.logMessage = logMessage;
-        this.ruleName = ruleName;
-        this.rule = rule;
         this.suppressedExceptions = suppressedExceptions;
-    }
-
-    public Rule getRule() {
-        return rule;
     }
 
     public State getState() {
@@ -102,23 +89,23 @@ public final class Result {
         return state == State.UNKNOWN;
     }
 
-    public Result and(Function<Rule, Result> other) {
+    public Result and(Supplier<Result> other) {
         Result result = null;
 
         switch(state) {
-            case SUCCESS, UNKNOWN -> result = other.apply(rule);
+            case SUCCESS, UNKNOWN -> result = other.get();
             case FAIL -> result = this;
         }
 
         return result;
     }
 
-    public Result or(Function<Rule, Result> other) {
+    public Result or(Supplier<Result> other) {
         Result result = null;
 
         switch(state) {
             case SUCCESS -> result = this;
-            case UNKNOWN, FAIL -> result = other.apply(rule);
+            case UNKNOWN, FAIL -> result = other.get();
         }
 
         switch(result.state) {
@@ -130,29 +117,12 @@ public final class Result {
                         concat(constraints, result.constraints),
                         state.or(result.state),
                         joinLogMessages(logMessage, result.logMessage),
-                        ruleName,
-                        rule,
                         suppressed
                 );
             }
         }
 
         return result;
-    }
-
-    public RuleException check() {
-        if(!isSuccess()) {
-            String userMessageKey = ruleName + Arrays.toString(constraints).replaceAll(" ", "");
-            RuleException exception = new RuleException(
-                    userMessageKey,
-                    getLogMessage(),
-                    constraints
-            );
-            suppressedExceptions.forEach(exception::addSuppressed);
-            return exception;
-        }
-
-        return null;
     }
 
     @Override
@@ -162,13 +132,12 @@ public final class Result {
         Result result = (Result) o;
         return Arrays.equals(constraints, result.constraints) &&
                 state == result.state &&
-                Objects.equals(logMessage, result.logMessage) &&
-                Objects.equals(rule, result.rule);
+                Objects.equals(logMessage, result.logMessage);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(state, logMessage, rule);
+        int result = Objects.hash(state, logMessage);
         result = 31 * result + Arrays.hashCode(constraints);
         return result;
     }
@@ -179,10 +148,32 @@ public final class Result {
                 ", constraints=" + Arrays.toString(constraints) +
                 ", state=" + state +
                 ", logMessage='" + logMessage + '\'' +
-                ", condition=" + rule +
                 '}';
     }
 
+
+    RuleException check(String ruleName) {
+        if(!isSuccess()) {
+            String userMessageKey = ruleName + Arrays.toString(constraints).replaceAll(" ", "");
+
+            StringBuilder log = new StringBuilder(ruleName).
+                    append(Arrays.toString(constraints)).
+                    append(" - is ").
+                    append(state).
+                    append(". ");
+            if(logMessage != null) log.append(logMessage);
+
+            RuleException exception = new RuleException(
+                    userMessageKey,
+                    log.toString(),
+                    constraints
+            );
+            suppressedExceptions.forEach(exception::addSuppressed);
+            return exception;
+        }
+
+        return null;
+    }
 
     private <T> T[] concat(T[] array1, T[] array2) {
         T[] result = Arrays.copyOf(array1, array1.length + array2.length);
@@ -202,18 +193,6 @@ public final class Result {
         }
 
         return result;
-    }
-
-    private String getLogMessage() {
-        StringBuilder result =  new StringBuilder(ruleName).
-                append(Arrays.toString(constraints)).
-                append(" - is ").
-                append(state).
-                append(". ");
-
-        if(logMessage != null) result.append(logMessage);
-
-        return result.toString();
     }
 
 }

@@ -1,9 +1,5 @@
 package com.bakuard.nutritionManager.validation;
 
-import com.bakuard.nutritionManager.model.AbstractBuilder;
-import com.bakuard.nutritionManager.model.Menu;
-import com.bakuard.nutritionManager.model.MenuItem;
-
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
@@ -12,139 +8,106 @@ import java.util.function.Predicate;
 
 public class Rule {
 
-    public static Rule of(String ruleName) {
-        return new Rule(ruleName);
+    public static Rule of(String ruleName, Result result) {
+        return new Rule(ruleName, result);
     }
 
 
     private final String ruleName;
+    private final Result result;
 
-    private Rule(String ruleName) {
+    private Rule(String ruleName, Result result) {
         this.ruleName = Objects.requireNonNull(ruleName, "ruleName can't be null");
+        this.result = Objects.requireNonNull(result, "result can't be null");
     }
 
-    public Result failure(Constraint constraint) {
+    public RuleException check() {
+        return result.check(ruleName);
+    }
+
+
+    public static Result failure(Constraint constraint) {
         return createResult(
                 constraint,
                 null,
-                ruleName,
                 Result.State.FAIL
         );
     }
 
-    public Result failure(Constraint constraint, String logMessage) {
+    public static Result failure(Constraint constraint, String logMessage) {
         return createResult(
                 constraint,
                 logMessage,
-                ruleName,
                 Result.State.FAIL
         );
     }
 
-    public Result success(Constraint constraint) {
+    public static Result success(Constraint constraint) {
         return createResult(
                 constraint,
                 null,
-                ruleName,
                 Result.State.SUCCESS
         );
     }
 
-    public Result success(Constraint constraint, String logMessage) {
+    public static Result success(Constraint constraint, String logMessage) {
         return createResult(
                 constraint,
                 logMessage,
-                ruleName,
                 Result.State.SUCCESS
         );
     }
 
-    public Result unknown(Constraint constraint) {
+    public static Result unknown(Constraint constraint) {
         return createResult(
                 constraint,
                 null,
-                ruleName,
                 Result.State.UNKNOWN
         );
     }
 
-    public Result unknown(Constraint constraint, String logMessage) {
+    public static Result unknown(Constraint constraint, String logMessage) {
         return createResult(
                 constraint,
                 logMessage,
-                ruleName,
                 Result.State.UNKNOWN
         );
     }
 
 
-    public <T> Result notNull(T checkedValue) {
-        return notNull(checkedValue, null);
-    }
-
-    public <T> Result notNull(T checkedValue, String field) {
-        String logMessage = null;
+    public static <T> Result notNull(T checkedValue) {
         Result.State state = Result.State.of(checkedValue != null);
-
-        if(field != null && state != Result.State.FAIL) {
-            logMessage = field + " can't be null";
-        }
 
         return createResult(
                 Constraint.NOT_NULL,
-                logMessage,
-                getRuleName(field),
+                null,
                 state
         );
     }
 
-    public <T> Result isNull(T checkedValue) {
-        return isNull(checkedValue, null);
-    }
-
-    public <T> Result isNull(T checkedValue, String field) {
-        String logMessage = null;
+    public static <T> Result isNull(T checkedValue) {
         Result.State state = Result.State.of(checkedValue == null);
-
-        if(field != null && state != Result.State.FAIL) {
-            logMessage = field + " must be null";
-        }
 
         return createResult(
                 Constraint.MUST_BE_NULL,
-                logMessage,
-                getRuleName(field),
+                null,
                 state
         );
     }
 
-    public Result notBlank(String checkedValue) {
-        return notBlank(checkedValue, null);
-    }
-
-    public Result notBlank(String checkedValue, String field) {
-        String logMessage = null;
+    public static Result notBlank(String checkedValue) {
         Result.State state = checkedValue == null ?
                 Result.State.UNKNOWN :
                 Result.State.of(!checkedValue.isBlank());
 
-        if(field != null) {
-            logMessage = field + " cant' be blank";
-        }
-
         return createResult(
                 Constraint.NOT_BLANK,
-                logMessage,
-                getRuleName(field),
+                null,
                 state
         );
     }
 
-    public <T> Result notContains(Collection<T> checkedValue, Predicate<T> matcher) {
-        return notContains(checkedValue, matcher, null);
-    }
-
-    public <T> Result notContains(Collection<T> checkedValue, Predicate<T> matcher, String field) {
+    public static <T> Result noneMatch(Collection<T> checkedValue, Predicate<T> matcher) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -153,50 +116,34 @@ public class Rule {
 
             state = Result.State.of(invalidItems.isEmpty());
 
-            if(field == null && state != Result.State.SUCCESS) {
+            if(state != Result.State.SUCCESS) {
                 logMessage = "Invalid items: " + invalidItems;
-            } else if(state != Result.State.SUCCESS) {
-                logMessage = field + " contains invalid items: " + invalidItems;
             }
         }
 
         return createResult(
-                Constraint.NOT_CONTAINS_BY_CONDITION,
+                Constraint.NONE_MATCH,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result notContainsNull(Collection<?> checkedValue) {
-        return notContainsNull(checkedValue, null);
-    }
-
-    public Result notContainsNull(Collection<?> checkedValue, String field) {
+    public static Result notContainsNull(Collection<?> checkedValue) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(checkedValue != null) {
             state = Result.State.of(checkedValue.stream().noneMatch(Objects::isNull));
-
-            if(field != null && state == Result.State.FAIL) {
-                logMessage = field + " can't contains null";
-            }
         }
 
         return createResult(
                 Constraint.NOT_CONTAINS_NULL,
-                logMessage,
-                getRuleName(field),
+                null,
                 state
         );
     }
 
-    public <T> Result notContainsDuplicate(Collection<T> checkedValue) {
-        return notContainsDuplicate(checkedValue, (String) null);
-    }
-
-    public <T> Result notContainsDuplicate(Collection<T> checkedValue, String field) {
+    public static <T> Result notContainsDuplicate(Collection<T> checkedValue) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
         if(checkedValue != null) {
@@ -205,9 +152,7 @@ public class Rule {
                     toList();
             state = Result.State.of(duplicates.isEmpty());
 
-            if(field != null && state == Result.State.FAIL) {
-                logMessage = field + " cant' contains duplicate items. Duplicate items: " + duplicates;
-            } else if(state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "Duplicate items: " + duplicates;
             }
         }
@@ -215,16 +160,11 @@ public class Rule {
         return createResult(
                 Constraint.NOT_CONTAINS_DUPLICATE,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public <T, R> Result notContainsDuplicate(Collection<T> checkedValue, Function<T, R> mapper) {
-        return notContainsDuplicate(checkedValue, mapper, null);
-    }
-
-    public <T, R> Result notContainsDuplicate(Collection<T> checkedValue, Function<T, R> mapper, String field) {
+    public static <T, R> Result notContainsDuplicate(Collection<T> checkedValue, Function<T, R> mapper) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -235,9 +175,7 @@ public class Rule {
                     toList();
             state = Result.State.of(duplicates.isEmpty());
 
-            if(field != null && state == Result.State.FAIL) {
-                logMessage = field + " cant' contains duplicate items. Duplicate items: " + duplicates;
-            } else if(state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "Duplicate items: " + duplicates;
             }
         }
@@ -245,16 +183,11 @@ public class Rule {
         return createResult(
                 Constraint.NOT_CONTAINS_DUPLICATE,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public <T> Result containsTheSameItems(Collection<T> a, Collection<T> b) {
-        return containsTheSameItems(a, b, null, null);
-    }
-
-    public <T> Result containsTheSameItems(Collection<T> a, Collection<T> b, String firstField, String secondField) {
+    public static <T> Result containsTheSameItems(Collection<T> a, Collection<T> b) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -263,142 +196,101 @@ public class Rule {
             Set<T> setB = new HashSet<>(b);
             state = Result.State.of(setA.equals(setB));
 
-            if((firstField == null || secondField == null) && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "a and b must contains the same items: a=" + a + ", b=" + b;
-            } else if(state == Result.State.FAIL) {
-                logMessage = firstField + " and " + secondField + " must contains the same items: " +
-                        firstField + "=" + a + ", " + secondField + "=" + b;
             }
         }
 
         return createResult(
                 Constraint.CONTAINS_THE_SAME_ITEMS,
                 logMessage,
-                getRuleName(firstField, secondField),
                 state
         );
     }
 
-    public <T> Result containsItem(Collection<T> collection, T item) {
-        return containsItem(collection, item, null);
-    }
-
-    public <T> Result containsItem(Collection<T> collection, T item, String field) {
+    public static <T> Result anyMatch(Collection<T> collection, T item) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(collection != null) {
             state = Result.State.of(collection.stream().anyMatch(v -> Objects.equals(v, item)));
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "must contain " + item;
-            } else if(state == Result.State.FAIL) {
-                logMessage = field + " must contain " + item;
             }
         }
 
         return createResult(
-                Constraint.CONTAINS_ITEM,
+                Constraint.ANY_MATCH,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public <T> Result containsItem(Collection<T> collection, Predicate<T> matcher) {
-        return containsItem(collection, matcher, null);
-    }
-
-    public <T> Result containsItem(Collection<T> collection, Predicate<T> matcher, String field) {
+    public static <T> Result anyMatch(Collection<T> collection, Predicate<T> matcher) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(collection != null) {
             state = Result.State.of(collection.stream().anyMatch(matcher));
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "must contain item by predicate";
-            } else if(state == Result.State.FAIL) {
-                logMessage = field + " must contain item by predicate";
             }
         }
 
         return createResult(
-                Constraint.CONTAINS_ITEM,
+                Constraint.ANY_MATCH,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public <T> Result isEmpty(Collection<T> collection) {
-        return isEmpty(collection, null);
-    }
-
-    public <T> Result isEmpty(Collection<T> collection, String field) {
+    public static <T> Result isEmpty(Collection<T> collection) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(collection != null) {
             state = Result.State.of(collection.isEmpty());
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "collection must be empty";
-            } else if(state == Result.State.FAIL) {
-                logMessage = field + " must be empty";
             }
         }
 
         return createResult(
                 Constraint.IS_EMPTY_COLLECTION,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public <T> Result notEmpty(Collection<T> collection) {
-        return notEmpty(collection, null);
-    }
-
-    public <T> Result notEmpty(Collection<T> collection, String field) {
+    public static <T> Result notEmpty(Collection<T> collection) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(collection != null) {
             state = Result.State.of(!collection.isEmpty());
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "collection can't be empty";
-            } else if(state == Result.State.FAIL) {
-                logMessage = field + " can't be empty";
             }
         }
 
         return createResult(
                 Constraint.NOT_EMPTY_COLLECTION,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result stringLength(String checkedValue, int minLength, int maxLength) {
-        return stringLength(checkedValue, minLength, maxLength, null);
-    }
-
-    public Result stringLength(String checkedValue, int minLength, int maxLength, String field) {
+    public static Result stringLength(String checkedValue, int minLength, int maxLength) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
         if(checkedValue != null) {
             state = Result.State.of(checkedValue.length() >= minLength && checkedValue.length() <= maxLength);
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "Incorrect string length. Min length = " + minLength +
-                        ", max length = " + maxLength +
-                        ", actual length = " + checkedValue.length();
-            } else if(state == Result.State.FAIL) {
-                logMessage = "Incorrect string length for field " + field +
-                        ". Min length = " + minLength +
                         ", max length = " + maxLength +
                         ", actual length = " + checkedValue.length();
             }
@@ -407,381 +299,283 @@ public class Rule {
         return createResult(
                 Constraint.STRING_LENGTH,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result notNegative(BigDecimal checkedValue) {
-        return notNegative(checkedValue, null);
-    }
-
-    public Result notNegative(BigDecimal checkedValue, String field) {
+    public static Result notNegative(BigDecimal checkedValue) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(checkedValue != null) {
             state = Result.State.of(checkedValue.signum() >= 0);
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage =  "Can't be negative. Actual = " + checkedValue;
-            } else if(state == Result.State.FAIL) {
-                logMessage =  field + " can't be negative. Actual = " + checkedValue;
             }
         }
 
         return createResult(
                 Constraint.NOT_NEGATIVE_VALUE,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result notNegative(long checkedValue) {
-        return notNegative(checkedValue, null);
-    }
-
-    public Result notNegative(long checkedValue, String field) {
+    public static Result notNegative(long checkedValue) {
         Result.State state =  Result.State.of(checkedValue >= 0);
         String logMessage = null;
 
-        if(field == null && state == Result.State.FAIL) {
+        if(state == Result.State.FAIL) {
             logMessage =  "Can't be negative. Actual = " + checkedValue;
-        } else if(state == Result.State.FAIL) {
-            logMessage =  field + " can't be negative. Actual = " + checkedValue;
         }
 
         return createResult(
                 Constraint.NOT_NEGATIVE_VALUE,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result positiveValue(BigDecimal checkedValue) {
-        return positiveValue(checkedValue, null);
-    }
-
-    public Result positiveValue(BigDecimal checkedValue, String field) {
+    public static Result positiveValue(BigDecimal checkedValue) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(checkedValue != null) {
             state = Result.State.of(checkedValue.signum() > 0);
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage =  "Must be positive. Actual = " + checkedValue;
-            } else if(state == Result.State.FAIL) {
-                logMessage =  field + " must be positive. Actual = " + checkedValue;
             }
         }
 
         return createResult(
                 Constraint.POSITIVE_VALUE,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result positiveValue(long checkedValue) {
-        return positiveValue(checkedValue, null);
-    }
-
-    public Result positiveValue(long checkedValue, String field) {
+    public static Result positiveValue(long checkedValue) {
         Result.State state = Result.State.of(checkedValue > 0);
         String logMessage = null;
 
-        if(field == null && state == Result.State.FAIL) {
+        if(state == Result.State.FAIL) {
             logMessage =  "Must be positive. Actual = " + checkedValue;
-        } else if(state == Result.State.FAIL) {
-            logMessage =  field + " must be positive. Actual = " + checkedValue;
         }
 
         return createResult(
                 Constraint.POSITIVE_VALUE,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public <T> Result notContainsItem(Collection<T> checkedValue, T item) {
-        return notContainsItem(checkedValue, item, null);
-    }
-
-    public <T> Result notContainsItem(Collection<T> checkedValue, T item, String field) {
+    public static <T> Result notContainsItem(Collection<T> checkedValue, T item) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(checkedValue != null) {
             state = Result.State.of(checkedValue.stream().noneMatch(v -> Objects.equals(v, item)));
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "Can't contains " + item;
-            } else if(state == Result.State.FAIL) {
-                logMessage = field + " can't contains " + item;
             }
         }
 
         return createResult(
                 Constraint.NOT_CONTAINS_ITEM,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result range(long checkedValue, long min, long max) {
-        return range(checkedValue, min, max, null);
-    }
-
-    public Result range(long checkedValue, long min, long max, String field) {
-        Result.State state = Result.State.of(checkedValue >= min && checkedValue <= max);
+    public static Result range(long checkedValue, long minInclusive, long maxExclusive) {
+        Result.State state = Result.State.of(checkedValue >= minInclusive && checkedValue < maxExclusive);
         String logMessage = null;
 
-        if(field == null && state == Result.State.FAIL) {
-            logMessage = "Must belong [" + min + ", " + max + "]. Actual = " + checkedValue;
-        } else if(state == Result.State.FAIL) {
-            logMessage = field + " must belong [" + min + ", " + max + "]. Actual = " + checkedValue;
+        if(state == Result.State.FAIL) {
+            logMessage = "Must belong [" + minInclusive + ", " + maxExclusive + "). Actual = " + checkedValue;
         }
 
         return createResult(
                 Constraint.RANGE,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result min(BigDecimal checkedValue, BigDecimal min) {
-        return min(checkedValue, min, null);
+    public static Result rangeClosed(long checkedValue, long minInclusive, long maxInclusive) {
+        Result.State state = Result.State.of(checkedValue >= minInclusive && checkedValue <= maxInclusive);
+        String logMessage = null;
+
+        if(state == Result.State.FAIL) {
+            logMessage = "Must belong [" + minInclusive + ", " + maxInclusive + "]. Actual = " + checkedValue;
+        }
+
+        return createResult(
+                Constraint.RANGE_CLOSED,
+                logMessage,
+                state
+        );
     }
 
-    public Result min(BigDecimal checkedValue, BigDecimal min, String field) {
+    public static Result min(BigDecimal checkedValue, BigDecimal min) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(checkedValue != null) {
             state = Result.State.of(checkedValue.compareTo(min) >= 0);
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "Must be greater or equal " + min + ". Actual = " + checkedValue;
-            } else if(state == Result.State.FAIL) {
-                logMessage = field + " must be greater or equal " + min + ". Actual = " + checkedValue;
             }
         }
 
         return createResult(
                 Constraint.MIN,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result min(long checkedValue, long min) {
-        return min(checkedValue, min, null);
-    }
-
-    public Result min(long checkedValue, long min, String field) {
+    public static Result min(long checkedValue, long min) {
         Result.State state = Result.State.of(checkedValue >= min);
         String logMessage = null;
 
-        if(field == null && state == Result.State.FAIL) {
+        if(state == Result.State.FAIL) {
             logMessage = "Must be greater or equal " + min + ". Actual = " + checkedValue;
-        } else if(state == Result.State.FAIL) {
-            logMessage = field + " must be greater or equal " + min + ". Actual = " + checkedValue;
         }
 
         return createResult(
                 Constraint.MIN,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result max(BigDecimal checkedValue, BigDecimal max) {
-        return min(checkedValue, max, null);
-    }
-
-    public Result max(BigDecimal checkedValue, BigDecimal max, String field) {
+    public static Result max(BigDecimal checkedValue, BigDecimal max) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(checkedValue != null) {
             state = Result.State.of(checkedValue.compareTo(max) <= 0);
 
-            if(field == null && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "Must be less or equal " + max + ". Actual = " + checkedValue;
-            } else if(state == Result.State.FAIL) {
-                logMessage = field + " must be less or equal " + max + ". Actual = " + checkedValue;
             }
         }
 
         return createResult(
                 Constraint.MAX,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result max(long checkedValue, long max) {
-        return min(checkedValue, max, null);
-    }
-
-    public Result max(long checkedValue, long max, String field) {
+    public static Result max(long checkedValue, long max) {
         Result.State state = Result.State.of(checkedValue <= max);
         String logMessage = null;
 
-        if(field == null && state == Result.State.FAIL) {
+        if(state == Result.State.FAIL) {
             logMessage = "Must be less or equal " + max + ". Actual = " + checkedValue;
-        } else if(state == Result.State.FAIL) {
-            logMessage = field + " must be less or equal " + max + ". Actual = " + checkedValue;
         }
 
         return createResult(
                 Constraint.MAX,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public <T> Result equal(T a, T b) {
-        return equal(a, b, null, null);
-    }
-
-    public <T> Result equal(T a, T b, String firstField, String secondField) {
+    public static <T> Result equal(T a, T b) {
         Result.State state = Result.State.of(Objects.equals(a, b));
         String logMessage = null;
 
-        if((firstField == null || secondField == null) && state == Result.State.FAIL) {
+        if(state == Result.State.FAIL) {
             logMessage = "Not equal: " + a + ", " + b;
-        } else if(state == Result.State.FAIL) {
-            logMessage = firstField + " must be equal " + secondField + ": " + a + ", " + b;
         }
 
         return createResult(
                 Constraint.EQUAL,
                 logMessage,
-                getRuleName(firstField, secondField),
                 state
         );
     }
 
-    public <T> Result equal(T a, T b, Comparator<T> comparator) {
-        return equal(a, b, comparator, null, null);
-    }
-
-    public <T> Result equal(T a, T b, Comparator<T> comparator, String firstField, String secondField) {
+    public static <T> Result equal(T a, T b, Comparator<T> comparator) {
         Result.State state = Result.State.of(comparator.compare(a, b) == 0);
         String logMessage = null;
 
-        if((firstField == null || secondField == null) && state == Result.State.FAIL) {
+        if(state == Result.State.FAIL) {
             logMessage = "Not equal: " + a + ", " + b;
-        } else if(state == Result.State.FAIL) {
-            logMessage = firstField + " must be equal " + secondField + ": " + a + ", " + b;
         }
 
         return createResult(
                 Constraint.EQUAL,
                 logMessage,
-                getRuleName(firstField, secondField),
                 state
         );
     }
-
-    public Result lessThen(BigDecimal a, BigDecimal b) {
-        return lessThen(a, b, null, null);
-    }
     
-    public Result lessThen(BigDecimal a, BigDecimal b, String firstField, String secondField) {
+    public static Result lessThen(BigDecimal a, BigDecimal b) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(a != null && b != null) {
             state = Result.State.of(a.compareTo(b) < 0);
 
-            if((firstField == null || secondField == null) && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "a must be less than b: a=" + a + ", b=" + b;
-            } else if(state == Result.State.FAIL) {
-                logMessage = firstField + " must be less than " + secondField + ": " + 
-                        firstField + "=" + a + ", " + secondField + "=" + b;
             }
         }
 
         return createResult(
                 Constraint.LESS_THEN,
                 logMessage,
-                getRuleName(firstField, secondField),
                 state
         );
     }
-    
-    public Result greaterThen(BigDecimal a, BigDecimal b) {
-        return greaterThen(a, b, null, null);
-    }
 
-    public Result greaterThen(BigDecimal a, BigDecimal b, String firstField, String secondField) {
+    public static Result greaterThen(BigDecimal a, BigDecimal b) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(a != null && b != null) {
             state = Result.State.of(a.compareTo(b) > 0);
 
-            if((firstField == null || secondField == null) && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "a must be greater than b: a=" + a + ", b=" + b;
-            } else if(state == Result.State.FAIL) {
-                logMessage = firstField + " must be greater than " + secondField + ": " +
-                        firstField + "=" + a + ", " + secondField + "=" + b;
             }
         }
 
         return createResult(
                 Constraint.GREATER_THEN,
                 logMessage,
-                getRuleName(firstField, secondField),
                 state
         );
     }
 
-    public Result differentSigns(BigDecimal a, BigDecimal b) {
-        return differentSigns(a, b, null, null);
-    }
-
-    public Result differentSigns(BigDecimal a, BigDecimal b, String firstField, String secondField) {
+    public static Result differentSigns(BigDecimal a, BigDecimal b) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
         if(a != null && b != null) {
             state = Result.State.of(a.signum() != b.signum());
 
-            if((firstField == null || secondField == null) && state == Result.State.FAIL) {
+            if(state == Result.State.FAIL) {
                 logMessage = "a and b must have different signs: a=" + a + ", b=" + b;
-            } else if(state == Result.State.FAIL) {
-                logMessage = firstField + "and" + secondField + " must have different signs: " +
-                        firstField + "=" + a + ", " + secondField + "=" + b;
             }
         }
 
         return createResult(
                 Constraint.DIFFERENT_SIGNS,
                 logMessage,
-                getRuleName(firstField, secondField),
                 state
         );
     }
 
-    public Result isUrl(String checkedValue, Container<URL> container) {
-        return isUrl(checkedValue, container, null);
-    }
-
-    public Result isUrl(String checkedValue, Container<URL> container, String field) {
+    public static Result isUrl(String checkedValue, Container<URL> container) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -791,8 +585,7 @@ public class Rule {
                 container.set(url);
                 state = Result.State.SUCCESS;
             } catch(Exception e) {
-                if(field == null) logMessage = "Incorrect url = " + checkedValue;
-                else logMessage = field + " is incorrect ulr = " + checkedValue;
+                logMessage = "Incorrect url = " + checkedValue;
                 state = Result.State.FAIL;
             }
         }
@@ -800,16 +593,11 @@ public class Rule {
         return createResult(
                 Constraint.IS_URL,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result isBigDecimal(String checkedValue, Container<BigDecimal> container) {
-        return isBigDecimal(checkedValue, container, null);
-    }
-
-    public Result isBigDecimal(String checkedValue, Container<BigDecimal> container, String field) {
+    public static Result isBigDecimal(String checkedValue, Container<BigDecimal> container) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;
@@ -822,24 +610,18 @@ public class Rule {
                 container.set(decimal);
             } catch (Exception e) {
                 state = Result.State.FAIL;
-                if(field == null) logMessage = "Incorrect BigDecimal format = " + checkedValue;
-                else logMessage = field + " is incorrect BigDecimal format = " + checkedValue;
+                logMessage = "Incorrect BigDecimal format = " + checkedValue;
             }
         }
 
         return createResult(
                 Constraint.IS_BIG_DECIMAL,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result isLong(String checkedValue, Container<Long> container) {
-        return isLong(checkedValue, container, null);
-    }
-
-    public Result isLong(String checkedValue, Container<Long> container, String field) {
+    public static Result isLong(String checkedValue, Container<Long> container) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;
@@ -852,24 +634,18 @@ public class Rule {
                 container.set(decimal);
             } catch (Exception e) {
                 state = Result.State.FAIL;
-                if(field == null) logMessage = "Incorrect Long format = " + checkedValue;
-                else logMessage = field + " is incorrect Long format = " + checkedValue;
+                logMessage = "Incorrect Long format = " + checkedValue;
             }
         }
 
         return createResult(
                 Constraint.IS_LONG,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result isInteger(String checkedValue, Container<Integer> container) {
-        return isInteger(checkedValue, container, null);
-    }
-
-    public Result isInteger(String checkedValue, Container<Integer> container, String field) {
+    public static Result isInteger(String checkedValue, Container<Integer> container) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;
@@ -882,51 +658,30 @@ public class Rule {
                 container.set(decimal);
             } catch (Exception e) {
                 state = Result.State.FAIL;
-                if(field == null) logMessage = "Incorrect Integer format = " + checkedValue;
-                else logMessage = field + " is incorrect Integer format = " + checkedValue;
+                logMessage = "Incorrect Integer format = " + checkedValue;
             }
         }
 
         return createResult(
                 Constraint.IS_INTEGER,
                 logMessage,
-                getRuleName(field),
                 state
         );
     }
 
-    public Result isTrue(boolean checkedValue) {
-        return isTrue(checkedValue, null);
-    }
-
-    public Result isTrue(boolean checkedValue, String field) {
+    public static Result isTrue(boolean checkedValue) {
         Result.State state = Result.State.of(checkedValue);
-        String logMessage = null;
-
-        if(state == Result.State.FAIL && field != null) {
-            logMessage = field + " must be true. Actual: false";
-        } else if(state == Result.State.FAIL) {
-            logMessage = "must be true. Actual: false";
-        }
 
         return createResult(
                 Constraint.IS_TRUE,
-                logMessage,
-                getRuleName(field),
+                null,
                 state
         );
     }
 
-    public <S, T> Result doesNotThrows(Collection<? extends S> source,
+    public static <S, T> Result doesNotThrows(Collection<? extends S> source,
                                        Function<? super S, ? extends T> factory,
                                        Container<List<T>> container) {
-        return doesNotThrows(source, factory, container, null);
-    }
-
-    public <S, T> Result doesNotThrows(Collection<? extends S> source,
-                                       Function<? super S, ? extends T> factory,
-                                       Container<List<T>> container,
-                                       String field) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;
@@ -951,28 +706,19 @@ public class Rule {
                     map(e -> e.getClass().getName()).
                     reduce((a, b) -> a + ", " + b).
                     orElse(null);
-            if(field != null) logMessage = "Unexpected exception for " + field + ": " + logMessage;
         }
 
         return createResult(
                 Constraint.DOES_NOT_THROW,
                 logMessage,
-                getRuleName(field),
                 state,
                 unexpectedExceptions
         );
     }
 
-    public <S, T> Result doesNotThrow(S source,
+    public static <S, T> Result doesNotThrow(S source,
                                       Function<S, T> factory,
                                       Container<T> container) {
-        return doesNotThrow(source, factory, container, null);
-    }
-
-    public <S, T> Result doesNotThrow(S source,
-                                      Function<S, T> factory,
-                                      Container<T> container,
-                                      String field) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;
@@ -988,55 +734,37 @@ public class Rule {
                 unexpectedExceptions.add(e);
 
                 logMessage = e.getClass().getName();
-                if(field != null) logMessage = "Unexpected exception for " + field + ": " + logMessage;
             }
         }
 
         return createResult(
                 Constraint.DOES_NOT_THROW,
                 logMessage,
-                getRuleName(field),
                 state,
                 unexpectedExceptions
         );
     }
 
 
-    protected String getRuleName(String field) {
-        return field == null ? ruleName : ruleName + "." + field;
-    }
-
-    protected String getRuleName(String firstField, String secondField) {
-        return firstField == null || secondField == null ?
-                ruleName :
-                ruleName + "." + firstField + "." + secondField;
-    }
-
-    protected Result createResult(Constraint constraint,
-                                  String logMessage,
-                                  String ruleName,
-                                  Result.State state) {
+    public static Result createResult(Constraint constraint, 
+                                      String logMessage, 
+                                      Result.State state) {
         return new Result(
                 constraint,
                 state,
                 logMessage,
-                ruleName,
-                this,
                 List.of()
         );
     }
 
-    protected Result createResult(Constraint constraint,
-                                  String logMessage,
-                                  String ruleName,
-                                  Result.State state,
-                                  List<Exception> suppressedExceptions) {
+    public static Result createResult(Constraint constraint, 
+                                      String logMessage, 
+                                      Result.State state, 
+                                      List<Exception> suppressedExceptions) {
         return new Result(
                 constraint,
                 state,
                 logMessage,
-                ruleName,
-                this,
                 suppressedExceptions
         );
     }

@@ -3,10 +3,11 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
+import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterMapper;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.*;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
@@ -17,7 +18,6 @@ import com.bakuard.nutritionManager.validation.Validator;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.SortField;
-import org.jooq.impl.DSL;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -35,23 +35,24 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
+import static com.bakuard.nutritionManager.validation.Rule.*;
 import static org.jooq.impl.DSL.*;
 
 public class ProductRepositoryPostgres implements ProductRepository {
 
     private JdbcTemplate statement;
     private AppConfigData appConfig;
+    private ProductFilterMapper filterMapper;
 
     public ProductRepositoryPostgres(DataSource dataSource, AppConfigData appConfig) {
         statement = new JdbcTemplate(dataSource);
         this.appConfig = appConfig;
+        filterMapper = new ProductFilterMapper();
     }
 
     @Override
     public boolean save(Product product) {
-        Validator.check(
-                Rule.of("ProductRepository.product").notNull(product)
-        );
+        Validator.check("ProductRepository.product", notNull(product));
 
         Product oldProduct = getById(product.getUser().getId(), product.getId()).orElse(null);
 
@@ -61,12 +62,12 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 addNewProduct(product);
                 newData = true;
             } else if(!product.equalsFullState(oldProduct)) {
-                updateProduct(product, oldProduct);
+                updateProduct(product);
                 newData = true;
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save product").
-                    addReason(Rule.of("ProductRepository.product").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("ProductRepository.product", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
 
         return newData;
@@ -77,7 +78,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Product product = getById(userId, productId).
                 orElseThrow(
                         () -> new ValidateException("Unknown product with id=" + productId + " for userId=" + userId).
-                                addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("ProductRepository.productId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
 
         statement.update(
@@ -94,8 +95,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Optional<Product> getById(UUID userId, UUID productId) {
         Validator.check(
-                Rule.of("ProductRepository.userId").notNull(userId),
-                Rule.of("ProductRepository.productId").notNull(productId)
+                "ProductRepository.userId", notNull(userId),
+                "ProductRepository.productId", notNull(productId)
         );
 
         return statement.query(
@@ -158,7 +159,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         return getById(userId, productId).
                 orElseThrow(
                         () -> new ValidateException("Unknown product with id = " + productId + " for userId=" + userId).
-                                addReason(Rule.of("ProductRepository.productId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("ProductRepository.productId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -174,7 +175,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         List<Field<?>> fields = new ArrayList<>();
         fields.add(field("*"));
         if(criteria.getFilter() != null) {
-            List<Condition> conditions = splitFilter(criteria.getFilter());
+            List<Condition> conditions = filterMapper.toConditions(criteria.getFilter());
             for(int i = 0; i < conditions.size(); i++) {
                 String fieldName = "condition" + i;
                 fieldsName.add(fieldName);
@@ -276,7 +277,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 from("ProductTags").
                 join("Products").
                     on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("ProductTags.tagValue").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -308,7 +309,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         String query = selectDistinct(field("Products.shop")).
                 from("Products").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 orderBy(field("Products.shop").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -340,7 +341,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         String query = selectDistinct(field("Products.grade")).
                 from("Products").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 orderBy(field("Products.grade").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -372,7 +373,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         String query = selectDistinct(field("Products.category")).
                 from("Products").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 orderBy(field("Products.category").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -404,7 +405,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         String query = selectDistinct(field("Products.manufacturer")).
                 from("Products").
-                where(switchFilter(criteria.tryGetFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 orderBy(field("Products.manufacturer").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -429,14 +430,13 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getProductsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = selectCount().
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.getFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
@@ -445,16 +445,15 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("ProductTags.tagValue"))).
                 from("ProductTags").
                 join("Products").
                 on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -469,14 +468,13 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getShopsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Products.shop"))).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -491,14 +489,13 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getGradesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Products.grade"))).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.getFilter())).
                 getSQL();
 
         return statement.query(
@@ -513,15 +510,14 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getCategoriesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER) &&
-                                criteria.getFilter().containsOnly(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER) &&
+                                criteria.tryGetFilter().containsOnly(USER)))
         );
 
         String query = select(countDistinct(field("Products.category"))).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -536,14 +532,13 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public int getManufacturersNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Products.manufacturer"))).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -558,14 +553,14 @@ public class ProductRepositoryPostgres implements ProductRepository {
     @Override
     public Optional<BigDecimal> getProductsSum(Criteria criteria) {
         Validator.check(
-                Rule.of("ProductRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter())).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> notNull(criteria.getFilter())).
+                        and(() -> isTrue(criteria.getFilter().containsAtLeast(USER)))
         );
 
         String query = select(sum(field("price", BigDecimal.class)).as("totalPrice")).
                 from("Products").
-                where(switchFilter(criteria.getFilter())).
+                where(filterMapper.toCondition(criteria.getFilter())).
                 getSQL();
 
         return Optional.ofNullable(
@@ -635,7 +630,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
-    private void updateProduct(Product newVersion, Product oldVersion) {
+    private void updateProduct(Product newVersion) {
         statement.update(
                 """
                         UPDATE Products SET
@@ -700,155 +695,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     }
                 }
         );
-    }
-
-
-    List<Condition> splitFilter(Filter filter) {
-        switch(filter.getType()) {
-            case AND -> {
-                return List.of(andFilter((AndFilter) filter));
-            }
-            case MIN_TAGS -> {
-                return List.of(minTagsFilter((MinTagsFilter) filter));
-            }
-            case CATEGORY -> {
-                return List.of(categoryFilter((AnyFilter) filter));
-            }
-            case SHOPS -> {
-                return List.of(shopFilter((AnyFilter) filter));
-            }
-            case GRADES -> {
-                return List.of(gradeFilter((AnyFilter) filter));
-            }
-            case MANUFACTURER -> {
-                return List.of(manufacturerFilter((AnyFilter) filter));
-            }
-            case OR_ELSE -> {
-                OrElseFilter orElse = (OrElseFilter) filter;
-                return orElse.getOperands().stream().
-                        map(this::switchFilter).
-                        toList();
-            }
-            case USER -> {
-                return List.of(userFilter((UserFilter) filter));
-            }
-            case MIN_QUANTITY -> {
-                return List.of(quantityFilter((QuantityFilter) filter));
-            }
-            default -> throw new UnsupportedOperationException(
-                    "Unsupported operation for " + filter.getType() + " constraint");
-        }
-    }
-
-    Condition switchFilter(Filter filter) {
-        switch(filter.getType()) {
-            case AND -> {
-                return andFilter((AndFilter) filter);
-            }
-            case MIN_TAGS -> {
-                return minTagsFilter((MinTagsFilter) filter);
-            }
-            case CATEGORY -> {
-                return categoryFilter((AnyFilter) filter);
-            }
-            case SHOPS -> {
-                return shopFilter((AnyFilter) filter);
-            }
-            case GRADES -> {
-                return gradeFilter((AnyFilter) filter);
-            }
-            case MANUFACTURER -> {
-                return manufacturerFilter((AnyFilter) filter);
-            }
-            case OR_ELSE -> {
-                return orElseFilter((OrElseFilter) filter);
-            }
-            case USER -> {
-                return userFilter((UserFilter) filter);
-            }
-            case MIN_QUANTITY -> {
-                return quantityFilter((QuantityFilter) filter);
-            }
-            default -> throw new UnsupportedOperationException(
-                        "Unsupported operation for " + filter.getType() + " constraint");
-        }
-    }
-
-    private Condition orElseFilter(OrElseFilter filter) {
-        Condition condition = switchFilter(filter.getOperands().get(0));
-        for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.or(switchFilter(filter.getOperands().get(i)));
-        }
-        return condition;
-    }
-
-    private Condition andFilter(AndFilter filter) {
-        Condition condition = switchFilter(filter.getOperands().get(0));
-        for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.and(switchFilter(filter.getOperands().get(i)));
-        }
-        return condition;
-    }
-
-    private Condition minTagsFilter(MinTagsFilter filter) {
-        return field("productId").in(
-                select(field("ProductTags.productId")).
-                        from("ProductTags").
-                        where(field("ProductTags.tagValue").in(
-                                filter.getTags().stream().map(t -> inline(t.getValue())).toList()
-                        )).
-                        groupBy(field("ProductTags.productId")).
-                        having(count(field("ProductTags.productId")).eq(inline(filter.getTags().size())))
-        );
-    }
-
-    private Condition categoryFilter(AnyFilter filter) {
-        return field("category").in(
-                filter.getValues().stream().map(DSL::inline).toList()
-        );
-    }
-
-    private Condition shopFilter(AnyFilter filter) {
-        return field("shop").in(
-                filter.getValues().stream().map(DSL::inline).toList()
-        );
-    }
-
-    private Condition gradeFilter(AnyFilter filter) {
-        return field("grade").in(
-                filter.getValues().stream().map(DSL::inline).toList()
-        );
-    }
-
-    private Condition manufacturerFilter(AnyFilter filter) {
-        return field("manufacturer").in(
-                filter.getValues().stream().map(DSL::inline).toList()
-        );
-    }
-
-    private Condition userFilter(UserFilter filter) {
-        return field("userId").eq(inline(filter.getUserId()));
-    }
-
-    private Condition quantityFilter(QuantityFilter filter) {
-        switch(filter.getRelative()) {
-            case LESS -> {
-                return field("quantity").lessThan(inline(filter.getQuantity()));
-            }
-            case LESS_OR_EQUAL -> {
-                return field("quantity").lessOrEqual(inline(filter.getQuantity()));
-            }
-            case GREATER -> {
-                return field("quantity").greaterThan(inline(filter.getQuantity()));
-            }
-            case GREATER_OR_EQUAL -> {
-                return field("quantity").greaterOrEqual(inline(filter.getQuantity()));
-            }
-            case EQUAL -> {
-                return field("quantity").eq(inline(filter.getQuantity()));
-            }
-            default -> throw new UnsupportedOperationException("Unknown relative = " + filter.getRelative());
-        }
     }
 
 

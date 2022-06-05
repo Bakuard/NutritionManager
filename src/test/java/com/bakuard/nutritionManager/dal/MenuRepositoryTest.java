@@ -78,7 +78,7 @@ class MenuRepositoryTest {
         userRepository = new UserRepositoryPostgres(dataSource);
         productRepository = new ProductRepositoryPostgres(dataSource, appConfiguration);
         dishRepository = new DishRepositoryPostgres(dataSource, appConfiguration, productRepository);
-        menuRepository = new MenuRepositoryPostgres(dataSource, appConfiguration, dishRepository, productRepository);
+        menuRepository = new MenuRepositoryPostgres(dataSource, appConfiguration, dishRepository);
     }
 
     @BeforeEach

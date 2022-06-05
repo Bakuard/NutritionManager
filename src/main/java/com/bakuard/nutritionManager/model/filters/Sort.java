@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.bakuard.nutritionManager.validation.Rule.*;
+
 public class Sort {
 
     public static Sort productDefaultSort() {
@@ -135,14 +137,15 @@ public class Sort {
 
         Validator.check(
                 () -> new ValidateException("Unknown sort direction"),
-                Rule.of("Sort.direction").notNull(direction).
-                        and(r -> {
+                Rule.of("Sort.direction", notNull(direction).
+                        and(() -> {
                             if("asc".equalsIgnoreCase(direction)) d.set(true);
                             else if("desc".equalsIgnoreCase(direction)) d.set(false);
 
-                            if(d.isEmpty()) return r.failure(Constraint.CONTAINS_ITEM);
-                            else return r.success(Constraint.CONTAINS_ITEM);
+                            if(d.isEmpty()) return failure(Constraint.ANY_MATCH);
+                            else return success(Constraint.ANY_MATCH);
                         })
+                )
         );
 
         return d.get();
@@ -150,8 +153,7 @@ public class Sort {
 
     private Sort put(String parameter, boolean isAscending) {
         Validator.check(
-                Rule.of("Sort.parameter").notNull(parameter).
-                        and(r -> r.containsItem(validParameters, parameter))
+                "Sort.parameter", notNull(parameter).and(() -> anyMatch(validParameters, parameter))
         );
 
         parameters.add(parameter);

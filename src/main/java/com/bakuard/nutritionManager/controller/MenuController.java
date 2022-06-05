@@ -435,15 +435,11 @@ public class MenuController {
         byte[] reportOutputData = reportService.createMenuProductsReport(reportInputData);
 
         HttpHeaders header = new HttpHeaders();
-        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=productsList.pdf");
-        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        header.add("Pragma", "no-cache");
-        header.add("Expires", "0");
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "inline;attachment; filename=report.pdf");
+        header.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE);
 
         return ResponseEntity.ok().
                 headers(header).
-                contentLength(reportOutputData.length).
-                contentType(MediaType.APPLICATION_OCTET_STREAM).
                 body(new ByteArrayResource(reportOutputData));
     }
 

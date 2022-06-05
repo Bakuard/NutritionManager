@@ -17,8 +17,8 @@ import java.util.Map;
 public class MenuProductsDataSource implements JRDataSource {
 
     private List<Menu.MenuItemProduct> itemProducts;
-    private Iterator<Map.Entry<Product, List<Menu.MenuItemProduct>>> productsIterator;
-    private Map.Entry<Product, List<Menu.MenuItemProduct>> current;
+    private Iterator<Menu.ProductGroup> productsIterator;
+    private Menu.ProductGroup current;
     private BigDecimal menuNumber;
     private Menu menu;
 
@@ -26,8 +26,8 @@ public class MenuProductsDataSource implements JRDataSource {
                                   BigDecimal menuNumber,
                                   List<Menu.ProductConstraint> constraints) {
         itemProducts = menu.getMenuItemProducts(constraints);
-        productsIterator = menu.groupByProduct(itemProducts).entrySet().stream().
-                sorted(Comparator.comparing(pair -> pair.getKey().getContext().getShop())).
+        productsIterator = menu.groupByProduct(itemProducts).stream().
+                sorted(Comparator.comparing(item -> item.product().getContext().getShop())).
                 toList().
                 iterator();
 
@@ -47,28 +47,30 @@ public class MenuProductsDataSource implements JRDataSource {
         String result = "";
 
         switch(jrField.getName()) {
+            case "menuName" -> result = menu.getName();
+            case "menuNumber" -> result = format(menuNumber);
             case "creationReportData" -> result = LocalDate.now().toString();
             case "totalPrice" -> result = format(
                     menu.getLackProductsPrice(itemProducts, menuNumber).orElseThrow()
             );
-            case "shopGroup" -> result = current.getKey().getContext().getShop();
-            case "productGroup", "productName" -> result = current.getKey().getContext().getCategory();
-            case "grade" -> result = current.getKey().getContext().getGrade();
-            case "price" -> result = format(current.getKey().getContext().getPrice());
-            case "packingSize" -> result = format(current.getKey().getContext().getPackingSize());
-            case "unit" -> result = current.getKey().getContext().getUnit();
-            case "manufacturer" -> result = current.getKey().getContext().getManufacturer();
-            case "quantity" -> result = format(current.getKey().getQuantity());
+            case "shopGroup" -> result = current.product().getContext().getShop();
+            case "productGroup", "productName" -> result = current.product().getContext().getCategory();
+            case "grade" -> result = current.product().getContext().getGrade();
+            case "price" -> result = format(current.product().getContext().getPrice());
+            case "packingSize" -> result = format(current.product().getContext().getPackingSize());
+            case "unit" -> result = current.product().getContext().getUnit();
+            case "manufacturer" -> result = current.product().getContext().getManufacturer();
+            case "quantity" -> result = format(current.product().getQuantity());
             case "necessaryQuantity" -> result = format(
-                    menu.getNecessaryQuantity(current.getValue(), menuNumber).orElseThrow()
+                    menu.getNecessaryQuantity(current, menuNumber)
             );
             case "lackQuantity" -> result = format(
-                    menu.getLackPackageQuantity(current.getValue(), menuNumber).orElseThrow()
+                    menu.getLackPackageQuantity(current, menuNumber)
             );
             case "lackQuantityPrice" -> result = format(
-                    menu.getLackPackageQuantityPrice(current.getValue(), menuNumber).orElseThrow()
+                    menu.getLackPackageQuantityPrice(current, menuNumber)
             );
-            case "useInDishes" -> result = menu.getMenuItems(current.getValue()).stream().
+            case "useInDishes" -> result = menu.getMenuItems(current).stream().
                     map(item -> item.getDish().getName()).
                     reduce((a, b) -> String.join(", ", a, b)).
                     orElseThrow();

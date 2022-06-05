@@ -1,13 +1,13 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.Result;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.bakuard.nutritionManager.validation.Rule.*;
 
 /**
  * Данное огрнаничение используется при фильтрации продуктов, блюд и меню по какому-то конкретному полю строкового
@@ -23,10 +23,10 @@ public class AnyFilter extends AbstractFilter {
 
     AnyFilter(List<String> values, int minItems, Type type) {
         Validator.check(
-                Rule.of("AnyFilter." + type).notNull(values).
-                        and(v -> v.notContainsNull(values)).
-                        and(v -> v.min(values.size(), minItems)).
-                        and(v -> v.notContains(values, String::isBlank))
+                "AnyFilter." + type, notNull(values).
+                        and(() -> notContainsNull(values)).
+                        and(() -> min(values.size(), minItems)).
+                        and(() -> noneMatch(values, String::isBlank))
         );
 
         this.values = ImmutableList.copyOf(values);

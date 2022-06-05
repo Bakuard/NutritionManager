@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Schema(description = """
         Данные используемые в запросе на добавление блюда. Не допускается, чтобы у пользователя были два
@@ -97,20 +98,22 @@ public class DishAddRequest {
         this.imageUrl = imageUrl;
     }
 
-    public List<IngredientAddRequest> getIngredients() {
-        return ingredients;
+    public Optional<List<IngredientAddRequest>> getIngredients() {
+        return Optional.ofNullable(ingredients);
     }
 
-    public void setIngredients(List<IngredientAddRequest> ingredients) {
+    public DishAddRequest setIngredients(List<IngredientAddRequest> ingredients) {
         this.ingredients = ingredients;
+        return this;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public Optional<List<String>> getTags() {
+        return Optional.ofNullable(tags);
     }
 
-    public void setTags(List<String> tags) {
+    public DishAddRequest setTags(List<String> tags) {
         this.tags = tags;
+        return this;
     }
 
     @Override

@@ -21,10 +21,6 @@ public class ExceptionResponse {
     private String httpStatus;
     @Schema(description = "Http код ошибки")
     private int httpErrorCode;
-    @Schema(description = "Текст сообщения пользователю об ошибке относящийся ко всему запросу в целом")
-    private String message;
-    @Schema(description = "Заголовок сообщения пользователю об ошибке")
-    private String title;
     @Schema(description = "Все пречины из-за которых запрос не смог завершится корректно")
     private List<ConstraintResponse> reasons;
 
@@ -51,14 +47,6 @@ public class ExceptionResponse {
         return httpErrorCode;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
     public List<ConstraintResponse> getReasons() {
         return reasons;
     }
@@ -71,14 +59,12 @@ public class ExceptionResponse {
         return httpErrorCode == that.httpErrorCode &&
                 Objects.equals(timestamp, that.timestamp) &&
                 Objects.equals(httpStatus, that.httpStatus) &&
-                Objects.equals(message, that.message) &&
-                Objects.equals(title, that.title) &&
                 Objects.equals(reasons, that.reasons);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, httpStatus, httpErrorCode, message, title, reasons);
+        return Objects.hash(timestamp, httpStatus, httpErrorCode, reasons);
     }
 
     @Override
@@ -87,8 +73,6 @@ public class ExceptionResponse {
                 "timestamp=" + timestamp +
                 ", httpStatus='" + httpStatus + '\'' +
                 ", httpErrorCode=" + httpErrorCode +
-                ", message='" + message + '\'' +
-                ", title='" + title + '\'' +
                 ", errors=" + reasons +
                 '}';
     }

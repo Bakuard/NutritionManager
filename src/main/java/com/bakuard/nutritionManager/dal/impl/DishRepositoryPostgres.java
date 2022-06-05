@@ -3,11 +3,14 @@ package com.bakuard.nutritionManager.dal.impl;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
+import com.bakuard.nutritionManager.dal.impl.mappers.DishFilterMapper;
+import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterJsonMapper;
+import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterMapper;
 import com.bakuard.nutritionManager.model.Dish;
 import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.model.filters.*;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
@@ -15,20 +18,13 @@ import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
-import com.fasterxml.jackson.core.*;
-
-import org.jooq.Condition;
-import org.jooq.Param;
 import org.jooq.SortField;
-import org.jooq.impl.DSL;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,7 +32,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static com.bakuard.nutritionManager.model.filters.Filter.Type.*;
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
+import static com.bakuard.nutritionManager.validation.Rule.*;
 import static org.jooq.impl.DSL.*;
 
 public class DishRepositoryPostgres implements DishRepository {
@@ -44,7 +41,9 @@ public class DishRepositoryPostgres implements DishRepository {
     private JdbcTemplate statement;
     private AppConfigData appConfig;
     private ProductRepositoryPostgres productRepository;
-    private JsonFactory jsonFactory;
+    private ProductFilterMapper filterMapper;
+    private ProductFilterJsonMapper filterJsonMapper;
+    private DishFilterMapper dishFilterMapper;
 
     public DishRepositoryPostgres(DataSource dataSource,
                                   AppConfigData appConfig,
@@ -52,14 +51,14 @@ public class DishRepositoryPostgres implements DishRepository {
         this.appConfig = appConfig;
         this.productRepository = productRepository;
         statement = new JdbcTemplate(dataSource);
-        jsonFactory = new JsonFactory();
+        filterMapper = new ProductFilterMapper();
+        filterJsonMapper = new ProductFilterJsonMapper();
+        dishFilterMapper = new DishFilterMapper();
     }
 
     @Override
     public boolean save(Dish dish) {
-        Validator.check(
-                Rule.of("DishRepository.dish").notNull(dish)
-        );
+        Validator.check("DishRepository.dish", notNull(dish));
 
         Dish oldDish = getById(dish.getUser().getId(), dish.getId()).orElse(null);
 
@@ -74,7 +73,7 @@ public class DishRepositoryPostgres implements DishRepository {
             }
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save dish", e).
-                    addReason(Rule.of("DishRepository.dish").failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB));
+                    addReason(Rule.of("DishRepository.dish", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
 
         return newData;
@@ -83,8 +82,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Optional<Dish> getById(UUID userId, UUID dishId) {
         Validator.check(
-                Rule.of("DishRepository.userId").notNull(userId),
-                Rule.of("DishRepository.dishId").notNull(dishId)
+                "DishRepository.userId", notNull(userId),
+                "DishRepository.dishId", notNull(dishId)
         );
 
         return statement.query(
@@ -156,7 +155,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                                 setId(ingredientId).
                                                 setName(rs.getString("ingredientName")).
                                                 setQuantity(rs.getBigDecimal("ingredientQuantity")).
-                                                setFilter(toFilter(rs.getString("ingredientFilter"))).
+                                                setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
                                                 setConfig(appConfig)
                                 );
                                 ingredients.add(ingredientId);
@@ -174,8 +173,8 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public Optional<Dish> getByName(UUID userId, String name) {
         Validator.check(
-                Rule.of("DishRepository.userId").notNull(userId),
-                Rule.of("DishRepository.name").notNull(name)
+                "DishRepository.userId", notNull(userId),
+                "DishRepository.name", notNull(name)
         );
 
         return statement.query(
@@ -247,7 +246,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                                 setId(ingredientId).
                                                 setName(rs.getString("ingredientName")).
                                                 setQuantity(rs.getBigDecimal("ingredientQuantity")).
-                                                setFilter(toFilter(rs.getString("ingredientFilter"))).
+                                                setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
                                                 setConfig(appConfig)
                                 );
                                 ingredients.add(ingredientId);
@@ -267,7 +266,7 @@ public class DishRepositoryPostgres implements DishRepository {
         Dish dish = getById(userId, dishId).
                 orElseThrow(
                         () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId).
-                                addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("DishRepository.dishId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
 
         statement.update(
@@ -286,7 +285,7 @@ public class DishRepositoryPostgres implements DishRepository {
         return getById(userId, dishId).
                 orElseThrow(
                         () -> new ValidateException("Unknown dish with id=" + dishId + " for userId=" + userId).
-                                addReason(Rule.of("DishRepository.dishId").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("DishRepository.dishId", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -295,7 +294,7 @@ public class DishRepositoryPostgres implements DishRepository {
         return getByName(userId, name).
                 orElseThrow(
                         () -> new ValidateException("Unknown dish with name=" + name + " for userId=" + userId).
-                                addReason(Rule.of("DishRepository.name").failure(Constraint.ENTITY_MUST_EXISTS_IN_DB))
+                                addReason(Rule.of("DishRepository.name", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)))
                 );
     }
 
@@ -322,7 +321,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         from(
                             select(field("*")).
                                 from("Dishes").
-                                where(switchFilter(criteria.getFilter())).
+                                where(dishFilterMapper.toCondition(criteria.getFilter())).
                                 orderBy(getOrderFields(criteria.getSort(), "Dishes")).
                                 limit(inline(metadata.getActualSize())).
                                 offset(inline(metadata.getOffset())).
@@ -355,7 +354,7 @@ public class DishRepositoryPostgres implements DishRepository {
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("DishTags.tagValue").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -387,7 +386,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectDistinct(field("Dishes.unit")).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("Dishes.unit").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -419,7 +418,7 @@ public class DishRepositoryPostgres implements DishRepository {
 
         String query = selectDistinct(field("Dishes.name")).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.getFilter())).
                 orderBy(field("Dishes.name").asc()).
                 limit(inline(metadata.getActualSize())).
                 offset(inline(metadata.getOffset())).
@@ -444,14 +443,13 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getDishesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = selectCount().
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.queryForObject(query, Integer.class);
@@ -460,16 +458,15 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("DishTags.tagValue"))).
                 from("DishTags").
                 join("Dishes").
                 on(field("Dishes.dishId").eq(field("DishTags.dishId"))).
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -484,14 +481,13 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getUnitsNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Dishes.unit"))).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -506,14 +502,13 @@ public class DishRepositoryPostgres implements DishRepository {
     @Override
     public int getNamesNumber(Criteria criteria) {
         Validator.check(
-                Rule.of("DishRepository.criteria").notNull(criteria).
-                        and(r -> r.notNull(criteria.getFilter(), "filter")).
-                        and(r -> r.isTrue(criteria.getFilter().containsAtLeast(USER)))
+                "DishRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
         );
 
         String query = select(countDistinct(field("Dishes.name"))).
                 from("Dishes").
-                where(switchFilter(criteria.getFilter())).
+                where(dishFilterMapper.toCondition(criteria.tryGetFilter())).
                 getSQL();
 
         return statement.query(
@@ -575,7 +570,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setId(ingredientId).
                                     setName(rs.getString("ingredientName")).
                                     setQuantity(rs.getBigDecimal("ingredientQuantity")).
-                                    setFilter(toFilter(rs.getString("ingredientFilter"))).
+                                    setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
                                     setConfig(appConfig)
                     );
                     ingredients.add(ingredientId);
@@ -648,14 +643,14 @@ public class DishRepositoryPostgres implements DishRepository {
                         DishIngredient ingredient = dish.getIngredients().get(i);
                         String filterQuery = select(field("*")).
                                 from(table("Products")).
-                                where(productRepository.switchFilter(ingredient.getFilter())).
+                                where(filterMapper.toCondition(ingredient.getFilter())).
                                 getSQL();
 
                         ps.setObject(1, ingredient.getId());
                         ps.setObject(2, dish.getId());
                         ps.setString(3, ingredient.getName());
                         ps.setBigDecimal(4, ingredient.getNecessaryQuantity(BigDecimal.ONE));
-                        ps.setString(5, toJson(ingredient.getFilter()));
+                        ps.setString(5, filterJsonMapper.toJson(ingredient.getFilter()));
                         ps.setString(6, filterQuery);
                         ps.setInt(7, i);
                     }
@@ -746,14 +741,14 @@ public class DishRepositoryPostgres implements DishRepository {
                         DishIngredient ingredient = newVersion.getIngredients().get(i);
                         String filterQuery = select(field("*")).
                                 from(table("Products")).
-                                where(productRepository.switchFilter(ingredient.getFilter())).
+                                where(filterMapper.toCondition(ingredient.getFilter())).
                                 getSQL();
 
                         ps.setObject(1, ingredient.getId());
                         ps.setObject(2, newVersion.getId());
                         ps.setString(3, ingredient.getName());
                         ps.setBigDecimal(4, ingredient.getNecessaryQuantity(BigDecimal.ONE));
-                        ps.setString(5, toJson(ingredient.getFilter()));
+                        ps.setString(5, filterJsonMapper.toJson(ingredient.getFilter()));
                         ps.setString(6, filterQuery);
                         ps.setInt(7, i);
                     }
@@ -765,283 +760,6 @@ public class DishRepositoryPostgres implements DishRepository {
 
                 }
         );
-    }
-
-
-    private Condition switchFilter(Filter filter) {
-        switch(filter.getType()) {
-            case AND -> {
-                return andFilter((AndFilter) filter);
-            }
-            case MIN_TAGS -> {
-                return minTagsFilter((MinTagsFilter) filter);
-            }
-            case INGREDIENTS -> {
-                return ingredientsFilter((AnyFilter) filter);
-            }
-            case USER -> {
-                return userFilter((UserFilter) filter);
-            }
-            default -> throw new UnsupportedOperationException(
-                    "Unsupported operation for " + filter.getType() + " constraint");
-        }
-    }
-
-    private Condition andFilter(AndFilter filter) {
-        Condition condition = switchFilter(filter.getOperands().get(0));
-        for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.and(switchFilter(filter.getOperands().get(i)));
-        }
-        return condition;
-    }
-
-    private Condition userFilter(UserFilter filter) {
-        return field("userId").eq(inline(filter.getUserId()));
-    }
-
-    private Condition minTagsFilter(MinTagsFilter filter) {
-        return field("dishId").in(
-                select(field("DishTags.dishId")).
-                        from("DishTags").
-                        where(field("DishTags.tagValue").in(
-                                filter.getTags().stream().map(t -> inline(t.getValue())).toList()
-                        )).
-                        groupBy(field("DishTags.dishId")).
-                        having(count(field("DishTags.dishId")).eq(inline(filter.getTags().size())))
-        );
-    }
-
-    private Condition ingredientsFilter(AnyFilter filter) {
-        List<Param<String>> arrayData = filter.getValues().stream().
-                map(DSL::inline).
-                toList();
-
-        return field("dishId").in(
-                select(field("DishIngredients.dishId")).
-                        from(table("DishIngredients")).
-                        where(
-                                "existProductsForFilter(?, DishIngredients.filterQuery)",
-                                array(arrayData)
-                        )
-        );
-    }
-
-
-    private Filter toFilter(String json) {
-        try {
-            JsonParser parser = jsonFactory.createParser(json);
-            Filter result = switchFilter(parser);
-            parser.close();
-
-            return result;
-        } catch(IOException e) {
-            throw new IllegalStateException("Fail to parse json to filter", e);
-        }
-    }
-
-    private Filter switchFilter(JsonParser parser) throws IOException {
-        Filter result = null;
-
-        Filter.Type type = null;
-        while(parser.nextToken() != JsonToken.END_OBJECT) {
-            String fieldName = parser.getCurrentName();
-
-            if("type".equals(fieldName)) {
-                type = Filter.Type.valueOf(parser.nextTextValue());
-            }
-
-            if("values".equals(fieldName)) {
-                switch(type) {
-                    case OR_ELSE -> result = toOrElseFilter(parser);
-                    case AND -> result = toAndFilter(parser);
-                    case MIN_TAGS -> result = toMinTagsFilter(parser);
-                    case CATEGORY -> result = toCategoryFilter(parser);
-                    case SHOPS -> result = toShopsFilter(parser);
-                    case GRADES -> result = toGradesFilter(parser);
-                    case MANUFACTURER -> result = toManufacturerFilter(parser);
-                    case USER -> result = toUserFilter(parser);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private OrElseFilter toOrElseFilter(JsonParser parser) throws IOException {
-        List<Filter> values = new ArrayList<>();
-
-        parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            values.add(switchFilter(parser));
-        }
-
-        return Filter.orElse(values);
-    }
-
-    private AndFilter toAndFilter(JsonParser parser) throws IOException {
-        List<Filter> values = new ArrayList<>();
-
-        parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            values.add(switchFilter(parser));
-        }
-
-        return Filter.and(values);
-    }
-
-    private AnyFilter toCategoryFilter(JsonParser parser) throws IOException {
-        List<String> values = new ArrayList<>();
-
-        parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            values.add(parser.getValueAsString());
-        }
-
-        return Filter.anyCategory(values);
-    }
-
-    private AnyFilter toManufacturerFilter(JsonParser parser) throws IOException {
-        List<String> values = new ArrayList<>();
-
-        parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            values.add(parser.getValueAsString());
-        }
-
-        return Filter.anyManufacturer(values);
-    }
-
-    private AnyFilter toShopsFilter(JsonParser parser) throws IOException {
-        List<String> values = new ArrayList<>();
-
-        parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            values.add(parser.getValueAsString());
-        }
-
-        return Filter.anyShop(values);
-    }
-
-    private AnyFilter toGradesFilter(JsonParser parser) throws IOException {
-        List<String> values = new ArrayList<>();
-
-        parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            values.add(parser.getValueAsString());
-        }
-
-        return Filter.anyGrade(values);
-    }
-
-    private MinTagsFilter toMinTagsFilter(JsonParser parser) throws IOException {
-        List<Tag> tags = new ArrayList<>();
-
-        parser.nextToken(); //BEGIN_ARRAY
-        while(parser.nextToken() != JsonToken.END_ARRAY) {
-            tags.add(new Tag(parser.getValueAsString()));
-        }
-
-        return Filter.minTags(tags);
-    }
-
-    private UserFilter toUserFilter(JsonParser parser) throws IOException {
-        parser.nextToken(); //BEGIN_ARRAY
-        UUID userId = UUID.fromString(parser.nextTextValue());
-        parser.nextToken(); //END_ARRAY
-
-        return Filter.user(userId);
-    }
-
-
-    private String toJson(Filter filter) {
-        try {
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            JsonGenerator writer = jsonFactory.createGenerator(buffer, JsonEncoding.UTF8);
-
-            switchFilter(filter, writer);
-            writer.close();
-
-            writer.flush();
-
-            return buffer.toString();
-        } catch(IOException e) {
-            throw new IllegalStateException("Fail to covert filter to json", e);
-        }
-    }
-
-    private void switchFilter(Filter filter, JsonGenerator writer) throws IOException {
-        switch(filter.getType()) {
-            case OR_ELSE -> toJson((OrElseFilter) filter, writer);
-            case AND -> toJson((AndFilter) filter, writer);
-            case MIN_TAGS -> toJson((MinTagsFilter) filter, writer);
-            case CATEGORY, SHOPS, GRADES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
-            case USER -> toJson((UserFilter) filter, writer);
-        }
-    }
-
-    private void toJson(OrElseFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-
-        writer.writeStringField("type", filter.getType().name());
-
-        writer.writeFieldName("values");
-        writer.writeStartArray();
-        for(Filter f : filter.getOperands()) switchFilter(f, writer);
-        writer.writeEndArray();
-
-        writer.writeEndObject();
-    }
-
-    private void toJson(AndFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-
-        writer.writeStringField("type", filter.getType().name());
-
-        writer.writeFieldName("values");
-        writer.writeStartArray();
-        for(Filter f : filter.getOperands()) switchFilter(f, writer);
-        writer.writeEndArray();
-
-        writer.writeEndObject();
-    }
-
-    private void toJson(AnyFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-
-        writer.writeStringField("type", filter.getType().name());
-
-        writer.writeFieldName("values");
-        writer.writeStartArray();
-        for(String manufacturer : filter.getValues()) writer.writeString(manufacturer);
-        writer.writeEndArray();
-
-        writer.writeEndObject();
-    }
-
-    private void toJson(MinTagsFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-
-        writer.writeStringField("type", filter.getType().name());
-
-        writer.writeFieldName("values");
-        writer.writeStartArray();
-        for(Tag tag : filter.getTags()) writer.writeString(tag.getValue());
-        writer.writeEndArray();
-
-        writer.writeEndObject();
-    }
-
-    private void toJson(UserFilter filter, JsonGenerator writer) throws IOException {
-        writer.writeStartObject();
-
-        writer.writeStringField("type", filter.getType().name());
-
-        writer.writeFieldName("values");
-        writer.writeStartArray();
-        writer.writeString(filter.getUserId().toString());
-        writer.writeEndArray();
-
-        writer.writeEndObject();
     }
 
 

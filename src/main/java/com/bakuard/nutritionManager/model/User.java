@@ -1,9 +1,7 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-
 import com.google.common.hash.Hashing;
 
 import java.nio.charset.StandardCharsets;
@@ -11,6 +9,8 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
+
+import static com.bakuard.nutritionManager.validation.Rule.*;
 
 public class User implements Entity<User> {
 
@@ -30,15 +30,15 @@ public class User implements Entity<User> {
 
     private User(UUID id, String name, String password, String email) {
         Validator.check(
-                Rule.of("User.id").notNull(id),
-                Rule.of("User.name").notNull(name).
-                        and(v -> v.notBlank(name)).
-                        and(v -> v.stringLength(name, 1, 40)),
-                Rule.of("User.password").notNull(password).
-                        and(v -> v.notBlank(password)).
-                        and(v -> v.stringLength(password, 8, 100)),
-                Rule.of("User.email").notNull(email).
-                        and(v -> v.notBlank(email))
+                "User.id", notNull(id),
+                "User.name", notNull(name).
+                        and(() -> notBlank(name)).
+                        and(() -> stringLength(name, 1, 40)),
+                "User.password", notNull(password).
+                        and(() -> notBlank(password)).
+                        and(() -> stringLength(password, 8, 100)),
+                "User.email", notNull(email).
+                        and(() -> notBlank(email))
         );
  
         this.id = id;
@@ -66,10 +66,10 @@ public class User implements Entity<User> {
     }
 
     public void setName(String name) {
-        Validator.check(
-                Rule.of("User.name").notNull(name).
-                        and(v -> v.notBlank(name)).
-                        and(v -> v.stringLength(name, 1, 40))
+        Validator.check("User.name", 
+                notNull(name).
+                        and(() -> notBlank(name)).
+                        and(() -> stringLength(name, 1, 40))
         );
         this.name = name;
     }
@@ -79,10 +79,10 @@ public class User implements Entity<User> {
     }
 
     public void setPassword(String password) {
-        Validator.check(
-                Rule.of("User.password").notNull(password).
-                        and(v -> v.notBlank(password)).
-                        and(v -> v.stringLength(password, 8, 100))
+        Validator.check("User.password", 
+                notNull(password).
+                        and(() -> notBlank(password)).
+                        and(() -> stringLength(password, 8, 100))
         );
         this.passwordHash = calculatePasswordHash(password, salt);
     }
@@ -93,8 +93,7 @@ public class User implements Entity<User> {
 
     public void setEmail(String email) {
         Validator.check(
-                Rule.of("User.email").notNull(email).
-                        and(v -> v.notBlank(email))
+                "User.email", notNull(email).and(() -> notBlank(email))
         );
         this.email = email;
     }
@@ -104,9 +103,7 @@ public class User implements Entity<User> {
     }
 
     public boolean isCorrectPassword(String password) {
-        Validator.check(
-                Rule.of("User.password").notNull(password)
-        );
+        Validator.check("User.password", notNull(password));
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 

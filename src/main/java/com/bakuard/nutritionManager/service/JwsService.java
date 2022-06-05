@@ -23,6 +23,8 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 
+import static com.bakuard.nutritionManager.validation.Rule.*;
+
 public class JwsService {
 
     private static Logger logger = LoggerFactory.getLogger(JwsService.class);
@@ -69,13 +71,13 @@ public class JwsService {
             claims = parseJws(jws, accessKeyPair);
         } catch(JwtException e) {
             throw new ValidateException("Incorrect access jws", e).
-                    addReason(Rule.of("JwsService.parseAccessJws").failure(Constraint.CORRECT_JWS));
+                    addReason(Rule.of("JwsService.parseAccessJws", failure(Constraint.CORRECT_JWS)));
         }
 
         UUID accessJwsId = UUID.fromString(claims.getId());
         if(blackList.inBlackList(accessJwsId)) {
             throw new ValidateException("Incorrect access jws").
-                    addReason(Rule.of("JwsService.parseAccessJws").failure(Constraint.CORRECT_JWS));
+                    addReason(Rule.of("JwsService.parseAccessJws", failure(Constraint.CORRECT_JWS)));
         }
 
         return UUID.fromString(claims.getSubject());
@@ -99,7 +101,7 @@ public class JwsService {
             return claims.get("email", String.class);
         } catch(JwtException e) {
             throw new ValidateException("Incorrect registration jws", e).
-                    addReason(Rule.of("JwsService.parseRegistrationJws").failure(Constraint.CORRECT_JWS));
+                    addReason(Rule.of("JwsService.parseRegistrationJws", failure(Constraint.CORRECT_JWS)));
         }
     }
 
@@ -121,11 +123,11 @@ public class JwsService {
             return claims.get("email", String.class);
         } catch(JwtException e) {
             throw new ValidateException("Incorrect change credential jws", e).
-                    addReason(Rule.of("JwsService.parseChangeCredentialsJws").failure(Constraint.CORRECT_JWS));
+                    addReason(Rule.of("JwsService.parseChangeCredentialsJws", failure(Constraint.CORRECT_JWS)));
         }
     }
 
-    public void invalidateJws(String accessJws) {
+    public UUID invalidateJws(String accessJws) {
         Claims claims = parseJws(accessJws, accessKeyPair);
 
         UUID accessJwsId = UUID.fromString(claims.getId());
@@ -135,6 +137,8 @@ public class JwsService {
                 toLocalDateTime();
 
         blackList.addToBlackList(accessJwsId, expiration);
+
+        return UUID.fromString(claims.getSubject());
     }
 
     @Transactional

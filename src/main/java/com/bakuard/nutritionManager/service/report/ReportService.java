@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.bakuard.nutritionManager.validation.Rule.failure;
+
 public class ReportService {
 
     private List<JasperReport> reportTemplates;
@@ -60,7 +62,7 @@ public class ReportService {
             return JasperExportManager.exportReportToPdf(filledReport);
         } catch(JRException e) {
             throw new ValidateException("Fail to create dish products report", e).
-                    addReason(Rule.of("ReportService.dishReport").failure(Constraint.DOES_NOT_THROW));
+                    addReason(Rule.of("ReportService.dishReport", failure(Constraint.DOES_NOT_THROW)));
         }
     }
 
@@ -78,7 +80,7 @@ public class ReportService {
             return JasperExportManager.exportReportToPdf(filledReport);
         } catch(JRException e) {
             throw new ValidateException("Fail to create menu products report", e).
-                    addReason(Rule.of("ReportService.menuReport").failure(Constraint.DOES_NOT_THROW));
+                    addReason(Rule.of("ReportService.menuReport", failure(Constraint.DOES_NOT_THROW)));
         }
     }
 

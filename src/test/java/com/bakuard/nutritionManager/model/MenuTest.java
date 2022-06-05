@@ -1271,7 +1271,8 @@ class MenuTest {
     public void getProductQuantityForDishes2() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1279,7 +1280,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getProductQuantityForDishes(menuItems, null),
+                () -> menu.getProductQuantityForDishes(productGroup, null),
                 Constraint.NOT_NULL
         );
     }
@@ -1293,7 +1294,8 @@ class MenuTest {
     public void getProductQuantityForDishes3() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1301,7 +1303,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getProductQuantityForDishes(menuItems, new BigDecimal(-10)),
+                () -> menu.getProductQuantityForDishes(productGroup, new BigDecimal(-10)),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -1315,15 +1317,16 @@ class MenuTest {
     public void getProductQuantityForDishes4() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                menuItemProduct(product(user, 3), 0, 0, 0),
-                menuItemProduct(product(user, 3), 0, 1, 13),
-                menuItemProduct(product(user, 3), 1, 2, 7),
-                menuItemProduct(product(user, 3), 2, 1, 2)
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
+                menuItemProduct(product(user, 3), 0, 0, 3),
+                menuItemProduct(product(user, 3), 0, 1, 3),
+                menuItemProduct(product(user, 3), 1, 2, 3),
+                menuItemProduct(product(user, 3), 2, 1, 3)
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getProductQuantityForDishes(menuItems, BigDecimal.ZERO),
+                () -> menu.getProductQuantityForDishes(productGroup, BigDecimal.ZERO),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -1331,8 +1334,8 @@ class MenuTest {
     @Test
     @DisplayName("""
             getProductQuantityForDishes(products, menuNumber):
-             products is empty
-             => return empty Map
+             all arguments is correct
+             => return correct result
             """)
     public void getProductQuantityForDishes5() {
         User user = user(1);
@@ -1363,150 +1366,8 @@ class MenuTest {
                                 BigDecimal.TEN, 2)
                 ).
                 tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of();
-
-        Map<MenuItem, BigDecimal> actual = menu.getProductQuantityForDishes(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getProductQuantityForDishes(products, menuNumber):
-             all products item contain empty Optional
-             => return empty Map
-            """)
-    public void getProductQuantityForDishes6() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                emptyMenuItemProduct(0, 0, 0),
-                emptyMenuItemProduct(0, 1, 13),
-                emptyMenuItemProduct(1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        Map<MenuItem, BigDecimal> actual = menu.getProductQuantityForDishes(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getProductQuantityForDishes(products, menuNumber):
-             some products item contain empty Optional
-             => return correct result (skip item where MenuItemProduct#product() return empty Optional)
-            """)
-    public void getProductQuantityForDishes7() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                menuItemProduct(product(user, 3).setPrice(new BigDecimal(120)),
-                        0, 0, 0),
-                menuItemProduct(product(user, 3).setPrice(new BigDecimal(120)),
-                        0, 1, 13),
-                menuItemProduct(product(user, 3).setPrice(new BigDecimal(120)),
-                        1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        Map<MenuItem, BigDecimal> actual = menu.getProductQuantityForDishes(menuItems, BigDecimal.TEN);
-
-        Map<MenuItem, BigDecimal> expected = Map.of(
-                menu.getItems().get(0), new BigDecimal(350).setScale(conf.getNumberScale(), conf.getRoundingMode()),
-                menu.getItems().get(1), new BigDecimal(100).setScale(conf.getNumberScale(), conf.getRoundingMode())
-        );
-        Assertions.assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("""
-            getProductQuantityForDishes(products, menuNumber):
-             all products item contain product
-             => return correct result
-            """)
-    public void getProductQuantityForDishes8() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3).setPrice(new BigDecimal(120)),
                         0, 0, 0),
                 menuItemProduct(product(user, 3).setPrice(new BigDecimal(120)),
@@ -1517,7 +1378,7 @@ class MenuTest {
                         2, 1, 2)
         );
 
-        Map<MenuItem, BigDecimal> actual = menu.getProductQuantityForDishes(menuItems, BigDecimal.TEN);
+        Map<MenuItem, BigDecimal> actual = menu.getProductQuantityForDishes(productGroup, BigDecimal.TEN);
 
         Map<MenuItem, BigDecimal> expected = Map.of(
                 menu.getItems().get(0), new BigDecimal(350).setScale(conf.getNumberScale(), conf.getRoundingMode()),
@@ -1552,7 +1413,8 @@ class MenuTest {
     public void getNecessaryQuantity2() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1560,7 +1422,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getNecessaryQuantity(menuItems, null),
+                () -> menu.getNecessaryQuantity(productGroup, null),
                 Constraint.NOT_NULL
         );
     }
@@ -1574,7 +1436,8 @@ class MenuTest {
     public void getNecessaryQuantity3() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1582,7 +1445,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getNecessaryQuantity(menuItems, new BigDecimal(-10)),
+                () -> menu.getNecessaryQuantity(productGroup, new BigDecimal(-10)),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -1596,7 +1459,8 @@ class MenuTest {
     public void getNecessaryQuantity4() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1604,7 +1468,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getNecessaryQuantity(menuItems, BigDecimal.ZERO),
+                () -> menu.getNecessaryQuantity(productGroup, BigDecimal.ZERO),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -1612,8 +1476,8 @@ class MenuTest {
     @Test
     @DisplayName("""
             getNecessaryQuantity(products, menuNumber):
-             products is empty
-             => return empty Optional
+             all arguments is correct
+             => return correct result
             """)
     public void getNecessaryQuantity5() {
         User user = user(1);
@@ -1644,150 +1508,15 @@ class MenuTest {
                                 BigDecimal.TEN, 2)
                 ).
                 tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of();
-
-        Optional<BigDecimal> actual = menu.getNecessaryQuantity(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getNecessaryQuantity(products, menuNumber):
-             all products item contain empty Optional
-             => return empty Optional
-            """)
-    public void getNecessaryQuantity6() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                emptyMenuItemProduct(0, 0, 0),
-                emptyMenuItemProduct(0, 1, 13),
-                emptyMenuItemProduct(1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        Optional<BigDecimal> actual = menu.getNecessaryQuantity(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getNecessaryQuantity(products, menuNumber):
-             some products item contain empty Optional
-             => return correct result (skip item where MenuItemProduct#product() return empty Optional)
-            """)
-    public void getNecessaryQuantity7() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                menuItemProduct(product(user, 3), 0, 0, 0),
-                menuItemProduct(product(user, 3), 0, 1, 13),
-                menuItemProduct(product(user, 3), 1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        BigDecimal actual = menu.getNecessaryQuantity(menuItems, BigDecimal.TEN).orElseThrow();
-
-        AssertUtil.assertEquals(new BigDecimal(450), actual);
-    }
-
-    @Test
-    @DisplayName("""
-            getNecessaryQuantity(products, menuNumber):
-             all products item contain product
-             => return correct result
-            """)
-    public void getNecessaryQuantity8() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 0),
                 menuItemProduct(product(user, 3), 0, 1, 13),
                 menuItemProduct(product(user, 3), 1, 2, 7),
                 menuItemProduct(product(user, 3), 2, 1, 2)
         );
 
-        BigDecimal actual = menu.getNecessaryQuantity(menuItems, BigDecimal.TEN).orElseThrow();
+        BigDecimal actual = menu.getNecessaryQuantity(productGroup, BigDecimal.TEN);
 
         AssertUtil.assertEquals(new BigDecimal(550), actual);
     }
@@ -1817,7 +1546,8 @@ class MenuTest {
     public void getLackPackageQuantity2() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1825,7 +1555,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getLackPackageQuantity(menuItems, null),
+                () -> menu.getLackPackageQuantity(productGroup, null),
                 Constraint.NOT_NULL
         );
     }
@@ -1839,7 +1569,8 @@ class MenuTest {
     public void getLackPackageQuantity3() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1847,7 +1578,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getLackPackageQuantity(menuItems, new BigDecimal(-10)),
+                () -> menu.getLackPackageQuantity(productGroup, new BigDecimal(-10)),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -1861,7 +1592,8 @@ class MenuTest {
     public void getLackPackageQuantity4() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -1869,7 +1601,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getLackPackageQuantity(menuItems, BigDecimal.ZERO),
+                () -> menu.getLackPackageQuantity(productGroup, BigDecimal.ZERO),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -1877,8 +1609,8 @@ class MenuTest {
     @Test
     @DisplayName("""
             getLackPackageQuantity(products, menuNumber):
-             products is empty
-             => return empty Optional
+             all arguments is correct
+             => return correct result
             """)
     public void getLackPackageQuantity5() {
         User user = user(1);
@@ -1909,152 +1641,10 @@ class MenuTest {
                                 BigDecimal.TEN, 2)
                 ).
                 tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of();
-
-        Optional<BigDecimal> actual = menu.getLackPackageQuantity(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getLackPackageQuantity(products, menuNumber):
-             all products item contain empty Optional
-             => return empty Optional
-            """)
-    public void getLackPackageQuantity6() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                emptyMenuItemProduct(0, 0, 0),
-                emptyMenuItemProduct(0, 1, 13),
-                emptyMenuItemProduct(1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        Optional<BigDecimal> actual = menu.getLackPackageQuantity(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getLackPackageQuantity(products, menuNumber):
-             some products item contain empty Optional
-             => return correct result (skip item where MenuItemProduct#product() return empty Optional)
-            """)
-    public void getLackPackageQuantity7() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                menuItemProduct(product(user, 3).
-                                setPackingSize(new BigDecimal(13)).
-                                setQuantity(new BigDecimal(16)),
-                        0, 0, 0),
-                menuItemProduct(product(user, 3).
-                                setPackingSize(new BigDecimal(13)).
-                                setQuantity(new BigDecimal(16)),
-                        0, 1, 13),
-                menuItemProduct(product(user, 3).
-                                setPackingSize(new BigDecimal(13)).
-                                setQuantity(new BigDecimal(16)),
-                        1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        BigDecimal actual = menu.getLackPackageQuantity(menuItems, BigDecimal.TEN).orElseThrow();
-
-        AssertUtil.assertEquals(new BigDecimal(34), actual);
-    }
-
-    @Test
-    @DisplayName("""
-            getLackPackageQuantity(products, menuNumber):
-             all products item contain product
-             => return correct result
-            """)
-    public void getLackPackageQuantity8() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3).
+                        setPackingSize(new BigDecimal(13)).
+                        setQuantity(new BigDecimal(16)),
                 menuItemProduct(product(user, 3).
                                 setPackingSize(new BigDecimal(13)).
                                 setQuantity(new BigDecimal(16)),
@@ -2073,7 +1663,7 @@ class MenuTest {
                         2, 1, 2)
         );
 
-        BigDecimal actual = menu.getLackPackageQuantity(menuItems, BigDecimal.TEN).orElseThrow();
+        BigDecimal actual = menu.getLackPackageQuantity(productGroup, BigDecimal.TEN);
 
         AssertUtil.assertEquals(new BigDecimal(42), actual);
     }
@@ -2103,7 +1693,8 @@ class MenuTest {
     public void getLackPackageQuantityPrice2() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -2111,7 +1702,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getLackPackageQuantityPrice(menuItems, null),
+                () -> menu.getLackPackageQuantityPrice(productGroup, null),
                 Constraint.NOT_NULL
         );
     }
@@ -2125,7 +1716,8 @@ class MenuTest {
     public void getLackPackageQuantityPrice3() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -2133,7 +1725,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getLackPackageQuantityPrice(menuItems, new BigDecimal(-10)),
+                () -> menu.getLackPackageQuantityPrice(productGroup, new BigDecimal(-10)),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -2147,7 +1739,8 @@ class MenuTest {
     public void getLackPackageQuantityPrice4() {
         User user = user(1);
         Menu menu = menu(1, user).tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3),
                 menuItemProduct(product(user, 3), 0, 0, 3),
                 menuItemProduct(product(user, 3), 0, 1, 3),
                 menuItemProduct(product(user, 3), 1, 2, 3),
@@ -2155,7 +1748,7 @@ class MenuTest {
         );
 
         AssertUtil.assertValidateException(
-                () -> menu.getLackPackageQuantityPrice(menuItems, BigDecimal.ZERO),
+                () -> menu.getLackPackageQuantityPrice(productGroup, BigDecimal.ZERO),
                 Constraint.POSITIVE_VALUE
         );
     }
@@ -2163,8 +1756,8 @@ class MenuTest {
     @Test
     @DisplayName("""
             getLackPackageQuantityPrice(products, menuNumber):
-             products is empty
-             => return empty Optional
+             all arguments is correct
+             => return correct result
             """)
     public void getLackPackageQuantityPrice5() {
         User user = user(1);
@@ -2195,155 +1788,11 @@ class MenuTest {
                                 BigDecimal.TEN, 2)
                 ).
                 tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of();
-
-        Optional<BigDecimal> actual = menu.getLackPackageQuantityPrice(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getLackPackageQuantityPrice(products, menuNumber):
-             all products item contain empty Optional
-             => return empty Optional
-            """)
-    public void getLackPackageQuantityPrice6() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                emptyMenuItemProduct(0, 0, 0),
-                emptyMenuItemProduct(0, 1, 13),
-                emptyMenuItemProduct(1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        Optional<BigDecimal> actual = menu.getLackPackageQuantityPrice(menuItems, BigDecimal.TEN);
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    @DisplayName("""
-            getLackPackageQuantityPrice(products, menuNumber):
-             some products item contain empty Optional
-             => return correct result (skip item where MenuItemProduct#product() return empty Optional)
-            """)
-    public void getLackPackageQuantityPrice7() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
-                menuItemProduct(product(user, 3).
-                                setPrice(new BigDecimal(56)).
-                                setPackingSize(new BigDecimal(13)).
-                                setQuantity(new BigDecimal(16)),
-                        0, 0, 0),
-                menuItemProduct(product(user, 3).
-                                setPrice(new BigDecimal(56)).
-                                setPackingSize(new BigDecimal(13)).
-                                setQuantity(new BigDecimal(16)),
-                        0, 1, 13),
-                menuItemProduct(product(user, 3).
-                                setPrice(new BigDecimal(56)).
-                                setPackingSize(new BigDecimal(13)).
-                                setQuantity(new BigDecimal(16)),
-                        1, 2, 7),
-                emptyMenuItemProduct(2, 1, 2)
-        );
-
-        BigDecimal actual = menu.getLackPackageQuantityPrice(menuItems, BigDecimal.TEN).orElseThrow();
-
-        AssertUtil.assertEquals(new BigDecimal(1904), actual);
-    }
-
-    @Test
-    @DisplayName("""
-            getLackPackageQuantityPrice(products, menuNumber):
-             all products item contain product
-             => return correct result
-            """)
-    public void getLackPackageQuantityPrice8() {
-        User user = user(1);
-        ProductRepository repository = Mockito.mock(ProductRepository.class);
-        Menu menu = menu(1, user).
-                addItem(
-                        menuItem(
-                                dish(user, 1, repository,
-                                        ingredient(filter(user, 0), new BigDecimal(5), 0),
-                                        ingredient(filter(user, 1), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 2), new BigDecimal(6), 2)),
-                                new BigDecimal(5), 0)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 2, repository,
-                                        ingredient(filter(user, 3), BigDecimal.TEN, 0),
-                                        ingredient(filter(user, 4), new BigDecimal(2), 1),
-                                        ingredient(filter(user, 5), BigDecimal.TEN, 2)),
-                                BigDecimal.ONE, 1)
-                ).
-                addItem(
-                        menuItem(
-                                dish(user, 3, repository,
-                                        ingredient(filter(user, 6), BigDecimal.ONE, 0),
-                                        ingredient(filter(user, 7), BigDecimal.ONE, 1),
-                                        ingredient(filter(user, 8), new BigDecimal(3), 2)),
-                                BigDecimal.TEN, 2)
-                ).
-                tryBuild();
-        List<Menu.MenuItemProduct> menuItems = List.of(
+        Menu.ProductGroup productGroup = productGroup(
+                product(user, 3).
+                        setPrice(new BigDecimal(56)).
+                        setPackingSize(new BigDecimal(13)).
+                        setQuantity(new BigDecimal(16)),
                 menuItemProduct(product(user, 3).
                                 setPrice(new BigDecimal(56)).
                                 setPackingSize(new BigDecimal(13)).
@@ -2366,7 +1815,7 @@ class MenuTest {
                         2, 1, 2)
         );
 
-        BigDecimal actual = menu.getLackPackageQuantityPrice(menuItems, BigDecimal.TEN).orElseThrow();
+        BigDecimal actual = menu.getLackPackageQuantityPrice(productGroup, BigDecimal.TEN);
 
         AssertUtil.assertEquals(new BigDecimal(2352), actual);
     }
@@ -3681,6 +3130,11 @@ class MenuTest {
                 ingredientIndex,
                 productIndex
         );
+    }
+
+    public Menu.ProductGroup productGroup(Product.Builder product,
+                                          Menu.MenuItemProduct... items) {
+        return new Menu.ProductGroup(product.tryBuild(), List.of(items));
     }
 
     private ProductRepository mockProductRepository(Filter filter00, Page<Product> page00,

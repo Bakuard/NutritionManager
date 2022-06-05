@@ -1,8 +1,11 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
+
+import static com.bakuard.nutritionManager.validation.Rule.notBlank;
+import static com.bakuard.nutritionManager.validation.Rule.notNull;
+
 
 /**
  * Теги используются для уточнения пользвателем данных о продуктах, блюдах и меню, а также для последующей
@@ -21,9 +24,7 @@ public class Tag implements Comparable<Tag> {
      *         2. если указанное значение не содержит ни одного отображаемого символа.
      */
     public Tag(String value) {
-        Validator.check(
-                Rule.of("Tag.value").notNull(value).and(r -> r.notBlank(value))
-        );
+        Validator.check("Tag.value", notNull(value).and(() -> notBlank(value)));
 
         this.value = value.trim();
     }

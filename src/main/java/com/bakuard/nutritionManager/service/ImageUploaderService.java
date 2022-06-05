@@ -33,6 +33,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
+import static com.bakuard.nutritionManager.validation.Rule.*;
+
 public class ImageUploaderService implements DisposableBean {
 
     private static Logger logger = LoggerFactory.getLogger(ImageUploaderService.class);
@@ -69,7 +71,7 @@ public class ImageUploaderService implements DisposableBean {
             return uploadImage(userId, image, "productimages");
         } catch(Exception e) {
             throw new ValidateException("Fail to upload product image", e).
-                    addReason(Rule.of("ImageUploaderService.uploadProductImage").failure(Constraint.SUCCESSFUL_UPLOAD));
+                    addReason(Rule.of("ImageUploaderService.uploadProductImage", failure(Constraint.SUCCESSFUL_UPLOAD)));
         }
     }
 
@@ -78,7 +80,7 @@ public class ImageUploaderService implements DisposableBean {
             return uploadImage(userId, image, "dishimages");
         } catch(Exception e) {
             throw new ValidateException("Fail to upload dish image", e).
-                    addReason(Rule.of("ImageUploaderService.uploadDishImage").failure(Constraint.SUCCESSFUL_UPLOAD));
+                    addReason(Rule.of("ImageUploaderService.uploadDishImage", failure(Constraint.SUCCESSFUL_UPLOAD)));
         }
     }
 
@@ -87,19 +89,19 @@ public class ImageUploaderService implements DisposableBean {
             return uploadImage(userId, image, "menuimages");
         } catch(Exception e) {
             throw new ValidateException("Fail to upload menu image", e).
-                    addReason(Rule.of("ImageUploaderService.uploadMenuImage").failure(Constraint.SUCCESSFUL_UPLOAD));
+                    addReason(Rule.of("ImageUploaderService.uploadMenuImage", failure(Constraint.SUCCESSFUL_UPLOAD)));
         }
     }
 
     @Transactional
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24)
     public void removeUnusedImages() throws AmazonServiceException {
-        logger.info("delete unused images");
+        logger.info("find unused images");
 
         List<String> unusedImages = imageRepository.getUnusedImages();
 
         if(!unusedImages.isEmpty()) {
-            logger.debug("There are {} unused images", unusedImages.size());
+            logger.debug("There are {} unused images. Delete them.", unusedImages.size());
 
             DeleteObjectsRequest dor = new DeleteObjectsRequest("nutritionmanagerimages").
                     withKeys(unusedImages.toArray(String[]::new));

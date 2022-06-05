@@ -2,7 +2,6 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.Container;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
@@ -17,6 +16,8 @@ import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static com.bakuard.nutritionManager.validation.Rule.*;
 
 /**
  * Представляет контекстные данные о продукте. Под контекстными здесь подразумевается совокупность
@@ -35,28 +36,6 @@ public class ProductContext {
     private final BigDecimal price;
     private final BigDecimal packingSize;
     private final ImmutableList<Tag> tags;
-    private final AppConfigData config;
-
-    private ProductContext(String category,
-                           String shop,
-                           String grade,
-                           String manufacturer,
-                           String unit,
-                           BigDecimal price,
-                           BigDecimal packingSize,
-                           ImmutableList<Tag> tags,
-                           AppConfigData config) {
-        this.category = category;
-        this.shop = shop;
-        this.grade = grade;
-        this.manufacturer = manufacturer;
-        this.unit = unit;
-        this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.tags = tags;
-        this.hashKey = calculateSha256();
-        this.config = config;
-    }
 
     private ProductContext(String category,
                            String shop,
@@ -70,15 +49,15 @@ public class ProductContext {
         Container<List<Tag>> container = new Container<>();
 
         Validator.check(
-                Rule.of("ProductContext.category").notNull(category).and(r -> r.notBlank(category)),
-                Rule.of("ProductContext.shop").notNull(shop).and(v -> v.notBlank(shop)),
-                Rule.of("ProductContext.grade").notNull(grade).and(v -> v.notBlank(grade)),
-                Rule.of("ProductContext.manufacturer").notNull(manufacturer).and(v -> v.notBlank(manufacturer)),
-                Rule.of("ProductContext.unit").notNull(unit).and(v -> v.notBlank(unit)),
-                Rule.of("ProductContext.price").notNull(price).and(v -> v.notNegative(price)),
-                Rule.of("ProductContext.packingSize").notNull(packingSize).and(v -> v.positiveValue(packingSize)),
-                Rule.of("ProductContext.config").notNull(config),
-                Rule.of("ProductContext.tags").doesNotThrows(tags, Tag::new, container).and(v -> v.notContainsDuplicate(container.get()))
+                "ProductContext.category", notNull(category).and(() -> notBlank(category)),
+                "ProductContext.shop", notNull(shop).and(() -> notBlank(shop)),
+                "ProductContext.grade", notNull(grade).and(() -> notBlank(grade)),
+                "ProductContext.manufacturer", notNull(manufacturer).and(() -> notBlank(manufacturer)),
+                "ProductContext.unit", notNull(unit).and(() -> notBlank(unit)),
+                "ProductContext.price", notNull(price).and(() -> notNegative(price)),
+                "ProductContext.packingSize", notNull(packingSize).and(() -> positiveValue(packingSize)),
+                "ProductContext.config", notNull(config),
+                "ProductContext.tags", doesNotThrows(tags, Tag::new, container).and(() -> notContainsDuplicate(container.get()))
         );
 
         this.category = category;
@@ -90,7 +69,6 @@ public class ProductContext {
         this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
         this.tags = ImmutableList.copyOf(container.get());
         this.hashKey = calculateSha256();
-        this.config = config;
     }
 
     /**

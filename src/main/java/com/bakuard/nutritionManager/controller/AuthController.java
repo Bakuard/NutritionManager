@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.controller;
 
+import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.auth.*;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
@@ -22,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Tag(
         name = "Контроллер аутентификации",
@@ -137,7 +140,7 @@ public class AuthController {
     @PostMapping("/registration")
     public ResponseEntity<SuccessResponse<JwsResponse>> registration(@RequestBody CredentialsForEnterRequest dto,
                                                                      @RequestHeader("Authorization") String registrationJws) {
-        logger.info("registration new user = " + dto.getUserName() + ". registrationJws=" + registrationJws);
+        logger.info("registration new user = " + dto.getUserName());
 
         Pair<String, User> accessJws = authService.registration(registrationJws, dto.getUserName(), dto.getUserPassword());
 
@@ -164,8 +167,7 @@ public class AuthController {
     @PostMapping("/changeCredential")
     public ResponseEntity<SuccessResponse<JwsResponse>> changeCredential(@RequestBody CredentialsForEnterRequest dto,
                                                                          @RequestHeader("Authorization") String changeCredentialsJws) {
-        logger.info("change credentials for user with new name = " + dto.getUserName() +
-                ". changeCredentialsJws=" + changeCredentialsJws);
+        logger.info("change credentials for user with new name = " + dto.getUserName());
 
         Pair<String, User> accessJws = authService.changeCredential(changeCredentialsJws, dto.getUserName(), dto.getUserPassword());
 
@@ -186,12 +188,13 @@ public class AuthController {
     @Transactional
     @PostMapping("/changeLoginAndEmail")
     public ResponseEntity<SuccessResponse<UserResponse>> changeLoginAndEmail(
-            @RequestBody ChangeLoginAndEmailRequest dto,
-            @RequestHeader("Authorization") String accessJws) {
-        logger.info("Change login and email from personal area. Dto = " + dto);
+            @RequestBody ChangeLoginAndEmailRequest dto) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+
+        logger.info("Change login and email from personal area for user = " + userId);
 
         User user = authService.changeLoginAndEmail(
-                accessJws,
+                userId,
                 dto.getUserName(),
                 dto.getUserEmail(),
                 dto.getUserPassword()
@@ -213,12 +216,13 @@ public class AuthController {
     )
     @Transactional
     @PostMapping("/changePassword")
-    public ResponseEntity<SuccessResponse<UserResponse>> changePassword(@RequestBody ChangePasswordRequest dto,
-                                                                        @RequestHeader("Authorization") String accessJws) {
-        logger.info("Change password from personal area. Dto = " + dto);
+    public ResponseEntity<SuccessResponse<UserResponse>> changePassword(@RequestBody ChangePasswordRequest dto) {
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+
+        logger.info("Change password from personal area for user = " + userId);
 
         User user = authService.changePassword(
-                accessJws,
+                userId,
                 dto.getUserCurrentPassword(),
                 dto.getUserNewPassword()
         );
@@ -240,14 +244,16 @@ public class AuthController {
     @Transactional
     @GetMapping("/getUserByJws")
     public ResponseEntity<UserResponse> getUserByJws(@RequestHeader("Authorization") String accessJws) {
-        logger.info("Get user by accessJws");
+        logger.info("Get user by accessJws. Step1 - try parse JWS.");
 
         User user = authService.getUserByJws(accessJws);
+        logger.info("Get user by accessJws. Step2 - return user " + user.getId());
+
         return ResponseEntity.ok(mapper.toUserResponse(user));
     }
 
     @Operation(
-            summary = "Выполняет logout для пользователя определяемого по токену доступа",
+            summary = "Выполняет logout для пользователя определяемого по токену доступа.",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "401",
@@ -259,9 +265,11 @@ public class AuthController {
     @Transactional
     @PostMapping("/logout")
     public ResponseEntity<SuccessResponse<?>> logout(@RequestHeader("Authorization") String accessJws) {
-        logger.info("Logout user by accessJws");
+        logger.info("Logout user by accessJws. Step1 - try parse JWS.");
 
-        authService.logout(accessJws);
+        UUID userId = authService.logout(accessJws);
+        logger.info("Logout user by accessJws. Step2 - logout user " + userId);
+
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.logout", null));
     }
 

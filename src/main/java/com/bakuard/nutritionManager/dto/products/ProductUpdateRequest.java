@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Schema(description = """
@@ -175,12 +176,13 @@ public class ProductUpdateRequest {
         this.imageUrl = imageUrl;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public Optional<List<String>> getTags() {
+        return Optional.ofNullable(tags);
     }
 
-    public void setTags(List<String> tags) {
+    public ProductUpdateRequest setTags(List<String> tags) {
         this.tags = tags;
+        return this;
     }
 
     @Override

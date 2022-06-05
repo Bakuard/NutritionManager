@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Schema(description = """
@@ -82,20 +83,22 @@ public class MenuUpdateRequest {
         this.description = description;
     }
 
-    public List<ItemUpdateRequest> getItems() {
-        return items;
+    public Optional<List<ItemUpdateRequest>> getItems() {
+        return Optional.ofNullable(items);
     }
 
-    public void setItems(List<ItemUpdateRequest> items) {
+    public MenuUpdateRequest setItems(List<ItemUpdateRequest> items) {
         this.items = items;
+        return this;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public Optional<List<String>> getTags() {
+        return Optional.ofNullable(tags);
     }
 
-    public void setTags(List<String> tags) {
+    public MenuUpdateRequest setTags(List<String> tags) {
         this.tags = tags;
+        return this;
     }
 
     @Override
