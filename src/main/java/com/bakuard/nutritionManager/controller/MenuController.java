@@ -135,6 +135,28 @@ public class MenuController {
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.update", response));
     }
 
+    @Operation(summary = "Генерирует новое меню на основе заданных ограничений",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400",
+                            description = """
+                                    Если нарушен хотя бы один из инвариантов связаный с телом запроса или
+                                     невозможно создать меню удовлетворяющее заданным ограничениям.
+                                    """,
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class))),
+                    @ApiResponse(responseCode = "401",
+                            description = "Если передан некорректный токен или токен не указан",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExceptionResponse.class)))
+            }
+    )
+    @Transactional
+    @PutMapping("/generate")
+    public ResponseEntity<SuccessResponse<MenuResponse>> generate(@RequestBody GenerateMenuRequest dto) {
+        return null;
+    }
+
     @Operation(summary = "Удаление меню",
             responses = {
                     @ApiResponse(responseCode = "200"),
