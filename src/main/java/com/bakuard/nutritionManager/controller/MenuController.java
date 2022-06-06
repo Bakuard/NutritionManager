@@ -152,7 +152,7 @@ public class MenuController {
             }
     )
     @Transactional
-    @PutMapping("/generate")
+    @PostMapping("/generate")
     public ResponseEntity<SuccessResponse<MenuResponse>> generate(@RequestBody GenerateMenuRequest dto) {
         return null;
     }
