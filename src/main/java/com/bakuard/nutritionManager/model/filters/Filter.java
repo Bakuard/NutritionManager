@@ -132,11 +132,11 @@ public interface Filter {
     }
 
     public static AnyFilter anyMenu(String menuName, String... other) {
-        return null;
+        return new AnyFilter(toList(menuName, other), 1, Type.MENUS);
     }
 
     public static AnyFilter anyMenu(List<String> menuNames) {
-        return null;
+        return new AnyFilter(menuNames, 1, Type.MENUS);
     }
 
     public static MinTagsFilter minTags(Tag a, Tag... other) {

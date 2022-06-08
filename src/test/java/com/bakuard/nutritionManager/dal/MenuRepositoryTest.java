@@ -1370,6 +1370,69 @@ class MenuRepositoryTest {
 
     @Test
     @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is menuNames
+             => return correct result
+            """)
+    public void getMenus12() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.anyMenu("Menu#0", "Menu#3", "Unknown menu")
+                                )
+                        ).
+                        setPageable(PageableByNumber.of(30, 0)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Page<Menu> expected = PageableByNumber.of(30, 0).
+                createPageMetadata(2, 30).
+                createPage(List.of(menus.get(0), menus.get(3)));
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
+            getMenus(criteria):
+             user have menus,
+             filter is AndFilter - matching exists
+                MinTags - matching exists,
+                Dishes - matching exists,
+                MenuNames - matching exists
+             => return correct result
+            """)
+    public void getMenus13() {
+        User user = createAndSaveUser(1);
+        List<Menu> menus = createAndSaveMenus(user);
+
+        Page<Menu> actual = menuRepository.getMenus(
+                new Criteria().
+                        setFilter(
+                                Filter.and(
+                                        Filter.user(user.getId()),
+                                        Filter.minTags(new Tag("tagB")),
+                                        Filter.anyDish("dish#100"),
+                                        Filter.anyMenu("Menu#3", "Menu#0", "Unknown menu")
+                                )
+                        ).
+                        setPageable(PageableByNumber.of(2, 1)).
+                        setSort(Sort.menuDefaultSort())
+        );
+
+        Page<Menu> expected = PageableByNumber.of(2, 1).
+                createPageMetadata(1, 30).
+                createPage(List.of(menus.get(3)));
+        AssertUtil.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("""
             getTagsNumber(criteria):
              criteria is null
              => exception
