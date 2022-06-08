@@ -25,7 +25,8 @@ public interface Filter {
         INGREDIENTS,
         USER,
         MIN_QUANTITY,
-        DISHES
+        DISHES,
+        MENUS
     }
 
     /**
@@ -128,6 +129,14 @@ public interface Filter {
 
     public static AnyFilter anyDish(List<String> dishNames) {
         return new AnyFilter(dishNames, 1, Type.DISHES);
+    }
+
+    public static AnyFilter anyMenu(String menuName, String... other) {
+        return null;
+    }
+
+    public static AnyFilter anyMenu(List<String> menuNames) {
+        return null;
     }
 
     public static MinTagsFilter minTags(Tag a, Tag... other) {

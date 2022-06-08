@@ -4,10 +4,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Представляет собой набор ограничений используемый при подборе нового меню
- * (подробнее см. {@link MenuGeneratorService#generate(MenuGeneratorInput)}).
+ * (подробнее см. {@link MenuGeneratorService#generate(MenuGeneratorInput, UUID)}).
  */
 public class MenuGeneratorInput {
 

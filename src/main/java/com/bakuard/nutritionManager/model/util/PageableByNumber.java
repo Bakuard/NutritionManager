@@ -100,6 +100,15 @@ public final class PageableByNumber implements Pageable {
     }
 
     /**
+     * Возвращает параметры пагинации для следующей страницы. Возвращаемые параметры получаются путем
+     * увеличения текущего параметра expectedPageNumber на единицу.
+     * @return параметры пагинации для следующей страницы.
+     */
+    public PageableByNumber next() {
+        return PageableByNumber.of(expectedPageSize, expectedPageNumber.add(BigInteger.ONE));
+    }
+
+    /**
      * Возвращает ожидаемый размер страницы, которая будет полученна с помощью данного объекта Pageable.
      * @return ожидаемый размер страницы, которая будет полученна с помощью данного объекта Pageable.
      */

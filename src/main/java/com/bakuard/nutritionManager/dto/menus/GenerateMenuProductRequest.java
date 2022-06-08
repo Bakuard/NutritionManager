@@ -13,7 +13,7 @@ public class GenerateMenuProductRequest {
     @Schema(description = """
             Категория продукта. Ограничения: <br/>
             1. Не может быть null. <br/>
-            2. Должен существовать хотя бы один продукт с указанной категорией. <br/>
+            2. Должно существовать хотя бы одно блюдо, для которого используется этот продукт. <br/>
             """)
     private String productCategory;
     @Schema(description = """

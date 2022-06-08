@@ -5,6 +5,7 @@ import com.bakuard.nutritionManager.dal.impl.*;
 import com.bakuard.nutritionManager.service.*;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 
+import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
 import com.bakuard.nutritionManager.service.report.ReportService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -143,6 +144,11 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public ImageUploaderService imageUploaderService(AppConfigData appConfigData, ImageRepository imageRepository) {
         return new ImageUploaderService(appConfigData, imageRepository);
+    }
+
+    @Bean
+    public MenuGeneratorService menuGeneratorService(DishRepository dishRepository, MenuRepository menuRepository) {
+        return new MenuGeneratorService(dishRepository, menuRepository);
     }
 
     @Bean
