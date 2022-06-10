@@ -147,8 +147,8 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public MenuGeneratorService menuGeneratorService(DishRepository dishRepository, MenuRepository menuRepository) {
-        return new MenuGeneratorService(dishRepository, menuRepository);
+    public MenuGeneratorService menuGeneratorService(AppConfigData appConfigData) {
+        return new MenuGeneratorService(appConfigData);
     }
 
     @Bean

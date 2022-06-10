@@ -4,8 +4,8 @@ import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.model.Dish;
-import com.bakuard.nutritionManager.model.DishIngredient;
 import com.bakuard.nutritionManager.model.Tag;
+import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.AnyFilter;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
@@ -17,7 +17,6 @@ import com.google.common.collect.ImmutableList;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.bakuard.nutritionManager.validation.Rule.*;
 
@@ -50,56 +49,49 @@ public class Input {
      */
     public record DishTagConstraint(Tag dishTag, Relationship relation, BigDecimal quantity) {}
 
-    /**
-     * Данные о кол-во продукта указанной категории необходимого для приготвления одной порции указанного блюда.
-     * @param dish блюдо.
-     * @param productCategory категория продукта.
-     * @param quantity кол-во продукта указанной категории.
-     */
-    public record ProductQuantity(Dish dish, String productCategory, BigDecimal quantity) {}
 
-    /**
-     * Указывает - содержит ли указанное блюдо указанный тег.
-     * @param dish блюдо.
-     * @param tag тег.
-     * @param contain true - если блюдо содержит указанный тег, false - в противном случае.
-     */
-    public record DishTag(Dish dish, Tag tag, boolean contain) {}
+    private record ProductQuantity(Dish dish, String productCategory, BigDecimal quantity) {};
+
+    private record ProductConstraintRaw(String category, String relation, BigDecimal quantity) {}
+
+    private record DishTagConstraintRaw(String dishTag, String relation, BigDecimal quantity) {}
 
 
     private ImmutableList<DishMinPrice> dishMinPrices;
     private ImmutableList<ProductConstraint> productConstraints;
     private ImmutableList<DishTagConstraint> dishTagConstraints;
+
     private ImmutableList<ProductQuantity> productQuantities;
-    private ImmutableList<DishTag> dishTags;
     private BigDecimal minServingNumber;
     private BigDecimal maxPrice;
     private String generatedMenuName;
+    private User user;
 
     private Input(List<ProductConstraintRaw> productConstraints,
-                  List<DishConstraintRaw> dishTagConstraints,
+                  List<DishTagConstraintRaw> dishTagConstraints,
                   int minMealsNumber,
                   BigDecimal servingNumberPerMeal,
                   BigDecimal maxPrice,
                   String generatedMenuName,
                   DishRepository dishRepository,
                   MenuRepository menuRepository,
-                  UUID userId) {
+                  User user) {
         Validator.check(
                 "Input.dishRepository", notNull(dishRepository),
                 "Input.menuRepository", notNull(menuRepository),
-                "Input.userId", notNull(userId)
+                "Input.userId", notNull(user)
         );
 
-        dishMinPrices = ImmutableList.copyOf(getAllUserDishes(userId, dishRepository));
+        this.dishMinPrices = ImmutableList.copyOf(getAllDishes(user.getId(), dishRepository));
         Validator.check("Input.allUserDishes", notEmpty(dishMinPrices));
 
-        Set<Tag> allTags = getAllDishesTag(dishMinPrices);
-        Set<String> allProductCategories = getAllProductCategories(dishMinPrices);
+        List<Tag> allTags = getAllDishesTag(dishMinPrices);
+        List<String> allProductCategories = getAllProductCategories(dishMinPrices);
 
         Validator.check(
                 "Input.generatedMenuName", notNull(generatedMenuName).
-                        and(() -> isTrue(menuRepository.getMenusNumber(menuByName(userId, generatedMenuName)) == 0)),
+                        and(() -> isTrue(menuRepository.getMenusNumber(
+                                menuByName(user.getId(), generatedMenuName)) == 0)),
                 "Input.maxPrice", notNull(maxPrice).
                         and(() -> notNegative(maxPrice)),
                 "Input.minMeals", notNull(minMealsNumber).
@@ -128,26 +120,35 @@ public class Input {
 
         this.generatedMenuName = generatedMenuName;
         this.maxPrice = maxPrice;
-        minServingNumber = servingNumberPerMeal.add(BigDecimal.valueOf(minMealsNumber));
-        this.productConstraints = productConstraints.stream().
-                map(pc -> new Input.ProductConstraint(pc.category(), toRelation(pc.relation()), pc.quantity())).
-                collect(ImmutableList.toImmutableList());
-        this.dishTagConstraints = dishTagConstraints.stream().
-                map(dtc -> new Input.DishTagConstraint(new Tag(dtc.dishTag()), toRelation(dtc.dishTag()), dtc.quantity())).
-                collect(ImmutableList.toImmutableList());
-
+        this.minServingNumber = servingNumberPerMeal.add(BigDecimal.valueOf(minMealsNumber));
+        this.dishTagConstraints = getAllDishTagConstraints(dishTagConstraints, allTags);
+        this.productQuantities = getProductQuantities(allProductCategories, dishMinPrices);
+        this.productConstraints = getAllProductConstraints(productConstraints, allProductCategories);
+        this.user = user;
     }
 
-    public ImmutableList<DishMinPrice> getDishMinPrices() {
+    public ImmutableList<DishMinPrice> getAllDishMinPrices() {
         return dishMinPrices;
     }
 
-    public ImmutableList<ProductConstraint> getProductConstraints() {
+    public ImmutableList<ProductConstraint> getConstraintsByAllProducts() {
         return productConstraints;
     }
 
-    public ImmutableList<DishTagConstraint> getDishTagConstraints() {
+    public ImmutableList<DishTagConstraint> getConstraintsByAllDishTags() {
         return dishTagConstraints;
+    }
+
+    public BigDecimal getQuantity(Dish dish, String productCategory) {
+        return productQuantities.stream().
+                filter(pq -> pq.dish().equals(dish) && pq.productCategory().equals(productCategory)).
+                findFirst().
+                map(ProductQuantity::quantity).
+                orElse(BigDecimal.ZERO);
+    }
+
+    public boolean hasTag(Dish dish, Tag tag) {
+        return dish.contains(tag);
     }
 
     public BigDecimal getMinServingNumber() {
@@ -162,6 +163,10 @@ public class Input {
         return generatedMenuName;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -170,15 +175,17 @@ public class Input {
         return dishMinPrices.equals(input.dishMinPrices) &&
                 productConstraints.equals(input.productConstraints) &&
                 dishTagConstraints.equals(input.dishTagConstraints) &&
+                productQuantities.equals(input.productQuantities) &&
                 minServingNumber.equals(input.minServingNumber) &&
                 maxPrice.equals(input.maxPrice) &&
-                generatedMenuName.equals(input.generatedMenuName);
+                generatedMenuName.equals(input.generatedMenuName)
+                && user.equals(input.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dishMinPrices, productConstraints, dishTagConstraints,
-                minServingNumber, maxPrice, generatedMenuName);
+        return Objects.hash(dishMinPrices, productConstraints, dishTagConstraints, productQuantities,
+                minServingNumber, maxPrice, generatedMenuName, user);
     }
 
     @Override
@@ -187,14 +194,16 @@ public class Input {
                 "dishMinPrices=" + dishMinPrices +
                 ", productConstraints=" + productConstraints +
                 ", dishTagConstraints=" + dishTagConstraints +
+                ", productQuantities=" + productQuantities +
                 ", minServingNumber=" + minServingNumber +
                 ", maxPrice=" + maxPrice +
                 ", generatedMenuName='" + generatedMenuName + '\'' +
+                ", user=" + user +
                 '}';
     }
 
-    
-    private List<DishMinPrice> getAllUserDishes(UUID userId, DishRepository dishRepository) {
+
+    private List<DishMinPrice> getAllDishes(UUID userId, DishRepository dishRepository) {
         List<DishMinPrice> result = new ArrayList<>();
 
         PageableByNumber pageable = PageableByNumber.of(30, 0);
@@ -220,21 +229,87 @@ public class Input {
         return result;
     }
 
-    private Set<DishTag> getAllDishesTag(List<DishMinPrice> dishMinPrices) {
+    private List<Tag> getAllDishesTag(List<DishMinPrice> dishMinPrices) {
         return dishMinPrices.stream().
-                flatMap(
-                        dmp -> dmp.dish().getTags().stream().
-                                map(t -> new DishTag(dmp.dish(), t))
-                ).
+                flatMap(dmp -> dmp.dish().getTags().stream()).
+                distinct().
+                toList();
     }
 
-    private Set<String> getAllProductCategories(List<DishMinPrice> dishMinPrices) {
+    private ImmutableList<DishTagConstraint> getAllDishTagConstraints(List<DishTagConstraintRaw> tagConstraints,
+                                                                      List<Tag> allTags) {
+        List<DishTagConstraint> result = new ArrayList<>();
+
+        for(Tag tag : allTags) {
+            List<DishTagConstraintRaw> match = tagConstraints.stream().
+                    filter(dtc -> dtc.dishTag().equals(tag.getValue())).
+                    toList();
+            if(match.isEmpty()) {
+                result.add(new DishTagConstraint(tag, Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO));
+            } else {
+                match.forEach(dtc ->
+                        result.add(new DishTagConstraint(tag, toRelation(dtc.relation()), dtc.quantity()))
+                );
+            }
+        }
+
+        return ImmutableList.copyOf(result);
+    }
+
+    private List<String> getAllProductCategories(List<DishMinPrice> dishMinPrices) {
         return dishMinPrices.stream().
                 flatMap(dmp -> dmp.dish().getIngredients().stream()).
                 map(ingredient -> (AnyFilter)ingredient.getFilter().findAny(Filter.Type.CATEGORY)).
                 filter(Objects::nonNull).
-                flatMap(filter -> filter.getValues().stream()).
-                collect(Collectors.toSet());
+                map(filter -> filter.getValues().get(0)).
+                distinct().
+                toList();
+    }
+
+    private ImmutableList<ProductQuantity> getProductQuantities(List<String> allProductCategories,
+                                                                List<DishMinPrice> dishMinPrices) {
+        List<ProductQuantity> result = new ArrayList<>();
+
+        for(String category : allProductCategories) {
+            for(DishMinPrice minPrice : dishMinPrices) {
+                ProductQuantity productQuantity = minPrice.dish().getIngredients().stream().
+                        filter(ingredient -> {
+                            AnyFilter filter = ingredient.getFilter().findAny(Filter.Type.CATEGORY);
+                            return filter != null && filter.getValues().get(0).equals(category);
+                        }).
+                        findFirst().
+                        map(ingredient ->
+                                new ProductQuantity(minPrice.dish(),
+                                        category,
+                                        ingredient.getNecessaryQuantity(BigDecimal.ONE))
+                        ).
+                        orElse(new ProductQuantity(minPrice.dish(), category, BigDecimal.ZERO));
+
+                result.add(productQuantity);
+            }
+        }
+
+        return ImmutableList.copyOf(result);
+    }
+
+    private ImmutableList<ProductConstraint> getAllProductConstraints(List<ProductConstraintRaw> productConstraints,
+                                                                      List<String> allProductCategories) {
+        List<ProductConstraint> result = new ArrayList<>();
+
+        for(String category : allProductCategories) {
+            List<ProductConstraintRaw> match = productConstraints.stream().
+                    filter(pcr -> pcr.category().equals(category)).
+                    toList();
+            if(match.isEmpty()) {
+                result.add(new ProductConstraint(category, Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO));
+            } else {
+                match.forEach(pcr ->
+                        result.add(new ProductConstraint(category, toRelation(pcr.relation()), pcr.quantity()))
+                );
+            }
+        }
+
+        return ImmutableList.copyOf(result);
     }
 
     private Criteria menuByName(UUID userId, String menuName) {
@@ -256,19 +331,15 @@ public class Input {
     }
 
 
-    private record ProductConstraintRaw(String category, String relation, BigDecimal quantity) {}
-
-    private record DishConstraintRaw(String dishTag, String relation, BigDecimal quantity) {}
-
     public static class Builder {
 
-        private UUID userId;
+        private User user;
         private String generatedMenuName;
         private BigDecimal maxPrice;
         private int minMealsNumber;
         private BigDecimal servingNumberPerMeal;
         private final List<ProductConstraintRaw> productConstraints;
-        private final List<DishConstraintRaw> dishConstraints;
+        private final List<DishTagConstraintRaw> dishConstraints;
 
         public Builder() {
             productConstraints = new ArrayList<>();
@@ -276,12 +347,12 @@ public class Input {
         }
 
         /**
-         * Устанавливает идентификатор пользователя из блюд которого будет генерирвоаться новое меню.
-         * @param userId идентификатор пользователя.
+         * Устанавливает пользователя из блюд которого будет генерирвоаться новое меню.
+         * @param user пользователь.
          * @return ссылку на этот же объект.
          */
-        public Builder setUserId(UUID userId) {
-            this.userId = userId;
+        public Builder setUser(User user) {
+            this.user = user;
             return this;
         }
 
@@ -340,7 +411,7 @@ public class Input {
          * @return ссылку на этот же объект.
          */
         public Builder addDishConstraint(String dishTag, String relation, BigDecimal quantity) {
-            dishConstraints.add(new DishConstraintRaw(dishTag, relation, quantity));
+            dishConstraints.add(new DishTagConstraintRaw(dishTag, relation, quantity));
             return this;
         }
 
@@ -387,7 +458,7 @@ public class Input {
          *         20. Если у пользователя нет ни одного блюда. <br/>
          *         21. Если у всем ингредиентам всех блюд пользователя не соответствует ин один продукт. <br/>
          *         23. Если невозможно подобрать меню с заданными ограничениями. <br/>
-         *         24. Если userId равен null. <br/>
+         *         24. Если user равен null. <br/>
          *         25. Если dishRepository равен null. <br/>
          *         26. Если menuRepository равен null. <br/>
          */
@@ -402,7 +473,7 @@ public class Input {
                     generatedMenuName,
                     dishRepository,
                     menuRepository,
-                    userId
+                    user
             );
         }
 
