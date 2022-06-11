@@ -79,7 +79,7 @@ public class Input {
         Validator.check(
                 "Input.dishRepository", notNull(dishRepository),
                 "Input.menuRepository", notNull(menuRepository),
-                "Input.userId", notNull(user)
+                "Input.user", notNull(user)
         );
 
         this.dishMinPrices = ImmutableList.copyOf(getAllDishes(user.getId(), dishRepository));
@@ -340,6 +340,8 @@ public class Input {
         private BigDecimal servingNumberPerMeal;
         private final List<ProductConstraintRaw> productConstraints;
         private final List<DishTagConstraintRaw> dishConstraints;
+        private DishRepository dishRepository;
+        private MenuRepository menuRepository;
 
         public Builder() {
             productConstraints = new ArrayList<>();
@@ -416,9 +418,27 @@ public class Input {
         }
 
         /**
-         * Создает и возвращает набор входных данных для генерации нового меню.
+         * Устанавливает репозиторий блюд.
          * @param dishRepository репозиторий блюд.
+         * @return ссылку на этот же объект.
+         */
+        public Builder setDishRepository(DishRepository dishRepository) {
+            this.dishRepository = dishRepository;
+            return this;
+        }
+
+        /**
+         * Устанавливает репозиторий меню.
          * @param menuRepository репозиторий меню.
+         * @return ссылку на этот же объект.
+         */
+        public Builder setMenuRepository(MenuRepository menuRepository) {
+            this.menuRepository = menuRepository;
+            return this;
+        }
+
+        /**
+         * Создает и возвращает набор входных данных для генерации нового меню.
          * @return новое меню.
          * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
          *         1. Если generatedMenuName является null. <br/>
@@ -462,8 +482,7 @@ public class Input {
          *         25. Если dishRepository равен null. <br/>
          *         26. Если menuRepository равен null. <br/>
          */
-        public Input build(DishRepository dishRepository,
-                           MenuRepository menuRepository) {
+        public Input build() {
             return new Input(
                     productConstraints,
                     dishConstraints,
