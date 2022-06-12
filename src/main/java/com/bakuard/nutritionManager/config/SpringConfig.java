@@ -152,7 +152,7 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    MultipartConfigElement multipartConfigElement() {
+    public MultipartConfigElement multipartConfigElement() {
         MultipartConfigFactory factory = new MultipartConfigFactory();
         factory.setMaxFileSize(DataSize.ofKilobytes(250));
         factory.setMaxRequestSize(DataSize.ofKilobytes(250));
