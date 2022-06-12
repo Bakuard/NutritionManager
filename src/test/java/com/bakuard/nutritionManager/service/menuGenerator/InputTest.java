@@ -6,6 +6,7 @@ import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dal.ProductRepository;
+import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
@@ -13,18 +14,12 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 class InputTest {
 
@@ -33,6 +28,9 @@ class InputTest {
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;
+    private List<Product> products;
+    private List<Dish> dishes;
+    private List<Menu> menus;
     private User user;
 
     @BeforeAll
@@ -51,13 +49,13 @@ class InputTest {
     public void beforeEach() {
         user = user(1);
 
-        List<Product> products = products(user);
+        products = products(user);
         productRepository = mockProductRepository(user, products);
 
-        List<Dish> dishes = dishes(user, productRepository);
+        dishes = dishes(user, productRepository);
         dishRepository = mockDishRepository(user, dishes);
 
-        List<Menu> menus = menus(user, dishes);
+        menus = menus(user, dishes);
         menuRepository = mockMenuRepository(user, menus);
     }
 
@@ -89,7 +87,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.user[NOT_NULL]",
                 Constraint.NOT_NULL
         );
@@ -123,7 +121,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.dishRepository[NOT_NULL]",
                 Constraint.NOT_NULL
         );
@@ -157,7 +155,7 @@ class InputTest {
                 setMenuRepository(null);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.menuRepository[NOT_NULL]",
                 Constraint.NOT_NULL
         );
@@ -191,7 +189,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.generatedMenuName[NOT_NULL]",
                 Constraint.NOT_NULL
         );
@@ -225,7 +223,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.generatedMenuName[IS_TRUE]",
                 Constraint.IS_TRUE
         );
@@ -259,7 +257,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.maxPrice[NOT_NULL]",
                 Constraint.NOT_NULL
         );
@@ -293,7 +291,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.maxPrice[NOT_NEGATIVE_VALUE]",
                 Constraint.NOT_NEGATIVE_VALUE
         );
@@ -327,7 +325,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.minMeals[POSITIVE_VALUE]",
                 Constraint.POSITIVE_VALUE
         );
@@ -361,7 +359,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.servingNumberPerMeal[NOT_NULL]",
                 Constraint.NOT_NULL
         );
@@ -395,7 +393,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.product.category[NOT_NULL]", Constraint.NOT_NULL),
                 new Pair<>("Input.products[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -429,7 +427,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.product.category[ANY_MATCH]", Constraint.ANY_MATCH),
                 new Pair<>("Input.products[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -463,7 +461,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.product.condition[NOT_NULL]", Constraint.NOT_NULL),
                 new Pair<>("Input.products[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -497,7 +495,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.product.condition[ANY_MATCH]", Constraint.ANY_MATCH),
                 new Pair<>("Input.products[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -531,7 +529,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.product.quantity[NOT_NULL]", Constraint.NOT_NULL),
                 new Pair<>("Input.products[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -565,7 +563,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.product.quantity[NOT_NEGATIVE_VALUE]", Constraint.NOT_NEGATIVE_VALUE),
                 new Pair<>("Input.products[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -599,7 +597,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.dish.dishTag[NOT_NULL]", Constraint.NOT_NULL),
                 new Pair<>("Input.dishes[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -633,7 +631,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.dish.dishTag[ANY_MATCH]", Constraint.ANY_MATCH),
                 new Pair<>("Input.dishes[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -667,7 +665,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.dish.condition[NOT_NULL]", Constraint.NOT_NULL),
                 new Pair<>("Input.dishes[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -701,7 +699,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.dish.condition[ANY_MATCH]", Constraint.ANY_MATCH),
                 new Pair<>("Input.dishes[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -735,7 +733,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.dish.quantity[NOT_NULL]", Constraint.NOT_NULL),
                 new Pair<>("Input.dishes[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -769,7 +767,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 new Pair<>("Input.dish.quantity[NOT_NEGATIVE_VALUE]", Constraint.NOT_NEGATIVE_VALUE),
                 new Pair<>("Input.dishes[DOES_NOT_THROW]", Constraint.DOES_NOT_THROW)
         );
@@ -803,7 +801,7 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.allUserDishes[NOT_EMPTY_COLLECTION]", Constraint.NOT_EMPTY_COLLECTION
         );
     }
@@ -842,9 +840,400 @@ class InputTest {
                 setMenuRepository(menuRepository);
 
         AssertUtil.assertValidateException(
-                builder::build,
+                builder::tryBuild,
                 "Input.allUserDishes[NOT_EMPTY_COLLECTION]", Constraint.NOT_EMPTY_COLLECTION
         );
+    }
+
+    @Test
+    @DisplayName("""
+            getMinServingNumber():
+             => return correct result
+            """)
+    public void getMinServingNumber1() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        AssertUtil.assertEquals(new BigDecimal(30), input.getMinServingNumber());
+    }
+
+    @Test
+    @DisplayName("""
+            hasTag(dish, tag):
+             dish doesn't contain tag
+             => return false
+            """)
+    public void hasTag1() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Assertions.assertFalse(input.hasTag(dishes.get(0), new Tag("закуска")));
+    }
+
+    @Test
+    @DisplayName("""
+            hasTag(dish, tag):
+             dish contains tag
+             => return true
+            """)
+    public void hasTag2() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Assertions.assertTrue(input.hasTag(dishes.get(0), new Tag("жаренное")));
+    }
+
+    @Test
+    @DisplayName("""
+            getQuantity(dish, productCategory):
+             productCategory used for dish
+             => return correct result (more then 0)
+            """)
+    public void getQuantity1() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Assertions.assertAll(
+                () -> AssertUtil.assertEquals(new BigDecimal("0.03"),
+                        input.getQuantity(dishes.get(0), "соль")),
+                () -> AssertUtil.assertEquals(new BigDecimal("0.5"),
+                        input.getQuantity(dishes.get(0), "Картофель")),
+                () -> AssertUtil.assertEquals(new BigDecimal("0.2"),
+                        input.getQuantity(dishes.get(0), "Растительное масло")),
+
+                () -> AssertUtil.assertEquals(new BigDecimal("2"),
+                        input.getQuantity(dishes.get(1), "Яйца")),
+                () -> AssertUtil.assertEquals(new BigDecimal("0.1"),
+                        input.getQuantity(dishes.get(1), "Крахмал")),
+                () -> AssertUtil.assertEquals(new BigDecimal("0.35"),
+                        input.getQuantity(dishes.get(1), "Растительное масло")),
+                () -> AssertUtil.assertEquals(new BigDecimal("4"),
+                        input.getQuantity(dishes.get(1), "Лук")),
+                () -> AssertUtil.assertEquals(new BigDecimal("0.06"),
+                        input.getQuantity(dishes.get(1), "соль")),
+
+                () -> AssertUtil.assertEquals(new BigDecimal("0.03"),
+                        input.getQuantity(dishes.get(2), "соль")),
+                () -> AssertUtil.assertEquals(new BigDecimal("0.1"),
+                        input.getQuantity(dishes.get(2), "Крахмал")),
+                () -> AssertUtil.assertEquals(new BigDecimal("0.1"),
+                        input.getQuantity(dishes.get(2), "Растительное масло")),
+                () -> AssertUtil.assertEquals(new BigDecimal("4"),
+                        input.getQuantity(dishes.get(2), "Лук")),
+                () -> AssertUtil.assertEquals(new BigDecimal("1"),
+                        input.getQuantity(dishes.get(2), "Хлеб")),
+                () -> AssertUtil.assertEquals(new BigDecimal("1"),
+                        input.getQuantity(dishes.get(2), "Масло"))
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getQuantity(dish, productCategory):
+             productCategory isn't used for dish
+             => return 0
+            """)
+    public void getQuantity2() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Assertions.assertAll(
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(0), "Яйца")),
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(0), "Крахмал")),
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(0), "Лук")),
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(0), "Хлеб")),
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(0), "Масло")),
+
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(1), "Картофель")),
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(1), "Хлеб")),
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(1), "Масло")),
+
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(2), "Картофель")),
+                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
+                        input.getQuantity(dishes.get(2), "Яйца"))
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            getConstraintsByAllDishTags():
+             all tags have constraints
+             => return correct result
+            """)
+    public void getConstraintsByAllDishTags1() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", new BigDecimal(2)).
+                addDishConstraint("закуска", "greaterOrEqual", new BigDecimal(5)).
+                addDishConstraint("суп", "greaterOrEqual", new BigDecimal(8)).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        List<Input.DishTagConstraint> expected = List.of(
+                tagConstraint("жаренное", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                tagConstraint("закуска", Relationship.GREATER_OR_EQUAL, new BigDecimal(5)),
+                tagConstraint("суп", Relationship.GREATER_OR_EQUAL, new BigDecimal(8))
+        );
+        Assertions.assertEquals(expected, input.getConstraintsByAllDishTags());
+    }
+
+    @Test
+    @DisplayName("""
+            getConstraintsByAllDishTags():
+             some tags haven't constraints
+             => return correct result
+            """)
+    public void getConstraintsByAllDishTags2() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", new BigDecimal(2)).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        List<Input.DishTagConstraint> expected = List.of(
+                tagConstraint("жаренное", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                tagConstraint("закуска", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                tagConstraint("суп", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO)
+        );
+        Assertions.assertEquals(expected, input.getConstraintsByAllDishTags());
+    }
+
+    @Test
+    @DisplayName("""
+            getConstraintsByAllProducts():
+             all product categories have constraints
+             => return correct result
+            """)
+    public void getConstraintsByAllProducts1() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", new BigDecimal(2)).
+                addDishConstraint("закуска", "greaterOrEqual", new BigDecimal(5)).
+                addDishConstraint("суп", "greaterOrEqual", new BigDecimal(8)).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Set<Input.ProductConstraint> expected = Set.of(
+                productConstraint("соль", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                productConstraint("Картофель", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                productConstraint("Растительное масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ONE),
+                productConstraint("Крахмал", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                productConstraint("Лук", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                productConstraint("Хлеб", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                productConstraint("Масло", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                productConstraint("Яйца", Relationship.GREATER_OR_EQUAL,new BigDecimal(3))
+        );
+        Assertions.assertEquals(expected, new HashSet<>(input.getConstraintsByAllProducts()));
+    }
+
+    @Test
+    @DisplayName("""
+            getConstraintsByAllProducts():
+            some product categories haven't constraints
+             => return correct result
+            """)
+    public void getConstraintsByAllProducts2() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("жаренное", "greaterOrEqual", new BigDecimal(2)).
+                addDishConstraint("закуска", "greaterOrEqual", new BigDecimal(5)).
+                addDishConstraint("суп", "greaterOrEqual", new BigDecimal(8)).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Set<Input.ProductConstraint> expected = Set.of(
+                productConstraint("соль", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                productConstraint("Картофель", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                productConstraint("Растительное масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ONE),
+                productConstraint("Крахмал", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                productConstraint("Лук", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                productConstraint("Хлеб", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                productConstraint("Масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                productConstraint("Яйца", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO)
+        );
+        Assertions.assertEquals(expected, new HashSet<>(input.getConstraintsByAllProducts()));
+    }
+
+    @Test
+    @DisplayName("""
+            getAllDishMinPrices():
+             => return correct result
+            """)
+    public void getAllDishMinPrices1() {
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.TEN).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", new BigDecimal(2)).
+                addDishConstraint("закуска", "greaterOrEqual", new BigDecimal(5)).
+                addDishConstraint("суп", "greaterOrEqual", new BigDecimal(8)).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Set<Input.DishMinPrice> expected = Set.of(
+                dishMinPrice(dishes.get(0), new BigDecimal("227")),
+                dishMinPrice(dishes.get(1), new BigDecimal("444")),
+                dishMinPrice(dishes.get(2), new BigDecimal("748"))
+        );
+        Assertions.assertEquals(expected, new HashSet<>(input.getAllDishMinPrices()));
     }
 
 
@@ -1135,7 +1524,7 @@ class InputTest {
 
         result.add(
                 new Dish.Builder().
-                        setId(toUUID(2)).
+                        setId(toUUID(3)).
                         setUser(user).
                         setName("Луковый суп").
                         setServingSize(new BigDecimal("0.5")).
@@ -1377,6 +1766,18 @@ class InputTest {
                 setPageable(PageableByNumber.of(30, 0)).
                 setFilter(filter).
                 setSort(Sort.dishDefaultSort());
+    }
+
+    private Input.DishTagConstraint tagConstraint(String dishTag, Relationship relation, BigDecimal quantity) {
+        return new Input.DishTagConstraint(new Tag(dishTag), relation, quantity);
+    }
+
+    private Input.ProductConstraint productConstraint(String productCategory, Relationship relation, BigDecimal quantity) {
+        return new Input.ProductConstraint(productCategory, relation, quantity);
+    }
+
+    private Input.DishMinPrice dishMinPrice(Dish dish, BigDecimal minPrice) {
+        return new Input.DishMinPrice(dish, minPrice.setScale(conf.getNumberScale(), conf.getRoundingMode()));
     }
 
 }

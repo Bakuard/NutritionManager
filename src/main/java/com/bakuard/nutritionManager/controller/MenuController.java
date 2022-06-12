@@ -9,7 +9,10 @@ import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.model.Menu;
+import com.bakuard.nutritionManager.model.filters.Filter;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
+import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.service.ImageUploaderService;
 import com.bakuard.nutritionManager.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -154,7 +157,22 @@ public class MenuController {
     @Transactional
     @PostMapping("/generate")
     public ResponseEntity<SuccessResponse<MenuResponse>> generate(@RequestBody GenerateMenuRequest dto) {
-        return null;
+        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        logger.info("Generate menu for user={}. dto={}", userId, dto);
+
+        return ResponseEntity.ok(
+                mapper.toSuccessResponse(
+                        "menu.generate",
+                        mapper.toMenuResponse(
+                                repository.getMenus(
+                                        new Criteria().
+                                                setFilter(Filter.user(userId)).
+                                                setPageable(PageableByNumber.of(30, 0)).
+                                                setSort(Sort.dishDefaultSort())
+                                ).getContent().get(0)
+                        )
+                )
+        );
     }
 
     @Operation(summary = "Удаление меню",

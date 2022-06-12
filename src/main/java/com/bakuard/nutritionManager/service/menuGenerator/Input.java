@@ -120,25 +120,48 @@ public class Input {
 
         this.generatedMenuName = generatedMenuName;
         this.maxPrice = maxPrice;
-        this.minServingNumber = servingNumberPerMeal.add(BigDecimal.valueOf(minMealsNumber));
+        this.minServingNumber = servingNumberPerMeal.multiply(BigDecimal.valueOf(minMealsNumber));
         this.dishTagConstraints = getAllDishTagConstraints(dishTagConstraints, allTags);
         this.productQuantities = getProductQuantities(allProductCategories, dishMinPrices);
         this.productConstraints = getAllProductConstraints(productConstraints, allProductCategories);
         this.user = user;
     }
 
+    /**
+     * Возвращает данные о минимальной стоимости для каждого блюда пользователя.
+     * @return данные о минимальной стоимости для каждого блюда пользователя.
+     */
     public ImmutableList<DishMinPrice> getAllDishMinPrices() {
         return dishMinPrices;
     }
 
+    /**
+     * Возвращает ограничения на общее кол-во продуктов определенных категорий. Если при создании данного
+     * объекта для некоторых категорий продуктов испольуземых в хотя бы одном из блюд не было задано ограничение,
+     * то для данной категории продукта по умолчанию будет добавленно следующее ограничение: кол-во данного тега >= 0
+     * @return список ограничений на общее кол-во продуктов определенных категорий.
+     */
     public ImmutableList<ProductConstraint> getConstraintsByAllProducts() {
         return productConstraints;
     }
 
+    /**
+     * Возвращает ограничения на кол-во блюд с определенным тегом. Если при создании данного объекта для
+     * некоторого тега не было задано ограничение, то для данного тега по умолчанию будет добавленно следующее
+     * ограничение: кол-во данного тега >= 0
+     * @return список ограничений на кол-во блюд с определенным тегом.
+     */
     public ImmutableList<DishTagConstraint> getConstraintsByAllDishTags() {
         return dishTagConstraints;
     }
 
+    /**
+     * Возвращает кол-во продукта указанной категории необходимого для приготовления одной порции
+     * указанного блюда. Если для указанного блюда не нужны продукты указанной категории - возвращает 0.
+     * @param dish блюдо.
+     * @param productCategory категория продуктов.
+     * @return кол-во продукта указанной категории.
+     */
     public BigDecimal getQuantity(Dish dish, String productCategory) {
         return productQuantities.stream().
                 filter(pq -> pq.dish().equals(dish) && pq.productCategory().equals(productCategory)).
@@ -147,22 +170,46 @@ public class Input {
                 orElse(BigDecimal.ZERO);
     }
 
+    /**
+     * Проверяет - содержит ли указанное блюдо указанный тег. Если это так - возвращает true, иначе - false.
+     * @param dish блюдо.
+     * @param tag тег.
+     * @return true - если указанное блюдо содержит указанный тег, иначе - false.
+     */
     public boolean hasTag(Dish dish, Tag tag) {
         return dish.contains(tag);
     }
 
+    /**
+     * Возвращает минимально необходимое общее кол-во всех блюд для генерируемого меню. Расчитывается, как
+     * произведение минимально необходимого кол-ва приемов пищи на одного человека и минимального кол-ва порций
+     * блюд в одном приеме пищи.
+     * @return минимально необходимое общее кол-во всех блюд для генерируемого меню.
+     */
     public BigDecimal getMinServingNumber() {
         return minServingNumber;
     }
 
+    /**
+     * Возвращает максимально допустимую стоимость генерируемого меню.
+     * @return максимально допустимая стоимость генерируемого меню.
+     */
     public BigDecimal getMaxPrice() {
         return maxPrice;
     }
 
+    /**
+     * Возвращает наименование для генерируемого меню.
+     * @return наименование для генерируемого меню.
+     */
     public String getGeneratedMenuName() {
         return generatedMenuName;
     }
 
+    /**
+     * Возвращает пользователя из данных которого составленны данные ограничения.
+     * @return пользователь.
+     */
     public User getUser() {
         return user;
     }
@@ -178,8 +225,8 @@ public class Input {
                 productQuantities.equals(input.productQuantities) &&
                 minServingNumber.equals(input.minServingNumber) &&
                 maxPrice.equals(input.maxPrice) &&
-                generatedMenuName.equals(input.generatedMenuName)
-                && user.equals(input.user);
+                generatedMenuName.equals(input.generatedMenuName) &&
+                user.equals(input.user);
     }
 
     @Override
@@ -481,7 +528,7 @@ public class Input {
          *         25. Если dishRepository равен null. <br/>
          *         26. Если menuRepository равен null. <br/>
          */
-        public Input build() {
+        public Input tryBuild() {
             return new Input(
                     productConstraints,
                     dishConstraints,
