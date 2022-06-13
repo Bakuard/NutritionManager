@@ -503,7 +503,7 @@ public class DtoMapper {
                         builder.addDishConstraint(tc.getDishTag(), tc.getCondition(), tc.getQuantity())
                 )
         );
-        
+
         dto.getProductConstraints().ifPresent(productConstraints ->
                 productConstraints.forEach(pc ->
                         builder.addProductConstraint(pc.getProductCategory(), pc.getCondition(), pc.getQuantity())

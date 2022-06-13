@@ -90,6 +90,7 @@ public class Input {
 
         Validator.check(
                 "Input.generatedMenuName", notNull(generatedMenuName).
+                        and(() -> notBlank(generatedMenuName)).
                         and(() -> isTrue(menuRepository.getMenusNumber(
                                 menuByName(user.getId(), generatedMenuName)) == 0)),
                 "Input.maxPrice", notNull(maxPrice).

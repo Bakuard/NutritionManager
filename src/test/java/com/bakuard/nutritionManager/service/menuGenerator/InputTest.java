@@ -847,6 +847,40 @@ class InputTest {
 
     @Test
     @DisplayName("""
+            Input.Builder.build():
+             generatedMenuName is blank
+             => exception
+            """)
+    public void buildInput24() {
+        Input.Builder builder = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("     ").
+                setMaxPrice(new BigDecimal(2700)).
+                setMinMealsNumber(10).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
+                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository);
+
+        AssertUtil.assertValidateException(
+                builder::tryBuild,
+                "Input.generatedMenuName[NOT_BLANK]",
+                Constraint.NOT_BLANK
+        );
+    }
+
+    @Test
+    @DisplayName("""
             getMinServingNumber():
              => return correct result
             """)
