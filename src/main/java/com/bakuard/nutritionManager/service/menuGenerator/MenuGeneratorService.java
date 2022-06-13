@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.service.menuGenerator;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.MenuItem;
+import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 import it.ssc.pl.milp.*;
@@ -13,10 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.bakuard.nutritionManager.validation.Rule.failure;
+import static com.bakuard.nutritionManager.validation.Rule.notNull;
 
 public class MenuGeneratorService {
 
-    private AppConfigData appConfigData;
+    private final AppConfigData appConfigData;
 
     public MenuGeneratorService(AppConfigData appConfigData) {
         this.appConfigData = appConfigData;
@@ -34,6 +36,8 @@ public class MenuGeneratorService {
      *         2. Если невозможно подобрать меню с заданными ограничениями. <br/>
      */
     public Menu generate(Input input) {
+        Validator.check("MenuGeneratorService.input", notNull(input));
+
         Menu menu = null;
 
         try {
@@ -52,8 +56,10 @@ public class MenuGeneratorService {
 
             menu = menu(result, input);
         } catch(Exception e) {
-            Validator.check("MenuGeneratorService.generate",
-                    failure(com.bakuard.nutritionManager.validation.Constraint.SOLUTION_EXISTS));
+            throw new ValidateException("Fail to generate menu").
+                    addReason(e).
+                    addReason(Rule.of("MenuGeneratorService.generate",
+                                    failure(com.bakuard.nutritionManager.validation.Constraint.SOLUTION_EXISTS)));
         }
 
         return menu;
@@ -67,13 +73,15 @@ public class MenuGeneratorService {
                 setName(input.getGeneratedMenuName()).
                 setConfig(appConfigData);
         for(int i = 0; i < result.length; i++) {
-            menuBuilder.addItem(
-                    new MenuItem.LoadBuilder().
-                            generateId().
-                            setDish(input.getAllDishMinPrices().get(i).dish()).
-                            setConfig(appConfigData).
-                            setQuantity(BigDecimal.valueOf(result[i].getValue()))
-            );
+            if(Math.signum(result[i].getValue()) > 0) {
+                menuBuilder.addItem(
+                        new MenuItem.LoadBuilder().
+                                generateId().
+                                setDish(input.getAllDishMinPrices().get(i).dish()).
+                                setConfig(appConfigData).
+                                setQuantity(BigDecimal.valueOf(result[i].getValue()))
+                );
+            }
         }
 
         return menuBuilder.tryBuild();
