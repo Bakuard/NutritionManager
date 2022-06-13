@@ -34,9 +34,15 @@ public class ValidateException extends RuntimeException implements Iterable<Rule
     }
 
     public boolean containsConstraint(Constraint constraint) {
-        return Arrays.stream(getSuppressed()).
-                filter(e -> e instanceof RuleException).
-                anyMatch(e -> ((RuleException)e).contains(constraint));
+
+        Container<Boolean> container = new Container<>();
+        container.set(false);
+
+        forEach(ruleException -> {
+            if(ruleException.contains(constraint)) container.set(true);
+        });
+
+        return container.get();
     }
 
     @Override

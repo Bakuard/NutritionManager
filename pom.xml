@@ -13,7 +13,7 @@
 
     <groupId>com.bakuard</groupId>
     <artifactId>nutritionManager</artifactId>
-    <version>0.11.1</version>
+    <version>0.12.1</version>
     <name>nutritionManager</name>
 
     <properties>
@@ -30,6 +30,12 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>31.1-jre</version>
+        </dependency>
+
+        <dependency>
+            <groupId>it.ssc</groupId>
+            <artifactId>solver</artifactId>
+            <version>3.0</version>
         </dependency>
 
         <dependency>

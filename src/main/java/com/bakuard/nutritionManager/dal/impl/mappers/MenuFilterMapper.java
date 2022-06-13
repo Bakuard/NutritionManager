@@ -20,6 +20,7 @@ public class MenuFilterMapper {
             case DISHES -> result = dishesFilter((AnyFilter) filter);
             case MIN_TAGS -> result = minTagsFilter((MinTagsFilter) filter);
             case AND -> result = andFilter((AndFilter) filter);
+            case MENUS -> result = menusFilter((AnyFilter) filter);
             default -> throw new UnsupportedOperationException(
                     "Unsupported operation for " + filter.getType() + " constraint");
         }
@@ -54,6 +55,10 @@ public class MenuFilterMapper {
                         groupBy(field("MenuTags.menuId")).
                         having(count(field("MenuTags.menuId")).eq(inline(filter.getTags().size())))
         );
+    }
+
+    private Condition menusFilter(AnyFilter filter) {
+        return field("name").in(filter.getValues().stream().map(DSL::inline).toList());
     }
 
     private Condition andFilter(AndFilter filter) {

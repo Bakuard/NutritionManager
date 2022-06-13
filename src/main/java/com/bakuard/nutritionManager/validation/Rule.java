@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.validation;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -208,7 +209,7 @@ public class Rule {
         );
     }
 
-    public static <T> Result anyMatch(Collection<T> collection, T item) {
+    public static <T> Result anyMatch(Collection<? extends T> collection, T item) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -227,7 +228,7 @@ public class Rule {
         );
     }
 
-    public static <T> Result anyMatch(Collection<T> collection, Predicate<T> matcher) {
+    public static <T> Result anyMatch(Collection<? extends T> collection, Predicate<? super T> matcher) {
         Result.State state = Result.State.UNKNOWN;
         String logMessage = null;
 
@@ -274,6 +275,25 @@ public class Rule {
 
             if(state == Result.State.FAIL) {
                 logMessage = "collection can't be empty";
+            }
+        }
+
+        return createResult(
+                Constraint.NOT_EMPTY_COLLECTION,
+                logMessage,
+                state
+        );
+    }
+
+    public static <T, S> Result notEmpty(Map<T, S> map) {
+        Result.State state = Result.State.UNKNOWN;
+        String logMessage = null;
+
+        if(map != null) {
+            state = Result.State.of(!map.isEmpty());
+
+            if(state == Result.State.FAIL) {
+                logMessage = "map can't be empty";
             }
         }
 
@@ -679,9 +699,40 @@ public class Rule {
         );
     }
 
+    public static <T> Result doesNotThrows(Collection<? extends T> source,
+                                           Consumer<? super T> validator) {
+        Result.State state = Result.State.UNKNOWN;
+        String logMessage = null;
+        List<Exception> unexpectedExceptions = new ArrayList<>();
+
+        if(source != null) {
+            state = Result.State.SUCCESS;
+            for(T value : source) {
+                try {
+                    validator.accept(value);
+                } catch(Exception e) {
+                    unexpectedExceptions.add(e);
+                    state = Result.State.FAIL;
+                }
+            }
+
+            logMessage = unexpectedExceptions.stream().
+                    map(e -> e.getClass().getName()).
+                    reduce((a, b) -> a + ", " + b).
+                    orElse(null);
+        }
+
+        return createResult(
+                Constraint.DOES_NOT_THROW,
+                logMessage,
+                state,
+                unexpectedExceptions
+        );
+    }
+
     public static <S, T> Result doesNotThrows(Collection<? extends S> source,
-                                       Function<? super S, ? extends T> factory,
-                                       Container<List<T>> container) {
+                                              Function<? super S, ? extends T> factory,
+                                              Container<List<T>> container) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;
@@ -717,8 +768,8 @@ public class Rule {
     }
 
     public static <S, T> Result doesNotThrow(S source,
-                                      Function<S, T> factory,
-                                      Container<T> container) {
+                                             Function<S, T> factory,
+                                             Container<T> container) {
         container.clear();
 
         Result.State state = Result.State.UNKNOWN;

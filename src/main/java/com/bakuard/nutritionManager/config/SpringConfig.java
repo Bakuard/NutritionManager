@@ -5,6 +5,7 @@ import com.bakuard.nutritionManager.dal.impl.*;
 import com.bakuard.nutritionManager.service.*;
 import com.bakuard.nutritionManager.dto.DtoMapper;
 
+import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
 import com.bakuard.nutritionManager.service.report.ReportService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -146,7 +147,12 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    MultipartConfigElement multipartConfigElement() {
+    public MenuGeneratorService menuGeneratorService(AppConfigData appConfigData) {
+        return new MenuGeneratorService(appConfigData);
+    }
+
+    @Bean
+    public MultipartConfigElement multipartConfigElement() {
         MultipartConfigFactory factory = new MultipartConfigFactory();
         factory.setMaxFileSize(DataSize.ofKilobytes(250));
         factory.setMaxRequestSize(DataSize.ofKilobytes(250));
@@ -196,7 +202,7 @@ public class SpringConfig implements WebMvcConfigurer {
                 info(
                         new Info().
                                 title("Nutrition Manager API").
-                                version("0.11.0").
+                                version("0.12.0").
                                 contact(new Contact().email("purplespicemerchant@gmail.com"))
                 );
     }
