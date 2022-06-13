@@ -38,8 +38,6 @@ public class MenuGeneratorService {
     public Menu generate(Input input) {
         Validator.check("MenuGeneratorService.input", notNull(input));
 
-        Menu menu = null;
-
         try {
             LinearObjectiveFunction goal = goal(input);
 
@@ -54,15 +52,13 @@ public class MenuGeneratorService {
             Solution solution = milp.getSolution();
             Variable[] result = solution.getVariables();
 
-            menu = menu(result, input);
+            return menu(result, input);
         } catch(Exception e) {
             throw new ValidateException("Fail to generate menu").
                     addReason(e).
                     addReason(Rule.of("MenuGeneratorService.generate",
                                     failure(com.bakuard.nutritionManager.validation.Constraint.SOLUTION_EXISTS)));
         }
-
-        return menu;
     }
 
 

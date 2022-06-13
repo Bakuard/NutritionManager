@@ -20,6 +20,7 @@ import com.bakuard.nutritionManager.model.filters.MinTagsFilter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
+import com.bakuard.nutritionManager.service.menuGenerator.Input;
 import com.bakuard.nutritionManager.service.report.ReportService;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.RuleException;
@@ -485,6 +486,31 @@ public class DtoMapper {
                 setPageable(PageableByNumber.of(size, page)).
                 setSort(Sort.menus(Arrays.asList(sortRule))).
                 setFilter(filter);
+    }
+
+    public Input toInput(UUID userId, GenerateMenuRequest dto) {
+        Input.Builder builder = new Input.Builder().
+                setUser(userRepository.tryGetById(userId)).
+                setGeneratedMenuName(dto.getMenuName()).
+                setMaxPrice(dto.getMaxPrice()).
+                setMinMealsNumber(dto.getMinMealsNumber()).
+                setServingNumberPerMeal(dto.getServingNumberPerMeal()).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository);
+
+        dto.getDishTagConstraints().ifPresent(tagConstraints ->
+                tagConstraints.forEach(tc ->
+                        builder.addDishConstraint(tc.getDishTag(), tc.getCondition(), tc.getQuantity())
+                )
+        );
+        
+        dto.getProductConstraints().ifPresent(productConstraints ->
+                productConstraints.forEach(pc ->
+                        builder.addProductConstraint(pc.getProductCategory(), pc.getCondition(), pc.getQuantity())
+                )
+        );
+
+        return builder.tryBuild();
     }
 
 

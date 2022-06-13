@@ -14,6 +14,8 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.service.ImageUploaderService;
+import com.bakuard.nutritionManager.service.menuGenerator.Input;
+import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
 import com.bakuard.nutritionManager.service.report.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,15 +54,19 @@ public class MenuController {
     private ImageUploaderService imageUploaderService;
     private ReportService reportService;
 
+    private MenuGeneratorService menuGeneratorService;
+
     @Autowired
     public MenuController(DtoMapper mapper,
                           MenuRepository repository,
                           ImageUploaderService imageUploaderService,
-                          ReportService reportService) {
+                          ReportService reportService,
+                          MenuGeneratorService menuGeneratorService) {
         this.mapper = mapper;
         this.repository = repository;
         this.imageUploaderService = imageUploaderService;
         this.reportService = reportService;
+        this.menuGeneratorService = menuGeneratorService;
     }
 
     @Operation(summary = "Загружает изображение меню и возвращает его URL",
@@ -160,19 +166,11 @@ public class MenuController {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Generate menu for user={}. dto={}", userId, dto);
 
-        return ResponseEntity.ok(
-                mapper.toSuccessResponse(
-                        "menu.generate",
-                        mapper.toMenuResponse(
-                                repository.getMenus(
-                                        new Criteria().
-                                                setFilter(Filter.user(userId)).
-                                                setPageable(PageableByNumber.of(30, 0)).
-                                                setSort(Sort.dishDefaultSort())
-                                ).getContent().get(0)
-                        )
-                )
-        );
+        Input input = mapper.toInput(userId, dto);
+        Menu menu = menuGeneratorService.generate(input);
+        MenuResponse response = mapper.toMenuResponse(menu);
+
+        return ResponseEntity.ok(mapper.toSuccessResponse("menu.generate", response));
     }
 
     @Operation(summary = "Удаление меню",
