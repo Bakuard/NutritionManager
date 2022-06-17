@@ -3,8 +3,8 @@
 /target/
 *.log
 *.ini
-/src/test/resources/security/
 /src/main/webapp/WEB-INF/classes/security/
 /docs/
 /logs/
 /src/main/resources/config/security.properties
+/externalConfig/**
