@@ -97,7 +97,7 @@ public class MenuGeneratorService {
         List<Input.ProductConstraint> productConstraints = input.getConstraintsByAllProducts();
         List<Input.DishTagConstraint> dishTagConstraints = input.getConstraintsByAllDishTags();
         int quantityConstraintsNumber = productConstraints.size() + dishTagConstraints.size();
-        int variablesNumber = input.getConstraintsByAllDishTags().size();
+        int variablesNumber = input.getAllDishMinPrices().size();
 
         for(int i = 0; i < quantityConstraintsNumber; i++) {
             double[] vector = new double[variablesNumber];
