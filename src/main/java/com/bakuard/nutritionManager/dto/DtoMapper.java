@@ -492,7 +492,6 @@ public class DtoMapper {
         Input.Builder builder = new Input.Builder().
                 setUser(userRepository.tryGetById(userId)).
                 setGeneratedMenuName(dto.getMenuName()).
-                setMaxPrice(dto.getMaxPrice()).
                 setMinMealsNumber(dto.getMinMealsNumber()).
                 setServingNumberPerMeal(dto.getServingNumberPerMeal()).
                 setDishRepository(dishRepository).

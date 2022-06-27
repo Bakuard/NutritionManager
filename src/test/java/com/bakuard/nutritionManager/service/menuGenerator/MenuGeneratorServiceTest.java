@@ -87,7 +87,6 @@ class MenuGeneratorServiceTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(2).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -134,7 +133,6 @@ class MenuGeneratorServiceTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(2).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "lessOrEqual", BigDecimal.ZERO).
@@ -155,6 +153,106 @@ class MenuGeneratorServiceTest {
         AssertUtil.assertValidateException(
                 () -> service.generate(input),
                 "MenuGeneratorService.generate[SOLUTION_EXISTS]", Constraint.SOLUTION_EXISTS
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            generate(input):
+             input is not null,
+             input contains several equal constraint
+             => return correct result
+            """)
+    public void generate4() {
+        MenuGeneratorService service = new MenuGeneratorService(conf);
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMinMealsNumber(2).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(4)).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(4)).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Яйца", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("жаренное", "lessOrEqual", BigDecimal.TEN).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ONE).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Menu actual = service.generate(input);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals("Новое меню", actual.getName()),
+                () -> AssertUtil.assertEquals(dishes.get(0),
+                        actual.tryGetItem("Картошка жаренная").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(5),
+                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
+                () -> AssertUtil.assertEquals(dishes.get(2),
+                        actual.tryGetItem("Луковый суп").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(1),
+                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            generate(input):
+             input is not null,
+             some constraints have thw same product category and relationship but different quantity
+             => return correct result
+            """)
+    public void generate5() {
+        MenuGeneratorService service = new MenuGeneratorService(conf);
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMinMealsNumber(2).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Картофель", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(4)).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(8)).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Яйца", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("жаренное", "lessOrEqual", BigDecimal.TEN).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ONE).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Menu actual = service.generate(input);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals("Новое меню", actual.getName()),
+                () -> AssertUtil.assertEquals(dishes.get(0),
+                        actual.tryGetItem("Картошка жаренная").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(5),
+                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
+                () -> AssertUtil.assertEquals(dishes.get(2),
+                        actual.tryGetItem("Луковый суп").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(1),
+                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
         );
     }
 

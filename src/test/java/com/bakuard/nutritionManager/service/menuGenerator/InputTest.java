@@ -69,7 +69,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(null).
                 setGeneratedMenuName("New menu #1").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -103,7 +102,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("New menu #1").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -137,7 +135,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("New menu #1").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -171,7 +168,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName(null).
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -205,7 +201,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Обед для группы Ленин-2022-01-22-А16").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -232,74 +227,6 @@ class InputTest {
     @Test
     @DisplayName("""
             Input.Builder.build():
-             maxPrice is null
-             => exception
-            """)
-    public void buildInput6() {
-        Input.Builder builder = new Input.Builder().
-                setUser(user).
-                setGeneratedMenuName("Новое меню").
-                setMaxPrice(null).
-                setMinMealsNumber(10).
-                setServingNumberPerMeal(new BigDecimal(3)).
-                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
-                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
-                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
-                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
-                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
-                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
-                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
-                setDishRepository(dishRepository).
-                setMenuRepository(menuRepository);
-
-        AssertUtil.assertValidateException(
-                builder::tryBuild,
-                "Input.maxPrice[NOT_NULL]",
-                Constraint.NOT_NULL
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            Input.Builder.build():
-             maxPrice < 0
-             => exception
-            """)
-    public void buildInput7() {
-        Input.Builder builder = new Input.Builder().
-                setUser(user).
-                setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(-1)).
-                setMinMealsNumber(10).
-                setServingNumberPerMeal(new BigDecimal(3)).
-                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
-                addProductConstraint("Растительное масло", "greaterOrEqual", BigDecimal.ONE).
-                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
-                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
-                addDishConstraint("жаренное", "greaterOrEqual", BigDecimal.ZERO).
-                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
-                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
-                setDishRepository(dishRepository).
-                setMenuRepository(menuRepository);
-
-        AssertUtil.assertValidateException(
-                builder::tryBuild,
-                "Input.maxPrice[NOT_NEGATIVE_VALUE]",
-                Constraint.NOT_NEGATIVE_VALUE
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            Input.Builder.build():
              minMealsNumber not positive
              => exception
             """)
@@ -307,7 +234,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(0).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -341,7 +267,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(null).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -375,7 +300,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -409,7 +333,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -443,7 +366,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -477,7 +399,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -511,7 +432,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -545,7 +465,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -579,7 +498,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -613,7 +531,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -647,7 +564,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -681,7 +597,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -715,7 +630,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -749,7 +663,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -783,7 +696,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -822,7 +734,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -855,7 +766,6 @@ class InputTest {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("     ").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -888,7 +798,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -919,7 +828,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -950,7 +858,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -981,7 +888,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -1043,7 +949,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -1097,7 +1002,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -1133,7 +1037,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -1167,7 +1070,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.TEN).
@@ -1208,7 +1110,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -1244,7 +1145,6 @@ class InputTest {
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(10).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.TEN).

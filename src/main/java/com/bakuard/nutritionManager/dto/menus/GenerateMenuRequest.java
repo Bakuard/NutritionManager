@@ -19,12 +19,6 @@ public class GenerateMenuRequest {
             """)
     private String menuName;
     @Schema(description = """
-            Максимально допустимая себестоимость меню. Ограничения: <br/>
-            1. Не может быть null. <br/>
-            2. Не может быть отрицательным числом. <br/>
-            """)
-    private BigDecimal maxPrice;
-    @Schema(description = """
             Минимально необходимое кол-во примемов пищи на одного человека. Ограничения: <br/>
             1. Не может быть null. <br/>
             2. Должно быть больше нуля. <br/>
@@ -57,14 +51,6 @@ public class GenerateMenuRequest {
 
     public void setMenuName(String menuName) {
         this.menuName = menuName;
-    }
-
-    public BigDecimal getMaxPrice() {
-        return maxPrice;
-    }
-
-    public void setMaxPrice(BigDecimal maxPrice) {
-        this.maxPrice = maxPrice;
     }
 
     public int getMinMealsNumber() {
@@ -106,7 +92,6 @@ public class GenerateMenuRequest {
         GenerateMenuRequest that = (GenerateMenuRequest) o;
         return minMealsNumber == that.minMealsNumber &&
                 Objects.equals(menuName, that.menuName) &&
-                Objects.equals(maxPrice, that.maxPrice) &&
                 Objects.equals(servingNumberPerMeal, that.servingNumberPerMeal) &&
                 Objects.equals(productConstraints, that.productConstraints) &&
                 Objects.equals(dishTagConstraints, that.dishTagConstraints);
@@ -114,7 +99,7 @@ public class GenerateMenuRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(menuName, maxPrice, minMealsNumber, servingNumberPerMeal,
+        return Objects.hash(menuName, minMealsNumber, servingNumberPerMeal,
                 productConstraints, dishTagConstraints);
     }
 
@@ -122,7 +107,6 @@ public class GenerateMenuRequest {
     public String toString() {
         return "GenerateMenuRequest{" +
                 "menuName='" + menuName + '\'' +
-                ", maxPrice=" + maxPrice +
                 ", minMealsNumber=" + minMealsNumber +
                 ", servingNumberPerMeal=" + servingNumberPerMeal +
                 ", productConstraints=" + productConstraints +

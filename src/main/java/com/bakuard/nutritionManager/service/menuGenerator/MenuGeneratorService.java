@@ -42,7 +42,6 @@ public class MenuGeneratorService {
             LinearObjectiveFunction goal = goal(input);
 
             ArrayList<Constraint> allConstraints = new ArrayList<>();
-            allConstraints.add(maxPriceConstraint(input));
             allConstraints.add(minServingNumberConstraint(input));
             allConstraints.add(intConstraint(input));
             allConstraints.addAll(quantityConstraints(input));
@@ -131,14 +130,6 @@ public class MenuGeneratorService {
         }
 
         return result;
-    }
-
-    private Constraint maxPriceConstraint(Input input) throws SimplexException {
-        double[] vector = input.getAllDishMinPrices().stream().
-                mapToDouble(dmp -> dmp.minPrice().doubleValue()).
-                toArray();
-
-        return new Constraint(vector, ConsType.LE, input.getMaxPrice().doubleValue());
     }
 
     private Constraint intConstraint(Input input) throws SimplexException {
