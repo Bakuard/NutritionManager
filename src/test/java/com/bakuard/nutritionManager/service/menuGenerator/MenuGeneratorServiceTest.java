@@ -1,6 +1,7 @@
 package com.bakuard.nutritionManager.service.menuGenerator;
 
 import com.bakuard.nutritionManager.AssertUtil;
+import com.bakuard.nutritionManager.SimpleTestConfig;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
@@ -14,6 +15,9 @@ import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -22,10 +26,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@SpringBootTest(classes = SimpleTestConfig.class,
+        properties = "spring.main.allow-bean-definition-overriding=true")
+@TestPropertySource(locations = "classpath:application.properties")
 class MenuGeneratorServiceTest {
 
-    private static AppConfigData conf;
-
+    @Autowired
+    private AppConfigData conf;
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;
@@ -33,18 +40,6 @@ class MenuGeneratorServiceTest {
     private List<Dish> dishes;
     private List<Menu> menus;
     private User user;
-
-    @BeforeAll
-    public static void beforeAll() {
-        try {
-            conf = new AppConfigData(
-                    "/config/appConfig.properties",
-                    "/config/security.properties"
-            );
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @BeforeEach
     public void beforeEach() {

@@ -1,6 +1,7 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.AssertUtil;
+import com.bakuard.nutritionManager.SimpleTestConfig;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
@@ -17,6 +18,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,21 +29,13 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
+@SpringBootTest(classes = SimpleTestConfig.class,
+        properties = "spring.main.allow-bean-definition-overriding=true")
+@TestPropertySource(locations = "classpath:application.properties")
 class DishTest {
 
-    private static AppConfigData conf;
-
-    @BeforeAll
-    public static void beforeAll() {
-        try {
-            conf = new AppConfigData(
-                    "/config/appConfig.properties",
-                    "/config/security.properties"
-            );
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    @Autowired
+    private AppConfigData conf;
 
     @Test
     @DisplayName("""

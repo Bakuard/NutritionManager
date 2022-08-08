@@ -22,6 +22,7 @@ import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -50,7 +51,7 @@ import java.io.IOException;
 public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
-    public AppConfigData appConfigData() throws IOException {
+    public AppConfigData appConfigData(Environment env) throws IOException {
         return new AppConfigData(
                 "/config/appConfig.properties",
                 "/config/security.properties"
