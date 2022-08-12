@@ -3,16 +3,13 @@ package com.bakuard.nutritionManager.model;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
-import com.bakuard.nutritionManager.model.filters.Sort;
-import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.model.filters.Filter;
+import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
-
-import org.junit.jupiter.api.BeforeAll;
+import com.bakuard.nutritionManager.validation.Constraint;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,19 +17,11 @@ import java.util.UUID;
 
 class DishIngredientTest {
 
-    private static AppConfigData conf;
-
-    @BeforeAll
-    public static void beforeAll() {
-        try {
-            conf = new AppConfigData(
-                    "/config/appConfig.properties",
-                    "/config/security.properties"
-            );
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private AppConfigData conf = AppConfigData.builder().
+            setNumberPrecision("16").
+            setNumberRoundingMod("CEILING").
+            setNumberScale("6").
+            build();
 
     @Test
     @DisplayName("""

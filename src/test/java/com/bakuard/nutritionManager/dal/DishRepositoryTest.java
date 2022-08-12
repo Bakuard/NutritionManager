@@ -3,112 +3,67 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.impl.DishRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
-import com.bakuard.nutritionManager.dal.impl.UserRepositoryPostgres;
 import com.bakuard.nutritionManager.model.*;
-import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
-import org.flywaydb.core.Flyway;
-
-import org.junit.jupiter.api.*;
-
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.jdbc.JdbcTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = DBTestConfig.class)
+@TestPropertySource(locations = "classpath:test.properties")
 class DishRepositoryTest {
 
-    private static HikariDataSource dataSource;
-    private static ProductRepositoryPostgres productRepository;
-    private static DishRepository dishRepository;
-    private static UserRepository userRepository;
-    private static DataSourceTransactionManager transactionManager;
-    private static AppConfigData appConfiguration;
-
-    static {
-        try {
-            appConfiguration = new AppConfigData(
-                    "/config/appConfig.properties",
-                    "/config/security.properties"
-            );
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @BeforeAll
-    static void beforeAll() {
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
-        hikariConfig.setUsername(appConfiguration.getDatabaseUser());
-        hikariConfig.setPassword(appConfiguration.getDatabasePassword());
-        hikariConfig.addDataSourceProperty("databaseName", "NutritionManagerUnitTest");
-        hikariConfig.setAutoCommit(false);
-        hikariConfig.addDataSourceProperty("portNumber", "5432");
-        hikariConfig.addDataSourceProperty("serverName", "localhost");
-        hikariConfig.setMaximumPoolSize(10);
-        hikariConfig.setMinimumIdle(5);
-        hikariConfig.setPoolName("hikariPool");
-        dataSource = new HikariDataSource(hikariConfig);
-
-        transactionManager = new DataSourceTransactionManager(dataSource);
-
-        userRepository = new UserRepositoryPostgres(dataSource);
-        productRepository = new ProductRepositoryPostgres(dataSource, appConfiguration);
-        dishRepository = new DishRepositoryPostgres(dataSource, appConfiguration, productRepository);
-    }
+    @Autowired
+    private ProductRepositoryPostgres productRepository;
+    @Autowired
+    private DishRepository dishRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+    @Autowired
+    private AppConfigData appConfiguration;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
-        try(Connection conn = dataSource.getConnection(); Statement statement = conn.createStatement()) {
-            statement.execute(
-                    "CREATE SCHEMA IF NOT EXISTS public AUTHORIZATION " +
-                            appConfiguration.getDatabaseUser() + ";");
-            conn.commit();
-        } catch(SQLException e) {
-            throw new RuntimeException(e);
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(def);
+        try {
+            JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                    "UsedImages", "JwsBlackList",
+                    "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
+                    "Menus", "Dishes", "Products", "Users");
+            transactionManager.commit(status);
+        } catch(RuntimeException e) {
+            transactionManager.rollback(status);
+            throw e;
         }
-
-        Flyway.configure().
-                locations("classpath:db").
-                dataSource(dataSource).
-                load().
-                migrate();
-    }
-
-    @AfterEach
-    void afterEach() {
-        try(Connection conn = dataSource.getConnection(); Statement statement = conn.createStatement()) {
-            statement.execute("DROP SCHEMA public CASCADE;");
-            conn.commit();
-        } catch(SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @AfterAll
-    static void afterAll() {
-        dataSource.close();
     }
 
     @Test

@@ -12,10 +12,12 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,8 +26,11 @@ import java.util.UUID;
 
 class MenuGeneratorServiceTest {
 
-    private static AppConfigData conf;
-
+    private AppConfigData conf = AppConfigData.builder().
+            setNumberPrecision("16").
+            setNumberRoundingMod("CEILING").
+            setNumberScale("6").
+            build();
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;
@@ -33,18 +38,6 @@ class MenuGeneratorServiceTest {
     private List<Dish> dishes;
     private List<Menu> menus;
     private User user;
-
-    @BeforeAll
-    public static void beforeAll() {
-        try {
-            conf = new AppConfigData(
-                    "/config/appConfig.properties",
-                    "/config/security.properties"
-            );
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @BeforeEach
     public void beforeEach() {
@@ -80,64 +73,13 @@ class MenuGeneratorServiceTest {
             generate(input):
              input is not null,
              solution exists
-             => return correct result
+             => return correct result (without not included dishes)
             """)
     public void generate2() {
         MenuGeneratorService service = new MenuGeneratorService(conf);
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
-                setMinMealsNumber(2).
-                setServingNumberPerMeal(new BigDecimal(3)).
-                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
-                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(4)).
-                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
-                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ZERO).
-                addProductConstraint("Яйца", "greaterOrEqual", new BigDecimal(3)).
-                addDishConstraint("жаренное", "lessOrEqual", BigDecimal.TEN).
-                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
-                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ONE).
-                setDishRepository(dishRepository).
-                setMenuRepository(menuRepository).
-                tryBuild();
-
-        Menu actual = service.generate(input);
-
-        Assertions.assertAll(
-                () -> Assertions.assertEquals("Новое меню", actual.getName()),
-                () -> AssertUtil.assertEquals(dishes.get(0),
-                        actual.tryGetItem("Картошка жаренная").getDish()),
-                () -> AssertUtil.assertEquals(dishes.get(1),
-                        actual.tryGetItem("Луковые кольца").getDish()),
-                () -> AssertUtil.assertEquals(dishes.get(2),
-                        actual.tryGetItem("Луковый суп").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(4),
-                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> AssertUtil.assertEquals(new BigDecimal(2),
-                        actual.tryGetItem("Луковые кольца").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> AssertUtil.assertEquals(new BigDecimal(1),
-                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE))
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            generate(input):
-             input is not null,
-             solution exists,
-             optimal solution doesn't include some dishes
-             => return correct result (without not included dishes)
-            """)
-    public void generate3() {
-        MenuGeneratorService service = new MenuGeneratorService(conf);
-        Input input = new Input.Builder().
-                setUser(user).
-                setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(2).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
@@ -161,13 +103,14 @@ class MenuGeneratorServiceTest {
                 () -> Assertions.assertEquals("Новое меню", actual.getName()),
                 () -> AssertUtil.assertEquals(dishes.get(0),
                         actual.tryGetItem("Картошка жаренная").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(5),
+                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
                 () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
                 () -> AssertUtil.assertEquals(dishes.get(2),
                         actual.tryGetItem("Луковый суп").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(5),
-                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
                 () -> AssertUtil.assertEquals(new BigDecimal(1),
-                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE))
+                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
         );
     }
 
@@ -178,12 +121,11 @@ class MenuGeneratorServiceTest {
              solution not exists
              => exception
             """)
-    public void generate4() {
+    public void generate3() {
         MenuGeneratorService service = new MenuGeneratorService(conf);
         Input input = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
-                setMaxPrice(new BigDecimal(2700)).
                 setMinMealsNumber(2).
                 setServingNumberPerMeal(new BigDecimal(3)).
                 addProductConstraint("соль", "lessOrEqual", BigDecimal.ZERO).
@@ -204,6 +146,106 @@ class MenuGeneratorServiceTest {
         AssertUtil.assertValidateException(
                 () -> service.generate(input),
                 "MenuGeneratorService.generate[SOLUTION_EXISTS]", Constraint.SOLUTION_EXISTS
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            generate(input):
+             input is not null,
+             input contains several equal constraint
+             => return correct result
+            """)
+    public void generate4() {
+        MenuGeneratorService service = new MenuGeneratorService(conf);
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMinMealsNumber(2).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(4)).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(4)).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Яйца", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("жаренное", "lessOrEqual", BigDecimal.TEN).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ONE).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Menu actual = service.generate(input);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals("Новое меню", actual.getName()),
+                () -> AssertUtil.assertEquals(dishes.get(0),
+                        actual.tryGetItem("Картошка жаренная").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(5),
+                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
+                () -> AssertUtil.assertEquals(dishes.get(2),
+                        actual.tryGetItem("Луковый суп").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(1),
+                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
+        );
+    }
+
+    @Test
+    @DisplayName("""
+            generate(input):
+             input is not null,
+             some constraints have thw same product category and relationship but different quantity
+             => return correct result
+            """)
+    public void generate5() {
+        MenuGeneratorService service = new MenuGeneratorService(conf);
+        Input input = new Input.Builder().
+                setUser(user).
+                setGeneratedMenuName("Новое меню").
+                setMinMealsNumber(2).
+                setServingNumberPerMeal(new BigDecimal(3)).
+                addProductConstraint("соль", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Картофель", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Картофель", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(4)).
+                addProductConstraint("Растительное масло", "lessOrEqual", new BigDecimal(8)).
+                addProductConstraint("Крахмал", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Лук", "greaterOrEqual", new BigDecimal(2)).
+                addProductConstraint("Хлеб", "greaterOrEqual", BigDecimal.ZERO).
+                addProductConstraint("Масло", "greaterOrEqual", BigDecimal.ONE).
+                addProductConstraint("Яйца", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("жаренное", "lessOrEqual", BigDecimal.TEN).
+                addDishConstraint("закуска", "greaterOrEqual", BigDecimal.ZERO).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ONE).
+                addDishConstraint("суп", "greaterOrEqual", BigDecimal.ZERO).
+                setDishRepository(dishRepository).
+                setMenuRepository(menuRepository).
+                tryBuild();
+
+        Menu actual = service.generate(input);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals("Новое меню", actual.getName()),
+                () -> AssertUtil.assertEquals(dishes.get(0),
+                        actual.tryGetItem("Картошка жаренная").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(5),
+                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
+                () -> AssertUtil.assertEquals(dishes.get(2),
+                        actual.tryGetItem("Луковый суп").getDish()),
+                () -> AssertUtil.assertEquals(new BigDecimal(1),
+                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
+                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
         );
     }
 
@@ -367,7 +409,7 @@ class MenuGeneratorServiceTest {
                         setName("Картошка жаренная").
                         setServingSize(new BigDecimal("0.5")).
                         setUnit("кг").
-                        setDescription("простое и быстрое в приготволении блюдо").
+                        setDescription("простое и быстрое в приготовлении блюдо").
                         setConfig(conf).
                         setRepository(productRepository).
                         addTag("жаренное").
@@ -581,6 +623,87 @@ class MenuGeneratorServiceTest {
                                                         Filter.user(user.getId()),
                                                         Filter.anyCategory("Масло"),
                                                         Filter.anyGrade("сливочное")
+                                                )
+                                        )
+                        ).
+                        tryBuild()
+        );
+
+        result.add(
+                new Dish.Builder().
+                        setId(toUUID(1)).
+                        setUser(user).
+                        setName("Яичница").
+                        setServingSize(new BigDecimal("0.1")).
+                        setUnit("кг").
+                        setDescription("простое и быстрое в приготовлении блюдо").
+                        setConfig(conf).
+                        setRepository(productRepository).
+                        addTag("жаренное").
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1015)).
+                                        setName("ingredient 1015").
+                                        setQuantity(new BigDecimal("0.03")).
+                                        setConfig(conf).
+                                        setFilter(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.anyCategory("соль")
+                                                )
+                                        )
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1016)).
+                                        setName("ingredient 1016").
+                                        setQuantity(new BigDecimal("0.1")).
+                                        setConfig(conf).
+                                        setFilter(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.anyCategory("Растительное масло")
+                                                )
+                                        )
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1017)).
+                                        setName("ingredient 1017").
+                                        setQuantity(new BigDecimal("0.2")).
+                                        setConfig(conf).
+                                        setFilter(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.anyCategory("Лук"),
+                                                        Filter.anyGrade("репчатый")
+                                                )
+                                        )
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1018)).
+                                        setName("ingredient 1018").
+                                        setQuantity(new BigDecimal("0.25")).
+                                        setConfig(conf).
+                                        setFilter(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.anyCategory("Хлеб"),
+                                                        Filter.anyGrade("белый")
+                                                )
+                                        )
+                        ).
+                        addIngredient(
+                                new DishIngredient.Builder().
+                                        setId(toUUID(1019)).
+                                        setName("ingredient 1019").
+                                        setQuantity(new BigDecimal("2")).
+                                        setConfig(conf).
+                                        setFilter(
+                                                Filter.and(
+                                                        Filter.user(user.getId()),
+                                                        Filter.anyCategory("Яйца")
                                                 )
                                         )
                         ).

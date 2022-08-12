@@ -63,7 +63,6 @@ public class Input {
 
     private ImmutableList<ProductQuantity> productQuantities;
     private BigDecimal minServingNumber;
-    private BigDecimal maxPrice;
     private String generatedMenuName;
     private User user;
 
@@ -71,7 +70,6 @@ public class Input {
                   List<DishTagConstraintRaw> dishTagConstraints,
                   int minMealsNumber,
                   BigDecimal servingNumberPerMeal,
-                  BigDecimal maxPrice,
                   String generatedMenuName,
                   DishRepository dishRepository,
                   MenuRepository menuRepository,
@@ -93,8 +91,6 @@ public class Input {
                         and(() -> notBlank(generatedMenuName)).
                         and(() -> isTrue(menuRepository.getMenusNumber(
                                 menuByName(user.getId(), generatedMenuName)) == 0)),
-                "Input.maxPrice", notNull(maxPrice).
-                        and(() -> notNegative(maxPrice)),
                 "Input.minMeals", notNull(minMealsNumber).
                         and(() -> positiveValue(minMealsNumber)),
                 "Input.servingNumberPerMeal", notNull(servingNumberPerMeal).
@@ -120,7 +116,6 @@ public class Input {
         );
 
         this.generatedMenuName = generatedMenuName;
-        this.maxPrice = maxPrice;
         this.minServingNumber = servingNumberPerMeal.multiply(BigDecimal.valueOf(minMealsNumber));
         this.dishTagConstraints = getAllDishTagConstraints(dishTagConstraints, allTags);
         this.productQuantities = getProductQuantities(allProductCategories, dishMinPrices);
@@ -192,14 +187,6 @@ public class Input {
     }
 
     /**
-     * Возвращает максимально допустимую стоимость генерируемого меню.
-     * @return максимально допустимая стоимость генерируемого меню.
-     */
-    public BigDecimal getMaxPrice() {
-        return maxPrice;
-    }
-
-    /**
      * Возвращает наименование для генерируемого меню.
      * @return наименование для генерируемого меню.
      */
@@ -225,7 +212,6 @@ public class Input {
                 dishTagConstraints.equals(input.dishTagConstraints) &&
                 productQuantities.equals(input.productQuantities) &&
                 minServingNumber.equals(input.minServingNumber) &&
-                maxPrice.equals(input.maxPrice) &&
                 generatedMenuName.equals(input.generatedMenuName) &&
                 user.equals(input.user);
     }
@@ -233,7 +219,7 @@ public class Input {
     @Override
     public int hashCode() {
         return Objects.hash(dishMinPrices, productConstraints, dishTagConstraints, productQuantities,
-                minServingNumber, maxPrice, generatedMenuName, user);
+                minServingNumber, generatedMenuName, user);
     }
 
     @Override
@@ -244,7 +230,6 @@ public class Input {
                 ", dishTagConstraints=" + dishTagConstraints +
                 ", productQuantities=" + productQuantities +
                 ", minServingNumber=" + minServingNumber +
-                ", maxPrice=" + maxPrice +
                 ", generatedMenuName='" + generatedMenuName + '\'' +
                 ", user=" + user +
                 '}';
@@ -383,7 +368,6 @@ public class Input {
 
         private User user;
         private String generatedMenuName;
-        private BigDecimal maxPrice;
         private int minMealsNumber;
         private BigDecimal servingNumberPerMeal;
         private final List<ProductConstraintRaw> productConstraints;
@@ -413,17 +397,6 @@ public class Input {
          */
         public Builder setGeneratedMenuName(String generatedMenuName) {
             this.generatedMenuName = generatedMenuName;
-            return this;
-        }
-
-        /**
-         * Устанавливает максимально допустую стоимость меню, которая расчитвается как суммарная стоимость всех
-         * продуктов необходимых для приготовелния блюд этого меню.
-         * @param maxPrice максимально допустимая стоимость меню.
-         * @return ссылку на этот же объект.
-         */
-        public Builder setMaxPrice(BigDecimal maxPrice) {
-            this.maxPrice = maxPrice;
             return this;
         }
 
@@ -491,43 +464,41 @@ public class Input {
          * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
          *         1. Если generatedMenuName является null. <br/>
          *         2. Если Уже существует меню с тем же наименованием, что и значение generatedMenuName. <br/>
-         *         3. Если maxPrice является null. <br/>
-         *         4. Если maxPrice является отрицательным значением. <br/>
-         *         5. Если minMealsNumber отрицательное значение или равен нулю. <br/>
-         *         6. Если servingNumberPerMeal является null. <br/>
-         *         7. Если servingNumberPerMeal отрицательное значение или равен нулю. <br/>
-         *         8. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
+         *         3. Если minMealsNumber отрицательное значение или равен нулю. <br/>
+         *         4. Если servingNumberPerMeal является null. <br/>
+         *         5. Если servingNumberPerMeal отрицательное значение или равен нулю. <br/>
+         *         6. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
          *            значения category было задано null. <br/>
-         *         9. Если для одного из ограничений на кол-во продуктов определенной категории было задано
+         *         7. Если для одного из ограничений на кол-во продуктов определенной категории было задано
          *            значение category, которое не используется ни для одного блюда пользователя. <br/>
+         *         8. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
+         *             значения relation было задано null<br/>
+         *         9. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
+         *             значения relation было задано значение НЕ принадлежащее множеству
+         *             {"lessOrEqual", "greaterOrEqual"}. <br/>
          *         10. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
-         *             значения relation было задано null<br/>
+         *             значение quantity было задано null. <br/>
          *         11. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
-         *             значения relation было задано значение НЕ принадлежащее множеству
-         *             {"lessOrEqual", "greaterOrEqual"}. <br/>
-         *         12. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
-         *             значение quantity было задано null. <br/>
-         *         13. Если для одного из ограничений на кол-во продуктов определенной категории, в качестве
          *             значение quantity было задано отрицательное значение. <br/>
-         *         14. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
+         *         12. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
          *             значения dishTag было задано null. <br/>
-         *         15. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
+         *         13. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
          *             значения dishTag был задан несуществующий тег. <br/>
-         *         16. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
+         *         14. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
          *             значения relation было задано null<br/>
-         *         17. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
+         *         15. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
          *             значения relation было задано значение НЕ принадлежащее множеству
          *             {"lessOrEqual", "greaterOrEqual"}. <br/>
-         *         18. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
+         *         16. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
          *             значение quantity было задано null. <br/>
-         *         19. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
+         *         17. Если для одного из ограничений на кол-во блюд с определенным тегом, в качестве
          *             значение quantity было задано отрицательное значение. <br/>
-         *         20. Если у пользователя нет ни одного блюда. <br/>
-         *         21. Если всем ингредиентам всех блюд пользователя не соответствует ни один продукт. <br/>
-         *         23. Если невозможно подобрать меню с заданными ограничениями. <br/>
-         *         24. Если user равен null. <br/>
-         *         25. Если dishRepository равен null. <br/>
-         *         26. Если menuRepository равен null. <br/>
+         *         18. Если у пользователя нет ни одного блюда. <br/>
+         *         19. Если всем ингредиентам всех блюд пользователя не соответствует ни один продукт. <br/>
+         *         20. Если невозможно подобрать меню с заданными ограничениями. <br/>
+         *         21. Если user равен null. <br/>
+         *         22. Если dishRepository равен null. <br/>
+         *         23. Если menuRepository равен null. <br/>
          */
         public Input tryBuild() {
             return new Input(
@@ -535,7 +506,6 @@ public class Input {
                     dishConstraints,
                     minMealsNumber,
                     servingNumberPerMeal,
-                    maxPrice,
                     generatedMenuName,
                     dishRepository,
                     menuRepository,

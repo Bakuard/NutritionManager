@@ -13,14 +13,14 @@
 
     <groupId>com.bakuard</groupId>
     <artifactId>nutritionManager</artifactId>
-    <version>0.14.0</version>
+    <version>0.15.0</version>
     <name>nutritionManager</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring.boot.version>2.7.0</spring.boot.version>
+        <spring.boot.version>2.7.2</spring.boot.version>
         <jjwt.version>0.11.5</jjwt.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
     </properties>
@@ -98,15 +98,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.5.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
 
