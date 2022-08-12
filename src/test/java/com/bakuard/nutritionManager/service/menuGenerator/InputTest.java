@@ -1,13 +1,11 @@
 package com.bakuard.nutritionManager.service.menuGenerator;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.SimpleTestConfig;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dal.ProductRepository;
-import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
@@ -15,23 +13,22 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
-@SpringBootTest(classes = SimpleTestConfig.class,
-        properties = "spring.main.allow-bean-definition-overriding=true")
-@TestPropertySource(locations = "classpath:application.properties")
 class InputTest {
 
-    @Autowired
-    private AppConfigData conf;
+    private AppConfigData conf = AppConfigData.builder().
+            setNumberPrecision("16").
+            setNumberRoundingMod("CEILING").
+            setNumberScale("6").
+            build();
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;

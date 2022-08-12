@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager;
+package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.dal.*;
@@ -6,33 +6,29 @@ import com.bakuard.nutritionManager.dal.impl.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 
-@SpringBootApplication(
-        exclude = {SecurityAutoConfiguration.class},
-        scanBasePackages = {
-                "com.bakuard.nutritionManager.controller",
-                "com.bakuard.nutritionManager.config"
-        }
-)
-@EnableTransactionManagement
+@TestConfiguration
 public class DBTestConfig {
 
     @Bean
     public AppConfigData appConfigData(Environment env) throws IOException {
-        return new AppConfigData(
-                "/config/appConfig.properties",
-                "/config/security.properties"
-        );
+        return AppConfigData.builder().
+                setNumberPrecision(env.getProperty("decimal.precision")).
+                setNumberRoundingMod(env.getProperty("decimal.rounding")).
+                setNumberScale(env.getProperty("decimal.numberScale")).
+                setDatabaseName(env.getProperty("db.name")).
+                setDatabaseUser(env.getProperty("db.user")).
+                setDatabasePassword(env.getProperty("db.password")).
+                build();
     }
 
     @Bean
@@ -50,6 +46,11 @@ public class DBTestConfig {
         hikariConfig.setPoolName("hikariPool");
 
         return new HikariDataSource(hikariConfig);
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
     }
 
     @Bean(initMethod = "migrate")

@@ -1,7 +1,6 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.Action;
-import com.bakuard.nutritionManager.DBTestConfig;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
@@ -9,10 +8,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -26,9 +27,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-@SpringBootTest(classes = DBTestConfig.class,
-        properties = "spring.main.allow-bean-definition-overriding=true")
-@TestPropertySource(locations = "classpath:application.properties")
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = DBTestConfig.class)
+@TestPropertySource(locations = "classpath:test.properties")
 class ImageRepositoryTest {
 
     @Autowired

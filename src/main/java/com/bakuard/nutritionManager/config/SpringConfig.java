@@ -2,20 +2,19 @@ package com.bakuard.nutritionManager.config;
 
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dal.impl.*;
-import com.bakuard.nutritionManager.service.*;
 import com.bakuard.nutritionManager.dto.DtoMapper;
-
+import com.bakuard.nutritionManager.service.AuthService;
+import com.bakuard.nutritionManager.service.EmailService;
+import com.bakuard.nutritionManager.service.ImageUploaderService;
+import com.bakuard.nutritionManager.service.JwsService;
 import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
 import com.bakuard.nutritionManager.service.report.ReportService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-
 import org.flywaydb.core.Flyway;
-
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
@@ -52,10 +51,19 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
     public AppConfigData appConfigData(Environment env) throws IOException {
-        return new AppConfigData(
-                "/config/appConfig.properties",
-                "/config/security.properties"
-        );
+        return AppConfigData.builder().
+                setNumberPrecision(env.getProperty("decimal.precision")).
+                setNumberRoundingMod(env.getProperty("decimal.rounding")).
+                setNumberScale(env.getProperty("decimal.numberScale")).
+                setMailServer(env.getProperty("mail.server")).
+                setMailPassword(env.getProperty("mail.server.password")).
+                setDatabaseName(env.getProperty("db.name")).
+                setDatabaseUser(env.getProperty("db.user")).
+                setDatabasePassword(env.getProperty("db.password")).
+                setAwsUserId(env.getProperty("AWS.userId")).
+                setAwsAccessKey(env.getProperty("AWS.accessKeyId")).
+                setAwsSecretKey(env.getProperty("AWS.secretKey")).
+                build();
     }
 
     @Bean
