@@ -52,18 +52,10 @@ class DishRepositoryTest {
 
     @BeforeEach
     void beforeEach() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
-        try {
-            JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                    "UsedImages", "JwsBlackList",
-                    "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
-                    "Menus", "Dishes", "Products", "Users");
-            transactionManager.commit(status);
-        } catch(RuntimeException e) {
-            transactionManager.rollback(status);
-            throw e;
-        }
+        commit(() -> JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                        "UsedImages", "JwsBlackList",
+                        "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
+                        "Menus", "Dishes", "Products", "Users"));
     }
 
     @Test
