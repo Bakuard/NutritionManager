@@ -3,7 +3,7 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +19,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -70,8 +71,8 @@ class JwsBlackListTest {
             """)
     public void addToBlackList3() {
         boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().minusDays(1)));
-
-        Assertions.assertFalse(actual);
+        
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -83,7 +84,7 @@ class JwsBlackListTest {
     public void addToBlackList4() {
         boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now()));
 
-        Assertions.assertFalse(actual);
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -97,7 +98,7 @@ class JwsBlackListTest {
 
         boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().plusDays(3)));
 
-        Assertions.assertFalse(actual);
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -109,7 +110,9 @@ class JwsBlackListTest {
     public void addToBlackList6() {
         commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().minusDays(1)));
 
-        Assertions.assertFalse(repository.inBlackList(toUUID(1)));
+        boolean actual = repository.inBlackList(toUUID(1));
+        
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -121,7 +124,9 @@ class JwsBlackListTest {
     public void addToBlackList7() {
         commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now()));
 
-        Assertions.assertFalse(repository.inBlackList(toUUID(1)));
+        boolean actual = repository.inBlackList(toUUID(1));
+        
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -134,7 +139,7 @@ class JwsBlackListTest {
     public void addToBlackList8() {
         boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().plusDays(3)));
 
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -147,7 +152,9 @@ class JwsBlackListTest {
     public void addToBlackList9() {
         commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().plusDays(3)));
 
-        Assertions.assertTrue(commit(() -> repository.inBlackList(toUUID(1))));
+        boolean actual = repository.inBlackList(toUUID(1));
+        
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -155,7 +162,7 @@ class JwsBlackListTest {
     public void removeAllExpired1() {
         int actual =commit(() -> repository.removeAllExpired(LocalDateTime.now()));
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -187,7 +194,7 @@ class JwsBlackListTest {
 
         int actual = commit(() -> repository.removeAllExpired(now));
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -206,11 +213,11 @@ class JwsBlackListTest {
 
         commit(() -> repository.removeAllExpired(now));
 
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(repository.inBlackList(toUUID(1))),
-                () -> Assertions.assertTrue(repository.inBlackList(toUUID(2))),
-                () -> Assertions.assertTrue(repository.inBlackList(toUUID(3)))
-        );
+        Assertions.assertThat(List.of(
+                repository.inBlackList(toUUID(1)),
+                repository.inBlackList(toUUID(2)),
+                repository.inBlackList(toUUID(3))
+        )).containsOnly(true);
     }
 
     @Test
@@ -232,7 +239,7 @@ class JwsBlackListTest {
 
         int actual = commit(() -> repository.removeAllExpired(now.plusDays(4)));
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -254,14 +261,14 @@ class JwsBlackListTest {
 
         commit(() -> repository.removeAllExpired(now.plusDays(4)));
 
-        Assertions.assertAll(
-                () -> Assertions.assertFalse(repository.inBlackList(toUUID(1))),
-                () -> Assertions.assertFalse(repository.inBlackList(toUUID(2))),
-                () -> Assertions.assertFalse(repository.inBlackList(toUUID(3))),
-                () -> Assertions.assertTrue(repository.inBlackList(toUUID(4))),
-                () -> Assertions.assertTrue(repository.inBlackList(toUUID(5))),
-                () -> Assertions.assertTrue(repository.inBlackList(toUUID(6)))
-        );
+        Assertions.assertThat(List.of(
+                repository.inBlackList(toUUID(1)),
+                repository.inBlackList(toUUID(2)),
+                repository.inBlackList(toUUID(3)),
+                repository.inBlackList(toUUID(4)),
+                repository.inBlackList(toUUID(5)),
+                repository.inBlackList(toUUID(6))
+        )).containsExactly(false, false, false, true, true, true);
     }
 
 

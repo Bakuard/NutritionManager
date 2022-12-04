@@ -10,7 +10,8 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,7 +72,9 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         Product product = createProduct(1, user);
 
-        Assertions.assertTrue(commit(() -> repository.save(product)));
+        boolean actual = commit(() -> repository.save(product));
+
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -97,8 +100,9 @@ class ProductRepositoryTest {
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
+        boolean actual = commit(() -> repository.save(addedProduct));
 
-        Assertions.assertTrue(commit(() -> repository.save(addedProduct)));
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -195,9 +199,9 @@ class ProductRepositoryTest {
                 addTag("updated tag 2").
                 addTag("2 tag updated").
                 tryBuild();
-        boolean isSaved = commit(() -> repository.save(updatedProduct));
+        boolean actual = commit(() -> repository.save(updatedProduct));
 
-        Assertions.assertTrue(isSaved);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -300,10 +304,9 @@ class ProductRepositoryTest {
 
         commit(() -> repository.save(product1));
         commit(() -> repository.save(product2));
+        boolean actual = commit(() -> repository.save(product1));
 
-        Assertions.assertFalse(
-                repository.save(product1)
-        );
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -397,7 +400,7 @@ class ProductRepositoryTest {
         commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -450,7 +453,7 @@ class ProductRepositoryTest {
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(256));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -466,7 +469,7 @@ class ProductRepositoryTest {
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -583,7 +586,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -607,7 +610,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -625,7 +628,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(6, actual);
+        Assertions.assertThat(actual).isEqualTo(6);
     }
 
     @Test
@@ -649,7 +652,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -682,7 +685,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(1, actual);
+        Assertions.assertThat(actual).isEqualTo(1);
     }
 
     @Test
@@ -706,7 +709,7 @@ class ProductRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(6, actual);
+        Assertions.assertThat(actual).isEqualTo(6);
     }
 
     @Test
@@ -732,7 +735,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -760,7 +763,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -792,7 +795,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -824,7 +827,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -856,7 +859,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -888,7 +891,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -920,7 +923,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -954,7 +957,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -988,7 +991,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1021,7 +1024,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -1072,7 +1075,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1125,7 +1128,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(1, actual);
+        Assertions.assertThat(actual).isEqualTo(1);
     }
 
     @Test
@@ -1175,7 +1178,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -1343,7 +1346,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -2024,7 +2027,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2040,7 +2043,7 @@ class ProductRepositoryTest {
 
         int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
-        Assertions.assertEquals(9, actual);
+        Assertions.assertThat(actual).isEqualTo(9);
     }
 
     @Test
@@ -2063,7 +2066,7 @@ class ProductRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(5, actual);
+        Assertions.assertThat(actual).isEqualTo(5);
     }
 
     @Test
@@ -2096,7 +2099,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -2120,7 +2123,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2144,7 +2147,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 2))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2179,7 +2182,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2210,7 +2213,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2239,7 +2242,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2257,7 +2260,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -2281,7 +2284,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2313,7 +2316,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2336,7 +2339,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(3, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2359,7 +2362,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2387,7 +2390,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2415,7 +2418,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2444,7 +2447,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2462,7 +2465,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -2486,7 +2489,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2518,7 +2521,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2541,7 +2544,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2564,7 +2567,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(3, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2592,7 +2595,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2620,7 +2623,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2649,7 +2652,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2666,7 +2669,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2698,7 +2701,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2721,7 +2724,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2744,7 +2747,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(1, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2773,7 +2776,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2791,7 +2794,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2815,7 +2818,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2847,7 +2850,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2870,7 +2873,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2893,7 +2896,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2921,7 +2924,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2949,7 +2952,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2990,7 +2993,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3020,7 +3023,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3048,7 +3051,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3080,7 +3083,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3108,7 +3111,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3134,7 +3137,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3162,7 +3165,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3189,9 +3192,11 @@ class ProductRepositoryTest {
                                 )
                         )
         );
-
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3221,7 +3226,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3253,7 +3258,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3281,8 +3286,10 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(107), actual.get());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(107));
     }
 
     @Test
@@ -3307,9 +3314,11 @@ class ProductRepositoryTest {
                                 )
                         )
         );
-
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3339,7 +3348,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3362,8 +3371,10 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3393,7 +3404,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3442,8 +3453,10 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3492,7 +3505,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
 

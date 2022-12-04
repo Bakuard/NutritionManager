@@ -2,17 +2,12 @@ package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
-import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.Sort;
-import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 class DishIngredientTest {
@@ -131,47 +126,6 @@ class DishIngredientTest {
 
     private UUID toUUID(int number) {
         return UUID.fromString("00000000-0000-0000-0000-" + String.format("%012d", number));
-    }
-
-    private List<Product> createProducts(int userId, int productNumber) {
-        ArrayList<Product> products = new ArrayList<>();
-
-        for(int i = 1; i <= productNumber; i++) {
-            products.add(createProduct(userId, i).tryBuild());
-        }
-
-        return products;
-    }
-
-    private Product.Builder createProduct(int userId, int id) {
-        return new Product.Builder().
-                setAppConfiguration(conf).
-                setId(toUUID(id)).
-                setUser(createUser(userId)).
-                setCategory("name " + id).
-                setShop("shop " + id).
-                setGrade("variety " + id).
-                setManufacturer("manufacturer " + id).
-                setUnit("unitA").
-                setPrice(new BigDecimal(id * 10).abs()).
-                setPackingSize(new BigDecimal("0.5").multiply(BigDecimal.valueOf(id))).
-                setQuantity(BigDecimal.ZERO).
-                setDescription("some description " + id).
-                setImageUrl("https://nutritionmanager.xyz/products/images?id=" + id).
-                addTag("tag " + id).
-                addTag("common tag");
-    }
-
-    private Criteria createCriteria(int expectedPageNumber) {
-        return new Criteria().
-                setPageable(PageableByNumber.ofIndex(5, expectedPageNumber)).
-                setFilter(
-                        Filter.and(
-                                Filter.anyCategory("categoryA"),
-                                Filter.user(toUUID(1))
-                        )
-                ).
-                setSort(Sort.products().asc("price"));
     }
 
 }

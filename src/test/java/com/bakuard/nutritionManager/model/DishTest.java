@@ -10,7 +10,8 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableById;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -128,7 +129,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantity(ip, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -248,7 +249,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantityPrice(ip, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -388,7 +389,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(List.of(), BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -413,7 +414,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -518,7 +519,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(-1, 0);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -536,7 +537,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(1, 0);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -554,7 +555,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(2, 0);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -576,7 +577,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, -1);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -595,7 +600,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 0);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -619,7 +628,9 @@ class DishTest {
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 4);
 
         Dish.IngredientProduct expected = ingredientProduct(product(user, 4), 0, 4);
-        Assertions.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(expected);
     }
 
     @Test
@@ -642,7 +653,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 5);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -665,7 +680,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 6);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -749,7 +768,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(1000), toUUID(10));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -788,7 +807,9 @@ class DishTest {
         Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(0), toUUID(1000));
 
         Dish.IngredientProduct expected = emptyIngredientProduct(0, -1);
-        Assertions.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(expected);
     }
 
     @Test
@@ -827,7 +848,9 @@ class DishTest {
         Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(0), toUUID(10));
 
         Dish.IngredientProduct expected = ingredientProduct(product(user, 10),0, 10);
-        Assertions.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(expected);
     }
 
     @Test
@@ -889,7 +912,7 @@ class DishTest {
                 )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -936,7 +959,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -983,7 +1006,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1030,7 +1053,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1077,7 +1100,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1124,7 +1147,7 @@ class DishTest {
                 ingredientProduct(product(user, 11), 1, 0),
                 ingredientProduct(product(user, 200), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1171,7 +1194,7 @@ class DishTest {
                 ingredientProduct(product(user, 11), 1, 0),
                 ingredientProduct(product(user, 200), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1220,7 +1243,7 @@ class DishTest {
                 ingredientProduct(product(user, 1), 1, 1),
                 ingredientProduct(product(user, 3), 2, 3)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1274,7 +1297,7 @@ class DishTest {
                 ingredientProduct(product(user, 1), 1, 1),
                 ingredientProduct(product(user, 3), 2, 3)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1322,7 +1345,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 4), 2, 4)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1338,7 +1361,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.ZERO, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1358,7 +1381,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.ZERO, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1390,7 +1413,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.valueOf(50), actual);
+        Assertions.assertThat(actual).isEqualTo(BigInteger.valueOf(50));
     }
 
     @Test
@@ -1422,7 +1445,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.valueOf(100), actual);
+        Assertions.assertThat(actual).isEqualTo(BigInteger.valueOf(100));
     }
 
     @Test
@@ -1438,7 +1461,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1462,7 +1485,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1682,7 +1705,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1706,7 +1729,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1925,7 +1948,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1949,7 +1972,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test

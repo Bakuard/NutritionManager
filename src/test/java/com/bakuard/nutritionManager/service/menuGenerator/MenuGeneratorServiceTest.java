@@ -12,17 +12,15 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 class MenuGeneratorServiceTest {
 
@@ -99,19 +97,28 @@ class MenuGeneratorServiceTest {
 
         Menu actual = service.generate(input);
 
-        Assertions.assertAll(
-                () -> Assertions.assertEquals("Новое меню", actual.getName()),
-                () -> AssertUtil.assertEquals(dishes.get(0),
-                        actual.tryGetItem("Картошка жаренная").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(5),
-                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
-                () -> AssertUtil.assertEquals(dishes.get(2),
-                        actual.tryGetItem("Луковый суп").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(1),
-                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
-        );
+        SoftAssertions assertions = new SoftAssertions();
+        assertions.assertThat(actual.getName()).
+                isEqualTo("Новое меню");
+        assertions.assertThat(actual.getMenuItem("Картошка жаренная")).
+                isPresent().
+                get().extracting(MenuItem::getDish, InstanceOfAssertFactories.type(Dish.class)).
+                usingRecursiveComparison().isEqualTo(dishes.get(0));
+        assertions.assertThat(actual.getMenuItem("Картошка жаренная")).
+                isPresent().
+                get().extracting(menuItem -> menuItem.getNecessaryQuantity(BigDecimal.ONE), InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(5));
+        assertions.assertThat(actual.getMenuItem("Луковые кольца")).
+                isEmpty();
+        assertions.assertThat(actual.getMenuItem("Луковый суп")).
+                isPresent().
+                get().extracting(MenuItem::getDish, InstanceOfAssertFactories.type(Dish.class)).
+                usingRecursiveComparison().isEqualTo(dishes.get(2));
+        assertions.assertThat(actual.getMenuItem("Луковый суп")).
+                isPresent().
+                get().extracting(menuItem -> menuItem.getNecessaryQuantity(BigDecimal.ONE), InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ONE);
+        assertions.assertAll();
     }
 
     @Test
@@ -185,26 +192,37 @@ class MenuGeneratorServiceTest {
 
         Menu actual = service.generate(input);
 
-        Assertions.assertAll(
-                () -> Assertions.assertEquals("Новое меню", actual.getName()),
-                () -> AssertUtil.assertEquals(dishes.get(0),
-                        actual.tryGetItem("Картошка жаренная").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(5),
-                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
-                () -> AssertUtil.assertEquals(dishes.get(2),
-                        actual.tryGetItem("Луковый суп").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(1),
-                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
-        );
+        SoftAssertions assertions = new SoftAssertions();
+        assertions.assertThat(actual.getName()).
+                isEqualTo("Новое меню");
+        assertions.assertThat(actual.getMenuItem("Картошка жаренная")).
+                isPresent().
+                get().extracting(MenuItem::getDish, InstanceOfAssertFactories.type(Dish.class)).
+                usingRecursiveComparison().isEqualTo(dishes.get(0));
+        assertions.assertThat(actual.getMenuItem("Картошка жаренная")).
+                isPresent().
+                get().extracting(menuItem -> menuItem.getNecessaryQuantity(BigDecimal.ONE), InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(5));
+        assertions.assertThat(actual.getMenuItem("Луковые кольца")).
+                isEmpty();
+        assertions.assertThat(actual.getMenuItem("Луковый суп")).
+                isPresent().
+                get().extracting(MenuItem::getDish, InstanceOfAssertFactories.type(Dish.class)).
+                usingRecursiveComparison().isEqualTo(dishes.get(2));
+        assertions.assertThat(actual.getMenuItem("Луковый суп")).
+                isPresent().
+                get().extracting(menuItem -> menuItem.getNecessaryQuantity(BigDecimal.ONE), InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ONE);
+        assertions.assertThat(actual.getMenuItem("Яичница")).
+                isEmpty();
+        assertions.assertAll();
     }
 
     @Test
     @DisplayName("""
             generate(input):
              input is not null,
-             some constraints have thw same product category and relationship but different quantity
+             some constraints have the same product category and relationship but different quantity
              => return correct result
             """)
     public void generate5() {
@@ -234,19 +252,30 @@ class MenuGeneratorServiceTest {
 
         Menu actual = service.generate(input);
 
-        Assertions.assertAll(
-                () -> Assertions.assertEquals("Новое меню", actual.getName()),
-                () -> AssertUtil.assertEquals(dishes.get(0),
-                        actual.tryGetItem("Картошка жаренная").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(5),
-                        actual.tryGetItem("Картошка жаренная").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> Assertions.assertTrue(actual.getMenuItem("Луковые кольца").isEmpty()),
-                () -> AssertUtil.assertEquals(dishes.get(2),
-                        actual.tryGetItem("Луковый суп").getDish()),
-                () -> AssertUtil.assertEquals(new BigDecimal(1),
-                        actual.tryGetItem("Луковый суп").getNecessaryQuantity(BigDecimal.ONE)),
-                () -> Assertions.assertTrue(actual.getMenuItem("Яичница").isEmpty())
-        );
+        SoftAssertions assertions = new SoftAssertions();
+        assertions.assertThat(actual.getName()).
+                isEqualTo("Новое меню");
+        assertions.assertThat(actual.getMenuItem("Картошка жаренная")).
+                isPresent().
+                get().extracting(MenuItem::getDish, InstanceOfAssertFactories.type(Dish.class)).
+                usingRecursiveComparison().isEqualTo(dishes.get(0));
+        assertions.assertThat(actual.getMenuItem("Картошка жаренная")).
+                isPresent().
+                get().extracting(menuItem -> menuItem.getNecessaryQuantity(BigDecimal.ONE), InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(5));
+        assertions.assertThat(actual.getMenuItem("Луковые кольца")).
+                isEmpty();
+        assertions.assertThat(actual.getMenuItem("Луковый суп")).
+                isPresent().
+                get().extracting(MenuItem::getDish, InstanceOfAssertFactories.type(Dish.class)).
+                usingRecursiveComparison().isEqualTo(dishes.get(2));
+        assertions.assertThat(actual.getMenuItem("Луковый суп")).
+                isPresent().
+                get().extracting(menuItem -> menuItem.getNecessaryQuantity(BigDecimal.ONE), InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ONE);
+        assertions.assertThat(actual.getMenuItem("Яичница")).
+                isEmpty();
+        assertions.assertAll();
     }
 
 

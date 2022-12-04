@@ -10,7 +10,7 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -85,7 +85,7 @@ class MenuRepositoryTest {
 
         boolean actual = commit(() -> menuRepository.save(menu));
 
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -118,7 +118,7 @@ class MenuRepositoryTest {
 
         boolean actual = commit(() -> menuRepository.save(menu));
 
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -204,7 +204,7 @@ class MenuRepositoryTest {
         });
         boolean actual = commit(() -> menuRepository.save(updatedMenu));
 
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -307,7 +307,7 @@ class MenuRepositoryTest {
 
         boolean actual = commit(() -> menuRepository.save(expected));
 
-        Assertions.assertFalse(actual);
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -473,7 +473,7 @@ class MenuRepositoryTest {
         commit(() -> menuRepository.tryRemove(user.getId(), toUUID(0)));
         Optional<Menu> actual = menuRepository.getById(user.getId(), toUUID(0));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -532,7 +532,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getById(user.getId(), toUUID(100));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -549,7 +549,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getById(otherUser.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -689,7 +689,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getByName(user.getId(), "unknown menu");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -706,7 +706,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getByName(otherUser.getId(), "Menu#1");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -832,7 +832,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
         
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
     
     @Test
@@ -850,7 +850,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
         
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
     
     @Test
@@ -873,7 +873,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -896,7 +896,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -919,7 +919,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -942,7 +942,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -968,7 +968,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -994,7 +994,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1020,7 +1020,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1054,7 +1054,7 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
 
-        Assertions.assertTrue(actual.getMetadata().isEmpty());
+        Assertions.assertThat(actual.getMetadata().isEmpty()).isTrue();
     }
 
     @Test
@@ -1403,7 +1403,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1420,7 +1420,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(7, actual);
+        Assertions.assertThat(actual).isEqualTo(7);
     }
 
     @Test
@@ -1451,7 +1451,7 @@ class MenuRepositoryTest {
                         setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -1473,7 +1473,7 @@ class MenuRepositoryTest {
         Page<Tag> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(7, 1000).
                 createPage(getAllTags(menus).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1502,7 +1502,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1519,7 +1519,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -1550,7 +1550,7 @@ class MenuRepositoryTest {
                         setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -1572,7 +1572,7 @@ class MenuRepositoryTest {
         Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 1000).
                 createPage(getAllNames(menus).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
 

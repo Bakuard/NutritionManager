@@ -9,7 +9,7 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,7 +82,7 @@ class DishRepositoryTest {
 
         boolean actual = commit(() -> dishRepository.save(dish));
 
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -115,7 +115,7 @@ class DishRepositoryTest {
 
         boolean actual = commit(() -> dishRepository.save(dish));
 
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -234,7 +234,7 @@ class DishRepositoryTest {
                 tryBuild();
         boolean actual = commit(() -> dishRepository.save(updatedDish));
 
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -401,7 +401,7 @@ class DishRepositoryTest {
         commit(() -> dishRepository.save(dish));
         boolean actual = commit(() -> dishRepository.save(dish));
 
-        Assertions.assertFalse(actual);
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -500,7 +500,7 @@ class DishRepositoryTest {
         commit(() -> dishRepository.tryRemove(user.getId(), toUUID(1)));
         Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -561,7 +561,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(100));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -577,7 +577,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -717,7 +717,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual =  dishRepository.getByName(user.getId(), "unknown dish");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -733,7 +733,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual = dishRepository.getByName(user.getId(), "dish A");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -861,7 +861,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -877,7 +877,7 @@ class DishRepositoryTest {
 
         int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -901,7 +901,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -925,7 +925,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -950,7 +950,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -975,7 +975,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1003,7 +1003,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1031,7 +1031,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1321,7 +1321,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1338,7 +1338,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(7, actual);
+        Assertions.assertThat(actual).isEqualTo(7);
     }
 
     @Test
@@ -1370,7 +1370,7 @@ class DishRepositoryTest {
         );
 
         Page<Tag> expected = Page.empty();
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1392,7 +1392,7 @@ class DishRepositoryTest {
         Page<Tag> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(7, 200).
                 createPage(getAllTags(dishes).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1421,7 +1421,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1438,7 +1438,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -1470,7 +1470,7 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = Page.empty();
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1492,7 +1492,7 @@ class DishRepositoryTest {
         Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(3, 200).
                 createPage(getAllUnits(dishes).subList(2, 3));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1521,7 +1521,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1538,7 +1538,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -1570,7 +1570,7 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = Page.empty();
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1592,7 +1592,7 @@ class DishRepositoryTest {
         Page<String> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 200).
                 createPage(getAllNames(dishes).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
 

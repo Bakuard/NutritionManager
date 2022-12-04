@@ -13,7 +13,8 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assert;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -222,7 +223,7 @@ class InputTest {
              minMealsNumber not positive
              => exception
             """)
-    public void buildInput8() {
+    public void buildInput6() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -255,7 +256,7 @@ class InputTest {
              servingNumberPerMeal is null
              => exception
             """)
-    public void buildInput9() {
+    public void buildInput7() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -288,7 +289,7 @@ class InputTest {
              one of product constraint has null category
              => exception
             """)
-    public void buildInput10() {
+    public void buildInput8() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -321,7 +322,7 @@ class InputTest {
              one of product constraint has a non-existed category
              => exception
             """)
-    public void buildInput11() {
+    public void buildInput9() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -354,7 +355,7 @@ class InputTest {
              one of product constraint has null condition
              => exception
             """)
-    public void buildInput12() {
+    public void buildInput10() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -387,7 +388,7 @@ class InputTest {
              one of product constraint has a non-existed condition
              => exception
             """)
-    public void buildInput13() {
+    public void buildInput11() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -420,7 +421,7 @@ class InputTest {
              one of product constraint has null quantity
              => exception
             """)
-    public void buildInput14() {
+    public void buildInput12() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -453,7 +454,7 @@ class InputTest {
              one of product constraint has negative quantity
              => exception
             """)
-    public void buildInput15() {
+    public void buildInput13() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -486,7 +487,7 @@ class InputTest {
              one of dish constraint has null tag
              => exception
             """)
-    public void buildInput16() {
+    public void buildInput14() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -519,7 +520,7 @@ class InputTest {
              one of dish constraint has a non-existed tag
              => exception
             """)
-    public void buildInput17() {
+    public void buildInput15() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -552,7 +553,7 @@ class InputTest {
              one of dish constraint has null condition
              => exception
             """)
-    public void buildInput18() {
+    public void buildInput16() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -585,7 +586,7 @@ class InputTest {
              one of dish constraint has a non-existed condition
              => exception
             """)
-    public void buildInput19() {
+    public void buildInput17() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -618,7 +619,7 @@ class InputTest {
              one of dish quantity has null quantity
              => exception
             """)
-    public void buildInput20() {
+    public void buildInput18() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -651,7 +652,7 @@ class InputTest {
              one of dish quantity has negative quantity
              => exception
             """)
-    public void buildInput21() {
+    public void buildInput19() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -684,7 +685,7 @@ class InputTest {
              user haven't any dishes
              => exception
             """)
-    public void buildInput22() {
+    public void buildInput20() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("Новое меню").
@@ -716,7 +717,7 @@ class InputTest {
              all user dishes haven't any suitable products
              => exception
             """)
-    public void buildInput23() {
+    public void buildInput21() {
         productRepository = mockProductRepository(user, List.of());
         List<Dish> dishes = dishes(user, productRepository);
         dishRepository = mockDishRepository(user, dishes);
@@ -754,7 +755,7 @@ class InputTest {
              generatedMenuName is blank
              => exception
             """)
-    public void buildInput24() {
+    public void buildInput22() {
         Input.Builder builder = new Input.Builder().
                 setUser(user).
                 setGeneratedMenuName("     ").
@@ -837,7 +838,7 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        Assertions.assertFalse(input.hasTag(dishes.get(0), new Tag("закуска")));
+        Assertions.assertThat(input.hasTag(dishes.get(0), new Tag("закуска"))).isFalse();
     }
 
     @Test
@@ -867,7 +868,7 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        Assertions.assertTrue(input.hasTag(dishes.get(0), new Tag("жаренное")));
+        Assertions.assertThat(input.hasTag(dishes.get(0), new Tag("жаренное"))).isTrue();
     }
 
     @Test
@@ -897,38 +898,43 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        Assertions.assertAll(
-                () -> AssertUtil.assertEquals(new BigDecimal("0.03"),
-                        input.getQuantity(dishes.get(0), "соль")),
-                () -> AssertUtil.assertEquals(new BigDecimal("0.5"),
-                        input.getQuantity(dishes.get(0), "Картофель")),
-                () -> AssertUtil.assertEquals(new BigDecimal("0.2"),
-                        input.getQuantity(dishes.get(0), "Растительное масло")),
+        Assertions.assertThat(List.of(
+                        input.getQuantity(dishes.get(0), "соль"),
+                        input.getQuantity(dishes.get(0), "Картофель"),
+                        input.getQuantity(dishes.get(0), "Растительное масло"),
 
-                () -> AssertUtil.assertEquals(new BigDecimal("2"),
-                        input.getQuantity(dishes.get(1), "Яйца")),
-                () -> AssertUtil.assertEquals(new BigDecimal("0.1"),
-                        input.getQuantity(dishes.get(1), "Крахмал")),
-                () -> AssertUtil.assertEquals(new BigDecimal("0.35"),
-                        input.getQuantity(dishes.get(1), "Растительное масло")),
-                () -> AssertUtil.assertEquals(new BigDecimal("4"),
-                        input.getQuantity(dishes.get(1), "Лук")),
-                () -> AssertUtil.assertEquals(new BigDecimal("0.06"),
-                        input.getQuantity(dishes.get(1), "соль")),
+                        input.getQuantity(dishes.get(1), "Яйца"),
+                        input.getQuantity(dishes.get(1), "Крахмал"),
+                        input.getQuantity(dishes.get(1), "Растительное масло"),
+                        input.getQuantity(dishes.get(1), "Лук"),
+                        input.getQuantity(dishes.get(1), "соль"),
 
-                () -> AssertUtil.assertEquals(new BigDecimal("0.03"),
-                        input.getQuantity(dishes.get(2), "соль")),
-                () -> AssertUtil.assertEquals(new BigDecimal("0.1"),
-                        input.getQuantity(dishes.get(2), "Крахмал")),
-                () -> AssertUtil.assertEquals(new BigDecimal("0.1"),
-                        input.getQuantity(dishes.get(2), "Растительное масло")),
-                () -> AssertUtil.assertEquals(new BigDecimal("4"),
-                        input.getQuantity(dishes.get(2), "Лук")),
-                () -> AssertUtil.assertEquals(new BigDecimal("1"),
-                        input.getQuantity(dishes.get(2), "Хлеб")),
-                () -> AssertUtil.assertEquals(new BigDecimal("1"),
-                        input.getQuantity(dishes.get(2), "Масло"))
-        );
+                        input.getQuantity(dishes.get(2), "соль"),
+                        input.getQuantity(dishes.get(2), "Крахмал"),
+                        input.getQuantity(dishes.get(2), "Растительное масло"),
+                        input.getQuantity(dishes.get(2), "Лук"),
+                        input.getQuantity(dishes.get(2), "Хлеб"),
+                        input.getQuantity(dishes.get(2), "Масло")
+                )).
+                usingElementComparator(Comparator.naturalOrder()).
+                containsExactly(
+                        new BigDecimal("0.03"),
+                        new BigDecimal("0.5"),
+                        new BigDecimal("0.2"),
+
+                        new BigDecimal("2"),
+                        new BigDecimal("0.1"),
+                        new BigDecimal("0.35"),
+                        new BigDecimal("4"),
+                        new BigDecimal("0.06"),
+
+                        new BigDecimal("0.03"),
+                        new BigDecimal("0.1"),
+                        new BigDecimal("0.1"),
+                        new BigDecimal("4"),
+                        new BigDecimal("1"),
+                        new BigDecimal("1")
+                );
     }
 
     @Test
@@ -958,30 +964,35 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        Assertions.assertAll(
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(0), "Яйца")),
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(0), "Крахмал")),
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(0), "Лук")),
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(0), "Хлеб")),
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(0), "Масло")),
+        Assertions.assertThat(List.of(
+                        input.getQuantity(dishes.get(0), "Яйца"),
+                        input.getQuantity(dishes.get(0), "Крахмал"),
+                        input.getQuantity(dishes.get(0), "Лук"),
+                        input.getQuantity(dishes.get(0), "Хлеб"),
+                        input.getQuantity(dishes.get(0), "Масло"),
 
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(1), "Картофель")),
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(1), "Хлеб")),
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(1), "Масло")),
+                        input.getQuantity(dishes.get(1), "Картофель"),
+                        input.getQuantity(dishes.get(1), "Хлеб"),
+                        input.getQuantity(dishes.get(1), "Масло"),
 
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(2), "Картофель")),
-                () -> AssertUtil.assertEquals(BigDecimal.ZERO,
-                        input.getQuantity(dishes.get(2), "Яйца"))
-        );
+                        input.getQuantity(dishes.get(2), "Картофель"),
+                        input.getQuantity(dishes.get(2), "Яйца")
+                )).
+                usingElementComparator(Comparator.naturalOrder()).
+                containsExactly(
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO
+                );
     }
 
     @Test
@@ -1011,12 +1022,12 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        List<Input.DishTagConstraint> expected = List.of(
-                tagConstraint("жаренное", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
-                tagConstraint("закуска", Relationship.GREATER_OR_EQUAL, new BigDecimal(5)),
-                tagConstraint("суп", Relationship.GREATER_OR_EQUAL, new BigDecimal(8))
-        );
-        Assertions.assertEquals(expected, input.getConstraintsByAllDishTags());
+        Assertions.assertThat(input.getConstraintsByAllDishTags()).
+                containsExactly(
+                        tagConstraint("жаренное", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                        tagConstraint("закуска", Relationship.GREATER_OR_EQUAL, new BigDecimal(5)),
+                        tagConstraint("суп", Relationship.GREATER_OR_EQUAL, new BigDecimal(8))
+                );
     }
 
     @Test
@@ -1044,12 +1055,12 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        List<Input.DishTagConstraint> expected = List.of(
-                tagConstraint("жаренное", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
-                tagConstraint("закуска", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
-                tagConstraint("суп", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO)
-        );
-        Assertions.assertEquals(expected, input.getConstraintsByAllDishTags());
+        Assertions.assertThat(input.getConstraintsByAllDishTags()).
+                containsExactly(
+                        tagConstraint("жаренное", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                        tagConstraint("закуска", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                        tagConstraint("суп", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO)
+                );
     }
 
     @Test
@@ -1079,17 +1090,17 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        Set<Input.ProductConstraint> expected = Set.of(
-                productConstraint("соль", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
-                productConstraint("Картофель", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
-                productConstraint("Растительное масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ONE),
-                productConstraint("Крахмал", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
-                productConstraint("Лук", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
-                productConstraint("Хлеб", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
-                productConstraint("Масло", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
-                productConstraint("Яйца", Relationship.GREATER_OR_EQUAL,new BigDecimal(3))
-        );
-        Assertions.assertEquals(expected, new HashSet<>(input.getConstraintsByAllProducts()));
+        Assertions.assertThat(input.getConstraintsByAllProducts()).
+                containsExactlyInAnyOrder(
+                        productConstraint("соль", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                        productConstraint("Картофель", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                        productConstraint("Растительное масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ONE),
+                        productConstraint("Крахмал", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                        productConstraint("Лук", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                        productConstraint("Хлеб", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                        productConstraint("Масло", Relationship.GREATER_OR_EQUAL, BigDecimal.TEN),
+                        productConstraint("Яйца", Relationship.GREATER_OR_EQUAL,new BigDecimal(3))
+                );
     }
 
     @Test
@@ -1115,17 +1126,17 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        Set<Input.ProductConstraint> expected = Set.of(
-                productConstraint("соль", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
-                productConstraint("Картофель", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
-                productConstraint("Растительное масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ONE),
-                productConstraint("Крахмал", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
-                productConstraint("Лук", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
-                productConstraint("Хлеб", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
-                productConstraint("Масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
-                productConstraint("Яйца", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO)
-        );
-        Assertions.assertEquals(expected, new HashSet<>(input.getConstraintsByAllProducts()));
+        Assertions.assertThat(input.getConstraintsByAllProducts()).
+                containsExactlyInAnyOrder(
+                        productConstraint("соль", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                        productConstraint("Картофель", Relationship.GREATER_OR_EQUAL, new BigDecimal(2)),
+                        productConstraint("Растительное масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ONE),
+                        productConstraint("Крахмал", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                        productConstraint("Лук", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                        productConstraint("Хлеб", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                        productConstraint("Масло", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO),
+                        productConstraint("Яйца", Relationship.GREATER_OR_EQUAL, BigDecimal.ZERO)
+                );
     }
 
     @Test
@@ -1154,12 +1165,12 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        Set<Input.DishMinPrice> expected = Set.of(
-                dishMinPrice(dishes.get(0), new BigDecimal("227")),
-                dishMinPrice(dishes.get(1), new BigDecimal("444")),
-                dishMinPrice(dishes.get(2), new BigDecimal("748"))
-        );
-        Assertions.assertEquals(expected, new HashSet<>(input.getAllDishMinPrices()));
+        Assertions.assertThat(input.getAllDishMinPrices()).
+                containsExactly(
+                        dishMinPrice(dishes.get(0), new BigDecimal("227")),
+                        dishMinPrice(dishes.get(1), new BigDecimal("444")),
+                        dishMinPrice(dishes.get(2), new BigDecimal("748"))
+                );
     }
 
 

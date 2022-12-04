@@ -4,7 +4,7 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,9 @@ class UserRepositoryTest {
     public void save2() {
         User user = createUser(1);
 
-        Assertions.assertTrue(repository.save(user));
+        boolean actual = commit(() -> repository.save(user));
+        
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -82,7 +84,9 @@ class UserRepositoryTest {
         repository.save(user1);
         repository.save(user2);
 
-        Assertions.assertTrue(repository.save(addedUser));
+        boolean actual = commit(() -> repository.save(addedUser));
+        
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -170,9 +174,9 @@ class UserRepositoryTest {
         expected.setName("new name");
         expected.setPassword("new password");
         expected.setEmail("new email");
-        boolean isSaved = repository.save(expected);
+        boolean actual = repository.save(expected);
 
-        Assertions.assertTrue(isSaved);
+        Assertions.assertThat(actual).isTrue();
     }
 
     @Test
@@ -286,7 +290,9 @@ class UserRepositoryTest {
         User user = createUser(1);
         commit(() -> repository.save(user));
 
-        Assertions.assertFalse(repository.save(user));
+        boolean actual = commit(() -> repository.save(user));
+        
+        Assertions.assertThat(actual).isFalse();
     }
 
     @Test
@@ -304,7 +310,9 @@ class UserRepositoryTest {
         commit(() -> repository.save(user));
 
         User actual = repository.tryGetById(toUUID(1));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -323,7 +331,8 @@ class UserRepositoryTest {
         repository.save(user);
 
         Optional<User> actual = repository.getById(toUUID(2));
-        Assertions.assertTrue(actual.isEmpty());
+        
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -387,7 +396,7 @@ class UserRepositoryTest {
         repository.save(user);
 
         Optional<User> actual = repository.getByName("unknown name");
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -462,7 +471,7 @@ class UserRepositoryTest {
         repository.save(user);
 
         Optional<User> actual = repository.getByEmail("unknownUser@gmail.com");
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
