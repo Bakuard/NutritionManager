@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
@@ -321,11 +320,11 @@ class ImageRepositoryTest {
     }
 
 
-    private void commit(Action action) {
+    private void commit(Runnable action) {
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         TransactionStatus status = transactionManager.getTransaction(def);
         try {
-            action.act();
+            action.run();
             transactionManager.commit(status);
         } catch(RuntimeException e) {
             transactionManager.rollback(status);

@@ -16,10 +16,10 @@ import java.util.stream.IntStream;
 public class AssertUtil {
 
     @SafeVarargs
-    public static void assertValidateException(Action action,
+    public static void assertValidateException(Runnable action,
                                                Pair<String, Constraint>... expectedConstraintsAndMessageKeys) {
         try {
-            action.act();
+            action.run();
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ValidateException)) {
@@ -55,11 +55,11 @@ public class AssertUtil {
         }
     }
 
-    public static void assertValidateException(Action action,
+    public static void assertValidateException(Runnable action,
                                                String expectedMessageKey,
                                                Constraint expectedConstraint) {
         try {
-            action.act();
+            action.run();
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ValidateException)) {
@@ -89,10 +89,10 @@ public class AssertUtil {
         }
     }
 
-    public static void assertValidateException(Action action,
+    public static void assertValidateException(Runnable action,
                                                Constraint... expectedConstraints) {
         try {
-            action.act();
+            action.run();
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ValidateException)) {

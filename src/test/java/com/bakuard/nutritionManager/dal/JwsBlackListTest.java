@@ -1,6 +1,5 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.validation.Constraint;
@@ -44,6 +43,7 @@ class JwsBlackListTest {
                 "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
                 "Menus", "Dishes", "Products", "Users"));
     }
+
     @Test
     @DisplayName("addToBlackList(tokenId, expired): tokenId is null => exception")
     public void addToBlackList1() {
@@ -278,11 +278,11 @@ class JwsBlackListTest {
         }
     }
 
-    private void commit(Action action) {
+    private void commit(Runnable action) {
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         TransactionStatus status = transactionManager.getTransaction(def);
         try {
-            action.act();
+            action.run();
             transactionManager.commit(status);
         } catch(RuntimeException e) {
             transactionManager.rollback(status);
