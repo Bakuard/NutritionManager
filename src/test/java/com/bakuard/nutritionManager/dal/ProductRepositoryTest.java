@@ -67,19 +67,8 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("save(product): no products in DB => return true")
-    void save2() {
-        User user = createAndSaveUser(1);
-        Product product = createProduct(1, user);
-
-        boolean actual = commit(() -> repository.save(product));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
     @DisplayName("save(product): no products in DB => add product")
-    void save3() {
+    void save2() {
         User user = createAndSaveUser(1);
         Product expected = createProduct(1, user);
 
@@ -92,24 +81,8 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("save(product): there are products in DB, product id not exists => return true")
-    void save4() {
-        User user1 = createAndSaveUser(1);
-        User user2 = createAndSaveUser(2);
-        Product product1 = createProduct(1, user1);
-        Product product2 = createProduct(2, user1);
-        Product addedProduct = createProduct(3, user2);
-
-        commit(() -> repository.save(product1));
-        commit(() -> repository.save(product2));
-        boolean actual = commit(() -> repository.save(addedProduct));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
     @DisplayName("save(product): there are products in DB, product id not exists => add product")
-    void save5() {
+    void save3() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
         Product product1 = createProduct(1, user1);
@@ -134,7 +107,7 @@ class ProductRepositoryTest {
              user has a product with the same productContext and other id in the database
              => exception
             """)
-    void save6() {
+    void save4() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
@@ -175,48 +148,9 @@ class ProductRepositoryTest {
              there are products in DB,
              product id exists,
              product state was changed
-             => return true
-            """)
-    void save7() {
-        User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user);
-        Product product2 = createProduct(2, user);
-        commit(() -> repository.save(product1));
-        commit(() -> repository.save(product2));
-
-        Product updatedProduct = new Product.Builder().
-                setAppConfiguration(appConfiguration).
-                setId(toUUID(1)).
-                setUser(user).
-                setCategory("updated name").
-                setShop("updated shop").
-                setGrade("updated grade").
-                setManufacturer("updated manufacturer").
-                setUnit("updated unit").
-                setPrice(BigDecimal.TEN).
-                setPackingSize(BigDecimal.TEN).
-                setQuantity(BigDecimal.TEN).
-                setDescription("updated description").
-                setImageUrl("https://nutritionmanager.xyz/products/images?updatedImageUrl").
-                addTag("tag 1").
-                addTag("1 tag").
-                addTag("updated tag 2").
-                addTag("2 tag updated").
-                tryBuild();
-        boolean actual = commit(() -> repository.save(updatedProduct));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(product):
-             there are products in DB,
-             product id exists,
-             product state was changed
              => update product
             """)
-    void save8() {
+    void save5() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
@@ -259,7 +193,7 @@ class ProductRepositoryTest {
              user has a product with the same productContext in the database
              => exception
             """)
-    void save9() {
+    void save6() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
@@ -301,29 +235,9 @@ class ProductRepositoryTest {
              there are products in DB,
              product id exists,
              product state wasn't changed
-             => return false
-            """)
-    void save10() {
-        User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user);
-        Product product2 = createProduct(2, user);
-
-        commit(() -> repository.save(product1));
-        commit(() -> repository.save(product2));
-        boolean actual = commit(() -> repository.save(product1));
-
-        Assertions.assertThat(actual).isFalse();
-    }
-
-    @Test
-    @DisplayName("""
-            save(product):
-             there are products in DB,
-             product id exists,
-             product state wasn't changed
              => don't update product
             """)
-    void save11() {
+    void save7() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);

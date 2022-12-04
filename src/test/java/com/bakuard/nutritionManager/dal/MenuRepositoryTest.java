@@ -77,24 +77,9 @@ class MenuRepositoryTest {
     @DisplayName("""
             save(menu):
              no menus in DB
-             => return true
-            """)
-    public void save2() {
-        User user = createAndSaveUser(1);
-        Menu menu = createMenu(user, 1);
-
-        boolean actual = commit(() -> menuRepository.save(menu));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             no menus in DB
              => add menu
             """)
-    public void save3() {
+    public void save2() {
         User user = createAndSaveUser(1);
         Menu expected = createMenu(user, 1);
 
@@ -111,26 +96,9 @@ class MenuRepositoryTest {
             save(menu):
              there are menus in DB,
              menu id not exists
-             => return true
-            """)
-    public void save4() {
-        User user = createAndSaveUser(1);
-        createAndSaveMenus(user);
-        Menu menu = createMenu(user, 100);
-
-        boolean actual = commit(() -> menuRepository.save(menu));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             there are menus in DB,
-             menu id not exists
              => add menu
             """)
-    public void save5() {
+    public void save3() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -151,7 +119,7 @@ class MenuRepositoryTest {
              user has a menu with the same name and other id
              => exception
             """)
-    public void save6() {
+    public void save4() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu menu = new Menu.Builder().
@@ -177,49 +145,9 @@ class MenuRepositoryTest {
              there are menus in DB,
              menu id exists,
              menu state was changed
-             => return true
-            """)
-    public void save7() {
-        User user = createAndSaveUser(1);
-        createAndSaveMenus(user);
-        Menu menu = createMenu(user, 100);
-        commit(() -> menuRepository.save(menu));
-
-        Dish dish0 = createDish(user, 0, 0, 1, 2);
-        Dish dish1000 = createDish(user, 1000, 3, 4, 5);
-        Dish dish10000 = createDish(user, 10000, 6, 7, 8);
-        Menu updatedMenu = new Menu.Builder().
-                setId(toUUID(100)).
-                setUser(user).
-                setName("updated menu name").
-                setDescription("updated description").
-                setImageUrl("https://nutritionmanager.xyz/menus/menuId=newMenuImage").
-                setConfig(appConfiguration).
-                addTag("common tag").
-                addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
-                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
-                tryBuild();
-        commit(() -> {
-            dishRepository.save(dish0);
-            dishRepository.save(dish1000);
-            dishRepository.save(dish10000);
-        });
-        boolean actual = commit(() -> menuRepository.save(updatedMenu));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             there are menus in DB,
-             menu id exists,
-             menu state was changed
              => update menu
              """)
-    public void save8() {
+    public void save5() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -263,7 +191,7 @@ class MenuRepositoryTest {
              user has menu with the same name and other id
              => exception
             """)
-    public void save9() {
+    public void save6() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -303,28 +231,9 @@ class MenuRepositoryTest {
              there are menus in DB,
              menu id exists,
              menu state wasn't changed,
-             => return false
-            """)
-    public void save10() {
-        User user = createAndSaveUser(1);
-        createAndSaveMenus(user);
-        Menu expected = createMenu(user, 100);
-        commit(() -> menuRepository.save(expected));
-
-        boolean actual = commit(() -> menuRepository.save(expected));
-
-        Assertions.assertThat(actual).isFalse();
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             there are menus in DB,
-             menu id exists,
-             menu state wasn't changed,
              => don't update menu
             """)
-    public void save11() {
+    public void save7() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -346,7 +255,7 @@ class MenuRepositoryTest {
              user doesn't have some of menu item dishes
              => exception
             """)
-    public void save12() {
+    public void save8() {
         User otherUser = createAndSaveUser(1);
         commit(() -> dishRepository.save(createDish(otherUser, 1000, 0, 1, 2)));
         User user = createAndSaveUser(2);
@@ -379,7 +288,7 @@ class MenuRepositoryTest {
              user doesn't have some of menu item dishes
              => exception
             """)
-    public void save13() {
+    public void save9() {
         User otherUser = createAndSaveUser(1);
         commit(() -> dishRepository.save(createDish(otherUser, 1000, 0, 1, 2)));
         User user = createAndSaveUser(2);

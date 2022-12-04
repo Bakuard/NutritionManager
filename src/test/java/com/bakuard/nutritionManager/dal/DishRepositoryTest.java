@@ -74,24 +74,9 @@ class DishRepositoryTest {
     @DisplayName("""
             save(dish):
              no dishes in DB
-             => return true
-            """)
-    public void save2() {
-        User user = createAndSaveUser(1);
-        Dish dish = createDish(1, user);
-
-        boolean actual = commit(() -> dishRepository.save(dish));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             no dishes in DB
              => add dish
             """)
-    public void save3() {
+    public void save2() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(1, user);
 
@@ -108,26 +93,9 @@ class DishRepositoryTest {
             save(dish):
              there are dishes in DB,
              dish id not exists
-             => return true
-            """)
-    public void save4() {
-        User user = createAndSaveUser(1);
-        createAndSaveDishes(user);
-        Dish dish = createDish(7, user);
-
-        boolean actual = commit(() -> dishRepository.save(dish));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             there are dishes in DB,
-             dish id not exists
              => add dish
             """)
-    public void save5() {
+    public void save3() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish expected = createDish(7, user);
@@ -148,7 +116,7 @@ class DishRepositoryTest {
              user has a dish with the same name and other id
              => exception
             """)
-    public void save6() {
+    public void save4() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish dish = new Dish.Builder().
@@ -175,81 +143,9 @@ class DishRepositoryTest {
              there are dishes in DB,
              dish id exists,
              dish state was changed
-             => return true
-            """)
-    public void save7() {
-        User user = createAndSaveUser(1);
-        createAndSaveDishes(user);
-        Dish dish = createDish(7, user);
-        commit(() -> dishRepository.save(dish));
-
-        Dish updatedDish = new Dish.Builder().
-                setId(toUUID(7)).
-                setUser(user).
-                setName("updated dish").
-                setServingSize(BigDecimal.TEN).
-                setUnit("updated unit").
-                setDescription("updated description").
-                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
-                setConfig(appConfiguration).
-                setRepository(productRepository).
-                addTag("tag 2").
-                addTag("2 tag").
-                addTag("new tag").
-                addTag("tag new").
-                addIngredient(
-                        new DishIngredient.Builder().
-                                setId(toUUID(0)).
-                                setFilter(
-                                        Filter.orElse(
-                                                Filter.and(
-                                                        Filter.user(user.getId()),
-                                                        Filter.minTags(new Tag("common tag")),
-                                                        Filter.anyCategory("name A"),
-                                                        Filter.anyShop("shop A"),
-                                                        Filter.anyGrade("variety A"),
-                                                        Filter.anyManufacturer("manufacturer A")
-                                                ),
-                                                Filter.and(
-                                                        Filter.user(user.getId()),
-                                                        Filter.minTags(new Tag("tag B"))
-                                                )
-                                        )
-                                ).
-                                setName("ingredient 1").
-                                setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
-                ).
-                addIngredient(
-                        new DishIngredient.Builder().
-                                setId(toUUID(1)).
-                                setFilter(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyCategory("name A", "name B", "name C"),
-                                                Filter.anyShop("shop B", "shop A"),
-                                                Filter.anyGrade("variety B")
-                                        )
-                                ).
-                                setName("ingredient 3").
-                                setQuantity(new BigDecimal("5.4")).
-                                setConfig(appConfiguration)
-                ).
-                tryBuild();
-        boolean actual = commit(() -> dishRepository.save(updatedDish));
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             there are dishes in DB,
-             dish id exists,
-             dish state was changed
              => update dish
             """)
-    public void save8() {
+    public void save5() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish dish = createDish(7, user);
@@ -325,7 +221,7 @@ class DishRepositoryTest {
              user has dish with the same name and other id
              => exception
             """)
-    public void save9() {
+    public void save6() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish dish = createDish(7, user);
@@ -397,28 +293,9 @@ class DishRepositoryTest {
              there are dishes in DB,
              dish id exists,
              dish state wasn't changed,
-             => return false
-            """)
-    public void save10() {
-        User user = createAndSaveUser(1);
-        createAndSaveDishes(user);
-        Dish dish = createDish(7, user);
-
-        commit(() -> dishRepository.save(dish));
-        boolean actual = commit(() -> dishRepository.save(dish));
-
-        Assertions.assertThat(actual).isFalse();
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             there are dishes in DB,
-             dish id exists,
-             dish state wasn't changed,
              => don't update dish
             """)
-    public void save11() {
+    public void save7() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish expected = createDish(7, user);

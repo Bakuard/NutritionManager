@@ -47,26 +47,18 @@ public class MenuRepositoryPostgres implements MenuRepository {
     }
 
     @Override
-    public boolean save(Menu menu) {
+    public void save(Menu menu) {
         Validator.check("MenuRepository.menu", notNull(menu));
 
         Menu oldMenu = getById(menu.getUser().getId(), menu.getId()).orElse(null);
 
-        boolean newData = false;
         try {
-            if(oldMenu == null) {
-                addNewMenu(menu);
-                newData = true;
-            } else if(!menu.equalsFullState(oldMenu)) {
-                updateMenu(menu);
-                newData = true;
-            }
+            if(doesMenuExist(menu.getId())) updateMenu(menu);
+            else addNewMenu(menu);
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save menu", e).
                     addReason(Rule.of("MenuRepository.menu", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
-
-        return newData;
     }
 
     @Override
@@ -788,6 +780,18 @@ public class MenuRepositoryPostgres implements MenuRepository {
                 throw new ValidateException("User haven't dish with name=" + newVersion.getItems().get(i).getDishName()).
                         addReason(Rule.of("MenuRepository.itemExists", failure(Constraint.ENTITY_MUST_EXISTS_IN_DB)));
         }
+    }
+
+    private boolean doesMenuExist(UUID menuId) {
+        return statement.query(
+                "select count(*) > 0 as doesMenuExist from Menus where menuId = ?;",
+                ps -> ps.setObject(1, menuId),
+                rs -> {
+                    boolean result = false;
+                    if(rs.next()) result = rs.getBoolean("doesMenuExist");
+                    return result;
+                }
+        );
     }
 
 

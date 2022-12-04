@@ -55,18 +55,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("save(user): no user in DB => return true")
-    public void save2() {
-        User user = createUser(1);
-
-        boolean actual = commit(() -> repository.save(user));
-        
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
     @DisplayName("save(user): no user in DB => add user")
-    public void save3() {
+    public void save2() {
         User expected = createUser(1);
 
         commit(() -> repository.save(expected));
@@ -78,22 +68,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("save(user): there are users in DB, user id not exists => return true")
-    public void save4() {
-        User user1 = createUser(1);
-        User user2 = createUser(2);
-        User addedUser = createUser(3);
-        repository.save(user1);
-        repository.save(user2);
-
-        boolean actual = commit(() -> repository.save(addedUser));
-        
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
     @DisplayName("save(user): there are users in DB, user id not exists => add user")
-    public void save5() {
+    public void save3() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         User expected = createUser(3);
@@ -110,7 +86,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("save(user): there is user with same name => exception")
-    public void save6() {
+    public void save4() {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
@@ -125,7 +101,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("save(user): there is user with same password => exception")
-    public void save7() {
+    public void save5() {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
@@ -145,7 +121,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("save(user): there is user with same email => exception")
-    public void save8() {
+    public void save6() {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
@@ -168,29 +144,9 @@ class UserRepositoryTest {
             save(user):
              user already saved in DB,
              user state was changed
-             => return true
-            """)
-    public void save9() {
-        User user = createUser(1);
-        repository.save(user);
-
-        User expected = new User(user);
-        expected.setName("new name");
-        expected.setPassword("new password");
-        expected.setEmail("new email");
-        boolean actual = repository.save(expected);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            save(user):
-             user already saved in DB,
-             user state was changed
              => update user
             """)
-    public void save10() {
+    public void save7() {
         User user = createUser(1);
         commit(() -> repository.save(user));
 
@@ -214,7 +170,7 @@ class UserRepositoryTest {
              there is user in DB with same name
              => exception
             """)
-    public void save11() {
+    public void save8() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         commit(() -> repository.save(user1));
@@ -237,7 +193,7 @@ class UserRepositoryTest {
              there is user in DB with same password
              => exception
             """)
-    public void save12() {
+    public void save9() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         commit(() -> repository.save(user1));
@@ -265,7 +221,7 @@ class UserRepositoryTest {
              there is user in DB with same email
              => exception
             """)
-    public void save13() {
+    public void save10() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         commit(() -> repository.save(user1));
@@ -290,25 +246,9 @@ class UserRepositoryTest {
             save(user):
              user already saved in DB,
              user state wasn't changed
-             => return false
-            """)
-    public void save14() {
-        User user = createUser(1);
-        commit(() -> repository.save(user));
-
-        boolean actual = commit(() -> repository.save(user));
-        
-        Assertions.assertThat(actual).isFalse();
-    }
-
-    @Test
-    @DisplayName("""
-            save(user):
-             user already saved in DB,
-             user state wasn't changed
              => don't update user
             """)
-    public void save15() {
+    public void save11() {
         User user = createUser(1);
         User expected = new User(user);
         commit(() -> repository.save(user));
@@ -556,6 +496,18 @@ class UserRepositoryTest {
             T value = supplier.get();
             transactionManager.commit(status);
             return value;
+        } catch(RuntimeException e) {
+            transactionManager.rollback(status);
+            throw e;
+        }
+    }
+
+    private void commit(Runnable action) {
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(def);
+        try {
+            action.run();
+            transactionManager.commit(status);
         } catch(RuntimeException e) {
             transactionManager.rollback(status);
             throw e;

@@ -57,26 +57,16 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public boolean save(Dish dish) {
+    public void save(Dish dish) {
         Validator.check("DishRepository.dish", notNull(dish));
 
-        Dish oldDish = getById(dish.getUser().getId(), dish.getId()).orElse(null);
-
-        boolean newData = false;
         try {
-            if(oldDish == null) {
-                addNewDish(dish);
-                newData = true;
-            } else if(!dish.equalsFullState(oldDish)) {
-                updateDish(dish);
-                newData = true;
-            }
+            if(doesDishExist(dish.getId())) updateDish(dish);
+            else addNewDish(dish);
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save dish", e).
                     addReason(Rule.of("DishRepository.dish", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
-
-        return newData;
     }
 
     @Override
@@ -758,6 +748,18 @@ public class DishRepositoryPostgres implements DishRepository {
                         return newVersion.getIngredients().size();
                     }
 
+                }
+        );
+    }
+
+    private boolean doesDishExist(UUID dishId) {
+        return statement.query(
+                "select count(*) > 0 as doesDishExist from Dishes where dishId = ?;",
+                ps -> ps.setObject(1, dishId),
+                rs -> {
+                    boolean result = false;
+                    if(rs.next()) result = rs.getBoolean("doesDishExist");
+                    return result;
                 }
         );
     }

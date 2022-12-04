@@ -22,12 +22,11 @@ public interface ProductRepository {
      * в БД у пользователя {@link Product#getUser()} продукт содержащий такой же {@link ProductContext} и если
      * ответ положительный - генерирует исключение.
      * @param product сохраняемый продукт.
-     * @return true - если указанный продукт отсутсвовал в БД или отличался от переданного, иначе - false.
      * @throws ValidateException если верно одно из следующих условий:<br/>
      *         1. если product имеет значение null.<br/>
      *         2. если в БД уже есть другой продукт с таким же контекстом ({@link ProductContext}).
      */
-    public boolean save(Product product);
+    public void save(Product product);
 
     /**
      * Удаляет из БД продукт, который принадлежит пользователю с идентификатором userId и имеет идентификатор

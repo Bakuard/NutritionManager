@@ -51,26 +51,16 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public boolean save(Product product) {
+    public void save(Product product) {
         Validator.check("ProductRepository.product", notNull(product));
 
-        Product oldProduct = getById(product.getUser().getId(), product.getId()).orElse(null);
-
-        boolean newData = false;
         try {
-            if (oldProduct == null) {
-                addNewProduct(product);
-                newData = true;
-            } else if(!product.equalsFullState(oldProduct)) {
-                updateProduct(product);
-                newData = true;
-            }
+            if(doesProductExist(product.getId())) updateProduct(product);
+            else addNewProduct(product);
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save product").
                     addReason(Rule.of("ProductRepository.product", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
-
-        return newData;
     }
 
     @Override
@@ -696,6 +686,19 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 }
         );
     }
+
+    private boolean doesProductExist(UUID productId) {
+        return statement.query(
+                "select count(*) > 0 as doesProductExist from Products where productId = ?;",
+                ps -> ps.setObject(1, productId),
+                rs -> {
+                    boolean result = false;
+                    if(rs.next()) result = rs.getBoolean("doesProductExist");
+                    return result;
+                }
+        );
+    }
+
 
 
     private List<SortField<?>> getOrderFields(List<String> optionalFields,
