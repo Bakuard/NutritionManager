@@ -808,7 +808,7 @@ class InputTest {
                 setMenuRepository(menuRepository).
                 tryBuild();
 
-        AssertUtil.assertEquals(new BigDecimal(30), input.getMinServingNumber());
+        Assertions.assertThat(input.getMinServingNumber()).isEqualByComparingTo(new BigDecimal(30));
     }
 
     @Test

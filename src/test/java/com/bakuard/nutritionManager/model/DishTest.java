@@ -150,7 +150,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantity(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(18), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(18));
     }
 
     @Test
@@ -270,7 +273,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantityPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(1980), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1980));
     }
 
     @Test
@@ -439,7 +445,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(4000), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(4000));
     }
 
     @Test
@@ -464,7 +473,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(6090), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(6090));
     }
 
     @Test
@@ -501,7 +513,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(8850), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(8850));
     }
 
     @Test
@@ -1527,7 +1542,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -1576,7 +1594,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(200), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(200));
     }
 
     @Test
@@ -1633,7 +1654,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(7700), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(7700));
     }
 
     @Test
@@ -1689,7 +1713,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1850), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1850));
     }
 
     @Test
@@ -1771,7 +1798,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -1819,7 +1849,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1500), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1500));
     }
 
     @Test
@@ -1875,7 +1908,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1350), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1350));
     }
 
     @Test
@@ -1932,7 +1968,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(2050), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(2050));
     }
 
     @Test
@@ -2034,8 +2073,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-
-        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -2107,7 +2148,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal(850), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(850));
     }
 
     @Test
@@ -2195,7 +2239,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal(4525), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(4525));
     }
 
     @Test
@@ -2282,7 +2329,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1950), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1950));
     }
 
 

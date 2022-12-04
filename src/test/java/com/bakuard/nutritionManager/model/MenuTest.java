@@ -10,6 +10,7 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -1231,7 +1232,10 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getDishIngredientQuantity(product, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(100), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(100));
     }
 
     @Test
@@ -1506,7 +1510,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getNecessaryQuantity(productGroup, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(550), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(550));
     }
 
     @Test
@@ -1653,7 +1657,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackPackageQuantity(productGroup, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(42), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(42));
     }
 
     @Test
@@ -1805,7 +1809,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackPackageQuantityPrice(productGroup, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(2352), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(2352));
     }
 
     @Test
@@ -2188,7 +2192,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackProductsPrice(menuItems, BigDecimal.TEN).orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1960 + 14800 + 2500), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(1960 + 14800 + 2500));
     }
 
     @Test
@@ -2278,7 +2282,8 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackProductsPrice(menuItems, BigDecimal.TEN).orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1960 + 14800 + 2500 + 12000 + 2500 + 36000), actual);
+        Assertions.assertThat(actual).
+                isEqualByComparingTo(new BigDecimal(1960 + 14800 + 2500 + 12000 + 2500 + 36000));
     }
 
     @Test
@@ -2440,7 +2445,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getMinPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1200 + 3000), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(1200 + 3000));
     }
 
     @Test
@@ -2521,7 +2526,8 @@ class MenuTest {
 
         BigDecimal actual = menu.getMinPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1200 + 3000 + 860 + 180 + 440 + 66), actual);
+        Assertions.assertThat(actual).
+                isEqualByComparingTo(new BigDecimal(1200 + 3000 + 860 + 180 + 440 + 66));
     }
 
     @Test
@@ -2683,7 +2689,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getMaxPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1500 + 6000), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(1500 + 6000));
     }
 
     @Test
@@ -2764,7 +2770,8 @@ class MenuTest {
 
         BigDecimal actual = menu.getMaxPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1500 + 540 + 250 + 6000 + 600 + 66), actual);
+        Assertions.assertThat(actual).
+                isEqualByComparingTo(new BigDecimal(1500 + 540 + 250 + 6000 + 600 + 66));
     }
 
     @Test
@@ -2929,7 +2936,7 @@ class MenuTest {
         BigDecimal expected = new BigDecimal(1200 + 3000).
                 add(new BigDecimal(1500 + 6000)).
                 divide(new BigDecimal(2), conf.getMathContext());
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(expected);
     }
 
     @Test
@@ -3013,7 +3020,7 @@ class MenuTest {
         BigDecimal expected = new BigDecimal(1200 + 3000 + 860 + 180 + 440 + 66).
                 add(new BigDecimal(1500 + 540 + 250 + 6000 + 600 + 66)).
                 divide(new BigDecimal(2), conf.getMathContext());
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(expected);
     }
 
 

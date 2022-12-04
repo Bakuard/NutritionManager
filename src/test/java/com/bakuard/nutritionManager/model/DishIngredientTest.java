@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.config.AppConfigData;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.validation.Constraint;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -86,8 +87,7 @@ class DishIngredientTest {
 
         BigDecimal actual = ingredient.getNecessaryQuantity(new BigDecimal("1.7"));
 
-        BigDecimal expected = new BigDecimal("17");
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal("17"));
     }
 
     @Test

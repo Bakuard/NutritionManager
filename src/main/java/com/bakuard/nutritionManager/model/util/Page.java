@@ -204,7 +204,7 @@ public final class Page<T> {
 
 
         private final BigInteger totalItems;
-        private final BigInteger commonPageSize;
+        private final BigInteger offset;
         private final BigInteger maxPageNumber;
         private final int actualSize;
         private final BigInteger actualNumber;
@@ -220,7 +220,7 @@ public final class Page<T> {
             if(totalItems.signum() < 0)
                 throw new IllegalArgumentException("totalItems can't be negative. totalItems = " + totalItems);
 
-            commonPageSize = BigInteger.valueOf(
+            BigInteger commonPageSize = BigInteger.valueOf(
                     Math.min(Math.max(expectedPageSize, minPageSize), maxPageSize)
             );
 
@@ -233,8 +233,10 @@ public final class Page<T> {
                     max(BigInteger.ZERO).
                     min(maxPageNumber);
 
+            offset = commonPageSize.multiply(actualNumber);
+
             actualSize = totalItems.
-                    subtract(getOffset()).
+                    subtract(offset).
                     min(commonPageSize).
                     intValue();
         }
@@ -247,7 +249,7 @@ public final class Page<T> {
          * @return смещение перед первым элементом страницы.
          */
         public BigInteger getOffset() {
-            return commonPageSize.multiply(actualNumber);
+            return offset;
         }
 
         /**
@@ -349,9 +351,8 @@ public final class Page<T> {
         @Override
         public String toString() {
             return "Metadata{" +
-                    "offset=" + getOffset() +
+                    "offset=" + offset +
                     ", totalItems=" + totalItems +
-                    ", commonPageSize=" + commonPageSize +
                     ", maxPageNumber=" + maxPageNumber +
                     ", actualSize=" + actualSize +
                     ", actualNumber=" + actualNumber +

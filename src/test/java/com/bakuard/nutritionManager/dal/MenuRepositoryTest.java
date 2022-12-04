@@ -101,7 +101,9 @@ class MenuRepositoryTest {
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -136,7 +138,9 @@ class MenuRepositoryTest {
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -245,7 +249,9 @@ class MenuRepositoryTest {
         });
         Menu actual = menuRepository.tryGetById(user.getId(), updatedMenu.getId());
 
-        AssertUtil.assertEquals(updatedMenu, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(updatedMenu);
     }
 
     @Test
@@ -327,7 +333,9 @@ class MenuRepositoryTest {
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -490,7 +498,9 @@ class MenuRepositoryTest {
 
         Menu actual = commit(() -> menuRepository.tryRemove(user.getId(), toUUID(0)));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -566,7 +576,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.getById(user.getId(), toUUID(100)).orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -647,7 +659,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -723,7 +737,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.getByName(user.getId(), "Menu#100").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -803,7 +819,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.tryGetByName(user.getId(), "Menu#100");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1078,7 +1096,9 @@ class MenuRepositoryTest {
         Page<Menu> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(4, 30).
                 createPage(menus);
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1104,7 +1124,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1133,7 +1155,9 @@ class MenuRepositoryTest {
         Page<Menu> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1159,7 +1183,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
     
     @Test
@@ -1188,7 +1214,9 @@ class MenuRepositoryTest {
         Page<Menu> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
     
     @Test
@@ -1217,7 +1245,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
     
     @Test
@@ -1246,7 +1276,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
     
     @Test
@@ -1278,7 +1310,9 @@ class MenuRepositoryTest {
         Page<Menu> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(2, 30).
                 createPage(menus.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
     
     @Test
@@ -1311,7 +1345,9 @@ class MenuRepositoryTest {
         Page<Menu> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(4, 30).
                 createPage(menus.subList(2, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1340,7 +1376,9 @@ class MenuRepositoryTest {
         Page<Menu> expected = PageableByNumber.of(30, 0).
                 createPageMetadata(2, 30).
                 createPage(List.of(menus.get(0), menus.get(3)));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1374,7 +1412,9 @@ class MenuRepositoryTest {
         Page<Menu> expected = PageableByNumber.of(2, 1).
                 createPageMetadata(1, 30).
                 createPage(List.of(menus.get(3)));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test

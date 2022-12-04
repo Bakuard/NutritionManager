@@ -72,7 +72,9 @@ class UserRepositoryTest {
         commit(() -> repository.save(expected));
 
         User actual = repository.tryGetById(toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -101,7 +103,9 @@ class UserRepositoryTest {
         commit(() -> repository.save(expected));
 
         User actual = repository.tryGetById(toUUID(3));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -197,7 +201,9 @@ class UserRepositoryTest {
         commit(() -> repository.save(expected));
 
         User actual =  repository.tryGetById(toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -344,7 +350,9 @@ class UserRepositoryTest {
 
         User actual = repository.getById(toUUID(1)).orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -377,7 +385,9 @@ class UserRepositoryTest {
 
         User actual = repository.tryGetById(toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -408,7 +418,9 @@ class UserRepositoryTest {
 
         User actual = repository.getByName("User1").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -452,7 +464,9 @@ class UserRepositoryTest {
 
         User actual = repository.tryGetByName("User1");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -483,7 +497,9 @@ class UserRepositoryTest {
 
         User actual = repository.getByEmail("user1@mail.com").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -527,7 +543,9 @@ class UserRepositoryTest {
 
         User actual = repository.tryGetByEmail("user1@mail.com");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
 

@@ -116,24 +116,4 @@ public class AssertUtil {
         }
     }
 
-    public static void assertEquals(BigDecimal a, BigDecimal b) {
-        if(a.compareTo(b) != 0) Assertions.fail("Expected: " + a + ", actual: " + b);
-    }
-
-    public static <T extends Entity<T>> void assertEquals(T a, T b) {
-        if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
-    }
-
-    public static <T extends Entity<T>> void assertEquals(Page<T> a, Page<T> b) {
-        boolean isEqual = a.getMetadata().equals(b.getMetadata()) &&
-                IntStream.range(0, a.getMetadata().getActualSize()).
-                        allMatch(i -> {
-                            T entityA = a.getContent().get(i);
-                            T entityB = b.getContent().get(i);
-                            return entityA.equalsFullState(entityB);
-                        });
-
-        if(!isEqual) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
-    }
-
 }

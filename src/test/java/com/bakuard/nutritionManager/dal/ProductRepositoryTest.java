@@ -86,7 +86,9 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
         Product actual = repository.tryGetById(user.getId(), expected.getId());
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -119,7 +121,9 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
 
         Product actual = repository.tryGetById(user2.getId(), toUUID(3));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -241,7 +245,9 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -328,7 +334,9 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -345,7 +353,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("tryRemove(userId, productId): userId is null => exception")
     void tryRemove2() {
-        User user = createAndSaveUser(1);
+        createAndSaveUser(1);
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryRemove(null, toUUID(1))),
@@ -417,7 +425,9 @@ class ProductRepositoryTest {
 
         Product actual = commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -434,7 +444,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("getById(userId, productId): userId is null => exception")
     void getById2() {
-        User user = createAndSaveUser(1);
+        createAndSaveUser(1);
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(null, toUUID(1))),
@@ -486,7 +496,11 @@ class ProductRepositoryTest {
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.type(Product.class)).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -503,7 +517,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("tryGetById(userId, productId): userId is null => exception")
     void tryGetById2() {
-        User user = createAndSaveUser(1);
+        createAndSaveUser(1);
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(null, toUUID(1))),
@@ -557,7 +571,9 @@ class ProductRepositoryTest {
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1203,8 +1219,7 @@ class ProductRepositoryTest {
     void getProducts2() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
-        List<Product> products = createAndSaveProducts(user1);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user1);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1212,7 +1227,9 @@ class ProductRepositoryTest {
                         setFilter(Filter.user(user2.getId()))
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1237,7 +1254,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1262,7 +1281,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1292,7 +1313,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1322,7 +1345,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1383,7 +1408,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1396,8 +1423,7 @@ class ProductRepositoryTest {
             """)
     void getProducts9() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1414,7 +1440,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1451,7 +1479,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1468,8 +1498,7 @@ class ProductRepositoryTest {
             """)
     void getProducts11() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1485,7 +1514,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1519,7 +1550,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1535,8 +1568,7 @@ class ProductRepositoryTest {
             """)
     void getProducts13() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1552,7 +1584,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1569,8 +1603,7 @@ class ProductRepositoryTest {
             """)
     void getProducts14() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1587,7 +1620,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1622,7 +1657,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1639,8 +1676,7 @@ class ProductRepositoryTest {
             """)
     void getProducts16() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1656,7 +1692,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1675,8 +1713,7 @@ class ProductRepositoryTest {
             """)
     void getProducts17() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1693,7 +1730,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1733,7 +1772,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1751,8 +1792,7 @@ class ProductRepositoryTest {
             """)
     void getProducts19() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1769,7 +1809,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1826,7 +1868,9 @@ class ProductRepositoryTest {
         Page<Product> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(2, 200).
                 createPage(products.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1885,7 +1929,9 @@ class ProductRepositoryTest {
         Page<Product> expected = PageableByNumber.of(5, 0).
                 createPageMetadata(1, 200).
                 createPage(products.subList(3, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1945,7 +1991,9 @@ class ProductRepositoryTest {
                                 products.get(0)
                         )
                 );
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1970,7 +2018,7 @@ class ProductRepositoryTest {
             """)
     void getProducts23() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1997,8 +2045,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        Page<Product> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test

@@ -98,7 +98,9 @@ class DishRepositoryTest {
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -133,7 +135,9 @@ class DishRepositoryTest {
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -307,7 +311,9 @@ class DishRepositoryTest {
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -421,7 +427,9 @@ class DishRepositoryTest {
         commit(() -> dishRepository.save(expected));
 
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -517,7 +525,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.tryRemove(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -594,7 +604,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.getById(user.getId(), toUUID(100)).orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -673,7 +685,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -750,7 +764,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.getByName(user.getId(), "dish A").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -829,7 +845,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.tryGetByName(user.getId(), "dish A");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1066,7 +1084,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1090,7 +1110,9 @@ class DishRepositoryTest {
         Page<Dish> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(4, 30).
                 createPage(dishes);
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1114,7 +1136,9 @@ class DishRepositoryTest {
         Page<Dish> expected = PageableByNumber.of(3, 1).
                 createPageMetadata(4, 200).
                 createPage(dishes.subList(3, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1141,7 +1165,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1170,7 +1196,9 @@ class DishRepositoryTest {
         Page<Dish> expected = PageableByNumber.of(2, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(2, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1200,7 +1228,9 @@ class DishRepositoryTest {
         Page<Dish> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(3, 200).
                 createPage(dishes.subList(0, 3));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1228,7 +1258,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1261,7 +1293,9 @@ class DishRepositoryTest {
         Page<Dish> expected = PageableByNumber.of(4, 0).
                 createPageMetadata(2, 200).
                 createPage(dishes.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1292,7 +1326,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
