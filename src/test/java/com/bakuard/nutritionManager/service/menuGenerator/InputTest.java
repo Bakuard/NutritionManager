@@ -1700,7 +1700,7 @@ class InputTest {
         return new Criteria().
                 setPageable(PageableByNumber.of(30, 0)).
                 setFilter(filter).
-                setSort(Sort.products().asc("price"));
+                setSort(Sort.products("price"));
     }
 
     private Criteria dishCriteria(Filter filter) {

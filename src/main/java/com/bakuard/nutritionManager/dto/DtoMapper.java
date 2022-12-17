@@ -25,7 +25,6 @@ import com.bakuard.nutritionManager.service.report.ReportService;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.RuleException;
 import com.bakuard.nutritionManager.validation.ValidateException;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -167,7 +166,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.products(Arrays.asList(sortRule))).
+                setSort(Sort.products(sortRule)).
                 setFilter(filter);
     }
 
@@ -316,7 +315,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.dishes(Arrays.asList(sortRule))).
+                setSort(Sort.dishes(sortRule)).
                 setFilter(filter);
     }
 
@@ -484,7 +483,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.menus(Arrays.asList(sortRule))).
+                setSort(Sort.menus(sortRule)).
                 setFilter(filter);
     }
 

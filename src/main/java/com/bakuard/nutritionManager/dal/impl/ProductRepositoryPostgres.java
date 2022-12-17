@@ -700,7 +700,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
 
-
     private List<SortField<?>> getOrderFields(List<String> optionalFields,
                                               Sort productSort,
                                               String tableName) {
@@ -708,22 +707,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         optionalFields.forEach(f -> fields.add(field(tableName + "." + f).desc()));
 
-        for(int i = 0; i < productSort.getParametersNumber(); i++) {
-            switch(productSort.getParameter(i)) {
-                case "category" -> {
-                    if(productSort.isAscending(i))
-                        fields.add(field(tableName + ".category").asc());
-                    else
-                        fields.add(field(tableName + ".category").desc());
-                }
-                case "price" -> {
-                    if(productSort.isAscending(i))
-                        fields.add(field(tableName + ".price").asc());
-                    else
-                        fields.add(field(tableName + ".price").desc());
-                }
-            }
-        }
+        productSort.forEachParam(param -> {
+            if(param.isAscending()) fields.add(field(tableName + "." + param.param()).asc());
+            else fields.add(field(tableName + "." + param.param()).desc());
+        });
+
         fields.add(field(tableName + ".productId").asc());
         if("P".equals(tableName)) {
             fields.add(field("ProductTags.index").asc());

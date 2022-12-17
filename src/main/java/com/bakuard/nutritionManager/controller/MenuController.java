@@ -281,14 +281,25 @@ public class MenuController {
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 30]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
-            @Parameter(description = "Указывает порядок сортировки выборки меню.",
-                    schema = @Schema(
-                            defaultValue = "name_asc (Сортировка по наименованию в порядке возрастания).",
-                            allowableValues = {
-                                    "name_asc",
-                                    "name_desc"
-                            }
-                    ))
+            @Parameter(description = """
+                    Задает порядок сортировки
+                    <br/><br/>
+                    Допустимые параметры (без учета регистра символов):
+                    <ol>
+                        <li>name - сортировка по наименованию меню </li>
+                    </ol>
+                    Параметры сортировки можно комбинировать через запятую.
+                    </br></br>
+                    Направление сортировки для параметра задается в виде <i>параметр_направление</i>, где направление
+                     задается одной из следующих констант (без учета регистра символов):
+                    <ol>
+                        <li>asc (по умолчанию)</li>
+                        <li>ascending</li>
+                        <li>desc</li>
+                        <li>descending</li>
+                    </ol>
+                    """,
+                    schema = @Schema(defaultValue = "name_asc"))
             String sortRule,
             @RequestParam(value = "dishNames", required = false)
             @Parameter(description = """
@@ -423,14 +434,13 @@ public class MenuController {
     )
     @Transactional
     @GetMapping("/getIngredientProductsOfAllDishes")
-    public ResponseEntity<MenuDishesProductsListResponse> getAllDishIngredientProducts(
+    public ResponseEntity<MenuDishesProductsListResponse> getIngredientProductsOfAllDishes(
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
             UUID menuId,
             @RequestParam(value = "menuQuantity", required = false)
             @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
-            BigDecimal menuQuantity
-    ) {
+            BigDecimal menuQuantity) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Get all ingredient products of all dishes for menuId={}, menuQuantity={}",
                 menuId, menuQuantity);

@@ -243,14 +243,25 @@ public class DishController {
             @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 30]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
-            @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
-                schema = @Schema(
-                    defaultValue = "name_asc (Сортировка по наименованию в порядке возрастания).",
-                    allowableValues = {
-                            "name_asc",
-                            "name_desc"
-                    }
-            ))
+            @Parameter(description = """
+                    Задает порядок сортировки
+                    <br/><br/>
+                    Допустимые параметры (без учета регистра символов):
+                    <ol>
+                        <li>name - сортировка по наименованию блюд </li>
+                    </ol>
+                    Параметры сортировки можно комбинировать через запятую.
+                    </br></br>
+                    Направление сортировки для параметра задается в виде <i>параметр_направление</i>, где направление
+                     задается одной из следующих констант (без учета регистра символов):
+                    <ol>
+                        <li>asc (по умолчанию)</li>
+                        <li>ascending</li>
+                        <li>desc</li>
+                        <li>descending</li>
+                    </ol>
+                    """,
+                schema = @Schema(defaultValue = "name_asc"))
             String sortRule,
             @RequestParam(value = "productCategories", required = false)
             @Parameter(description = """

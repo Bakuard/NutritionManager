@@ -1892,7 +1892,7 @@ class ProductRepositoryTest {
                                 )
                         ).
                         setSort(
-                                Sort.products().desc("price")
+                                Sort.products("price_desc")
                         )
         );
 

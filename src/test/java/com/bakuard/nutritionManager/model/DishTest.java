@@ -2401,13 +2401,13 @@ class DishTest {
         return new Criteria().
                 setPageable(PageableByNumber.ofIndex(30, productIndex)).
                 setFilter(filter).
-                setSort(Sort.products().asc("price"));
+                setSort(Sort.products("price"));
     }
 
     private Criteria criteriaById(int productId, Filter filter) {
         return new Criteria().
                 setPageable(PageableById.of(30, toUUID(productId))).
-                setSort(Sort.products().asc("price")).
+                setSort(Sort.products("price")).
                 setFilter(filter);
     }
 

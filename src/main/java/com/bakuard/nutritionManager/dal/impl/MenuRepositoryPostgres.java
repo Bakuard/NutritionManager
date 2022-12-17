@@ -799,16 +799,11 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                               String tableName) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
 
-        for(int i = 0; i < menuSort.getParametersNumber(); i++) {
-            switch(menuSort.getParameter(i)) {
-                case "name" -> {
-                    if(menuSort.isAscending(i))
-                        fields.add(field(tableName + ".name").asc());
-                    else
-                        fields.add(field(tableName + ".name").desc());
-                }
-            }
-        }
+        menuSort.forEachParam(param -> {
+            if(param.isAscending()) fields.add(field(tableName + "." + param.param()).asc());
+            else fields.add(field(tableName + "." + param.param()).desc());
+        });
+
         fields.add(field(tableName + ".menuId").asc());
         if("M".equals(tableName)) {
             fields.add(field("MenuItems.index").asc());

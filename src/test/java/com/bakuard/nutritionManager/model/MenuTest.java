@@ -3211,7 +3211,7 @@ class MenuTest {
         return new Criteria().
                 setPageable(PageableByNumber.of(30, pageNumber)).
                 setFilter(filter).
-                setSort(Sort.products().asc("price"));
+                setSort(Sort.products("price"));
     }
 
     private Criteria criteriaNumber(Filter filter) {

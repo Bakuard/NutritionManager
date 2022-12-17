@@ -267,16 +267,26 @@ public class ProductController {
             @Parameter(description = "Размер страницы выборки. Диапазон значений - [1, 30]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
-            @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
-                     schema = @Schema(
-                             defaultValue = "category_asc (Сортировка по категориям в порядке возрастания).",
-                             allowableValues = {
-                                     "category_asc",
-                                     "price_asc",
-                                     "category_desc",
-                                     "price_desc"
-                             }
-                     ))
+            @Parameter(description = """
+                    Задает порядок сортировки
+                    <br/><br/>
+                    Допустимые параметры (без учета регистра символов):
+                    <ol>
+                        <li>category - сортировка по категориям продуктов </li>
+                        <li>price - сортировка по цене продуктов </li>
+                    </ol>
+                    Параметры сортировки можно комбинировать через запятую.
+                    </br></br>
+                    Направление сортировки для параметра задается в виде <i>параметр_направление</i>, где направление
+                     задается одной из следующих констант (без учета регистра символов):
+                    <ol>
+                        <li>asc (по умолчанию)</li>
+                        <li>ascending</li>
+                        <li>desc</li>
+                        <li>descending</li>
+                    </ol>
+                    """,
+                     schema = @Schema(defaultValue = "category_asc"))
             String sortRule,
             @RequestParam(value = "onlyFridge", required = false)
             @Parameter(description = """

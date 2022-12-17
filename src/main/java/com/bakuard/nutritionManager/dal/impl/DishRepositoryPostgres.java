@@ -769,16 +769,11 @@ public class DishRepositoryPostgres implements DishRepository {
                                               String tableName) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
 
-        for(int i = 0; i < dishSort.getParametersNumber(); i++) {
-            switch(dishSort.getParameter(i)) {
-                case "name" -> {
-                    if(dishSort.isAscending(i))
-                        fields.add(field(tableName + ".name").asc());
-                    else
-                        fields.add(field(tableName + ".name").desc());
-                }
-            }
-        }
+        dishSort.forEachParam(param -> {
+            if(param.isAscending()) fields.add(field(tableName + "." + param.param()).asc());
+            else fields.add(field(tableName + "." + param.param()).desc());
+        });
+
         fields.add(field(tableName + ".dishId").asc());
         if("D".equals(tableName)) {
             fields.add(field("DishIngredients.index").asc());

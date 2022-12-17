@@ -107,7 +107,7 @@ public class Dish implements Entity<Dish> {
         this.tags = new ArrayList<>(tagContainer.get());
         this.config = config;
         this.productRepository = productRepository;
-        this.ingredientProductsSort = Sort.products().asc("price");
+        this.ingredientProductsSort = Sort.products("price");
     }
 
     /**
