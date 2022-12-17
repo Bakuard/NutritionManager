@@ -42,12 +42,12 @@ public class EmailService {
 
     private void sendEmail(String htmlFileName, String jws, String email) throws MessagingException {
         Properties properties = new Properties();
-        properties.setProperty("confirmationMail.transport.protocol", "smtps");
-        properties.setProperty("confirmationMail.smtp.host", "smtp.gmail.com");
-        properties.setProperty("confirmationMail.smtp.port", "465");
-        properties.setProperty("confirmationMail.smtp.auth", "true");
-        properties.setProperty("confirmationMail.smtp.socketFactory.port", "465");
-        properties.setProperty("confirmationMail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        properties.setProperty("mail.transport.protocol", "smtps");
+        properties.setProperty("mail.smtp.host", "smtp.gmail.com");
+        properties.setProperty("mail.smtp.port", "465");
+        properties.setProperty("mail.smtp.auth", "true");
+        properties.setProperty("mail.smtp.socketFactory.port", "465");
+        properties.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
         Session session = Session.getInstance(properties, new Authenticator() {
             @Override

@@ -12,6 +12,9 @@ import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
 import com.bakuard.nutritionManager.service.report.ReportService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -48,6 +51,9 @@ import javax.sql.DataSource;
 @EnableTransactionManagement
 @EnableScheduling
 @ConfigurationPropertiesScan
+@SecurityScheme(name = "commonToken", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
+@SecurityScheme(name = "registrationToken", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
+@SecurityScheme(name = "restorePassToken", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class SpringConfig implements WebMvcConfigurer {
 
     @Bean

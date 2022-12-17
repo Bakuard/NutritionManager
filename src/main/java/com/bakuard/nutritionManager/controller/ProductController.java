@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.slf4j.Logger;
@@ -52,23 +54,23 @@ public class ProductController {
         this.imageUploaderService = imageUploaderService;
     }
 
-    @Operation(summary = "Загружает изображение продукта и возвращает его URL",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = """
+    @Operation(summary = "Загружает изображение продукта и возвращает его URL")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = """
                                     Если размер файла превышает 250 Кб.
                                     """,
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/uploadImage")
+    @Transactional
     public ResponseEntity<SuccessResponse<URL>> uploadImage(@RequestParam("image") MultipartFile image) {
         logger.info("Upload product image.");
 
@@ -77,21 +79,21 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toSuccessResponse("product.uploadImage", imageUrl));
     }
 
-    @Operation(summary = "Добавление нового продукта",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Добавление нового продукта")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/add")
+    @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody ProductAddRequest dto) {
         logger.info("Add new product. dto={}", dto);
 
@@ -102,21 +104,21 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toSuccessResponse("product.add", response));
     }
 
-    @Operation(summary = "Обновление продукта",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Обновление продукта")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PutMapping("/update")
+    @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody ProductUpdateRequest dto) {
         logger.info("Update product. dto={}", dto);
 
@@ -127,21 +129,21 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toSuccessResponse("product.update", response));
     }
 
-    @Operation(summary = "Удаление продукта",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти продукт с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Удаление продукта")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти продукт с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @DeleteMapping("/delete")
+    @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> delete(
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.", required = true)
@@ -155,25 +157,25 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toSuccessResponse("product.delete", response));
     }
 
-    @Operation(summary = "Увеличение кол-ва продукта имеющегося в наличии у пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти продукт с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Увеличение кол-ва продукта имеющегося в наличии у пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти продукт с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PatchMapping("/addQuantity")
+    @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> addQuantity(@RequestBody ProductAddedQuantityRequest dto) {
         logger.info("Add quantity to product. dto={}", dto);
 
@@ -186,25 +188,25 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toSuccessResponse("product.addQuantity", response));
     }
 
-    @Operation(summary = "Уменьшение кол-ва продукта имеющегося в наличии у пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти продукт с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Уменьшение кол-ва продукта имеющегося в наличии у пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти продукт с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PatchMapping("/takeQuantity")
+    @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> takeQuantity(@RequestBody ProductTakeQuantityRequest dto) {
         logger.info("Take quantity from product. dto={}", dto);
 
@@ -217,21 +219,21 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toSuccessResponse("product.takeQuantity", response));
     }
 
-    @Operation(summary = "Получение продукта по его ID",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти продукт с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Получение продукта по его ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти продукт с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getById")
+    @Transactional
     public ResponseEntity<ProductResponse> getById(
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.", required = true)
@@ -244,21 +246,21 @@ public class ProductController {
         return ResponseEntity.ok(mapper.toProductResponse(product));
     }
 
-    @Operation(summary = "Получение выборки продуктов указанного пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связанный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Получение выборки продуктов указанного пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с параметрами запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getByFilter")
+    @Transactional
     public ResponseEntity<Page<ProductResponse>> getByFilter(
             @RequestParam("page")
             @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
@@ -379,17 +381,17 @@ public class ProductController {
     @Operation(summary = """
             Возвращает производителей, торговые точки, сорта, категории и теги всех продуктов пользователя
              сделавшего запрос.
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+            """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getAllProductsFields")
+    @Transactional
     public ResponseEntity<ProductFieldsResponse> getAllProductsFields() {
         logger.info("Get products categories, sorts, tags, manufacturers, shops for user");
 

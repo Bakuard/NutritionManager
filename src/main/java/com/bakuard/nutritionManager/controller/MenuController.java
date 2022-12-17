@@ -22,6 +22,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,23 +71,23 @@ public class MenuController {
         this.menuGeneratorService = menuGeneratorService;
     }
 
-    @Operation(summary = "Загружает изображение меню и возвращает его URL",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = """
+    @Operation(summary = "Загружает изображение меню и возвращает его URL")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = """
                                     Если размер файла превышает 250 Кб.
                                     """,
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/uploadImage")
+    @Transactional
     public ResponseEntity<SuccessResponse<URL>> uploadImage(@RequestParam("image") MultipartFile image) {
         logger.info("Upload menu image.");
 
@@ -94,21 +96,21 @@ public class MenuController {
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.uploadImage", imageUrl));
     }
 
-    @Operation(summary = "Добавление нового меню",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Добавление нового меню")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/add")
+    @Transactional
     public ResponseEntity<SuccessResponse<MenuResponse>> add(@RequestBody MenuAddRequest dto) {
         logger.info("Add new menu. dto={}", dto);
 
@@ -119,21 +121,21 @@ public class MenuController {
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.add", response));
     }
 
-    @Operation(summary = "Обновление меню",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Обновление меню")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PutMapping("/update")
+    @Transactional
     public ResponseEntity<SuccessResponse<MenuResponse>> update(@RequestBody MenuUpdateRequest dto) {
         logger.info("Update menu. dto={}", dto);
 
@@ -144,24 +146,24 @@ public class MenuController {
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.update", response));
     }
 
-    @Operation(summary = "Генерирует новое меню на основе заданных ограничений",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = """
+    @Operation(summary = "Генерирует новое меню на основе заданных ограничений")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = """
                                     Если нарушен хотя бы один из инвариантов связаный с телом запроса или
                                      невозможно создать меню удовлетворяющее заданным ограничениям.
                                     """,
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/generate")
+    @Transactional
     public ResponseEntity<SuccessResponse<MenuResponse>> generate(@RequestBody GenerateMenuRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("Generate menu for user={}. dto={}", userId, dto);
@@ -173,21 +175,21 @@ public class MenuController {
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.generate", response));
     }
 
-    @Operation(summary = "Удаление меню",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти меню с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Удаление меню")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти меню с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @DeleteMapping("/delete")
+    @Transactional
     public ResponseEntity<SuccessResponse<MenuResponse>> delete(
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор меню в формате UUID. Не может быть null.", required = true)
@@ -200,21 +202,21 @@ public class MenuController {
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.delete", response));
     }
 
-    @Operation(summary = "Получение меню по его ID",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти меню с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Получение меню по его ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти меню с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getById")
+    @Transactional
     public ResponseEntity<MenuResponse> getById(
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор меню в формате UUID. Не может быть null.", required = true)
@@ -227,21 +229,21 @@ public class MenuController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение меню по его наименованию",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти меню с таким наименованием",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Получение меню по его наименованию")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти меню с таким наименованием",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getByName")
+    @Transactional
     public ResponseEntity<MenuResponse> getByName(
             @RequestParam("name")
             @Parameter(description = "Наименование меню. Не может быть null.", required = true)
@@ -254,25 +256,25 @@ public class MenuController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Получение выборки меню указанного пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти пользователя с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Получение выборки меню указанного пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти пользователя с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getByFilter")
+    @Transactional
     public ResponseEntity<Page<MenuForListResponse>> getByFilter(
             @RequestParam("page")
             @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
@@ -341,17 +343,17 @@ public class MenuController {
 
     @Operation(summary = """
             Возвращает теги и наименования всех меню указанного пользователя.
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+            """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getAllMenusFields")
+    @Transactional
     public ResponseEntity<MenuFieldsResponse> getAllMenusFields() {
         logger.info("Get all menus fields");
 
@@ -365,25 +367,25 @@ public class MenuController {
     @Operation(summary = """
             Возвращает список продуктов для каждого ингредиента указанного блюда. Необходимое кол-во
              каждого продукта рассчитывается с учетом кол-ва блюда в указанном меню и кол-ва этого меню.
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти блюдо с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+            """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти блюдо с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getAllDishIngredientProducts")
+    @Transactional
     public ResponseEntity<MenuDishProductsListResponse> getAllDishIngredientProducts(
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
@@ -415,25 +417,25 @@ public class MenuController {
     @Operation(summary = """
             Возвращает список продуктов для каждого ингредиента каждого блюда. Необходимое кол-во
              каждого продукта рассчитывается с учетом кол-ва блюда в указанном меню и кол-ва этого меню.
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти блюдо с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+            """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти блюдо с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getIngredientProductsOfAllDishes")
+    @Transactional
     public ResponseEntity<MenuDishesProductsListResponse> getIngredientProductsOfAllDishes(
             @RequestParam("menuId")
             @Parameter(description = "Уникальный идентификатор меню. Не может быть null.", required = true)
@@ -456,25 +458,25 @@ public class MenuController {
             Составляет и возвращает отчет содержащий перечень всех недостающих продуктов и их кол-во, а также
              суммарную их стоимость. Этот список создается на основе выбранных пользователем продуктов для каждого
              ингредиента каждого блюда.
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class))),
-                    @ApiResponse(responseCode = "404",
-                            description = "Если не удалось найти меню с таким ID",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+            """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если не удалось найти меню с таким ID",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/createReport")
+    @Transactional
     public ResponseEntity<Resource> createReport(@RequestBody MenuReportRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         logger.info("create menu report: userId={}, dto={}", userId, dto);

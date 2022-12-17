@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.slf4j.Logger;
@@ -49,19 +51,17 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(
-            summary = "Аутентификация существующего пользователя",
-            description = "Используется для входа существующего пользователя в систему",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "403",
-                            description = "Если пользователь не найден или указан неверный пароль",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Аутентификация существующего пользователя",
+            description = "Используется для входа существующего пользователя в систему")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403",
+                    description = "Если пользователь не найден или указан неверный пароль",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @PostMapping("/enter")
+    @Transactional
     public ResponseEntity<SuccessResponse<JwsResponse>> enter(@RequestBody CredentialsForEnterRequest dto) {
         logger.info("User " + dto.getUserName() + " try enter");
 
@@ -71,24 +71,22 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.enter", response));
     }
 
-    @Operation(
-            summary = "Верификация почты пользователя для регистрации",
+    @Operation(summary = "Верификация почты пользователя для регистрации",
             description = """
                     Первый из двух шагов для регистрации нового пользователя.
                      Отправляет на указанную почту письмо с ссылкой для подтверждения почты.
                      При переходе по ссылке в письме пользователь переходит ко второму шагу регистрации -
                      добавление своих учетных данных.
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если не удалось отправить письмо на почту",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+                    """)
+    @ApiResponses(value ={
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если не удалось отправить письмо на почту",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @PostMapping("/verifyEmailForRegistration")
+    @Transactional
     public ResponseEntity<SuccessResponse<?>> verifyEmailForRegistration(@RequestBody EmailRequest dto) {
         logger.info("Verify email for registration");
 
@@ -96,24 +94,22 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.verifyEmailForRegistration", null));
     }
 
-    @Operation(
-            summary = "Верификация почты пользователя для смены учетных данных",
+    @Operation(summary = "Верификация почты пользователя для смены учетных данных",
             description = """
                     Первый из двух шагов для смены учетных данных существующего пользователя.
                      Отправляет на указанную почту письмо с ссылкой для подтверждения почты.
                      При переходе по ссылке в письме пользователь переходит ко второму шагу смены учетных данных -
                      указание своих новых учетных данных.
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "400",
-                            description = "Если не удалось отправить письмо на почту",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+                    """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400",
+                    description = "Если не удалось отправить письмо на почту",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @PostMapping("/verifyEmailForChangeCredentials")
+    @Transactional
     public ResponseEntity<SuccessResponse<?>> verifyEmailForChangeCredentials(@RequestBody EmailRequest dto) {
         logger.info("Verify email for change credentials");
 
@@ -121,23 +117,22 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.verifyEmailForChangeCredentials", null));
     }
 
-    @Operation(
-            summary = "Добавление учетных данных пользователя при регистрации",
+    @Operation(summary = "Добавление учетных данных пользователя при регистрации",
             description = """
                     Второй и завершающий шаг регистрации нового пользователя.
                      На этом шаге пользователь указывает свои учетные данные.
                      Необходимо указать в http заголовке Authorization токен полученный на предыдущем шаге.
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "403",
-                            description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+                    """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403",
+                    description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "registrationToken")
     @PostMapping("/registration")
+    @Transactional
     public ResponseEntity<SuccessResponse<JwsResponse>> registration(@RequestBody CredentialsForEnterRequest dto,
                                                                      @RequestHeader("Authorization") String registrationJws) {
         logger.info("registration new user = " + dto.getUserName());
@@ -148,23 +143,22 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.registration", response));
     }
 
-    @Operation(
-            summary = "Указание новых учетных данных пользователя",
+    @Operation(summary = "Указание новых учетных данных пользователя",
             description = """
                     Второй и завершающий шаг смены учетных данных пользователя.
                      На этом шаге пользователь указывает свои учетные данные.
                      Необходимо указать в http заголовке Authorization токен полученный на предыдущем шаге.
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "403",
-                            description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+                    """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403",
+                    description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "restorePassToken")
     @PostMapping("/changeCredential")
+    @Transactional
     public ResponseEntity<SuccessResponse<JwsResponse>> changeCredential(@RequestBody CredentialsForEnterRequest dto,
                                                                          @RequestHeader("Authorization") String changeCredentialsJws) {
         logger.info("change credentials for user with new name = " + dto.getUserName());
@@ -175,18 +169,17 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.changeCredential", response));
     }
 
-    @Operation(
-            summary = "Смена логина и почты пользователя из его личного кабинета.",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "403",
-                            description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Смена логина и почты пользователя из его личного кабинета.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403",
+                    description = "Если уже есть пользователь с такими учетными данными или передан неверный токен",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/changeLoginAndEmail")
+    @Transactional
     public ResponseEntity<SuccessResponse<UserResponse>> changeLoginAndEmail(
             @RequestBody ChangeLoginAndEmailRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
@@ -204,18 +197,17 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.changeLoginAndEmail", response));
     }
 
-    @Operation(
-            summary = "Смена пароля пользователя из его личного кабинета.",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "403",
-                            description = "Если передан неверный токен",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Смена пароля пользователя из его личного кабинета.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403",
+                    description = "Если передан неверный токен",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/changePassword")
+    @Transactional
     public ResponseEntity<SuccessResponse<UserResponse>> changePassword(@RequestBody ChangePasswordRequest dto) {
         UUID userId = JwsAuthenticationProvider.getAndClearUserId();
 
@@ -231,18 +223,17 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toSuccessResponse("auth.changePassword", response));
     }
 
-    @Operation(
-            summary = "Возвращает пользователя в соответствии с токеном доступа",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Возвращает пользователя в соответствии с токеном доступа")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @GetMapping("/getUserByJws")
+    @Transactional
     public ResponseEntity<UserResponse> getUserByJws(@RequestHeader("Authorization") String accessJws) {
         logger.info("Get user by accessJws. Step1 - try parse JWS.");
 
@@ -252,18 +243,17 @@ public class AuthController {
         return ResponseEntity.ok(mapper.toUserResponse(user));
     }
 
-    @Operation(
-            summary = "Выполняет logout для пользователя определяемого по токену доступа.",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401",
-                            description = "Если передан некорректный токен или токен не указан",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExceptionResponse.class)))
-            }
-    )
-    @Transactional
+    @Operation(summary = "Выполняет logout для пользователя определяемого по токену доступа.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
     @PostMapping("/logout")
+    @Transactional
     public ResponseEntity<SuccessResponse<?>> logout(@RequestHeader("Authorization") String accessJws) {
         logger.info("Logout user by accessJws. Step1 - try parse JWS.");
 
