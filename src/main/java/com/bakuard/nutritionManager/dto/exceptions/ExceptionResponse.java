@@ -21,7 +21,7 @@ public class ExceptionResponse {
     private String httpStatus;
     @Schema(description = "Http код ошибки")
     private int httpErrorCode;
-    @Schema(description = "Все пречины из-за которых запрос не смог завершится корректно")
+    @Schema(description = "Все причины из-за которых запрос не смог завершится корректно")
     private List<ConstraintResponse> reasons;
 
     public ExceptionResponse(HttpStatus status) {

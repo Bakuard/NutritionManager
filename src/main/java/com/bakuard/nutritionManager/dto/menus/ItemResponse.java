@@ -9,26 +9,13 @@ import java.util.UUID;
 @Schema(description = "Данные о блюде входящем в состав меню.")
 public class ItemResponse {
 
-    @Schema(description = """
-            Уникальный идентификатор элемента меню.
-            """)
+    @Schema(description = "Уникальный идентификатор элемента меню.")
     private UUID id;
-    @Schema(description = """
-            Наименование блюда. Ограничения: <br/>
-            1. Не может быть null. <br/>
-            2. Среди блюд пользователя должно быть блюдо с таким наименованием. <br/>
-            3. Значение должно содержать как минимум один отображаемый символ. <br/>
-            """)
+    @Schema(description = "Наименование блюда.")
     private String dishName;
-    @Schema(description = """
-            Кол-во порций указанного блюда. Ограничения: <br/>
-            1. Не может быть null. <br/>
-            2. Должно быть больше нуля. <br/>
-            """)
+    @Schema(description = "Кол-во порций указанного блюда.")
     private BigDecimal servingNumber;
-    @Schema(description = """
-            Порядковый номер (индекс) блюда среди всех блюд конкретного меню. Нумерация начинается с нуля.
-            """)
+    @Schema(description = "Порядковый номер (индекс) блюда среди всех блюд конкретного меню. Нумерация начинается с 0.")
     private int itemIndex;
 
     public ItemResponse() {

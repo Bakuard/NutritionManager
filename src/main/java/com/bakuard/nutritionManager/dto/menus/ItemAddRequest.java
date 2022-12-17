@@ -22,7 +22,7 @@ public class ItemAddRequest {
             """)
     private BigDecimal servingNumber;
     @Schema(description = """
-            Порядковый номер (индекс) блюда среди всех блюд конкретного меню. Нумерация начинается с нуля.
+            Порядковый номер (индекс) блюда среди всех блюд конкретного меню. Нумерация начинается с 0.
             """)
     private int itemIndex;
 

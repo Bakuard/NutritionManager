@@ -31,7 +31,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "Котроллер продуктов")
+@Tag(name = "Контроллер продуктов")
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -81,7 +81,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",
@@ -106,7 +106,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",
@@ -159,7 +159,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",
@@ -190,7 +190,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                            description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",
@@ -248,7 +248,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "400",
-                            description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                            description = "Если нарушен хотя бы один из инвариантов связанный с параметрами запроса",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ExceptionResponse.class))),
                     @ApiResponse(responseCode = "401",
@@ -264,7 +264,7 @@ public class ProductController {
             @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
             int page,
             @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 30]. Не может быть null.", required = true)
+            @Parameter(description = "Размер страницы выборки. Диапазон значений - [1, 30]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = "Указывает порядок сортировки выборки продуктов.",
@@ -337,7 +337,7 @@ public class ProductController {
                       которые имеют как минимум все указанные теги. Если параметр
                       имеет значение null или является пустым массивом - в выборку попадут
                       продукты связанные с любыми тегами.
-                      Если массив задается -  все эелементы должны содержать как минимум
+                      Если массив задается -  все элементы должны содержать как минимум
                       один отображаемый символ.
                      """,
                      schema = @Schema(defaultValue = "null"))
