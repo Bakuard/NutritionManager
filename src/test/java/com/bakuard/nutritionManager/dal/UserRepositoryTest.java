@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.Constraint;
 import org.assertj.core.api.Assertions;
@@ -24,7 +25,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class UserRepositoryTest {
 
@@ -33,7 +34,7 @@ class UserRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData appConfiguration;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -435,7 +436,7 @@ class UserRepositoryTest {
         User expected = new User(user);
         commit(() -> repository.save(user));
 
-        User actual = repository.getByEmail("user1@mail.com").orElseThrow();
+        User actual = repository.getByEmail("user1@confirmationMail.com").orElseThrow();
 
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -466,7 +467,7 @@ class UserRepositoryTest {
         commit(() -> repository.save(user));
 
         AssertUtil.assertValidateException(
-                () -> repository.tryGetByEmail("newEmail@mail.com"),
+                () -> repository.tryGetByEmail("newEmail@confirmationMail.com"),
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -481,7 +482,7 @@ class UserRepositoryTest {
         User expected = createUser(1);
         commit(() -> repository.save(expected));
 
-        User actual = repository.tryGetByEmail("user1@mail.com");
+        User actual = repository.tryGetByEmail("user1@confirmationMail.com");
 
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -519,7 +520,7 @@ class UserRepositoryTest {
                 setId(toUUID(userId)).
                 setName("User" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
     }
 

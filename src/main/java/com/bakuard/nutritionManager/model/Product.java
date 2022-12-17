@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.validation.Container;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
@@ -43,7 +43,7 @@ public class Product implements Entity<Product> {
                     BigDecimal quantity,
                     String imageUrl,
                     ProductContext.Builder contextBuilder,
-                    AppConfigData config) {
+                    ConfigData config) {
         Container<ProductContext> context = new Container<>();
         Container<URL> url = new Container<>();
 
@@ -60,7 +60,7 @@ public class Product implements Entity<Product> {
         this.id = id;
         this.user = user;
         this.context = context.get();
-        this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.quantity = quantity.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.description = description;
         this.imageUrl = url.get();
     }
@@ -209,7 +209,7 @@ public class Product implements Entity<Product> {
         private BigDecimal quantity;
         private String description;
         private String imageUrl;
-        private AppConfigData appConfigData;
+        private ConfigData configData;
 
         public Builder() {
             contextBuilder = new ProductContext.Builder();
@@ -280,9 +280,9 @@ public class Product implements Entity<Product> {
             return this;
         }
 
-        public Builder setAppConfiguration(AppConfigData appConfigData) {
-            this.appConfigData = appConfigData;
-            contextBuilder.setAppConfiguration(appConfigData);
+        public Builder setAppConfiguration(ConfigData configData) {
+            this.configData = configData;
+            contextBuilder.setAppConfiguration(configData);
             return this;
         }
 
@@ -299,7 +299,7 @@ public class Product implements Entity<Product> {
                     quantity,
                     imageUrl,
                     contextBuilder,
-                    appConfigData
+                    configData
             );
         }
 

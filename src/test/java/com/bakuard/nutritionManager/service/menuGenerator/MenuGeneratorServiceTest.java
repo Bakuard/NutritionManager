@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.service.menuGenerator;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.MenuRepository;
@@ -17,18 +18,23 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.util.*;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestConfig.class)
+@TestPropertySource(locations = "classpath:test.properties")
 class MenuGeneratorServiceTest {
 
-    private AppConfigData conf = AppConfigData.builder().
-            setNumberPrecision("16").
-            setNumberRoundingMod("CEILING").
-            setNumberScale("6").
-            build();
+    @Autowired
+    private ConfigData conf;
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;
@@ -288,7 +294,7 @@ class MenuGeneratorServiceTest {
                 setId(toUUID(userId)).
                 setName("User" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
     }
 

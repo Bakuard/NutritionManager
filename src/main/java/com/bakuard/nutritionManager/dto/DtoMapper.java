@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dto;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.dishes.*;
@@ -40,7 +40,7 @@ public class DtoMapper {
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;
-    private AppConfigData appConfiguration;
+    private ConfigData appConfiguration;
     private MessageSource messageSource;
 
     public DtoMapper(UserRepository userRepository,
@@ -48,7 +48,7 @@ public class DtoMapper {
                      DishRepository dishRepository,
                      MenuRepository menuRepository,
                      MessageSource messageSource,
-                     AppConfigData appConfiguration) {
+                     ConfigData appConfiguration) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.dishRepository = dishRepository;

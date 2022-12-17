@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
@@ -22,7 +22,7 @@ public class DishIngredient implements Entity<DishIngredient> {
     private final String name;
     private final Filter filter;
     private final BigDecimal quantity;
-    private final AppConfigData config;
+    private final ConfigData config;
 
     /**
      * Конструктор копирования. Выполняет глубокое копирование.
@@ -53,7 +53,7 @@ public class DishIngredient implements Entity<DishIngredient> {
                           String name,
                           Filter filter,
                           BigDecimal quantity,
-                          AppConfigData config) {
+                          ConfigData config) {
         Validator.check(
                 "DishIngredient.id", notNull(id),
                 "DishIngredient.name", notNull(name).and(() -> notBlank(name)),
@@ -65,7 +65,7 @@ public class DishIngredient implements Entity<DishIngredient> {
         this.id = id;
         this.name = name;
         this.filter = filter;
-        this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.quantity = quantity.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.config = config;
     }
 
@@ -106,7 +106,7 @@ public class DishIngredient implements Entity<DishIngredient> {
                 notNull(servingNumber).and(() -> positiveValue(servingNumber))
         );
 
-        return quantity.multiply(servingNumber, config.getMathContext());
+        return quantity.multiply(servingNumber, config.decimal().mathContext());
     }
 
     @Override
@@ -151,7 +151,7 @@ public class DishIngredient implements Entity<DishIngredient> {
         private String name;
         private Filter filter;
         private BigDecimal quantity;
-        private AppConfigData config;
+        private ConfigData config;
 
         public Builder() {
 
@@ -223,7 +223,7 @@ public class DishIngredient implements Entity<DishIngredient> {
          * @param config конфигурациооные данные всего приложения.
          * @return этот же объект.
          */
-        public Builder setConfig(AppConfigData config) {
+        public Builder setConfig(ConfigData config) {
             this.config = config;
             return this;
         }

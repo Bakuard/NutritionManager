@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.validation.Constraint;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class JwsBlackListTest {
 
@@ -33,7 +34,7 @@ class JwsBlackListTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData appConfiguration;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

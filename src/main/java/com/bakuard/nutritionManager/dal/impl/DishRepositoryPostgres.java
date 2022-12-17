@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dal.impl;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.impl.mappers.DishFilterMapper;
@@ -39,14 +39,14 @@ import static org.jooq.impl.DSL.*;
 public class DishRepositoryPostgres implements DishRepository {
 
     private JdbcTemplate statement;
-    private AppConfigData appConfig;
+    private ConfigData appConfig;
     private ProductRepositoryPostgres productRepository;
     private ProductFilterMapper filterMapper;
     private ProductFilterJsonMapper filterJsonMapper;
     private DishFilterMapper dishFilterMapper;
 
     public DishRepositoryPostgres(DataSource dataSource,
-                                  AppConfigData appConfig,
+                                  ConfigData appConfig,
                                   ProductRepositoryPostgres productRepository) {
         this.appConfig = appConfig;
         this.productRepository = productRepository;

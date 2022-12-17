@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.validation.Container;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
@@ -45,7 +45,7 @@ public class ProductContext {
                            BigDecimal price,
                            BigDecimal packingSize,
                            List<String> tags,
-                           AppConfigData config) {
+                           ConfigData config) {
         Container<List<Tag>> container = new Container<>();
 
         Validator.check(
@@ -65,8 +65,8 @@ public class ProductContext {
         this.grade = grade;
         this.manufacturer = manufacturer;
         this.unit = unit;
-        this.price = price.setScale(config.getNumberScale(), config.getRoundingMode());
-        this.packingSize = packingSize.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.price = price.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
+        this.packingSize = packingSize.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.tags = ImmutableList.copyOf(container.get());
         this.hashKey = calculateSha256();
     }
@@ -233,7 +233,7 @@ public class ProductContext {
         private BigDecimal price;
         private BigDecimal packingSize;
         private final List<String> tags;
-        private AppConfigData appConfigData;
+        private ConfigData configData;
 
         public Builder() {
             tags = new ArrayList<>();
@@ -274,8 +274,8 @@ public class ProductContext {
             return this;
         }
 
-        public Builder setAppConfiguration(AppConfigData appConfigData) {
-            this.appConfigData = appConfigData;
+        public Builder setAppConfiguration(ConfigData configData) {
+            this.configData = configData;
             return this;
         }
 
@@ -287,7 +287,7 @@ public class ProductContext {
         @Override
         public ProductContext tryBuild() throws ValidateException {
             return new ProductContext(category, shop, grade, manufacturer, unit,
-                    price, packingSize, tags, appConfigData);
+                    price, packingSize, tags, configData);
         }
 
     }

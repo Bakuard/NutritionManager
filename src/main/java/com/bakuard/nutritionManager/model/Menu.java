@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.validation.*;
 
@@ -27,7 +27,7 @@ public class Menu implements Entity<Menu> {
     private List<MenuItem> items;
     private List<Tag> tags;
 
-    private final AppConfigData config;
+    private final ConfigData config;
 
     public Menu(Menu other) {
         id = other.id;
@@ -47,7 +47,7 @@ public class Menu implements Entity<Menu> {
                  String imageUrl,
                  List<AbstractBuilder<MenuItem>> items,
                  List<String> tags,
-                 AppConfigData config) {
+                 ConfigData config) {
         Container<List<MenuItem>> menuItemsContainer = new Container<>();
         Container<List<Tag>> tagContainer = new Container<>();
         Container<URL> imageURlContainer = new Container<>();
@@ -274,7 +274,7 @@ public class Menu implements Entity<Menu> {
             MenuItem item = items.get(product.itemIndex());
             DishIngredient ingredient = item.getDish().tryGetIngredient(product.ingredientIndex());
             result = ingredient.getNecessaryQuantity(item.getNecessaryQuantity(menuNumber));
-            result = result.setScale(config.getNumberScale(), config.getRoundingMode());
+            result = result.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         }
 
         return Optional.ofNullable(result);
@@ -556,7 +556,7 @@ public class Menu implements Entity<Menu> {
         Optional<BigDecimal> max = getMaxPrice();
         Optional<BigDecimal> min = getMinPrice();
         Optional<BigDecimal> sum = min.map(vMin -> vMin.add(max.orElseThrow()));
-        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.getMathContext()));
+        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.decimal().mathContext()));
     }
 
     @Override
@@ -605,7 +605,7 @@ public class Menu implements Entity<Menu> {
     private BigDecimal calculatePackagesNumber(Product product, BigDecimal quantityInUnits) {
         if(quantityInUnits.signum() > 0) {
             quantityInUnits = quantityInUnits.
-                    divide(product.getContext().getPackingSize(), config.getMathContext()).
+                    divide(product.getContext().getPackingSize(), config.decimal().mathContext()).
                     setScale(0, RoundingMode.UP);
         }
 
@@ -613,7 +613,7 @@ public class Menu implements Entity<Menu> {
     }
 
     private BigDecimal calculateProductPrice(Product product, BigDecimal packagesNumber) {
-        return product.getContext().getPrice().multiply(packagesNumber, config.getMathContext());
+        return product.getContext().getPrice().multiply(packagesNumber, config.decimal().mathContext());
     }
 
 
@@ -658,7 +658,7 @@ public class Menu implements Entity<Menu> {
         private String imageUrl;
         private List<AbstractBuilder<MenuItem>> items;
         private List<String> tags;
-        private AppConfigData config;
+        private ConfigData config;
 
         public Builder() {
             items = new ArrayList<>();
@@ -695,7 +695,7 @@ public class Menu implements Entity<Menu> {
             return this;
         }
 
-        public Builder setConfig(AppConfigData config) {
+        public Builder setConfig(ConfigData config) {
             this.config = config;
             return this;
         }

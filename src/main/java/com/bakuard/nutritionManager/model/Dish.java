@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -36,7 +36,7 @@ public class Dish implements Entity<Dish> {
     private final List<DishIngredient> ingredients;
     private final List<Tag> tags;
 
-    private AppConfigData config;
+    private ConfigData config;
     private ProductRepository productRepository;
     private final Sort ingredientProductsSort;
 
@@ -68,7 +68,7 @@ public class Dish implements Entity<Dish> {
                  String imageUrl,
                  List<DishIngredient.Builder> ingredients,
                  List<String> tags,
-                 AppConfigData config,
+                 ConfigData config,
                  ProductRepository productRepository) {
         Container<List<Tag>> tagContainer = new Container<>();
         Container<List<DishIngredient>> ingredientContainer = new Container<>();
@@ -99,7 +99,7 @@ public class Dish implements Entity<Dish> {
         this.id = id;
         this.user = user;
         this.name = name.trim();
-        this.servingSize = servingSize.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.servingSize = servingSize.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.unit = unit.trim();
         this.description = description;
         this.imageUrl = urlContainer.get();
@@ -772,7 +772,7 @@ public class Dish implements Entity<Dish> {
         Optional<BigDecimal> max = getMaxPrice();
         Optional<BigDecimal> min = getMinPrice();
         Optional<BigDecimal> sum = min.map(vMin -> vMin.add(max.orElseThrow()));
-        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.getMathContext()));
+        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.decimal().mathContext()));
     }
 
     /**
@@ -868,7 +868,7 @@ public class Dish implements Entity<Dish> {
     private BigDecimal calculatePackagesNumber(Product product, BigDecimal quantityInUnits) {
         if(quantityInUnits.signum() > 0) {
             quantityInUnits = quantityInUnits.
-                    divide(product.getContext().getPackingSize(), config.getMathContext()).
+                    divide(product.getContext().getPackingSize(), config.decimal().mathContext()).
                     setScale(0, RoundingMode.UP);
         }
 
@@ -876,7 +876,7 @@ public class Dish implements Entity<Dish> {
     }
 
     private BigDecimal calculateProductPrice(Product product, BigDecimal packagesNumber) {
-        return product.getContext().getPrice().multiply(packagesNumber, config.getMathContext());
+        return product.getContext().getPrice().multiply(packagesNumber, config.decimal().mathContext());
     }
 
 
@@ -942,7 +942,7 @@ public class Dish implements Entity<Dish> {
         private String imageUrl;
         private List<DishIngredient.Builder> ingredients;
         private List<String> tags;
-        private AppConfigData config;
+        private ConfigData config;
         private ProductRepository repository;
 
         public Builder() {
@@ -990,7 +990,7 @@ public class Dish implements Entity<Dish> {
             return this;
         }
 
-        public Builder setConfig(AppConfigData config) {
+        public Builder setConfig(ConfigData config) {
             this.config = config;
 
             ingredients.forEach(b -> b.setConfig(config));

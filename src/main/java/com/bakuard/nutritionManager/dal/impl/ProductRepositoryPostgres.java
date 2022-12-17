@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dal.impl;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterMapper;
@@ -41,10 +41,10 @@ import static org.jooq.impl.DSL.*;
 public class ProductRepositoryPostgres implements ProductRepository {
 
     private JdbcTemplate statement;
-    private AppConfigData appConfig;
+    private ConfigData appConfig;
     private ProductFilterMapper filterMapper;
 
-    public ProductRepositoryPostgres(DataSource dataSource, AppConfigData appConfig) {
+    public ProductRepositoryPostgres(DataSource dataSource, ConfigData appConfig) {
         statement = new JdbcTemplate(dataSource);
         this.appConfig = appConfig;
         filterMapper = new ProductFilterMapper();

@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
@@ -19,7 +19,7 @@ public class MenuItem implements Entity<MenuItem> {
     private final UUID id;
     private final Dish dish;
     private final BigDecimal quantity;
-    private final AppConfigData config;
+    private final ConfigData config;
 
     public MenuItem(MenuItem other) {
         id = other.id;
@@ -31,7 +31,7 @@ public class MenuItem implements Entity<MenuItem> {
     private MenuItem(UUID id,
                      Dish dish,
                      BigDecimal quantity,
-                     AppConfigData config) {
+                     ConfigData config) {
         Validator.check(
                 "MenuItem.id", notNull(id),
                 "MenuItem.dish", notNull(dish),
@@ -41,14 +41,14 @@ public class MenuItem implements Entity<MenuItem> {
 
         this.id = id;
         this.dish = dish;
-        this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.quantity = quantity.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.config = config;
     }
 
     private MenuItem(UUID id,
                      String dishName,
                      BigDecimal quantity,
-                     AppConfigData config,
+                     ConfigData config,
                      DishRepository repository,
                      UUID userId) {
         Validator.check(
@@ -61,7 +61,7 @@ public class MenuItem implements Entity<MenuItem> {
         );
 
         this.id = id;
-        this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.quantity = quantity.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.config = config;
         this.dish = repository.tryGetByName(userId, dishName);
     }
@@ -84,10 +84,10 @@ public class MenuItem implements Entity<MenuItem> {
     }
 
     public BigDecimal getNecessaryQuantity(BigDecimal menuNumber) {
-        return quantity.multiply(menuNumber, config.getMathContext());
+        return quantity.multiply(menuNumber, config.decimal().mathContext());
     }
 
-    public AppConfigData getConfig() {
+    public ConfigData getConfig() {
         return config;
     }
 
@@ -127,7 +127,7 @@ public class MenuItem implements Entity<MenuItem> {
         private UUID id;
         private Dish dish;
         private BigDecimal quantity;
-        private AppConfigData config;
+        private ConfigData config;
 
         public LoadBuilder() {
 
@@ -153,7 +153,7 @@ public class MenuItem implements Entity<MenuItem> {
             return this;
         }
 
-        public LoadBuilder setConfig(AppConfigData config) {
+        public LoadBuilder setConfig(ConfigData config) {
             this.config = config;
             return this;
         }
@@ -171,7 +171,7 @@ public class MenuItem implements Entity<MenuItem> {
         private UUID id;
         private String dishName;
         private BigDecimal quantity;
-        private AppConfigData config;
+        private ConfigData config;
         private DishRepository repository;
         private UUID userId;
 
@@ -204,7 +204,7 @@ public class MenuItem implements Entity<MenuItem> {
             return this;
         }
 
-        public Builder setConfig(AppConfigData config) {
+        public Builder setConfig(ConfigData config) {
             this.config = config;
             return this;
         }

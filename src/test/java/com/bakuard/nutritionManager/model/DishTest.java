@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -14,7 +15,12 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,13 +31,13 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestConfig.class)
+@TestPropertySource(locations = "classpath:test.properties")
 class DishTest {
 
-    private AppConfigData conf = AppConfigData.builder().
-            setNumberPrecision("16").
-            setNumberRoundingMod("CEILING").
-            setNumberScale("6").
-            build();
+    @Autowired
+    private ConfigData conf;
 
     @Test
     @DisplayName("""
@@ -2341,7 +2347,7 @@ class DishTest {
                 setId(toUUID(1)).
                 setName("User").
                 setPassword("password").
-                setEmail("user@mail.com").
+                setEmail("user@confirmationMail.com").
                 tryBuild();
     }
 

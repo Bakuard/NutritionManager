@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dal.impl;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dal.impl.mappers.MenuFilterMapper;
@@ -33,12 +33,12 @@ import static org.jooq.impl.DSL.*;
 public class MenuRepositoryPostgres implements MenuRepository {
 
     private JdbcTemplate statement;
-    private AppConfigData appConfig;
+    private ConfigData appConfig;
     private DishRepositoryPostgres dishRepository;
     private MenuFilterMapper menuFilterMapper;
 
     public MenuRepositoryPostgres(DataSource dataSource,
-                                  AppConfigData appConfig,
+                                  ConfigData appConfig,
                                   DishRepositoryPostgres dishRepository) {
         statement = new JdbcTemplate(dataSource);
         this.dishRepository = dishRepository;

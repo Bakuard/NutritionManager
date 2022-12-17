@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
@@ -34,7 +35,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class ProductRepositoryTest {
 
@@ -45,7 +46,7 @@ class ProductRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData appConfiguration;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -3502,7 +3503,7 @@ class ProductRepositoryTest {
                 setId(toUUID(userId)).
                 setName("User#" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
         commit(() -> userRepository.save(user));
         return user;

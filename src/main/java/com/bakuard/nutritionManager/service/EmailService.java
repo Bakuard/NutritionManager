@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.service;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.validation.*;
 
 import javax.mail.*;
@@ -16,10 +16,10 @@ import static com.bakuard.nutritionManager.validation.Rule.failure;
 
 public class EmailService {
 
-    private final AppConfigData appConfigData;
+    private final ConfigData configData;
 
-    public EmailService(AppConfigData appConfigData) {
-        this.appConfigData = appConfigData;
+    public EmailService(ConfigData configData) {
+        this.configData = configData;
     }
 
     public void confirmEmailForRegistration(String jws, String email) throws ValidateException {
@@ -42,25 +42,25 @@ public class EmailService {
 
     private void sendEmail(String htmlFileName, String jws, String email) throws MessagingException {
         Properties properties = new Properties();
-        properties.setProperty("mail.transport.protocol", "smtps");
-        properties.setProperty("mail.smtp.host", "smtp.gmail.com");
-        properties.setProperty("mail.smtp.port", "465");
-        properties.setProperty("mail.smtp.auth", "true");
-        properties.setProperty("mail.smtp.socketFactory.port", "465");
-        properties.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        properties.setProperty("confirmationMail.transport.protocol", "smtps");
+        properties.setProperty("confirmationMail.smtp.host", "smtp.gmail.com");
+        properties.setProperty("confirmationMail.smtp.port", "465");
+        properties.setProperty("confirmationMail.smtp.auth", "true");
+        properties.setProperty("confirmationMail.smtp.socketFactory.port", "465");
+        properties.setProperty("confirmationMail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
         Session session = Session.getInstance(properties, new Authenticator() {
             @Override
             public PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        appConfigData.getMailServer(),
-                        appConfigData.getMailPassword()
+                        configData.confirmationMail().server(),
+                        configData.confirmationMail().password()
                 );
             }
         });
 
         Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(appConfigData.getMailServer()));
+        message.setFrom(new InternetAddress(configData.confirmationMail().server()));
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
         message.setSubject("Nutrition Manager");
 
