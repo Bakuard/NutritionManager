@@ -39,16 +39,16 @@ import static org.jooq.impl.DSL.*;
 public class DishRepositoryPostgres implements DishRepository {
 
     private JdbcTemplate statement;
-    private ConfigData appConfig;
+    private ConfigData conf;
     private ProductRepositoryPostgres productRepository;
     private ProductFilterMapper filterMapper;
     private ProductFilterJsonMapper filterJsonMapper;
     private DishFilterMapper dishFilterMapper;
 
     public DishRepositoryPostgres(DataSource dataSource,
-                                  ConfigData appConfig,
+                                  ConfigData conf,
                                   ProductRepositoryPostgres productRepository) {
-        this.appConfig = appConfig;
+        this.conf = conf;
         this.productRepository = productRepository;
         statement = new JdbcTemplate(dataSource);
         filterMapper = new ProductFilterMapper();
@@ -127,7 +127,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig).
+                                    setConfig(conf).
                                     setRepository(productRepository);
                         }
 
@@ -146,7 +146,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                                 setName(rs.getString("ingredientName")).
                                                 setQuantity(rs.getBigDecimal("ingredientQuantity")).
                                                 setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
-                                                setConfig(appConfig)
+                                                setConfig(conf)
                                 );
                                 ingredients.add(ingredientId);
                             }
@@ -218,7 +218,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig).
+                                    setConfig(conf).
                                     setRepository(productRepository);
                         }
 
@@ -237,7 +237,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                                 setName(rs.getString("ingredientName")).
                                                 setQuantity(rs.getBigDecimal("ingredientQuantity")).
                                                 setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
-                                                setConfig(appConfig)
+                                                setConfig(conf)
                                 );
                                 ingredients.add(ingredientId);
                             }
@@ -292,7 +292,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<Dish> getDishes(Criteria criteria) {
         int dishesNumber = getDishesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(dishesNumber, 30);
+                createPageMetadata(dishesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return Page.empty();
 
@@ -336,7 +336,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(tagsNumber, 1000);
+                createPageMetadata(tagsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -370,7 +370,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<String> getUnits(Criteria criteria) {
         int unitsNumber = getUnitsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(unitsNumber, 1000);
+                createPageMetadata(unitsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -402,7 +402,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<String> getNames(Criteria criteria) {
         int namesNumber = getNamesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(namesNumber, 1000);
+                createPageMetadata(namesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -538,7 +538,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         setUnit(rs.getString("unit")).
                         setDescription(rs.getString("description")).
                         setImageUrl(rs.getString("imagePath")).
-                        setConfig(appConfig).
+                        setConfig(conf).
                         setRepository(productRepository);
 
                 lastDishId = dishId;
@@ -561,7 +561,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setName(rs.getString("ingredientName")).
                                     setQuantity(rs.getBigDecimal("ingredientQuantity")).
                                     setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
-                                    setConfig(appConfig)
+                                    setConfig(conf)
                     );
                     ingredients.add(ingredientId);
                 }

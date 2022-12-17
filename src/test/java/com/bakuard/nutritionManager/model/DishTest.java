@@ -2432,7 +2432,7 @@ class DishTest {
                                       int productIndex,
                                       BiFunction<User, Integer, Product.Builder> productFactory) {
         Page.Metadata metadata = PageableByNumber.ofIndex(30, productIndex).
-                createPageMetadata(1000, 30);
+                createPageMetadata(1000, conf.pagination().productMaxPageSize());
 
         int offset = metadata.getOffset().intValue();
         List<Product> products = IntStream.range(0, metadata.getActualSize()).
@@ -2446,7 +2446,7 @@ class DishTest {
                                       BiFunction<User, Integer, Product.Builder> productFactory,
                                       int... productIds) {
         Page.Metadata metadata = PageableByNumber.of(30 , 0).
-                createPageMetadata(productIds.length, 30);
+                createPageMetadata(productIds.length, conf.pagination().productMaxPageSize());
 
         List<Product> products = Arrays.stream(productIds).
                 mapToObj(i -> productFactory.apply(user, i).tryBuild()).
@@ -2466,7 +2466,7 @@ class DishTest {
                 orElse(-1);
         Page.Metadata metadata = pageable.createPageMetaData(productIds.length,
                 index % productIds.length,
-                30);
+                conf.pagination().productMaxPageSize());
 
         List<Product> products = Arrays.stream(productIds).
                 mapToObj(i -> productFactory.apply(user, i).tryBuild()).

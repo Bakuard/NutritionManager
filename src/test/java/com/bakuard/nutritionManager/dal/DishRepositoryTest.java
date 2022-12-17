@@ -46,7 +46,7 @@ class DishRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private ConfigData appConfiguration;
+    private ConfigData conf;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -128,7 +128,7 @@ class DishRepositoryTest {
                 setUnit("unit A").
                 setDescription("description A").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?id=7").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 tryBuild();
 
@@ -160,7 +160,7 @@ class DishRepositoryTest {
                 setUnit("updated unit").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag 2").
                 addTag("2 tag").
@@ -187,7 +187,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -202,7 +202,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("5.4")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
         commit(() -> dishRepository.save(expected));
@@ -236,7 +236,7 @@ class DishRepositoryTest {
                 setUnit("updated unit").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag 2").
                 addTag("2 tag").
@@ -263,7 +263,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -278,7 +278,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("5.4")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
 
@@ -986,7 +986,7 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(4, 30).
+                createPageMetadata(4, conf.pagination().dishMaxPageSize()).
                 createPage(dishes);
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1012,7 +1012,7 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(3, 1).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(3, 4));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1072,7 +1072,7 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(2, 4));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1104,7 +1104,7 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(0, 3));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1169,7 +1169,7 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(0, 2));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1304,7 +1304,7 @@ class DishRepositoryTest {
         );
 
         Page<Tag> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(7, 200).
+                createPageMetadata(7, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllTags(dishes).subList(2, 4));
         Assertions.assertThat(actual).isEqualTo(expected);
     }
@@ -1404,7 +1404,7 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllUnits(dishes).subList(2, 3));
         Assertions.assertThat(actual).isEqualTo(expected);
     }
@@ -1504,7 +1504,7 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllNames(dishes).subList(2, 4));
         Assertions.assertThat(actual).isEqualTo(expected);
     }
@@ -1555,7 +1555,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(1)).
                         setUser(user).
                         setCategory("name A").
@@ -1576,7 +1576,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(2)).
                         setUser(user).
                         setCategory("name A").
@@ -1597,7 +1597,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(3)).
                         setUser(user).
                         setCategory("name A").
@@ -1618,7 +1618,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(4)).
                         setUser(user).
                         setCategory("name B").
@@ -1639,7 +1639,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(5)).
                         setUser(user).
                         setCategory("name B").
@@ -1660,7 +1660,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(6)).
                         setUser(user).
                         setCategory("name B").
@@ -1693,7 +1693,7 @@ class DishRepositoryTest {
                 setUnit("unit A").
                 setDescription("description A").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?id=1").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag A").
                 addTag("common tag").
@@ -1722,7 +1722,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1744,7 +1744,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 2").
                                 setQuantity(new BigDecimal("2.5")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1760,7 +1760,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("0.1")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
     }
@@ -1777,7 +1777,7 @@ class DishRepositoryTest {
                         setUnit("unit A").
                         setDescription("description 1").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=1").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 1").
                         addTag("tag A").
@@ -1803,7 +1803,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -1825,7 +1825,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 2").
                                         setQuantity(new BigDecimal("2.5")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -1841,7 +1841,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 3").
                                         setQuantity(new BigDecimal("0.1")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );
@@ -1855,7 +1855,7 @@ class DishRepositoryTest {
                         setUnit("unit A").
                         setDescription("description 2").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=2").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 2").
                         addTag("tag A").
@@ -1881,7 +1881,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );
@@ -1895,7 +1895,7 @@ class DishRepositoryTest {
                         setUnit("unit B").
                         setDescription("description 3").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=3").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 3").
                         addTag("tag B").
@@ -1921,7 +1921,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -1940,7 +1940,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 2").
                                         setQuantity(new BigDecimal("2.5")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -1956,7 +1956,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 3").
                                         setQuantity(new BigDecimal("0.1")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );
@@ -1970,7 +1970,7 @@ class DishRepositoryTest {
                         setUnit("unit C").
                         setDescription("description 4").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=4").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 4").
                         addTag("tag B").
@@ -1993,7 +1993,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -2012,7 +2012,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 2").
                                         setQuantity(new BigDecimal("2.5")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );

@@ -49,7 +49,7 @@ class MenuRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private ConfigData appConfiguration;
+    private ConfigData conf;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -129,7 +129,7 @@ class MenuRepositoryTest {
                 setName("Menu#0").
                 setDescription("Description for menu#100").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=100").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#100").
                 tryBuild();
@@ -163,7 +163,7 @@ class MenuRepositoryTest {
                 setName("updated menu name").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=newMenuImage").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("new unique tag").
                 addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
@@ -207,7 +207,7 @@ class MenuRepositoryTest {
                 setName("Menu#0").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=newMenuImage").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("new unique tag").
                 addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
@@ -266,7 +266,7 @@ class MenuRepositoryTest {
                 setName("Menu#1").
                 setDescription("Description for menu#1").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#1").
                 addItem(
@@ -300,7 +300,7 @@ class MenuRepositoryTest {
                 setName("Menu#1").
                 setDescription("Description for menu#1").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#1").
                 addItem(
@@ -1004,7 +1004,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(4, 30).
+                createPageMetadata(4, conf.pagination().menuMaxPageSize()).
                 createPage(menus);
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1063,7 +1063,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(0, 2));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1122,7 +1122,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(0, 2));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1218,7 +1218,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(0, 2));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1253,7 +1253,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(4, 30).
+                createPageMetadata(4, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(2, 4));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1284,7 +1284,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(30, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(List.of(menus.get(0), menus.get(3)));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1320,7 +1320,7 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(1, 30).
+                createPageMetadata(1, conf.pagination().menuMaxPageSize()).
                 createPage(List.of(menus.get(3)));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1421,7 +1421,7 @@ class MenuRepositoryTest {
         );
 
         Page<Tag> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(7, 1000).
+                createPageMetadata(7, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllTags(menus).subList(2, 4));
         Assertions.assertThat(actual).isEqualTo(expected);
     }
@@ -1520,7 +1520,7 @@ class MenuRepositoryTest {
         );
 
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(4, 1000).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllNames(menus).subList(2, 4));
         Assertions.assertThat(actual).isEqualTo(expected);
     }
@@ -1581,7 +1581,7 @@ class MenuRepositoryTest {
                 setName("Menu#" + menuId).
                 setDescription("Description for menu#" + menuId).
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=" + menuId).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#" + menuId).
                 addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"), 1000)).
@@ -1616,7 +1616,7 @@ class MenuRepositoryTest {
                         setName("Menu#0").
                         setDescription("Description for menu#0").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=0").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#0").
                         addTag("tagA").
@@ -1633,7 +1633,7 @@ class MenuRepositoryTest {
                         setName("Menu#1").
                         setDescription("Description for menu#1").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#1").
                         addTag("tagA").
@@ -1650,7 +1650,7 @@ class MenuRepositoryTest {
                         setName("Menu#2").
                         setDescription("Description for menu#2").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=2").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#2").
                         addTag("tagB").
@@ -1667,7 +1667,7 @@ class MenuRepositoryTest {
                         setName("Menu#3").
                         setDescription("Description for menu#3").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=3").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#3").
                         addTag("tagB").
@@ -1711,7 +1711,7 @@ class MenuRepositoryTest {
                 setUnit("unit A").
                 setDescription("description for dish#" + dishId).
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?id=" + dishId).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag A").
                 addTag("common tag").
@@ -1740,7 +1740,7 @@ class MenuRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1762,7 +1762,7 @@ class MenuRepositoryTest {
                                 ).
                                 setName("ingredient 2").
                                 setQuantity(new BigDecimal("2.5")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1778,7 +1778,7 @@ class MenuRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("0.1")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
     }
@@ -1786,7 +1786,7 @@ class MenuRepositoryTest {
     private MenuItem.LoadBuilder createMenuItem(Dish dish, BigDecimal quantity, int itemId) {
         return new MenuItem.LoadBuilder().
                 setId(toUUID(itemId)).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setDish(dish).
                 setQuantity(quantity);
     }

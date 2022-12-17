@@ -8,5 +8,6 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public record ConfigData(Decimal decimal,
                          ConfirmationMail confirmationMail,
                          DataBase database,
-                         Aws aws) {}
+                         Aws aws,
+                         Pagination pagination) {}
 

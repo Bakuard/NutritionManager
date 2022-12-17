@@ -41,12 +41,12 @@ import static org.jooq.impl.DSL.*;
 public class ProductRepositoryPostgres implements ProductRepository {
 
     private JdbcTemplate statement;
-    private ConfigData appConfig;
+    private ConfigData conf;
     private ProductFilterMapper filterMapper;
 
-    public ProductRepositoryPostgres(DataSource dataSource, ConfigData appConfig) {
+    public ProductRepositoryPostgres(DataSource dataSource, ConfigData conf) {
         statement = new JdbcTemplate(dataSource);
-        this.appConfig = appConfig;
+        this.conf = conf;
         filterMapper = new ProductFilterMapper();
     }
 
@@ -110,7 +110,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     while(rs.next()) {
                         if(builder == null) {
                             builder = new Product.Builder().
-                                    setAppConfiguration(appConfig).
+                                    setAppConfiguration(conf).
                                     setId(productId).
                                     setUser(
                                             new User.LoadBuilder().
@@ -157,7 +157,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<Product> getProducts(Criteria criteria) {
         int productsNumber = getProductsNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(productsNumber, 30);
+                createPageMetadata(productsNumber, conf.pagination().productMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -216,7 +216,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                         if(!productId.equals(lastProductId)) {
                             if(builder != null) result.add(builder.tryBuild());
                             builder = new Product.Builder().
-                                    setAppConfiguration(appConfig).
+                                    setAppConfiguration(conf).
                                     setId(productId).
                                     setUser(
                                             new User.LoadBuilder().
@@ -259,7 +259,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(tagsNumber, 1000);
+                createPageMetadata(tagsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -293,7 +293,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getShops(Criteria criteria) {
         int shopsNumber = getShopsNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(shopsNumber, 1000);
+                createPageMetadata(shopsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -325,7 +325,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getGrades(Criteria criteria) {
         int gradesNumber = getGradesNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(gradesNumber, 1000);
+                createPageMetadata(gradesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -357,7 +357,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getCategories(Criteria criteria) {
         int categoriesNumber = getCategoriesNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(categoriesNumber, 1000);
+                createPageMetadata(categoriesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -389,7 +389,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getManufacturers(Criteria criteria) {
         int manufacturersNumber = getManufacturersNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(manufacturersNumber, 1000);
+                createPageMetadata(manufacturersNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 

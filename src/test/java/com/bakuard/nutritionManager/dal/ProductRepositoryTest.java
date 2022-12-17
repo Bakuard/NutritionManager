@@ -46,7 +46,7 @@ class ProductRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private ConfigData appConfiguration;
+    private ConfigData conf;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -113,7 +113,7 @@ class ProductRepositoryTest {
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
         Product addedProduct = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(3)).
                 setUser(user).
                 setCategory("name#2").
@@ -159,7 +159,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
 
         Product expected = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(1)).
                 setUser(user).
                 setCategory("updated name").
@@ -199,7 +199,7 @@ class ProductRepositoryTest {
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
         Product updatedProduct = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(2)).
                 setUser(user).
                 setCategory("name#1").
@@ -1159,7 +1159,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(6, 200).
+                createPageMetadata(6, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 5));
 
         Page<Product> actual = repository.getProducts(
@@ -1186,7 +1186,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(5, 1).
-                createPageMetadata(6, 200).
+                createPageMetadata(6, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1213,7 +1213,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(3, 5));
 
         Page<Product> actual = repository.getProducts(
@@ -1245,7 +1245,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1305,7 +1305,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(1, 0).
-                createPageMetadata(1, 200).
+                createPageMetadata(1, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1376,7 +1376,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 2));
 
         Page<Product> actual = repository.getProducts(
@@ -1448,7 +1448,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(3, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1555,7 +1555,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 3));
 
         Page<Product> actual = repository.getProducts(
@@ -1668,7 +1668,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 2));
 
         Page<Product> actual = repository.getProducts(
@@ -1781,7 +1781,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 2));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1842,7 +1842,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(1, 200).
+                createPageMetadata(1, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(3, 4));
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
@@ -1897,7 +1897,7 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().productMaxPageSize()).
                 createPage(
                         List.of(
                                 products.get(5),
@@ -2078,7 +2078,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(9, 200).
+                createPageMetadata(9, conf.pagination().itemsMaxPageSize()).
                 createPage(createTags(products).subList(0, 5));
 
         Page<Tag> actual = repository.getTags(
@@ -2102,7 +2102,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(4, 2).
-                createPageMetadata(9, 200).
+                createPageMetadata(9, conf.pagination().itemsMaxPageSize()).
                 createPage(createTags(products).subList(8, 9));
 
         Page<Tag> actual = repository.getTags(
@@ -2126,7 +2126,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(5, 200).
+                createPageMetadata(5, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of(
                         new Tag("common tag"),
                         new Tag("tag A"),
@@ -2161,7 +2161,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(4, 1).
-                createPageMetadata(5, 200).
+                createPageMetadata(5, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of(
                         new Tag("value 3")
                 ));
@@ -2294,7 +2294,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop A", "shop B", "shop C"));
 
         Page<String> actual = repository.getShops(
@@ -2317,7 +2317,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop C"));
 
         Page<String> actual = repository.getShops(
@@ -2340,7 +2340,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
@@ -2368,7 +2368,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
@@ -2499,7 +2499,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
 
         Page<String> actual = repository.getGrades(
@@ -2522,7 +2522,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(3, 1).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety D"));
 
         Page<String> actual = repository.getGrades(
@@ -2545,7 +2545,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getGrades(
@@ -2573,7 +2573,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getGrades(
@@ -2679,7 +2679,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("name A", "name B"));
 
         Page<String> actual = repository.getCategories(
@@ -2702,7 +2702,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(1, 1).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("name B"));
 
         Page<String> actual = repository.getCategories(
@@ -2828,7 +2828,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2851,7 +2851,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2874,7 +2874,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2902,7 +2902,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(1, 200).
+                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A"));
 
         Page<String> actual = repository.getManufacturers(
@@ -3511,7 +3511,7 @@ class ProductRepositoryTest {
 
     private Product createProduct(int productId, User user) {
         return new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(productId)).
                 setUser(user).
                 setCategory("name#" + productId).
@@ -3543,7 +3543,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(1)).
                         setUser(user).
                         setCategory("name A").
@@ -3564,7 +3564,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(2)).
                         setUser(user).
                         setCategory("name A").
@@ -3585,7 +3585,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(3)).
                         setUser(user).
                         setCategory("name A").
@@ -3606,7 +3606,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(4)).
                         setUser(user).
                         setCategory("name B").
@@ -3627,7 +3627,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(5)).
                         setUser(user).
                         setCategory("name B").
@@ -3648,7 +3648,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(6)).
                         setUser(user).
                         setCategory("name B").

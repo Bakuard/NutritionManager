@@ -1676,7 +1676,7 @@ class InputTest {
 
     private Page<Product> productPage(Product... products) {
         Page.Metadata metadata = PageableByNumber.of(30 , 0).
-                createPageMetadata(products.length, 30);
+                createPageMetadata(products.length, conf.pagination().productMaxPageSize());
 
         List<Product> resultProducts = Arrays.asList(products);
 
@@ -1685,7 +1685,7 @@ class InputTest {
 
     private Page<Dish> dishPage(Dish... dishes) {
         Page.Metadata metadata = PageableByNumber.of(30 , 0).
-                createPageMetadata(dishes.length, 30);
+                createPageMetadata(dishes.length, conf.pagination().dishMaxPageSize());
 
         List<Dish> resultDishes = Arrays.asList(dishes);
 

@@ -3222,7 +3222,7 @@ class MenuTest {
                                       int productIndex,
                                       BiFunction<User, Integer, Product.Builder> productFactory) {
         Page.Metadata metadata = PageableByNumber.ofIndex(30, productIndex).
-                createPageMetadata(1000, 30);
+                createPageMetadata(1000, conf.pagination().productMaxPageSize());
 
         int offset = metadata.getOffset().intValue();
         List<Product> products = IntStream.range(0, metadata.getActualSize()).
@@ -3234,7 +3234,7 @@ class MenuTest {
 
     private Page<Product> productPage(Product.Builder... products) {
         Page.Metadata metadata = PageableByNumber.of(30 , 0).
-                createPageMetadata(products.length, 30);
+                createPageMetadata(products.length, conf.pagination().productMaxPageSize());
 
         List<Product> resultProducts = Arrays.stream(products).
                 map(Product.Builder::tryBuild).

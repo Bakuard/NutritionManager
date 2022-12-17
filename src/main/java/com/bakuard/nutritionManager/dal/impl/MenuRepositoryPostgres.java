@@ -33,16 +33,16 @@ import static org.jooq.impl.DSL.*;
 public class MenuRepositoryPostgres implements MenuRepository {
 
     private JdbcTemplate statement;
-    private ConfigData appConfig;
+    private ConfigData conf;
     private DishRepositoryPostgres dishRepository;
     private MenuFilterMapper menuFilterMapper;
 
     public MenuRepositoryPostgres(DataSource dataSource,
-                                  ConfigData appConfig,
+                                  ConfigData conf,
                                   DishRepositoryPostgres dishRepository) {
         statement = new JdbcTemplate(dataSource);
         this.dishRepository = dishRepository;
-        this.appConfig = appConfig;
+        this.conf = conf;
         menuFilterMapper = new MenuFilterMapper();
     }
 
@@ -132,7 +132,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     setName(rs.getString("name")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig);
+                                    setConfig(conf);
                         }
 
                         String tagValue = rs.getString("tagValue");
@@ -146,7 +146,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
                                             setId(itemId).
-                                            setConfig(appConfig).
+                                            setConfig(conf).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
                             items.add(itemId);
@@ -250,7 +250,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     setName(rs.getString("name")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig);
+                                    setConfig(conf);
                         }
 
                         String tagValue = rs.getString("tagValue");
@@ -264,7 +264,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
                                             setId(itemId).
-                                            setConfig(appConfig).
+                                            setConfig(conf).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
                             items.add(itemId);
@@ -340,7 +340,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Page<Menu> getMenus(Criteria criteria) {
         int menusNumber = getMenusNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(menusNumber, 30);
+                createPageMetadata(menusNumber, conf.pagination().menuMaxPageSize());
 
         if(metadata.isEmpty()) return Page.empty();
 
@@ -400,7 +400,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     setName(rs.getString("name")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig);
+                                    setConfig(conf);
 
                             lastMenuId = menuId;
                             tags.clear();
@@ -418,7 +418,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
                                             setId(itemId).
-                                            setConfig(appConfig).
+                                            setConfig(conf).
                                             setQuantity(rs.getBigDecimal("itemQuantity"))
                             );
                             items.add(itemId);
@@ -480,7 +480,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(tagsNumber, 1000);
+                createPageMetadata(tagsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -514,7 +514,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Page<String> getNames(Criteria criteria) {
         int namesNumber = getNamesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(namesNumber, 1000);
+                createPageMetadata(namesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
