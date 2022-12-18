@@ -1,6 +1,8 @@
 package com.bakuard.nutritionManager.config;
 
 import com.bakuard.nutritionManager.config.configData.ConfigData;
+import com.bakuard.nutritionManager.config.security.RequestContext;
+import com.bakuard.nutritionManager.config.security.RequestContextImpl;
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dal.impl.*;
 import com.bakuard.nutritionManager.dto.DtoMapper;
@@ -10,6 +12,7 @@ import com.bakuard.nutritionManager.service.ImageUploaderService;
 import com.bakuard.nutritionManager.service.JwsService;
 import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
 import com.bakuard.nutritionManager.service.report.ReportService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -40,6 +43,7 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import javax.servlet.MultipartConfigElement;
 import javax.sql.DataSource;
+import java.time.Clock;
 
 @SpringBootApplication(
         exclude = {SecurityAutoConfiguration.class},
@@ -87,6 +91,11 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
+
+    @Bean
     public ProductRepository productRepository(DataSource dataSource, ConfigData appConfiguration) {
         return new ProductRepositoryPostgres(dataSource, appConfiguration);
     }
@@ -121,8 +130,10 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JwsService jwsService(JwsBlackListRepository jwsBlackListRepository) {
-        return new JwsService(jwsBlackListRepository);
+    public JwsService jwsService(JwsBlackListRepository jwsBlackListRepository,
+                                 Clock clock,
+                                 ObjectMapper objectMapper) {
+        return new JwsService(jwsBlackListRepository, clock, objectMapper);
     }
 
     @Bean
@@ -131,8 +142,11 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public AuthService authService(JwsService jwsService, EmailService emailService, UserRepository userRepository) {
-        return new AuthService(jwsService, emailService, userRepository);
+    public AuthService authService(JwsService jwsService,
+                                   EmailService emailService,
+                                   UserRepository userRepository,
+                                   ConfigData configData) {
+        return new AuthService(jwsService, emailService, userRepository, configData);
     }
 
     @Bean(initMethod = "loadTemplates")
@@ -180,6 +194,11 @@ public class SpringConfig implements WebMvcConfigurer {
         messageSource.setBasenames("locales/exceptions", "locales/success");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
+    }
+
+    @Bean
+    public RequestContext requestContext() {
+        return new RequestContextImpl();
     }
 
     @Bean

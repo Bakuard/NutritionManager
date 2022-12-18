@@ -1,5 +1,6 @@
 package com.bakuard.nutritionManager.service;
 
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.UserRepository;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.*;
@@ -15,19 +16,26 @@ public class AuthService {
     private JwsService jwsService;
     private EmailService emailService;
     private UserRepository userRepository;
+    private ConfigData configData;
 
-    public AuthService(JwsService jwsService, EmailService emailService, UserRepository userRepository) {
+    public AuthService(JwsService jwsService,
+                       EmailService emailService,
+                       UserRepository userRepository,
+                       ConfigData configData) {
         this.jwsService = jwsService;
         this.emailService = emailService;
         this.userRepository = userRepository;
+        this.configData = configData;
     }
 
     public Pair<String, User> enter(String name, String password) {
         User user = userRepository.tryGetByName(name);
 
         if(user.isCorrectPassword(password)) {
-            String jws = jwsService.generateAccessJws(user);
-            return new Pair<>(jws, user);
+            String accessJws = jwsService.generateJws(user.getId(),
+                    "commonToken",
+                    configData.jws().commonTokenLifeTime());
+            return new Pair<>(accessJws, user);
         } else {
             throw new ValidateException("Incorrect credentials").
                     addReason(Rule.of("AuthService.enter", failure(Constraint.CORRECT_CREDENTIALS)));
@@ -42,20 +50,22 @@ public class AuthService {
                     addReason(Rule.of("AuthService.verifyEmailForRegistration", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
 
-        String jws = jwsService.generateRegistrationJws(email);
+        String jws = jwsService.generateJws(email,
+                "registration",
+                configData.jws().registrationTokenLifeTime());
         emailService.confirmEmailForRegistration(jws, email);
     }
 
     public void verifyEmailForChangeCredentials(String email) {
         Validator.check("AuthService.email", notNull(email));
 
-        String jws = jwsService.generateChangeCredentialsJws(email);
+        String jws = jwsService.generateJws(email,
+                "restorePassword",
+                configData.jws().restorePassTokenLifeTime());
         emailService.confirmEmailForChangeCredentials(jws, email);
     }
 
-    public Pair<String, User> registration(String jws, String name, String password) {
-        String email = jwsService.parseRegistrationJws(jws);
-
+    public Pair<String, User> registration(String email, String name, String password) {
         User user = new User.Builder().
                 generateId().
                 setName(name).
@@ -64,19 +74,21 @@ public class AuthService {
                 tryBuild();
         userRepository.save(user);
 
-        String accessJws = jwsService.generateAccessJws(user);
+        String accessJws = jwsService.generateJws(user.getId(),
+                "commonToken",
+                configData.jws().commonTokenLifeTime());
         return new Pair<>(accessJws, user);
     }
 
-    public Pair<String, User> changeCredential(String jws, String name, String password) {
-        String email = jwsService.parseChangeCredentialsJws(jws);
-
+    public Pair<String, User> changeCredential(String email, String name, String password) {
         User user = userRepository.tryGetByEmail(email);
         user.setPassword(password);
         user.setName(name);
         userRepository.save(user);
 
-        String accessJws = jwsService.generateAccessJws(user);
+        String accessJws = jwsService.generateJws(user.getId(),
+                "commonToken",
+                configData.jws().commonTokenLifeTime());
         return new Pair<>(accessJws, user);
     }
 
@@ -108,13 +120,8 @@ public class AuthService {
         return user;
     }
 
-    public User getUserByJws(String jws) {
-        UUID userId = jwsService.parseAccessJws(jws);
-        return userRepository.tryGetById(userId);
-    }
-
-    public UUID logout(String jws) {
-        return jwsService.invalidateJws(jws);
+    public void logout(String jws) {
+        jwsService.invalidateJws(jws, "commonToken");
     }
 
 }

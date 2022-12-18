@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.config;
+package com.bakuard.nutritionManager.config.security;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;

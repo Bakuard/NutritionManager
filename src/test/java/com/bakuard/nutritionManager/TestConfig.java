@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager;
 import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dal.impl.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
@@ -15,6 +16,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.time.Clock;
 
 @TestConfiguration
 @ConfigurationPropertiesScan
@@ -56,6 +58,11 @@ public class TestConfig {
     }
 
     @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
+
+    @Bean
     public ProductRepository productRepository(DataSource dataSource, ConfigData appConfiguration) {
         return new ProductRepositoryPostgres(dataSource, appConfiguration);
     }
@@ -87,6 +94,11 @@ public class TestConfig {
     @Bean
     public ImageRepository imageRepository(DataSource dataSource) {
         return new ImageRepositoryPostgres(dataSource);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
 }

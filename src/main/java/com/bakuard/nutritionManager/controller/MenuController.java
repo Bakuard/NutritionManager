@@ -1,18 +1,14 @@
 package com.bakuard.nutritionManager.controller;
 
-import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
+import com.bakuard.nutritionManager.config.security.RequestContext;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dto.DtoMapper;
-import com.bakuard.nutritionManager.dto.dishes.DishReportRequest;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.model.Menu;
-import com.bakuard.nutritionManager.model.filters.Filter;
-import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.service.ImageUploaderService;
 import com.bakuard.nutritionManager.service.menuGenerator.Input;
 import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
@@ -57,18 +53,21 @@ public class MenuController {
     private ReportService reportService;
 
     private MenuGeneratorService menuGeneratorService;
+    private RequestContext requestContext;
 
     @Autowired
     public MenuController(DtoMapper mapper,
                           MenuRepository repository,
                           ImageUploaderService imageUploaderService,
                           ReportService reportService,
-                          MenuGeneratorService menuGeneratorService) {
+                          MenuGeneratorService menuGeneratorService,
+                          RequestContext requestContext) {
         this.mapper = mapper;
         this.repository = repository;
         this.imageUploaderService = imageUploaderService;
         this.reportService = reportService;
         this.menuGeneratorService = menuGeneratorService;
+        this.requestContext = requestContext;
     }
 
     @Operation(summary = "Загружает изображение меню и возвращает его URL")
@@ -89,9 +88,10 @@ public class MenuController {
     @PostMapping("/uploadImage")
     @Transactional
     public ResponseEntity<SuccessResponse<URL>> uploadImage(@RequestParam("image") MultipartFile image) {
-        logger.info("Upload menu image.");
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Upload menu image for user {}", userId);
 
-        URL imageUrl = imageUploaderService.uploadMenuImage(JwsAuthenticationProvider.getAndClearUserId(), image);
+        URL imageUrl = imageUploaderService.uploadMenuImage(userId, image);
 
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.uploadImage", imageUrl));
     }
@@ -112,9 +112,10 @@ public class MenuController {
     @PostMapping("/add")
     @Transactional
     public ResponseEntity<SuccessResponse<MenuResponse>> add(@RequestBody MenuAddRequest dto) {
-        logger.info("Add new menu. dto={}", dto);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Add new menu for user {}. dto={}", userId, dto);
 
-        Menu menu = mapper.toMenu(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        Menu menu = mapper.toMenu(userId, dto);
         repository.save(menu);
 
         MenuResponse response = mapper.toMenuResponse(menu);
@@ -137,9 +138,10 @@ public class MenuController {
     @PutMapping("/update")
     @Transactional
     public ResponseEntity<SuccessResponse<MenuResponse>> update(@RequestBody MenuUpdateRequest dto) {
-        logger.info("Update menu. dto={}", dto);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Update menu for user {}. dto={}", userId, dto);
 
-        Menu menu = mapper.toMenu(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        Menu menu = mapper.toMenu(userId, dto);
         repository.save(menu);
 
         MenuResponse response = mapper.toMenuResponse(menu);
@@ -165,7 +167,7 @@ public class MenuController {
     @PostMapping("/generate")
     @Transactional
     public ResponseEntity<SuccessResponse<MenuResponse>> generate(@RequestBody GenerateMenuRequest dto) {
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
         logger.info("Generate menu for user={}. dto={}", userId, dto);
 
         Input input = mapper.toInput(userId, dto);
@@ -194,9 +196,10 @@ public class MenuController {
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор меню в формате UUID. Не может быть null.", required = true)
             UUID id) {
-        logger.info("Delete menu by id={}", id);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Delete menu by id={} of user {}", id, userId);
 
-        Menu menu = repository.tryRemove(JwsAuthenticationProvider.getAndClearUserId(), id);
+        Menu menu = repository.tryRemove(userId, id);
 
         MenuResponse response = mapper.toMenuResponse(menu);
         return ResponseEntity.ok(mapper.toSuccessResponse("menu.delete", response));
@@ -221,9 +224,10 @@ public class MenuController {
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор меню в формате UUID. Не может быть null.", required = true)
             UUID id) {
-        logger.info("Get menu by id = {}", id);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get menu by id = {} of user {}", id, userId);
 
-        Menu menu = repository.tryGetById(JwsAuthenticationProvider.getAndClearUserId(), id);
+        Menu menu = repository.tryGetById(userId, id);
 
         MenuResponse response = mapper.toMenuResponse(menu);
         return ResponseEntity.ok(response);
@@ -248,9 +252,10 @@ public class MenuController {
             @RequestParam("name")
             @Parameter(description = "Наименование меню. Не может быть null.", required = true)
             String name) {
-        logger.info("Get menu by name={}", name);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get menu by name={} of user {}", name, userId);
 
-        Menu menu = repository.tryGetByName(JwsAuthenticationProvider.getAndClearUserId(), name);
+        Menu menu = repository.tryGetByName(userId, name);
 
         MenuResponse response = mapper.toMenuResponse(menu);
         return ResponseEntity.ok(response);
@@ -322,11 +327,10 @@ public class MenuController {
                      """,
                     schema = @Schema(defaultValue = "null"))
             List<String> tags) {
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-
-        logger.info("Get menus for list by filter: page={}, size={}, userId={}, " +
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get menus for list by filter: user={}, page={}, size={}, userId={}, " +
                         "sortRule={}, dishNames={}, tags={}",
-                page, size, userId, sortRule, dishNames, tags);
+                userId, page, size, userId, sortRule, dishNames, tags);
 
         Criteria criteria = mapper.toMenuCriteria(
                 page,
@@ -355,11 +359,10 @@ public class MenuController {
     @GetMapping("/getAllMenusFields")
     @Transactional
     public ResponseEntity<MenuFieldsResponse> getAllMenusFields() {
-        logger.info("Get all menus fields");
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get all menus fields of user {}", userId);
 
-        MenuFieldsResponse response = mapper.toMenuFieldsResponse(
-                JwsAuthenticationProvider.getAndClearUserId()
-        );
+        MenuFieldsResponse response = mapper.toMenuFieldsResponse(userId);
 
         return ResponseEntity.ok(response);
     }
@@ -404,9 +407,9 @@ public class MenuController {
             @RequestParam(value = "menuQuantity", required = false)
             @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
             BigDecimal menuQuantity) {
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        logger.info("Get all ingredient products for menuId={}, dishName={}, menuQuantity={}",
-                menuId, dishName, menuQuantity);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get all ingredient products for menuId={}, dishName={}, menuQuantity={} of user {}",
+                menuId, dishName, menuQuantity, userId);
 
         MenuDishProductsListResponse response = mapper.toMenuDishProductsListResponse(
                 userId, menuId, dishName, menuQuantity);
@@ -443,9 +446,9 @@ public class MenuController {
             @RequestParam(value = "menuQuantity", required = false)
             @Parameter(description = "Кол-во меню. Должно быть больше 0. Значение по умолчанию равно 1.")
             BigDecimal menuQuantity) {
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-        logger.info("Get all ingredient products of all dishes for menuId={}, menuQuantity={}",
-                menuId, menuQuantity);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get all ingredient products of all dishes for menuId={}, menuQuantity={} of user {}",
+                menuId, menuQuantity, userId);
 
         MenuDishesProductsListResponse response = mapper.toMenuDishesProductsListResponse(
                 userId, menuId, menuQuantity
@@ -478,7 +481,7 @@ public class MenuController {
     @PostMapping("/createReport")
     @Transactional
     public ResponseEntity<Resource> createReport(@RequestBody MenuReportRequest dto) {
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
         logger.info("create menu report: userId={}, dto={}", userId, dto);
 
         ReportService.MenuProductsReportData reportInputData = mapper.toMenuProductsReportData(userId, dto);

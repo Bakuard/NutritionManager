@@ -9,5 +9,6 @@ public record ConfigData(Decimal decimal,
                          ConfirmationMail confirmationMail,
                          DataBase database,
                          Aws aws,
-                         Pagination pagination) {}
+                         Pagination pagination,
+                         Jws jws) {}
 

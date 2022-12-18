@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.config;
+package com.bakuard.nutritionManager.config.log;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.filter.Filter;

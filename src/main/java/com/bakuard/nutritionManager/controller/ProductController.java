@@ -1,15 +1,14 @@
 package com.bakuard.nutritionManager.controller;
 
-import com.bakuard.nutritionManager.config.JwsAuthenticationProvider;
+import com.bakuard.nutritionManager.config.security.RequestContext;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
+import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.products.*;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.util.Page;
-import com.bakuard.nutritionManager.dto.DtoMapper;
-
 import com.bakuard.nutritionManager.service.ImageUploaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,10 +18,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,14 +41,17 @@ public class ProductController {
     private DtoMapper mapper;
     private ProductRepository productRepository;
     private ImageUploaderService imageUploaderService;
+    private RequestContext requestContext;
 
     @Autowired
     public ProductController(DtoMapper mapper,
                              ProductRepository productRepository,
-                             ImageUploaderService imageUploaderService) {
+                             ImageUploaderService imageUploaderService,
+                             RequestContext requestContext) {
         this.mapper = mapper;
         this.productRepository = productRepository;
         this.imageUploaderService = imageUploaderService;
+        this.requestContext = requestContext;
     }
 
     @Operation(summary = "Загружает изображение продукта и возвращает его URL")
@@ -72,9 +72,10 @@ public class ProductController {
     @PostMapping("/uploadImage")
     @Transactional
     public ResponseEntity<SuccessResponse<URL>> uploadImage(@RequestParam("image") MultipartFile image) {
-        logger.info("Upload product image.");
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Upload product image of user {}", userId);
 
-        URL imageUrl = imageUploaderService.uploadProductImage(JwsAuthenticationProvider.getAndClearUserId(), image);
+        URL imageUrl = imageUploaderService.uploadProductImage(userId, image);
 
         return ResponseEntity.ok(mapper.toSuccessResponse("product.uploadImage", imageUrl));
     }
@@ -95,9 +96,10 @@ public class ProductController {
     @PostMapping("/add")
     @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> add(@RequestBody ProductAddRequest dto) {
-        logger.info("Add new product. dto={}", dto);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Add new product for user {}. dto={}", userId, dto);
 
-        Product product = mapper.toProduct(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        Product product = mapper.toProduct(userId, dto);
         productRepository.save(product);
 
         ProductResponse response = mapper.toProductResponse(product);
@@ -120,9 +122,10 @@ public class ProductController {
     @PutMapping("/update")
     @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> update(@RequestBody ProductUpdateRequest dto) {
-        logger.info("Update product. dto={}", dto);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Update product of user {}. dto={}", userId, dto);
 
-        Product product = mapper.toProduct(JwsAuthenticationProvider.getAndClearUserId(), dto);
+        Product product = mapper.toProduct(userId, dto);
         productRepository.save(product);
 
         ProductResponse response = mapper.toProductResponse(product);
@@ -148,9 +151,9 @@ public class ProductController {
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.", required = true)
             UUID id) {
-        logger.info("Delete product with id={}", id);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Delete product with id={} of user {}", id, userId);
 
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         Product product = productRepository.tryRemove(userId, id);
 
         ProductResponse response = mapper.toProductResponse(product);
@@ -177,9 +180,9 @@ public class ProductController {
     @PatchMapping("/addQuantity")
     @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> addQuantity(@RequestBody ProductAddedQuantityRequest dto) {
-        logger.info("Add quantity to product. dto={}", dto);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Add quantity to product of user {}. dto={}", userId, dto);
 
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         Product product = productRepository.tryGetById(userId, dto.getProductId());
         product.addQuantity(dto.getAddedQuantity());
         productRepository.save(product);
@@ -208,9 +211,9 @@ public class ProductController {
     @PatchMapping("/takeQuantity")
     @Transactional
     public ResponseEntity<SuccessResponse<ProductResponse>> takeQuantity(@RequestBody ProductTakeQuantityRequest dto) {
-        logger.info("Take quantity from product. dto={}", dto);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Take quantity from product of user {}. dto={}", userId, dto);
 
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         Product product = productRepository.tryGetById(userId, dto.getProductId());
         product.take(dto.getTakeQuantity());
         productRepository.save(product);
@@ -238,9 +241,9 @@ public class ProductController {
             @RequestParam("id")
             @Parameter(description = "Уникальный идентификатор продукта в формате UUID. Не может быть null.", required = true)
             UUID id) {
-        logger.info("Get product with id={}", id);
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get product with id={} of user {}", id, userId);
 
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
         Product product = productRepository.tryGetById(userId, id);
 
         return ResponseEntity.ok(mapper.toProductResponse(product));
@@ -354,11 +357,10 @@ public class ProductController {
                      """,
                      schema = @Schema(defaultValue = "null"))
             List<String> tags) {
-        UUID userId = JwsAuthenticationProvider.getAndClearUserId();
-
-        logger.info("Get products by filter: page={}, size={}, userId={}, sortRule={}, onlyFridge={}, " +
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get products by filter: user={}, page={}, size={}, userId={}, sortRule={}, onlyFridge={}, " +
                         "categories={}, shops={}, grades={}, manufacturers={}, tags={}",
-                page, size, userId, sortRule, onlyFridge,
+                userId, page, size, userId, sortRule, onlyFridge,
                 categories, shops, grades, manufacturers, tags);
 
         Criteria criteria = mapper.toProductCriteria(
@@ -393,11 +395,10 @@ public class ProductController {
     @GetMapping("/getAllProductsFields")
     @Transactional
     public ResponseEntity<ProductFieldsResponse> getAllProductsFields() {
-        logger.info("Get products categories, sorts, tags, manufacturers, shops for user");
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("Get products categories, sorts, tags, manufacturers, shops for user {}", userId);
 
-        ProductFieldsResponse response = mapper.toProductFieldsResponse(
-                JwsAuthenticationProvider.getAndClearUserId()
-        );
+        ProductFieldsResponse response = mapper.toProductFieldsResponse(userId);
 
         return ResponseEntity.ok(response);
     }
