@@ -87,8 +87,9 @@ public class TestConfig {
     }
 
     @Bean
-    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource) {
-        return new JwsBlackListPostgres(dataSource);
+    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource,
+                                                         Clock clock) {
+        return new JwsBlackListPostgres(dataSource, clock);
     }
 
     @Bean

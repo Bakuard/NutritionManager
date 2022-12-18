@@ -120,8 +120,9 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource) {
-        return new JwsBlackListPostgres(dataSource);
+    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource,
+                                                         Clock clock) {
+        return new JwsBlackListPostgres(dataSource, clock);
     }
 
     @Bean
@@ -150,8 +151,8 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean(initMethod = "loadTemplates")
-    public ReportService reportService() {
-        return new ReportService();
+    public ReportService reportService(Clock clock) {
+        return new ReportService(clock);
     }
 
     @Bean
@@ -178,14 +179,16 @@ public class SpringConfig implements WebMvcConfigurer {
                                DishRepository dishRepository,
                                MenuRepository menuRepository,
                                MessageSource messageSource,
-                               ConfigData appConfiguration) {
+                               ConfigData appConfiguration,
+                               Clock clock) {
         return new DtoMapper(
                 userRepository,
                 productRepository,
                 dishRepository,
                 menuRepository,
                 messageSource,
-                appConfiguration);
+                appConfiguration,
+                clock);
     }
 
     @Bean

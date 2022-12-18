@@ -8,6 +8,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -21,10 +22,12 @@ public class MenuProductsDataSource implements JRDataSource {
     private Menu.ProductGroup current;
     private BigDecimal menuNumber;
     private Menu menu;
+    private Clock clock;
 
     public MenuProductsDataSource(Menu menu,
                                   BigDecimal menuNumber,
-                                  List<Menu.ProductConstraint> constraints) {
+                                  List<Menu.ProductConstraint> constraints,
+                                  Clock clock) {
         itemProducts = menu.getMenuItemProducts(constraints);
         productsIterator = menu.groupByProduct(itemProducts).stream().
                 sorted(Comparator.comparing(item -> item.product().getContext().getShop())).
@@ -49,7 +52,7 @@ public class MenuProductsDataSource implements JRDataSource {
         switch(jrField.getName()) {
             case "menuName" -> result = menu.getName();
             case "menuNumber" -> result = format(menuNumber);
-            case "creationReportData" -> result = LocalDate.now().toString();
+            case "creationReportData" -> result = LocalDate.now(clock).toString();
             case "totalPrice" -> result = format(
                     menu.getLackProductsPrice(itemProducts, menuNumber).orElseThrow()
             );

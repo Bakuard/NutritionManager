@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import org.springframework.http.HttpStatus;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,8 @@ public class ExceptionResponse {
     @Schema(description = "Все причины из-за которых запрос не смог завершится корректно")
     private List<ConstraintResponse> reasons;
 
-    public ExceptionResponse(HttpStatus status) {
-        timestamp = LocalDateTime.now();
+    public ExceptionResponse(HttpStatus status, Clock clock) {
+        timestamp = LocalDateTime.now(clock);
         httpStatus = status.getReasonPhrase();
         httpErrorCode = status.value();
         reasons = new ArrayList<>();

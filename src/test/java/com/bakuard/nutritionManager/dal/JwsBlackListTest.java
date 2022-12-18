@@ -19,6 +19,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,8 @@ class JwsBlackListTest {
     private ConfigData appConfiguration;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private Clock clock;
 
     @BeforeEach
     void beforeEach() {
@@ -50,7 +53,7 @@ class JwsBlackListTest {
     @DisplayName("addToBlackList(tokenId, expired): tokenId is null => exception")
     public void addToBlackList1() {
         AssertUtil.assertValidateException(
-                () -> commit(() -> repository.addToBlackList(null, LocalDateTime.now().plusDays(2))),
+                () -> commit(() -> repository.addToBlackList(null, LocalDateTime.now(clock).plusDays(2))),
                 Constraint.NOT_NULL
         );
     }
@@ -71,7 +74,7 @@ class JwsBlackListTest {
              => return false
             """)
     public void addToBlackList3() {
-        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().minusDays(1)));
+        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now(clock).minusDays(1)));
         
         Assertions.assertThat(actual).isFalse();
     }
@@ -83,7 +86,7 @@ class JwsBlackListTest {
              => return false
             """)
     public void addToBlackList4() {
-        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now()));
+        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now(clock)));
 
         Assertions.assertThat(actual).isFalse();
     }
@@ -95,9 +98,9 @@ class JwsBlackListTest {
              => return false
             """)
     public void addToBlackList5() {
-        commit(() ->repository.addToBlackList(toUUID(1), LocalDateTime.now().plusDays(5)));
+        commit(() ->repository.addToBlackList(toUUID(1), LocalDateTime.now(clock).plusDays(5)));
 
-        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().plusDays(3)));
+        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now(clock).plusDays(3)));
 
         Assertions.assertThat(actual).isFalse();
     }
@@ -109,7 +112,7 @@ class JwsBlackListTest {
              => doesn't add token to black list
             """)
     public void addToBlackList6() {
-        commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().minusDays(1)));
+        commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now(clock).minusDays(1)));
 
         boolean actual = repository.inBlackList(toUUID(1));
         
@@ -123,7 +126,7 @@ class JwsBlackListTest {
              => doesn't add token to black list
             """)
     public void addToBlackList7() {
-        commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now()));
+        commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now(clock)));
 
         boolean actual = repository.inBlackList(toUUID(1));
         
@@ -138,7 +141,7 @@ class JwsBlackListTest {
              => return true
             """)
     public void addToBlackList8() {
-        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().plusDays(3)));
+        boolean actual = commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now(clock).plusDays(3)));
 
         Assertions.assertThat(actual).isTrue();
     }
@@ -151,7 +154,7 @@ class JwsBlackListTest {
              => add tokenId to black list
             """)
     public void addToBlackList9() {
-        commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now().plusDays(3)));
+        commit(() -> repository.addToBlackList(toUUID(1), LocalDateTime.now(clock).plusDays(3)));
 
         boolean actual = repository.inBlackList(toUUID(1));
         
@@ -161,7 +164,7 @@ class JwsBlackListTest {
     @Test
     @DisplayName("removeAllExpired(deadline): black list is empty => return 0")
     public void removeAllExpired1() {
-        int actual =commit(() -> repository.removeAllExpired(LocalDateTime.now()));
+        int actual =commit(() -> repository.removeAllExpired(LocalDateTime.now(clock)));
 
         Assertions.assertThat(actual).isZero();
     }
@@ -186,7 +189,7 @@ class JwsBlackListTest {
              => return 0
             """)
     public void removeAllExpired3() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         commit(() -> {
             repository.addToBlackList(toUUID(1), now.plusDays(1));
             repository.addToBlackList(toUUID(2), now.plusDays(2));
@@ -205,7 +208,7 @@ class JwsBlackListTest {
              => doesn't remove any token
             """)
     public void removeAllExpired4() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         commit(() -> {
             repository.addToBlackList(toUUID(1), now.plusDays(1));
             repository.addToBlackList(toUUID(2), now.plusDays(2));
@@ -228,7 +231,7 @@ class JwsBlackListTest {
              => return correct number of removed tokens
             """)
     public void removeAllExpired5() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         commit(() -> {
             repository.addToBlackList(toUUID(1), now.plusDays(1));
             repository.addToBlackList(toUUID(2), now.plusDays(2));
@@ -250,7 +253,7 @@ class JwsBlackListTest {
              => remove these tokens
             """)
     public void removeAllExpired6() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         commit(() -> {
             repository.addToBlackList(toUUID(1), now.plusDays(1));
             repository.addToBlackList(toUUID(2), now.plusDays(2));
