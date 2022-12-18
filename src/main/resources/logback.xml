@@ -43,7 +43,7 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>ERROR</level>
         </filter>
-        <filter class="com.bakuard.nutritionManager.config.HierarchyLoggerFilter">
+        <filter class="com.bakuard.nutritionManager.config.log.HierarchyLoggerFilter">
             <parentLoggerName>com.bakuard.nutritionManager</parentLoggerName>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">

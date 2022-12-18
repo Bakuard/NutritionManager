@@ -1,11 +1,13 @@
-package com.bakuard.nutritionManager.dal;
+package com.bakuard.nutritionManager;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dal.impl.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -14,30 +16,19 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.io.IOException;
+import java.time.Clock;
 
 @TestConfiguration
-public class DBTestConfig {
+@ConfigurationPropertiesScan
+public class TestConfig {
 
     @Bean
-    public AppConfigData appConfigData(Environment env) throws IOException {
-        return AppConfigData.builder().
-                setNumberPrecision(env.getProperty("decimal.precision")).
-                setNumberRoundingMod(env.getProperty("decimal.rounding")).
-                setNumberScale(env.getProperty("decimal.numberScale")).
-                setDatabaseName(env.getProperty("db.name")).
-                setDatabaseUser(env.getProperty("db.user")).
-                setDatabasePassword(env.getProperty("db.password")).
-                build();
-    }
-
-    @Bean
-    public DataSource dataSource(AppConfigData appConfigData) {
+    public DataSource dataSource(ConfigData configData) {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
-        hikariConfig.setUsername(appConfigData.getDatabaseUser());
-        hikariConfig.setPassword(appConfigData.getDatabasePassword());
-        hikariConfig.addDataSourceProperty("databaseName", appConfigData.getDatabaseName());
+        hikariConfig.setUsername(configData.database().user());
+        hikariConfig.setPassword(configData.database().password());
+        hikariConfig.addDataSourceProperty("databaseName", configData.database().name());
         hikariConfig.setAutoCommit(false);
         hikariConfig.addDataSourceProperty("portNumber", "5432");
         hikariConfig.addDataSourceProperty("serverName", "localhost");
@@ -67,20 +58,25 @@ public class DBTestConfig {
     }
 
     @Bean
-    public ProductRepository productRepository(DataSource dataSource, AppConfigData appConfiguration) {
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
+
+    @Bean
+    public ProductRepository productRepository(DataSource dataSource, ConfigData appConfiguration) {
         return new ProductRepositoryPostgres(dataSource, appConfiguration);
     }
 
     @Bean
     public DishRepository dishRepository(DataSource dataSource,
-                                         AppConfigData appConfiguration,
+                                         ConfigData appConfiguration,
                                          ProductRepositoryPostgres productRepository) {
         return new DishRepositoryPostgres(dataSource, appConfiguration, productRepository);
     }
 
     @Bean
     public MenuRepository menuRepository(DataSource dataSource,
-                                         AppConfigData appConfiguration,
+                                         ConfigData appConfiguration,
                                          DishRepositoryPostgres dishRepository) {
         return new MenuRepositoryPostgres(dataSource, appConfiguration, dishRepository);
     }
@@ -91,13 +87,19 @@ public class DBTestConfig {
     }
 
     @Bean
-    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource) {
-        return new JwsBlackListPostgres(dataSource);
+    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource,
+                                                         Clock clock) {
+        return new JwsBlackListPostgres(dataSource, clock);
     }
 
     @Bean
     public ImageRepository imageRepository(DataSource dataSource) {
         return new ImageRepositoryPostgres(dataSource);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
 }

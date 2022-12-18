@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.service.menuGenerator;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.MenuItem;
 import com.bakuard.nutritionManager.validation.Rule;
@@ -18,10 +18,10 @@ import static com.bakuard.nutritionManager.validation.Rule.notNull;
 
 public class MenuGeneratorService {
 
-    private final AppConfigData appConfigData;
+    private final ConfigData configData;
 
-    public MenuGeneratorService(AppConfigData appConfigData) {
-        this.appConfigData = appConfigData;
+    public MenuGeneratorService(ConfigData configData) {
+        this.configData = configData;
     }
 
     /**
@@ -66,14 +66,14 @@ public class MenuGeneratorService {
                 generateId().
                 setUser(input.getUser()).
                 setName(input.getGeneratedMenuName()).
-                setConfig(appConfigData);
+                setConfig(configData);
         for(int i = 0; i < result.length; i++) {
             if(Math.signum(result[i].getValue()) > 0) {
                 menuBuilder.addItem(
                         new MenuItem.LoadBuilder().
                                 generateId().
                                 setDish(input.getAllDishMinPrices().get(i).dish()).
-                                setConfig(appConfigData).
+                                setConfig(configData).
                                 setQuantity(BigDecimal.valueOf(result[i].getValue()))
                 );
             }

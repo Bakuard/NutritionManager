@@ -1,10 +1,10 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.Action;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.User;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class ImageRepositoryTest {
 
@@ -41,24 +41,16 @@ class ImageRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData appConfiguration;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
-        try {
-            JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                    "UsedImages", "JwsBlackList",
-                    "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
-                    "Menus", "Dishes", "Products", "Users");
-            transactionManager.commit(status);
-        } catch(RuntimeException e) {
-            transactionManager.rollback(status);
-            throw e;
-        }
+        commit(() -> JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "UsedImages", "JwsBlackList",
+                "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
+                "Menus", "Dishes", "Products", "Users"));
     }
 
     @Test
@@ -78,7 +70,7 @@ class ImageRepositoryTest {
 
         URL actual = imageRepository.getImageUrl(user.getId(), "d1921aa0ca3c1146a01520c04e6caa9e");
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -94,14 +86,15 @@ class ImageRepositoryTest {
                 "d1921aa0ca3c1146a01520c04e6caa9e",
                 createUrl("https://somepath"))
         );
-
-        Assertions.assertDoesNotThrow(() ->
-            commit(() -> imageRepository.addImageUrl(
-                    user.getId(),
-                    "d1921aa0ca3c1146a01520c04e6caa9e",
-                    createUrl("https://somepath"))
-            )
-        );
+        
+        Assertions.assertThatNoException().
+                isThrownBy(() -> 
+                        commit(() -> imageRepository.addImageUrl(
+                                user.getId(),
+                                "d1921aa0ca3c1146a01520c04e6caa9e",
+                                createUrl("https://somepath"))
+                        )
+                );
     }
 
     @Test
@@ -126,7 +119,7 @@ class ImageRepositoryTest {
         );
         URL actual = imageRepository.getImageUrl(user.getId(), "d1921aa0ca3c1146a01520c04e6caa9e");
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -143,7 +136,7 @@ class ImageRepositoryTest {
                 "889b88c75a5b0236e6fa67848fdce656"
         );
 
-        Assertions.assertNull(actual);
+        Assertions.assertThat(actual).isNull();
     }
 
     @Test
@@ -155,7 +148,7 @@ class ImageRepositoryTest {
     void getUnusedImages1() {
         List<String> actual = imageRepository.getUnusedImages();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -192,7 +185,7 @@ class ImageRepositoryTest {
 
         List<String> actual = imageRepository.getUnusedImages();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -233,10 +226,11 @@ class ImageRepositoryTest {
 
         List<String> actual = commit(() -> imageRepository.getUnusedImages());
 
-        Assertions.assertEquals(
-                List.of("622ed5d9d4c45a0ce5b4dd9a7b80fd74", "6e209648b5cce6ebd95561788d1cbfb8"),
-                actual
-        );
+        Assertions.assertThat(actual).
+                containsExactly(
+                        "622ed5d9d4c45a0ce5b4dd9a7b80fd74",
+                        "6e209648b5cce6ebd95561788d1cbfb8"
+                );
     }
 
     @Test
@@ -273,17 +267,11 @@ class ImageRepositoryTest {
 
         imageRepository.removeUnusedImages();
 
-        Assertions.assertAll(
-                () -> Assertions.assertNotNull(
-                        imageRepository.getImageUrl(user.getId(), "d1921aa0ca3c1146a01520c04e6caa9e")
-                ),
-                () -> Assertions.assertNotNull(
-                        imageRepository.getImageUrl(user.getId(), "889b88c75a5b0236e6fa67848fdce656")
-                ),
-                () -> Assertions.assertNotNull(
-                        imageRepository.getImageUrl(user.getId(), "622ed5d9d4c45a0ce5b4dd9a7b80fd74")
-                )
-        );
+        Assertions.assertThat(List.of(
+                imageRepository.getImageUrl(user.getId(), "d1921aa0ca3c1146a01520c04e6caa9e"),
+                imageRepository.getImageUrl(user.getId(), "889b88c75a5b0236e6fa67848fdce656"),
+                imageRepository.getImageUrl(user.getId(), "622ed5d9d4c45a0ce5b4dd9a7b80fd74")
+        )).doesNotContainNull();
     }
 
     @Test
@@ -325,15 +313,15 @@ class ImageRepositoryTest {
         commit(() -> imageRepository.removeUnusedImages());
 
         List<String> actual = commit(() -> imageRepository.getUnusedImages());
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
 
-    private void commit(Action action) {
+    private void commit(Runnable action) {
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         TransactionStatus status = transactionManager.getTransaction(def);
         try {
-            action.act();
+            action.run();
             transactionManager.commit(status);
         } catch(RuntimeException e) {
             transactionManager.rollback(status);
@@ -388,7 +376,7 @@ class ImageRepositoryTest {
                 setId(toUUID(userId)).
                 setName("User" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
         commit(() -> userRepository.save(user));
         return user;

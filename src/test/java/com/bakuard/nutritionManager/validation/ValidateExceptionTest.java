@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.validation;
 
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +15,14 @@ class ValidateExceptionTest {
             iterator():
              validate exception doesn't contain any rule exceptions,
              validate exception doesn't contain nested validation exceptions
-             => iterator#hasNext() return false
+             => return empty Iterator
             """)
     public void iterator1() {
         ValidateException validateException = new ValidateException();
 
         Iterator<RuleException> iterator = validateException.iterator();
 
-        Assertions.assertFalse(iterator.hasNext());
+        Assertions.assertThat(iterator).toIterable().isEmpty();
     }
 
     @Test
@@ -31,7 +31,7 @@ class ValidateExceptionTest {
              validate exception doesn't contain any rule exceptions,
              validate exception contains nested validation exceptions,
              nested validation exceptions don't contain any rule exceptions
-             => iterator#hasNext() return false
+             => return empty Iterator
             """)
     public void iterator2() {
         ValidateException validateException = new ValidateException().
@@ -41,7 +41,7 @@ class ValidateExceptionTest {
 
         Iterator<RuleException> iterator = validateException.iterator();
 
-        Assertions.assertFalse(iterator.hasNext());
+        Assertions.assertThat(iterator).toIterable().isEmpty();
     }
 
     @Test
@@ -69,7 +69,7 @@ class ValidateExceptionTest {
 
         Iterator<RuleException> iterator = validateException.iterator();
 
-        Assertions.assertTrue(iterator.hasNext());
+        Assertions.assertThat(iterator).hasNext();
     }
 
     @Test
@@ -104,7 +104,8 @@ class ValidateExceptionTest {
                                 addReason(expected.get(5))
                 );
 
-        Assertions.assertIterableEquals(expected, validateException);
+        Assertions.assertThat((Iterable<RuleException>) validateException).
+                containsExactlyElementsOf(expected);
     }
 
     @Test
@@ -140,7 +141,8 @@ class ValidateExceptionTest {
                 addReason(expected.get(4)).
                 addReason(expected.get(5));
 
-        Assertions.assertIterableEquals(expected, validateException);
+        Assertions.assertThat((Iterable<RuleException>) validateException).
+                containsExactlyElementsOf(expected);
     }
 
     @Test
@@ -175,7 +177,8 @@ class ValidateExceptionTest {
                                 addReason(expected.get(5))
                 );
 
-        Assertions.assertIterableEquals(expected, validateException);
+        Assertions.assertThat((Iterable<RuleException>) validateException).
+                containsExactlyElementsOf(expected);
     }
 
     @Test
@@ -217,7 +220,7 @@ class ValidateExceptionTest {
             ++number;
         }
 
-        Assertions.assertEquals(expected.size(), number);
+        Assertions.assertThat(number).isEqualTo(expected.size());
     }
 
     @Test
@@ -261,7 +264,8 @@ class ValidateExceptionTest {
                 ).
                 addReason(ruleException);
 
-        Assertions.assertIterableEquals(expected, validateException);
+        Assertions.assertThat((Iterable<RuleException>) validateException).
+                containsExactlyElementsOf(expected);
     }
 
     @Test
@@ -277,7 +281,7 @@ class ValidateExceptionTest {
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertEquals(0, actual.size());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -297,7 +301,7 @@ class ValidateExceptionTest {
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertEquals(0, actual.size());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -335,7 +339,7 @@ class ValidateExceptionTest {
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -373,7 +377,7 @@ class ValidateExceptionTest {
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -411,7 +415,7 @@ class ValidateExceptionTest {
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -449,7 +453,7 @@ class ValidateExceptionTest {
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -496,7 +500,7 @@ class ValidateExceptionTest {
         List<RuleException> actual = new ArrayList<>();
         validateException.forEach(actual::add);
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
 }

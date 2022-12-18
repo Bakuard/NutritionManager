@@ -40,14 +40,14 @@ public class DishUpdateRequest {
     private String description;
     @Schema(description = """
             Путь к изображению данного блюда. Ограничения:<br/>
-            1. Должен быть null ИЛИ представлять собой корректный URl адресс.<br/>
+            1. Должен быть null ИЛИ представлять собой корректный URl адрес.<br/>
             """)
     private String imageUrl;
     @Schema(description = """
             Ингредиенты блюда. Допускается пустой список ингредиентов. Ограничения:<br/>
             1. Список ингредиентов не должен быть null. <br/>
             2. Каждый элемент списка ингредиентов не должен быть null. <br/>
-            3. Наименования всех ингрдеиентов должны быть уникальны. <br/>
+            3. Наименования всех ингредиентов должны быть уникальны. <br/>
             """)
     private List<IngredientUpdateRequest> ingredients;
     @Schema(description = """

@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.service;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.validation.*;
 
 import javax.mail.*;
@@ -16,10 +16,10 @@ import static com.bakuard.nutritionManager.validation.Rule.failure;
 
 public class EmailService {
 
-    private final AppConfigData appConfigData;
+    private final ConfigData configData;
 
-    public EmailService(AppConfigData appConfigData) {
-        this.appConfigData = appConfigData;
+    public EmailService(ConfigData configData) {
+        this.configData = configData;
     }
 
     public void confirmEmailForRegistration(String jws, String email) throws ValidateException {
@@ -53,14 +53,14 @@ public class EmailService {
             @Override
             public PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        appConfigData.getMailServer(),
-                        appConfigData.getMailPassword()
+                        configData.confirmationMail().server(),
+                        configData.confirmationMail().password()
                 );
             }
         });
 
         Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(appConfigData.getMailServer()));
+        message.setFrom(new InternetAddress(configData.confirmationMail().server()));
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
         message.setSubject("Nutrition Manager");
 

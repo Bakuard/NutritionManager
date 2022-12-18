@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.config;
+package com.bakuard.nutritionManager.config.security;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +22,9 @@ public class JwsFilter extends OncePerRequestFilter {
 
         if(token != null && token.startsWith("Bearer ") &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
-            SecurityContextHolder.getContext().setAuthentication(new JwsAuthentication(token));
+            SecurityContextHolder.getContext().setAuthentication(
+                    new JwsAuthentication(token, request.getRequestURI())
+            );
         }
         filterChain.doFilter(request, response);
     }

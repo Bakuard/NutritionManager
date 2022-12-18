@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dto;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.dishes.*;
@@ -25,12 +25,12 @@ import com.bakuard.nutritionManager.service.report.ReportService;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.RuleException;
 import com.bakuard.nutritionManager.validation.ValidateException;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -40,21 +40,24 @@ public class DtoMapper {
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;
-    private AppConfigData appConfiguration;
+    private ConfigData appConfiguration;
     private MessageSource messageSource;
+    private Clock clock;
 
     public DtoMapper(UserRepository userRepository,
                      ProductRepository productRepository,
                      DishRepository dishRepository,
                      MenuRepository menuRepository,
                      MessageSource messageSource,
-                     AppConfigData appConfiguration) {
+                     ConfigData appConfiguration,
+                     Clock clock) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.dishRepository = dishRepository;
         this.menuRepository = menuRepository;
         this.messageSource = messageSource;
         this.appConfiguration = appConfiguration;
+        this.clock = clock;
     }
 
     public ProductResponse toProductResponse(Product product) {
@@ -167,7 +170,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.products(Arrays.asList(sortRule))).
+                setSort(Sort.products(sortRule)).
                 setFilter(filter);
     }
 
@@ -316,7 +319,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.dishes(Arrays.asList(sortRule))).
+                setSort(Sort.dishes(sortRule)).
                 setFilter(filter);
     }
 
@@ -484,7 +487,7 @@ public class DtoMapper {
 
         return new Criteria().
                 setPageable(PageableByNumber.of(size, page)).
-                setSort(Sort.menus(Arrays.asList(sortRule))).
+                setSort(Sort.menus(sortRule)).
                 setFilter(filter);
     }
 
@@ -518,7 +521,8 @@ public class DtoMapper {
         return new SuccessResponse<>(
                 getMessage(keyMessage, "Success"),
                 getMessage("successTitle", "Success"),
-                body
+                body,
+                clock
         );
     }
 
@@ -540,7 +544,7 @@ public class DtoMapper {
 
 
     public ExceptionResponse toExceptionResponse(HttpStatus httpStatus, String keyMessage) {
-        ExceptionResponse response = new ExceptionResponse(httpStatus);
+        ExceptionResponse response = new ExceptionResponse(httpStatus, clock);
         ConstraintResponse constraintResponse = new ConstraintResponse();
         constraintResponse.setTitle(getMessage("constraintTitle", "Reason"));
         constraintResponse.setMessage(getMessage(keyMessage, "Unexpected exception"));
@@ -557,7 +561,7 @@ public class DtoMapper {
             httpStatus = HttpStatus.NOT_FOUND;
         }
 
-        ExceptionResponse response = new ExceptionResponse(httpStatus);
+        ExceptionResponse response = new ExceptionResponse(httpStatus, clock);
         e.forEach(constraint -> response.addReason(toConstraintResponse(constraint)));
         return response;
     }

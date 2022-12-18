@@ -28,26 +28,16 @@ public class UserRepositoryPostgres implements UserRepository {
     }
 
     @Override
-    public boolean save(User user) {
+    public void save(User user) {
         Validator.check("UserRepository.user", notNull(user));
 
-        User oldUser = getById(user.getId()).orElse(null);
-
-        boolean wasSaved = false;
         try {
-            if(oldUser == null) {
-                addNewUser(user);
-                wasSaved = true;
-            } else if(!user.equalsFullState(oldUser)) {
-                updateUser(user);
-                wasSaved = true;
-            }
+            if(doesUserExist(user.getId())) updateUser(user);
+            else addNewUser(user);
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save user", e).
                     addReason(Rule.of("UserRepository.user", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
-
-        return wasSaved;
     }
 
     @Override
@@ -194,6 +184,18 @@ public class UserRepositoryPostgres implements UserRepository {
                     ps.setString(3, user.getEmail());
                     ps.setString(4, user.getSalt());
                     ps.setObject(5, user.getId());
+                }
+        );
+    }
+
+    private boolean doesUserExist(UUID userId) {
+        return statement.query(
+                "select count(*) > 0 as doesUserExist from Users where userId = ?;",
+                ps -> ps.setObject(1, userId),
+                rs -> {
+                    boolean result = false;
+                    if(rs.next()) result = rs.getBoolean("doesUserExist");
+                    return result;
                 }
         );
     }

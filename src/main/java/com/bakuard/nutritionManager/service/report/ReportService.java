@@ -12,6 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,9 +23,10 @@ import static com.bakuard.nutritionManager.validation.Rule.failure;
 public class ReportService {
 
     private List<JasperReport> reportTemplates;
+    private Clock clock;
 
-    public ReportService() {
-
+    public ReportService(Clock clock) {
+        this.clock = clock;
     }
 
     public void loadTemplates() {
@@ -56,7 +58,7 @@ public class ReportService {
             JasperPrint filledReport = JasperFillManager.fillReport(
                     getCompiledReport("dishProductsReportTemplate"),
                     parameters,
-                    new DishProductsDataSource(data.dish(), data.servingNumber(), data.constraints())
+                    new DishProductsDataSource(data.dish(), data.servingNumber(), data.constraints(), clock)
             );
 
             return JasperExportManager.exportReportToPdf(filledReport);
@@ -74,7 +76,7 @@ public class ReportService {
             JasperPrint filledReport = JasperFillManager.fillReport(
                     getCompiledReport("menuProductsReportTemplate"),
                     parameters,
-                    new MenuProductsDataSource(data.menu(), data.menuNumber(), data.constraints())
+                    new MenuProductsDataSource(data.menu(), data.menuNumber(), data.constraints(), clock)
             );
 
             return JasperExportManager.exportReportToPdf(filledReport);

@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,9 +18,12 @@ import static com.bakuard.nutritionManager.validation.Rule.*;
 public class JwsBlackListPostgres implements JwsBlackListRepository {
 
     private JdbcTemplate statement;
+    private Clock clock;
 
-    public JwsBlackListPostgres(DataSource dataSource) {
+    public JwsBlackListPostgres(DataSource dataSource,
+                                Clock clock) {
         statement = new JdbcTemplate(dataSource);
+        this.clock = clock;
     }
 
     @Override
@@ -29,7 +33,7 @@ public class JwsBlackListPostgres implements JwsBlackListRepository {
                 "JwsBlackListPostgres.expired", notNull(expired)
         );
 
-        boolean isCorrect = LocalDateTime.now().compareTo(expired) < 0 && !inBlackList(tokenId);
+        boolean isCorrect = LocalDateTime.now(clock).isBefore(expired) && !inBlackList(tokenId);
 
         if(isCorrect) {
             statement.update(

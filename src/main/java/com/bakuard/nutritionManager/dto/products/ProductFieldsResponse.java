@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ProductFieldsResponse {
 
     @Schema(description = """
-            Все теги всех продуктов пользователя. Если ни для оодного продукта не используется ни один тег -
+            Все теги всех продуктов пользователя. Если ни для одного продукта не используется ни один тег -
              данный список будет пустым.
             """)
     private List<FieldResponse> tags;

@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 import static com.bakuard.nutritionManager.validation.Rule.*;
 
 /**
- * Представляет оределенное блюдо.
+ * Представляет определенное блюдо.
  */
 public class Dish implements Entity<Dish> {
 
@@ -36,7 +36,7 @@ public class Dish implements Entity<Dish> {
     private final List<DishIngredient> ingredients;
     private final List<Tag> tags;
 
-    private AppConfigData config;
+    private ConfigData config;
     private ProductRepository productRepository;
     private final Sort ingredientProductsSort;
 
@@ -68,7 +68,7 @@ public class Dish implements Entity<Dish> {
                  String imageUrl,
                  List<DishIngredient.Builder> ingredients,
                  List<String> tags,
-                 AppConfigData config,
+                 ConfigData config,
                  ProductRepository productRepository) {
         Container<List<Tag>> tagContainer = new Container<>();
         Container<List<DishIngredient>> ingredientContainer = new Container<>();
@@ -99,7 +99,7 @@ public class Dish implements Entity<Dish> {
         this.id = id;
         this.user = user;
         this.name = name.trim();
-        this.servingSize = servingSize.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.servingSize = servingSize.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.unit = unit.trim();
         this.description = description;
         this.imageUrl = urlContainer.get();
@@ -107,12 +107,12 @@ public class Dish implements Entity<Dish> {
         this.tags = new ArrayList<>(tagContainer.get());
         this.config = config;
         this.productRepository = productRepository;
-        this.ingredientProductsSort = Sort.products().asc("price");
+        this.ingredientProductsSort = Sort.products("price");
     }
 
     /**
-     * Возвращает уникальный идетификатор данного блюда.
-     * @return уникальный идетификатор данного блюда.
+     * Возвращает уникальный идентификатор данного блюда.
+     * @return уникальный идентификатор данного блюда.
      */
     @Override
     public UUID getId() {
@@ -128,8 +128,8 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает наименование даннго блюда.
-     * @return наименование даннго блюда.
+     * Возвращает наименование данного блюда.
+     * @return наименование данного блюда.
      */
     public String getName() {
         return name;
@@ -160,7 +160,7 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Возвращает путь изображения данного блюда. Путь не обязательно может быть путем в файловой системе.
+     * Возвращает путь изображения данного блюда. Путь необязательно может быть путем в файловой системе.
      * @return путь изображения данного блюда.
      */
     public URL getImageUrl() {
@@ -259,7 +259,7 @@ public class Dish implements Entity<Dish> {
      * Возвращает ингредиент по его уникальному идентификатору.
      * @param ingredientId уникальный идентификатор ингредиента.
      * @return ингредиент блюда или пустой Optional.
-     * @throws ValidateException если выполняется хотябы одно из следующих условий: <br/>
+     * @throws ValidateException если выполняется хотя бы одно из следующих условий: <br/>
      *         1. ingredientId равен null. <br/>
      *         2. У блюда нет ингредиента с таким идентификатором. <br/>
      */
@@ -274,7 +274,7 @@ public class Dish implements Entity<Dish> {
 
     /**
      * Возвращает все ингредиенты данного блюда в виде списка доступного только для чтения.
-     * @return все ингрединты данного блюда.
+     * @return все ингредиенты данного блюда.
      */
     public List<DishIngredient> getIngredients() {
         return Collections.unmodifiableList(ingredients);
@@ -416,11 +416,11 @@ public class Dish implements Entity<Dish> {
      *    этому ингредиенту и при это множество продуктов соответствующих указанному ингредиенту не пусто - этот
      *    элемент будет отброшен и не будет принимать участия в формировании итогового результата. <br/>
      * 6. Если некоторому ингредиенту блюда не соответствует ни один продукт - то для этого ингредиента
-     *    будет добавлен элемент, метод {@link IngredientProduct#product()} которого будет возвращаеть пустой
+     *    будет добавлен элемент, метод {@link IngredientProduct#product()} которого будет возвращать пустой
      *    Optional. <br/>
      * 7. Если для одного и того же ингредиента блюда указанно несколько элементов задающих для него продукт - будет
      *    выбран первый корректный элемент из списка. <br/>
-     * 8. Если для некоторого ингредиента блюда не указанно ни одного продукта в входном списке или все элементы
+     * 8. Если для некоторого ингредиента блюда не указанно ни одного продукта во входном списке или все элементы
      *    содержащие такие ограничения были отброшены - будет выбран самый дешевый из всех продуктов подходящих
      *    для данного ингредиента. <br/>
      * @param constraints ограничения задающие конкретные продукты для ингредиентов блюд.
@@ -437,7 +437,7 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Групирует продукты относящиеся к разным ингредиентам по одинаковым продуктам. Если
+     * Группирует продукты относящиеся к разным ингредиентам по одинаковым продуктам. Если
      * {@link IngredientProduct#product()} какого-то ингредиента возвращает пустой Optional -
      * он не будет участвовать в формировании итогового результата.<br/>
      * Особые случаи: <br/>
@@ -447,7 +447,7 @@ public class Dish implements Entity<Dish> {
      * Данный метод полагается, что передаваемый список был корректно сформирован вызывающим кодом, например,
      * вызовом метода {@link #getProductForEachIngredient(List)}.
      * @param ingredientProducts данные об одном конкретном продукте для каждого ингредиента блюда.
-     * @return продукты разных ингредиентов сгрупированные по одинаковым продуктам.
+     * @return продукты разных ингредиентов сгруппированные по одинаковым продуктам.
      * @throws ValidateException если menuItemProducts является null.
      */
     public List<ProductGroup> groupByProduct(List<IngredientProduct> ingredientProducts) {
@@ -463,13 +463,13 @@ public class Dish implements Entity<Dish> {
 
     /**
      * В некоторых случаях один и тот же продукт может использоваться для нескольких ингредиентов блюда. Этот метод
-     * возвращает общее кол-во указаннаго продукта необходимого для всех ингредиентов блюда где он используется.
+     * возвращает общее кол-во указанного продукта необходимого для всех ингредиентов блюда где он используется.
      * <br/><br/>
      * Метод не проверят содержимое объекта productGroup полагая, что данный объект был сформирован правильно с
      * помощью метода: {@link #groupByProduct(List)}.
      * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
-     * @return общее кол-во указаннаго продукта необходимого для всех ингредиентов блюда где он используется.
+     * @return общее кол-во указанного продукта необходимого для всех ингредиентов блюда где он используется.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
      *              2. если servingNumber меньше или равно нулю.<br/>
@@ -495,7 +495,7 @@ public class Dish implements Entity<Dish> {
      * с помощью метода: {@link #groupByProduct(List)}.
      * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
-     * @return общее кол-во упаковок указаннаго продукта необходимого для всех ингредиентов блюда где он
+     * @return общее кол-во упаковок указанного продукта необходимого для всех ингредиентов блюда где он
      *         используется.
      * @throws ValidateException если выполняется хотя бы одно из следующих условий:<br/>
      *              1. если servingNumber имеет значение null.<br/>
@@ -529,7 +529,7 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Для любого указанного продукта, из множества взаимозаменямых продуктов указанного ингредиента, вычисляет
+     * Для любого указанного продукта, из множества взаимозаменяемых продуктов указанного ингредиента, вычисляет
      * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
      * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
      * Недостающее кол-во рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой
@@ -538,7 +538,7 @@ public class Dish implements Entity<Dish> {
      * 1. Если {@link IngredientProduct#product()} возвращает пустой Optional - этот метод также вернет
      *    пустой Optional.
      * <br/><br/>
-     * Метод не проверят содержимое объекта ingredientProduct (не выходят ли индексы за допустимые пределы, действительно
+     * Метод не проверят содержимое объекта ingredientProduct (выходят ли индексы за допустимые пределы, действительно
      * ли указанный продукт соответствует указанном ингредиенту) полагая, что данный объект был сформирован правильно
      * с помощью одного из методов: {@link #getProduct(int, int)} или {@link #getProductForEachIngredient(List)}.
      * @param ingredientProduct данные об одном из продуктов соответствующих одному из ингредиентов.
@@ -565,11 +565,11 @@ public class Dish implements Entity<Dish> {
     }
 
     /**
-     * Для любого указанного продукта, из множества взаимозаменямых продуктов указанного ингредиента, вычисляет
+     * Для любого указанного продукта, из множества взаимозаменяемых продуктов указанного ингредиента, вычисляет
      * и возвращает - в каком кол-ве его необходимо докупить (именно "докупить", а не "купить", т.к. искомый
      * продукт может уже иметься в некотором кол-ве у пользователя) для блюда в указанном кол-ве порций.
      * Недостающее кол-во рассчитывается с учетом фасовки продукта (размера упаковки) и представляет собой
-     * кол-во недостающих "упаковок" продукта. Данный метдо используется, когда для разных ингредиентов блюда
+     * кол-во недостающих "упаковок" продукта. Данный метод используется, когда для разных ингредиентов блюда
      * были выбраны одинаковые продукты. <br/><br/>
      * Метод не проверят содержимое объекта productGroup полагая, что данный объект был сформирован правильно с
      * помощью метода: {@link #groupByProduct(List)}.
@@ -597,7 +597,7 @@ public class Dish implements Entity<Dish> {
      * 1. Если {@link IngredientProduct#product()} возвращает пустой Optional - этот метод также вернет
      *    пустой Optional.
      * <br/><br/>
-     * Метод не проверят содержимое объекта ingredientProduct (не выходят ли индексы за допустимые пределы, действительно
+     * Метод не проверят содержимое объекта ingredientProduct (выходят ли индексы за допустимые пределы, действительно
      * ли указанный продукт соответствует указанном ингредиенту) полагая, что данный объект был сформирован правильно
      * с помощью одного из методов: {@link #getProduct(int, int)} или {@link #getProductForEachIngredient(List)}.
      * @param ingredientProduct данные об одном из продуктов соответствующих одному из ингредиентов.
@@ -620,7 +620,7 @@ public class Dish implements Entity<Dish> {
     /**
      * Возвращает общую цену за недостающее кол-во "упаковок" докупаемого продукта. Стоимость недостающего
      * кол-ва рассчитывается с учетом фасовки продукта (размера упаковки). <br/><br/>
-     * Метод не проверят содержимое объекта productGroup  полагая, что данный объект был сформирован правильно
+     * Метод не проверят содержимое объекта productGroup полагая, что данный объект был сформирован правильно
      * с помощью метода: {@link #groupByProduct(List)}.
      * @param productGroup данные о продукте используемом для нескольких ингредиентов блюда.
      * @param servingNumber кол-во порций блюда.
@@ -692,7 +692,7 @@ public class Dish implements Entity<Dish> {
 
     /**
      * Возвращает кол-во всех возможных комбинаций состава данного блюда. Если для данного блюда не было
-     * указанно ни одного ингредиента или любому ингредиенту не соответсвует ни один продукт - возвращает 0.
+     * указанно ни одного ингредиента или любому ингредиенту не соответствует ни один продукт - возвращает 0.
      * @return кол-во всех возможных комбинаций состава данного блюда.
      */
     public BigInteger getNumberIngredientCombinations() {
@@ -710,7 +710,7 @@ public class Dish implements Entity<Dish> {
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
      * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
-     *    участия в рассчете минимальной стоимости блюда.
+     *    участия в расчете минимальной стоимости блюда.
      * @return минимально возможная стоимость данного блюда.
      */
     public Optional<BigDecimal> getMinPrice() {
@@ -731,7 +731,7 @@ public class Dish implements Entity<Dish> {
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту этого блюда не соответствует ни одного продукта - возвращает пустой Optional.<br/>
      * 3. Если какому-либо ингредиенту этого блюда не соответствует ни одного продукта - то он не принимает
-     *    участия в рассчете максимальной стоимости блюда.
+     *    участия в расчете максимальной стоимости блюда.
      * @return максимально возможная стоимость данного блюда.
      */
     public Optional<BigDecimal> getMaxPrice() {
@@ -739,7 +739,7 @@ public class Dish implements Entity<Dish> {
          * Если в метод getProduct(ingredientIndex, productIndex) в качестве productIndex передать
          * значение, которое больше или равно кол-ву всех продуктов соответствующих указанному
          * ингредиенту - то метод вернет последний из продуктов. Здесь мы берем заведомо большее
-         * значение для productIndex чтобы получить последний продукт.
+         * значение для productIndex, чтобы получить последний продукт.
          */
         List<IngredientProduct> ingredientProducts = IntStream.range(0, getIngredientNumber()).
                 mapToObj(ingredientIndex -> {
@@ -764,41 +764,21 @@ public class Dish implements Entity<Dish> {
      * порции блюда НЕ учитывается кол-во продуктов уже имеющееся в наличии у пользователя. Особые случаи:<br/>
      * 1. Если для данного блюда не было указанно ни одного ингредиента - возвращает пустой Optional.<br/>
      * 2. Если любому ингредиенту блюда не соответствует ни один продукт - возвращает пустой Optional.<br/>
-     * 3. Если для какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
-     *    в рассчете средней стоимости блюда.
+     * 3. Если какому-либо ингредиенту не соответствует ни одного продукта - то он не принимает участия
+     *    в расчете средней стоимости блюда.
      * @return средняя стоимость данного блюда.
      */
     public Optional<BigDecimal> getAveragePrice() {
         Optional<BigDecimal> max = getMaxPrice();
         Optional<BigDecimal> min = getMinPrice();
         Optional<BigDecimal> sum = min.map(vMin -> vMin.add(max.orElseThrow()));
-        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.getMathContext()));
-    }
-
-    /**
-     * Выполняет сравнение на равенство двух блюд с учетом всех их данных.
-     * @param other блюдо с которым выполняется сравнение.
-     * @return true - если все поля двух блюд соответственно равны, false - в противном случае.
-     */
-    @Override
-    public boolean equalsFullState(Dish other) {
-        return id.equals(other.id) &&
-                user.equalsFullState(other.user) &&
-                name.equals(other.name) &&
-                servingSize.equals(other.servingSize) &&
-                unit.equals(other.unit) &&
-                Objects.equals(description, other.description) &&
-                Objects.equals(imageUrl, other.imageUrl) &&
-                equals(ingredients, other.ingredients) &&
-                tags.equals(other.tags) &&
-                config == other.config &&
-                productRepository == other.productRepository;
+        return sum.map(vSum -> vSum.divide(new BigDecimal(2), config.decimal().mathContext()));
     }
 
     /**
      * Сравнивает два объекта Dish. Два объекта Dish считаются равными, если их идентификаторы имеют одинаковое
      * значение.
-     * @param o сранвиваемый объект Dish.
+     * @param o сравниваемый объект Dish.
      * @return true, если два объекта Dish имеют одинаковые идентификаторы, иначе - false.
      */
     @Override
@@ -827,12 +807,6 @@ public class Dish implements Entity<Dish> {
                 ", ingredients=" + ingredients +
                 ", tags=" + tags +
                 '}';
-    }
-
-
-    private boolean equals(List<DishIngredient> a, List<DishIngredient> b) {
-        return a.size() == b.size() &&
-                IntStream.range(0, a.size()).allMatch(i -> a.get(i).equalsFullState(b.get(i)));
     }
 
 
@@ -868,7 +842,7 @@ public class Dish implements Entity<Dish> {
     private BigDecimal calculatePackagesNumber(Product product, BigDecimal quantityInUnits) {
         if(quantityInUnits.signum() > 0) {
             quantityInUnits = quantityInUnits.
-                    divide(product.getContext().getPackingSize(), config.getMathContext()).
+                    divide(product.getContext().getPackingSize(), config.decimal().mathContext()).
                     setScale(0, RoundingMode.UP);
         }
 
@@ -876,7 +850,7 @@ public class Dish implements Entity<Dish> {
     }
 
     private BigDecimal calculateProductPrice(Product product, BigDecimal packagesNumber) {
-        return product.getContext().getPrice().multiply(packagesNumber, config.getMathContext());
+        return product.getContext().getPrice().multiply(packagesNumber, config.decimal().mathContext());
     }
 
 
@@ -924,7 +898,7 @@ public class Dish implements Entity<Dish> {
      * 5. Метод {@link IngredientProduct#product()} каждого элемента возвращает тот же объект, который равен
      *    объекту возвращаемому методом {@link ProductGroup#product()}.
      * @param product продукт
-     * @param ingredients ингредиенты, в качесте котрых используется указанный продукт
+     * @param ingredients ингредиенты, в качестве которых используется указанный продукт
      */
     public record ProductGroup(Product product, List<IngredientProduct> ingredients) {}
 
@@ -942,7 +916,7 @@ public class Dish implements Entity<Dish> {
         private String imageUrl;
         private List<DishIngredient.Builder> ingredients;
         private List<String> tags;
-        private AppConfigData config;
+        private ConfigData config;
         private ProductRepository repository;
 
         public Builder() {
@@ -990,7 +964,7 @@ public class Dish implements Entity<Dish> {
             return this;
         }
 
-        public Builder setConfig(AppConfigData config) {
+        public Builder setConfig(ConfigData config) {
             this.config = config;
 
             ingredients.forEach(b -> b.setConfig(config));

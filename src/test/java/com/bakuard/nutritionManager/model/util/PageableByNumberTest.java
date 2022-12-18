@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.util;
 
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +13,12 @@ class PageableByNumberTest {
              => exception
             """)
     public void getPageMetadata1() {
-        Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> PageableByNumber.
-                        of(10, 0).
-                        createPageMetadata(-1, 1)
-        );
+        Assertions.assertThatIllegalArgumentException().
+                isThrownBy(
+                        () -> PageableByNumber.
+                                of(10, 0).
+                                createPageMetadata(-1, 1) 
+                );
     }
 
     @Test
@@ -28,12 +28,12 @@ class PageableByNumberTest {
              => exception
             """)
     public void getPageMetadata2() {
-        Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> PageableByNumber.
-                        of(10, 0).
-                        createPageMetadata(1, 0)
-        );
+        Assertions.assertThatIllegalArgumentException().
+                isThrownBy(
+                        () -> PageableByNumber.
+                                of(10, 0).
+                                createPageMetadata(1, 0)
+                );
     }
 
     @Test
@@ -46,7 +46,7 @@ class PageableByNumberTest {
         PageableByNumber actual = PageableByNumber.ofIndex(1, -1);
 
         PageableByNumber expected = PageableByNumber.of(1, 0);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -59,7 +59,7 @@ class PageableByNumberTest {
         PageableByNumber actual = PageableByNumber.ofIndex(5, 0);
 
         PageableByNumber expected = PageableByNumber.of(5, 0);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -72,7 +72,7 @@ class PageableByNumberTest {
         PageableByNumber actual = PageableByNumber.ofIndex(10, 15);
 
         PageableByNumber expected = PageableByNumber.of(10, 1);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -85,7 +85,7 @@ class PageableByNumberTest {
         PageableByNumber actual = PageableByNumber.ofIndex(0, 10);
 
         PageableByNumber expected = PageableByNumber.of(1, 10);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -95,9 +95,8 @@ class PageableByNumberTest {
              => exception
             """)
     public void ofIndex5() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> PageableByNumber.ofIndex(20, null)
-        );
+        Assertions.assertThatNullPointerException().
+                isThrownBy(() -> PageableByNumber.ofIndex(20, null));
     }
 
     @Test
@@ -107,9 +106,8 @@ class PageableByNumberTest {
              => exception
             """)
     public void of1() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> PageableByNumber.of(20, null)
-        );
+        Assertions.assertThatNullPointerException().
+                isThrownBy(() -> PageableByNumber.of(20, null));
     }
 
 }

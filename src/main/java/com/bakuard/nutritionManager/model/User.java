@@ -107,7 +107,6 @@ public class User implements Entity<User> {
         return passwordHash.equals(calculatePasswordHash(password, salt));
     }
 
-    @Override
     public boolean equalsFullState(User other) {
         if(this == other) return true;
         if(getClass() != other.getClass()) return false;

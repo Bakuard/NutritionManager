@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -9,23 +10,29 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestConfig.class)
+@TestPropertySource(locations = "classpath:test.properties")
 class MenuTest {
 
-    private AppConfigData conf = AppConfigData.builder().
-            setNumberPrecision("16").
-            setNumberRoundingMod("CEILING").
-            setNumberScale("6").
-            build();
+    @Autowired
+    private ConfigData conf;
 
     @Test
     @DisplayName("""
@@ -79,7 +86,7 @@ class MenuTest {
                 )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -105,7 +112,7 @@ class MenuTest {
                 )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -169,18 +176,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 0), 0, 1, 0),
-                menuItemProduct(product(user, 0), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 0), 0, 1, 0),
+                        menuItemProduct(product(user, 0), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -244,18 +251,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 0), 0, 1, 0),
-                menuItemProduct(product(user, 0), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 0), 0, 1, 0),
+                        menuItemProduct(product(user, 0), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -319,18 +326,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 0), 0, 1, 0),
-                menuItemProduct(product(user, 0), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 0), 0, 1, 0),
+                        menuItemProduct(product(user, 0), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -394,18 +401,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 0), 0, 1, 0),
-                menuItemProduct(product(user, 0), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 0), 0, 1, 0),
+                        menuItemProduct(product(user, 0), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -469,18 +476,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 0), 0, 1, 0),
-                menuItemProduct(product(user, 0), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 0), 0, 1, 0),
+                        menuItemProduct(product(user, 0), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -544,18 +551,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 0), 0, 1, 0),
-                menuItemProduct(product(user, 0), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 0), 0, 1, 0),
+                        menuItemProduct(product(user, 0), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -634,18 +641,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 11), 0, 1, 0),
-                menuItemProduct(product(user, 21), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 11), 0, 1, 0),
+                        menuItemProduct(product(user, 21), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -724,18 +731,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 11), 0, 1, 0),
-                menuItemProduct(product(user, 21), 0, 2, 0),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 11), 0, 1, 0),
+                        menuItemProduct(product(user, 21), 0, 2, 0),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -789,18 +796,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                emptyMenuItemProduct(0, 0, 0),
-                emptyMenuItemProduct(0, 1, 0),
-                emptyMenuItemProduct(0, 2, 0),
-                emptyMenuItemProduct(1, 0, 0),
-                emptyMenuItemProduct(1, 1, 0),
-                emptyMenuItemProduct(1, 2, 0),
-                emptyMenuItemProduct(2, 0, 0),
-                emptyMenuItemProduct(2, 1, 0),
-                emptyMenuItemProduct(2, 2, 0)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        emptyMenuItemProduct(0, 0, 0),
+                        emptyMenuItemProduct(0, 1, 0),
+                        emptyMenuItemProduct(0, 2, 0),
+                        emptyMenuItemProduct(1, 0, 0),
+                        emptyMenuItemProduct(1, 1, 0),
+                        emptyMenuItemProduct(1, 2, 0),
+                        emptyMenuItemProduct(2, 0, 0),
+                        emptyMenuItemProduct(2, 1, 0),
+                        emptyMenuItemProduct(2, 2, 0)
+                );
     }
 
     @Test
@@ -864,18 +871,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 3), 0, 1, 3),
-                menuItemProduct(product(user, 2), 0, 2, 2),
-                emptyMenuItemProduct(1, 0, 0),
-                emptyMenuItemProduct(1, 1, 0),
-                emptyMenuItemProduct(1, 2, 0),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 3), 0, 1, 3),
+                        menuItemProduct(product(user, 2), 0, 2, 2),
+                        emptyMenuItemProduct(1, 0, 0),
+                        emptyMenuItemProduct(1, 1, 0),
+                        emptyMenuItemProduct(1, 2, 0),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -946,18 +953,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 3), 0, 1, 3),
-                menuItemProduct(product(user, 2), 0, 2, 2),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 3), 0, 1, 3),
+                        menuItemProduct(product(user, 2), 0, 2, 2),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -1013,18 +1020,18 @@ class MenuTest {
                 List.of()
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 11), 0, 1, 0),
-                menuItemProduct(product(user, 21), 0, 2, 0),
-                menuItemProduct(product(user, 31), 1, 0, 0),
-                menuItemProduct(product(user, 41), 1, 1, 0),
-                menuItemProduct(product(user, 51), 1, 2, 0),
-                menuItemProduct(product(user, 61), 2, 0, 0),
-                menuItemProduct(product(user, 71), 2, 1, 0),
-                menuItemProduct(product(user, 81), 2, 2, 0)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 11), 0, 1, 0),
+                        menuItemProduct(product(user, 21), 0, 2, 0),
+                        menuItemProduct(product(user, 31), 1, 0, 0),
+                        menuItemProduct(product(user, 41), 1, 1, 0),
+                        menuItemProduct(product(user, 51), 1, 2, 0),
+                        menuItemProduct(product(user, 61), 2, 0, 0),
+                        menuItemProduct(product(user, 71), 2, 1, 0),
+                        menuItemProduct(product(user, 81), 2, 2, 0)
+                );
     }
 
     @Test
@@ -1090,18 +1097,18 @@ class MenuTest {
                 )
         );
 
-        List<Menu.MenuItemProduct> expected = List.of(
-                menuItemProduct(product(user, 0), 0, 0, 0),
-                menuItemProduct(product(user, 3), 0, 1, 3),
-                menuItemProduct(product(user, 2), 0, 2, 2),
-                menuItemProduct(product(user, 1), 1, 0, 1),
-                menuItemProduct(product(user, 3), 1, 1, 3),
-                menuItemProduct(product(user, 4), 1, 2, 4),
-                menuItemProduct(product(user, 10), 2, 0, 10),
-                menuItemProduct(product(user, 15), 2, 1, 15),
-                menuItemProduct(product(user, 11), 2, 2, 11)
-        );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                containsExactly(
+                        menuItemProduct(product(user, 0), 0, 0, 0),
+                        menuItemProduct(product(user, 3), 0, 1, 3),
+                        menuItemProduct(product(user, 2), 0, 2, 2),
+                        menuItemProduct(product(user, 1), 1, 0, 1),
+                        menuItemProduct(product(user, 3), 1, 1, 3),
+                        menuItemProduct(product(user, 4), 1, 2, 4),
+                        menuItemProduct(product(user, 10), 2, 0, 10),
+                        menuItemProduct(product(user, 15), 2, 1, 15),
+                        menuItemProduct(product(user, 11), 2, 2, 11)
+                );
     }
 
     @Test
@@ -1231,7 +1238,10 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getDishIngredientQuantity(product, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(100), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(100));
     }
 
     @Test
@@ -1369,11 +1379,11 @@ class MenuTest {
         Map<MenuItem, BigDecimal> actual = menu.getProductQuantityForDishes(productGroup, BigDecimal.TEN);
 
         Map<MenuItem, BigDecimal> expected = Map.of(
-                menu.getItems().get(0), new BigDecimal(350).setScale(conf.getNumberScale(), conf.getRoundingMode()),
-                menu.getItems().get(1), new BigDecimal(100).setScale(conf.getNumberScale(), conf.getRoundingMode()),
-                menu.getItems().get(2), new BigDecimal(100).setScale(conf.getNumberScale(), conf.getRoundingMode())
+                menu.getItems().get(0), new BigDecimal(350).setScale(conf.decimal().numberScale(), conf.decimal().roundingMode()),
+                menu.getItems().get(1), new BigDecimal(100).setScale(conf.decimal().numberScale(), conf.decimal().roundingMode()),
+                menu.getItems().get(2), new BigDecimal(100).setScale(conf.decimal().numberScale(), conf.decimal().roundingMode())
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).containsAllEntriesOf(expected);
     }
 
     @Test
@@ -1506,7 +1516,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getNecessaryQuantity(productGroup, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(550), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(550));
     }
 
     @Test
@@ -1653,7 +1663,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackPackageQuantity(productGroup, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(42), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(42));
     }
 
     @Test
@@ -1805,7 +1815,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackPackageQuantityPrice(productGroup, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(2352), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(2352));
     }
 
     @Test
@@ -2058,7 +2068,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getLackProductsPrice(menuItems, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2110,7 +2120,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getLackProductsPrice(menuItems, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2188,7 +2198,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackProductsPrice(menuItems, BigDecimal.TEN).orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1960 + 14800 + 2500), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(1960 + 14800 + 2500));
     }
 
     @Test
@@ -2278,7 +2288,8 @@ class MenuTest {
 
         BigDecimal actual = menu.getLackProductsPrice(menuItems, BigDecimal.TEN).orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1960 + 14800 + 2500 + 12000 + 2500 + 36000), actual);
+        Assertions.assertThat(actual).
+                isEqualByComparingTo(new BigDecimal(1960 + 14800 + 2500 + 12000 + 2500 + 36000));
     }
 
     @Test
@@ -2293,7 +2304,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getMinPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2319,7 +2330,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getMinPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2371,7 +2382,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getMinPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2440,7 +2451,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getMinPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1200 + 3000), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(1200 + 3000));
     }
 
     @Test
@@ -2521,7 +2532,8 @@ class MenuTest {
 
         BigDecimal actual = menu.getMinPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1200 + 3000 + 860 + 180 + 440 + 66), actual);
+        Assertions.assertThat(actual).
+                isEqualByComparingTo(new BigDecimal(1200 + 3000 + 860 + 180 + 440 + 66));
     }
 
     @Test
@@ -2536,7 +2548,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getMaxPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2562,7 +2574,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getMaxPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2614,7 +2626,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getMaxPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2683,7 +2695,7 @@ class MenuTest {
 
         BigDecimal actual = menu.getMaxPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1500 + 6000), actual);
+        Assertions.assertThat(actual).isEqualByComparingTo(new BigDecimal(1500 + 6000));
     }
 
     @Test
@@ -2764,7 +2776,8 @@ class MenuTest {
 
         BigDecimal actual = menu.getMaxPrice().orElseThrow();
 
-        AssertUtil.assertEquals(new BigDecimal(1500 + 540 + 250 + 6000 + 600 + 66), actual);
+        Assertions.assertThat(actual).
+                isEqualByComparingTo(new BigDecimal(1500 + 540 + 250 + 6000 + 600 + 66));
     }
 
     @Test
@@ -2779,7 +2792,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getAveragePrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2805,7 +2818,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getAveragePrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2857,7 +2870,7 @@ class MenuTest {
 
         Optional<BigDecimal> actual = menu.getAveragePrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2928,8 +2941,8 @@ class MenuTest {
 
         BigDecimal expected = new BigDecimal(1200 + 3000).
                 add(new BigDecimal(1500 + 6000)).
-                divide(new BigDecimal(2), conf.getMathContext());
-        AssertUtil.assertEquals(expected, actual);
+                divide(new BigDecimal(2), conf.decimal().mathContext());
+        Assertions.assertThat(actual).isEqualByComparingTo(expected);
     }
 
     @Test
@@ -3012,8 +3025,8 @@ class MenuTest {
 
         BigDecimal expected = new BigDecimal(1200 + 3000 + 860 + 180 + 440 + 66).
                 add(new BigDecimal(1500 + 540 + 250 + 6000 + 600 + 66)).
-                divide(new BigDecimal(2), conf.getMathContext());
-        AssertUtil.assertEquals(expected, actual);
+                divide(new BigDecimal(2), conf.decimal().mathContext());
+        Assertions.assertThat(actual).isEqualByComparingTo(expected);
     }
 
 
@@ -3022,7 +3035,7 @@ class MenuTest {
                 setId(toUUID(userId)).
                 setName("User" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
     }
 
@@ -3198,7 +3211,7 @@ class MenuTest {
         return new Criteria().
                 setPageable(PageableByNumber.of(30, pageNumber)).
                 setFilter(filter).
-                setSort(Sort.products().asc("price"));
+                setSort(Sort.products("price"));
     }
 
     private Criteria criteriaNumber(Filter filter) {
@@ -3209,7 +3222,7 @@ class MenuTest {
                                       int productIndex,
                                       BiFunction<User, Integer, Product.Builder> productFactory) {
         Page.Metadata metadata = PageableByNumber.ofIndex(30, productIndex).
-                createPageMetadata(1000, 30);
+                createPageMetadata(1000, conf.pagination().productMaxPageSize());
 
         int offset = metadata.getOffset().intValue();
         List<Product> products = IntStream.range(0, metadata.getActualSize()).
@@ -3221,7 +3234,7 @@ class MenuTest {
 
     private Page<Product> productPage(Product.Builder... products) {
         Page.Metadata metadata = PageableByNumber.of(30 , 0).
-                createPageMetadata(products.length, 30);
+                createPageMetadata(products.length, conf.pagination().productMaxPageSize());
 
         List<Product> resultProducts = Arrays.stream(products).
                 map(Product.Builder::tryBuild).

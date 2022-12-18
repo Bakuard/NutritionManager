@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.impl.DishRepositoryPostgres;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
 import com.bakuard.nutritionManager.model.*;
@@ -11,7 +11,7 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class MenuRepositoryTest {
 
@@ -49,24 +49,16 @@ class MenuRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData conf;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
-        try {
-            JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                    "UsedImages", "JwsBlackList",
-                    "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
-                    "Menus", "Dishes", "Products", "Users");
-            transactionManager.commit(status);
-        } catch(RuntimeException e) {
-            transactionManager.rollback(status);
-            throw e;
-        }
+        commit(() -> JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "UsedImages", "JwsBlackList",
+                "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
+                "Menus", "Dishes", "Products", "Users"));
     }
 
     @Test
@@ -86,48 +78,18 @@ class MenuRepositoryTest {
     @DisplayName("""
             save(menu):
              no menus in DB
-             => return true
-            """)
-    public void save2() {
-        User user = createAndSaveUser(1);
-        Menu menu = createMenu(user, 1);
-
-        boolean actual = commit(() -> menuRepository.save(menu));
-
-        Assertions.assertTrue(actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             no menus in DB
              => add menu
             """)
-    public void save3() {
+    public void save2() {
         User user = createAndSaveUser(1);
         Menu expected = createMenu(user, 1);
 
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             there are menus in DB,
-             menu id not exists
-             => return true
-            """)
-    public void save4() {
-        User user = createAndSaveUser(1);
-        createAndSaveMenus(user);
-        Menu menu = createMenu(user, 100);
-
-        boolean actual = commit(() -> menuRepository.save(menu));
-
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -137,7 +99,7 @@ class MenuRepositoryTest {
              menu id not exists
              => add menu
             """)
-    public void save5() {
+    public void save3() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -145,7 +107,9 @@ class MenuRepositoryTest {
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -156,7 +120,7 @@ class MenuRepositoryTest {
              user has a menu with the same name and other id
              => exception
             """)
-    public void save6() {
+    public void save4() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu menu = new Menu.Builder().
@@ -165,7 +129,7 @@ class MenuRepositoryTest {
                 setName("Menu#0").
                 setDescription("Description for menu#100").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=100").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#100").
                 tryBuild();
@@ -182,49 +146,9 @@ class MenuRepositoryTest {
              there are menus in DB,
              menu id exists,
              menu state was changed
-             => return true
-            """)
-    public void save7() {
-        User user = createAndSaveUser(1);
-        createAndSaveMenus(user);
-        Menu menu = createMenu(user, 100);
-        commit(() -> menuRepository.save(menu));
-
-        Dish dish0 = createDish(user, 0, 0, 1, 2);
-        Dish dish1000 = createDish(user, 1000, 3, 4, 5);
-        Dish dish10000 = createDish(user, 10000, 6, 7, 8);
-        Menu updatedMenu = new Menu.Builder().
-                setId(toUUID(100)).
-                setUser(user).
-                setName("updated menu name").
-                setDescription("updated description").
-                setImageUrl("https://nutritionmanager.xyz/menus/menuId=newMenuImage").
-                setConfig(appConfiguration).
-                addTag("common tag").
-                addTag("new unique tag").
-                addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
-                addItem(createMenuItem(dish1000, new BigDecimal("12.5"), 1)).
-                addItem(createMenuItem(dish10000, new BigDecimal(7), 2)).
-                tryBuild();
-        commit(() -> {
-            dishRepository.save(dish0);
-            dishRepository.save(dish1000);
-            dishRepository.save(dish10000);
-        });
-        boolean actual = commit(() -> menuRepository.save(updatedMenu));
-
-        Assertions.assertTrue(actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             there are menus in DB,
-             menu id exists,
-             menu state was changed
              => update menu
              """)
-    public void save8() {
+    public void save5() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -239,7 +163,7 @@ class MenuRepositoryTest {
                 setName("updated menu name").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=newMenuImage").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("new unique tag").
                 addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
@@ -254,7 +178,9 @@ class MenuRepositoryTest {
         });
         Menu actual = menuRepository.tryGetById(user.getId(), updatedMenu.getId());
 
-        AssertUtil.assertEquals(updatedMenu, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(updatedMenu);
     }
 
     @Test
@@ -266,7 +192,7 @@ class MenuRepositoryTest {
              user has menu with the same name and other id
              => exception
             """)
-    public void save9() {
+    public void save6() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -281,7 +207,7 @@ class MenuRepositoryTest {
                 setName("Menu#0").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=newMenuImage").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("new unique tag").
                 addItem(createMenuItem(dish0, new BigDecimal(107), 0)).
@@ -306,28 +232,9 @@ class MenuRepositoryTest {
              there are menus in DB,
              menu id exists,
              menu state wasn't changed,
-             => return false
-            """)
-    public void save10() {
-        User user = createAndSaveUser(1);
-        createAndSaveMenus(user);
-        Menu expected = createMenu(user, 100);
-        commit(() -> menuRepository.save(expected));
-
-        boolean actual = commit(() -> menuRepository.save(expected));
-
-        Assertions.assertFalse(actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(menu):
-             there are menus in DB,
-             menu id exists,
-             menu state wasn't changed,
              => don't update menu
             """)
-    public void save11() {
+    public void save7() {
         User user = createAndSaveUser(1);
         createAndSaveMenus(user);
         Menu expected = createMenu(user, 100);
@@ -336,7 +243,9 @@ class MenuRepositoryTest {
         commit(() -> menuRepository.save(expected));
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -347,7 +256,7 @@ class MenuRepositoryTest {
              user doesn't have some of menu item dishes
              => exception
             """)
-    public void save12() {
+    public void save8() {
         User otherUser = createAndSaveUser(1);
         commit(() -> dishRepository.save(createDish(otherUser, 1000, 0, 1, 2)));
         User user = createAndSaveUser(2);
@@ -357,7 +266,7 @@ class MenuRepositoryTest {
                 setName("Menu#1").
                 setDescription("Description for menu#1").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#1").
                 addItem(
@@ -380,7 +289,7 @@ class MenuRepositoryTest {
              user doesn't have some of menu item dishes
              => exception
             """)
-    public void save13() {
+    public void save9() {
         User otherUser = createAndSaveUser(1);
         commit(() -> dishRepository.save(createDish(otherUser, 1000, 0, 1, 2)));
         User user = createAndSaveUser(2);
@@ -391,7 +300,7 @@ class MenuRepositoryTest {
                 setName("Menu#1").
                 setDescription("Description for menu#1").
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#1").
                 addItem(
@@ -482,7 +391,7 @@ class MenuRepositoryTest {
         commit(() -> menuRepository.tryRemove(user.getId(), toUUID(0)));
         Optional<Menu> actual = menuRepository.getById(user.getId(), toUUID(0));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -499,7 +408,9 @@ class MenuRepositoryTest {
 
         Menu actual = commit(() -> menuRepository.tryRemove(user.getId(), toUUID(0)));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -541,7 +452,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getById(user.getId(), toUUID(100));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -558,7 +469,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getById(otherUser.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -575,7 +486,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.getById(user.getId(), toUUID(100)).orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -656,7 +569,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -698,7 +613,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getByName(user.getId(), "unknown menu");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -715,7 +630,7 @@ class MenuRepositoryTest {
 
         Optional<Menu> actual = menuRepository.getByName(otherUser.getId(), "Menu#1");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -732,7 +647,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.getByName(user.getId(), "Menu#100").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -812,7 +729,9 @@ class MenuRepositoryTest {
 
         Menu actual = menuRepository.tryGetByName(user.getId(), "Menu#100");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -841,7 +760,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
         
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
     
     @Test
@@ -859,7 +778,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
         
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
     
     @Test
@@ -882,7 +801,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -905,7 +824,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -928,7 +847,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -951,7 +870,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -977,7 +896,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1003,7 +922,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1029,7 +948,7 @@ class MenuRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1063,7 +982,7 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
 
-        Assertions.assertTrue(actual.getMetadata().isEmpty());
+        Assertions.assertThat(actual.getMetadata().isEmpty()).isTrue();
     }
 
     @Test
@@ -1085,9 +1004,11 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(4, 30).
+                createPageMetadata(4, conf.pagination().menuMaxPageSize()).
                 createPage(menus);
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1113,7 +1034,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1140,9 +1063,11 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1168,7 +1093,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
     
     @Test
@@ -1195,9 +1122,11 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
     
     @Test
@@ -1226,7 +1155,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
         
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
     
     @Test
@@ -1255,7 +1186,9 @@ class MenuRepositoryTest {
                         setSort(Sort.menuDefaultSort())
         );
 
-        AssertUtil.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
     
     @Test
@@ -1285,9 +1218,11 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
     
     @Test
@@ -1318,9 +1253,11 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(4, 30).
+                createPageMetadata(4, conf.pagination().menuMaxPageSize()).
                 createPage(menus.subList(2, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1347,9 +1284,11 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(30, 0).
-                createPageMetadata(2, 30).
+                createPageMetadata(2, conf.pagination().menuMaxPageSize()).
                 createPage(List.of(menus.get(0), menus.get(3)));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1381,9 +1320,11 @@ class MenuRepositoryTest {
         );
 
         Page<Menu> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(1, 30).
+                createPageMetadata(1, conf.pagination().menuMaxPageSize()).
                 createPage(List.of(menus.get(3)));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1412,7 +1353,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1429,7 +1370,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(7, actual);
+        Assertions.assertThat(actual).isEqualTo(7);
     }
 
     @Test
@@ -1460,7 +1401,7 @@ class MenuRepositoryTest {
                         setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -1480,9 +1421,9 @@ class MenuRepositoryTest {
         );
 
         Page<Tag> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(7, 1000).
+                createPageMetadata(7, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllTags(menus).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1511,7 +1452,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1528,7 +1469,7 @@ class MenuRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -1559,7 +1500,7 @@ class MenuRepositoryTest {
                         setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -1579,9 +1520,9 @@ class MenuRepositoryTest {
         );
 
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(4, 1000).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllNames(menus).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
 
@@ -1598,11 +1539,11 @@ class MenuRepositoryTest {
         }
     }
 
-    private void commit(Action action) {
+    private void commit(Runnable action) {
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         TransactionStatus status = transactionManager.getTransaction(def);
         try {
-            action.act();
+            action.run();
             transactionManager.commit(status);
         } catch(RuntimeException e) {
             transactionManager.rollback(status);
@@ -1619,7 +1560,7 @@ class MenuRepositoryTest {
                 setId(toUUID(userId)).
                 setName("User#" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
         commit(() -> userRepository.save(user));
         return user;
@@ -1640,7 +1581,7 @@ class MenuRepositoryTest {
                 setName("Menu#" + menuId).
                 setDescription("Description for menu#" + menuId).
                 setImageUrl("https://nutritionmanager.xyz/menus/menuId=" + menuId).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 addTag("common tag").
                 addTag("tag#" + menuId).
                 addItem(createMenuItem(dishes.get(0), new BigDecimal("3.5"), 1000)).
@@ -1675,7 +1616,7 @@ class MenuRepositoryTest {
                         setName("Menu#0").
                         setDescription("Description for menu#0").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=0").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#0").
                         addTag("tagA").
@@ -1692,7 +1633,7 @@ class MenuRepositoryTest {
                         setName("Menu#1").
                         setDescription("Description for menu#1").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=1").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#1").
                         addTag("tagA").
@@ -1709,7 +1650,7 @@ class MenuRepositoryTest {
                         setName("Menu#2").
                         setDescription("Description for menu#2").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=2").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#2").
                         addTag("tagB").
@@ -1726,7 +1667,7 @@ class MenuRepositoryTest {
                         setName("Menu#3").
                         setDescription("Description for menu#3").
                         setImageUrl("https://nutritionmanager.xyz/menus/menuId=3").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         addTag("common tag").
                         addTag("tag#3").
                         addTag("tagB").
@@ -1770,7 +1711,7 @@ class MenuRepositoryTest {
                 setUnit("unit A").
                 setDescription("description for dish#" + dishId).
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?id=" + dishId).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag A").
                 addTag("common tag").
@@ -1799,7 +1740,7 @@ class MenuRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1821,7 +1762,7 @@ class MenuRepositoryTest {
                                 ).
                                 setName("ingredient 2").
                                 setQuantity(new BigDecimal("2.5")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1837,7 +1778,7 @@ class MenuRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("0.1")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
     }
@@ -1845,7 +1786,7 @@ class MenuRepositoryTest {
     private MenuItem.LoadBuilder createMenuItem(Dish dish, BigDecimal quantity, int itemId) {
         return new MenuItem.LoadBuilder().
                 setId(toUUID(itemId)).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setDish(dish).
                 setQuantity(quantity);
     }

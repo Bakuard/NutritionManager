@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dal.impl;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterMapper;
@@ -41,36 +41,26 @@ import static org.jooq.impl.DSL.*;
 public class ProductRepositoryPostgres implements ProductRepository {
 
     private JdbcTemplate statement;
-    private AppConfigData appConfig;
+    private ConfigData conf;
     private ProductFilterMapper filterMapper;
 
-    public ProductRepositoryPostgres(DataSource dataSource, AppConfigData appConfig) {
+    public ProductRepositoryPostgres(DataSource dataSource, ConfigData conf) {
         statement = new JdbcTemplate(dataSource);
-        this.appConfig = appConfig;
+        this.conf = conf;
         filterMapper = new ProductFilterMapper();
     }
 
     @Override
-    public boolean save(Product product) {
+    public void save(Product product) {
         Validator.check("ProductRepository.product", notNull(product));
 
-        Product oldProduct = getById(product.getUser().getId(), product.getId()).orElse(null);
-
-        boolean newData = false;
         try {
-            if (oldProduct == null) {
-                addNewProduct(product);
-                newData = true;
-            } else if(!product.equalsFullState(oldProduct)) {
-                updateProduct(product);
-                newData = true;
-            }
+            if(doesProductExist(product.getId())) updateProduct(product);
+            else addNewProduct(product);
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save product").
                     addReason(Rule.of("ProductRepository.product", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
-
-        return newData;
     }
 
     @Override
@@ -120,7 +110,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                     while(rs.next()) {
                         if(builder == null) {
                             builder = new Product.Builder().
-                                    setAppConfiguration(appConfig).
+                                    setAppConfiguration(conf).
                                     setId(productId).
                                     setUser(
                                             new User.LoadBuilder().
@@ -167,7 +157,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<Product> getProducts(Criteria criteria) {
         int productsNumber = getProductsNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(productsNumber, 30);
+                createPageMetadata(productsNumber, conf.pagination().productMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -226,7 +216,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
                         if(!productId.equals(lastProductId)) {
                             if(builder != null) result.add(builder.tryBuild());
                             builder = new Product.Builder().
-                                    setAppConfiguration(appConfig).
+                                    setAppConfiguration(conf).
                                     setId(productId).
                                     setUser(
                                             new User.LoadBuilder().
@@ -269,7 +259,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(tagsNumber, 1000);
+                createPageMetadata(tagsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -303,7 +293,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getShops(Criteria criteria) {
         int shopsNumber = getShopsNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(shopsNumber, 1000);
+                createPageMetadata(shopsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -335,7 +325,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getGrades(Criteria criteria) {
         int gradesNumber = getGradesNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(gradesNumber, 1000);
+                createPageMetadata(gradesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -367,7 +357,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getCategories(Criteria criteria) {
         int categoriesNumber = getCategoriesNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(categoriesNumber, 1000);
+                createPageMetadata(categoriesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -399,7 +389,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public Page<String> getManufacturers(Criteria criteria) {
         int manufacturersNumber = getManufacturersNumber(criteria);
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
-                createPageMetadata(manufacturersNumber, 1000);
+                createPageMetadata(manufacturersNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -697,6 +687,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
+    private boolean doesProductExist(UUID productId) {
+        return statement.query(
+                "select count(*) > 0 as doesProductExist from Products where productId = ?;",
+                ps -> ps.setObject(1, productId),
+                rs -> {
+                    boolean result = false;
+                    if(rs.next()) result = rs.getBoolean("doesProductExist");
+                    return result;
+                }
+        );
+    }
+
 
     private List<SortField<?>> getOrderFields(List<String> optionalFields,
                                               Sort productSort,
@@ -705,22 +707,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         optionalFields.forEach(f -> fields.add(field(tableName + "." + f).desc()));
 
-        for(int i = 0; i < productSort.getParametersNumber(); i++) {
-            switch(productSort.getParameter(i)) {
-                case "category" -> {
-                    if(productSort.isAscending(i))
-                        fields.add(field(tableName + ".category").asc());
-                    else
-                        fields.add(field(tableName + ".category").desc());
-                }
-                case "price" -> {
-                    if(productSort.isAscending(i))
-                        fields.add(field(tableName + ".price").asc());
-                    else
-                        fields.add(field(tableName + ".price").desc());
-                }
-            }
-        }
+        productSort.forEachParam(param -> {
+            if(param.isAscending()) fields.add(field(tableName + "." + param.param()).asc());
+            else fields.add(field(tableName + "." + param.param()).desc());
+        });
+
         fields.add(field(tableName + ".productId").asc());
         if("P".equals(tableName)) {
             fields.add(field("ProductTags.index").asc());

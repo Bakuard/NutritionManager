@@ -1,13 +1,12 @@
 package com.bakuard.nutritionManager.model;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.validation.Container;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.Objects;
 import java.util.UUID;
 
 import static com.bakuard.nutritionManager.validation.Rule.*;
@@ -43,7 +42,7 @@ public class Product implements Entity<Product> {
                     BigDecimal quantity,
                     String imageUrl,
                     ProductContext.Builder contextBuilder,
-                    AppConfigData config) {
+                    ConfigData config) {
         Container<ProductContext> context = new Container<>();
         Container<URL> url = new Container<>();
 
@@ -60,15 +59,15 @@ public class Product implements Entity<Product> {
         this.id = id;
         this.user = user;
         this.context = context.get();
-        this.quantity = quantity.setScale(config.getNumberScale(), config.getRoundingMode());
+        this.quantity = quantity.setScale(config.decimal().numberScale(), config.decimal().roundingMode());
         this.description = description;
         this.imageUrl = url.get();
     }
 
     /**
-     * Увеличевает кол-во данного продукта имеющегося в распоряжении у пользователя на указанное значение.
-     * @param quantity значение на которое будет увеличенно кол-во данного продукта имеющегося в распряжении у
-     *                 пользвателя.
+     * Увеличивает кол-во данного продукта имеющегося в распоряжении у пользователя на указанное значение.
+     * @param quantity значение на которое будет увеличено кол-во данного продукта имеющегося в распоряжении у
+     *                 пользователя.
      * @throws ValidateException в следующих случаях:<br/>
      *         1. если указанное значение равняется null<br/>
      *         2. если указанное значение меньше нуля.
@@ -83,9 +82,9 @@ public class Product implements Entity<Product> {
 
     /**
      * Пытается уменьшить кол-во данного продукта имеющееся в распоряжении у пользователя на заданное значение и
-     * возращает значение на которое фактически удалось уменьшить кол-во данного продукта. Если кол-во продукта
+     * возвращает значение на которое фактически удалось уменьшить кол-во данного продукта. Если кол-во продукта
      * имеющееся в распоряжении у пользователя меньше указанного значения, то метод вернет значение равное кол-ву
-     * этого продукта имеющегося у пользователя. Если же кол-во продукта у пользваотеля больше или равно quantity,
+     * этого продукта имеющегося у пользователя. Если же кол-во продукта у пользователя больше или равно quantity,
      * тогда метод вернет значение равное quantity.
      * @param quantity снимаемое кол-во продукта.
      * @return кол-во продукта, которое удалось снять.
@@ -129,15 +128,15 @@ public class Product implements Entity<Product> {
     }
 
     /**
-     * Возвращает кол-во данного продукта имеющеей в распоряжении у пользователя.
-     * @return кол-во данного продукта имеющеей с распоряжении у пользователя.
+     * Возвращает кол-во данного продукта имеющегося в распоряжении у пользователя.
+     * @return кол-во данного продукта имеющегося в распоряжении у пользователя.
      */
     public BigDecimal getQuantity() {
         return quantity;
     }
 
     /**
-     * Возвращает описание к данноыму продукту.
+     * Возвращает описание к данному продукту.
      * @return описание данного продукта.
      */
     public String getDescription() {
@@ -145,28 +144,11 @@ public class Product implements Entity<Product> {
     }
 
     /**
-     * Возвращает путь к избражению данного продукта.
-     * @return путь к избражению данного продукта.
+     * Возвращает путь к изображению данного продукта.
+     * @return путь к изображению данного продукта.
      */
     public URL getImageUrl() {
         return imageUrl;
-    }
-
-    /**
-     * Выполняет сравнение на равенство двух продуктов с учетом всех их данных.
-     * @param other продукт с которым выполняется сравнение.
-     * @return true - если все поля двух продуктов соответственно равны, false - в противном случае.
-     */
-    @Override
-    public boolean equalsFullState(Product other) {
-        if(this == other) return true;
-        if(getClass() != other.getClass()) return false;
-        return id.equals(other.id) &&
-                user.equalsFullState(other.user) &&
-                quantity.equals(other.quantity) &&
-                context.equals(other.context) &&
-                Objects.equals(description, other.description) &&
-                Objects.equals(imageUrl, other.imageUrl);
     }
 
     @Override
@@ -209,7 +191,7 @@ public class Product implements Entity<Product> {
         private BigDecimal quantity;
         private String description;
         private String imageUrl;
-        private AppConfigData appConfigData;
+        private ConfigData configData;
 
         public Builder() {
             contextBuilder = new ProductContext.Builder();
@@ -280,9 +262,9 @@ public class Product implements Entity<Product> {
             return this;
         }
 
-        public Builder setAppConfiguration(AppConfigData appConfigData) {
-            this.appConfigData = appConfigData;
-            contextBuilder.setAppConfiguration(appConfigData);
+        public Builder setAppConfiguration(ConfigData configData) {
+            this.configData = configData;
+            contextBuilder.setAppConfiguration(configData);
             return this;
         }
 
@@ -299,7 +281,7 @@ public class Product implements Entity<Product> {
                     quantity,
                     imageUrl,
                     contextBuilder,
-                    appConfigData
+                    configData
             );
         }
 

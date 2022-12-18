@@ -39,7 +39,7 @@ public class ProductAddRequest {
             """)
     private String manufacturer;
     @Schema(description = """
-            Цена продукта указанной категории, сорта, производителя и продающегося в указанном магазине. Ограичения:<br/>
+            Цена продукта указанной категории, сорта, производителя и продающегося в указанном магазине. Ограничения:<br/>
             1. Не может быть null.<br/>
             2. Должна быть больше нуля.<br/>
             """)
@@ -66,7 +66,7 @@ public class ProductAddRequest {
     private String description;
     @Schema(description = """
             Путь к изображению данного продукта. Ограничения:<br/>
-            1. Должен быть null ИЛИ представлять собой корректный URl адресс.<br/>
+            1. Должен быть null ИЛИ представлять собой корректный URl адрес.<br/>
             """)
     private String imageUrl;
     @Schema(description = """

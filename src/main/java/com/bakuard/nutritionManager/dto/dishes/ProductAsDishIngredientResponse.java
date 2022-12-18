@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(description = "Содержит данные продукта отосящегося к одному из ингредиентов блюда.")
+@Schema(description = "Содержит данные продукта относящегося к одному из ингредиентов блюда.")
 public class ProductAsDishIngredientResponse {
 
     @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Product.")
@@ -46,17 +46,17 @@ public class ProductAsDishIngredientResponse {
     private BigDecimal lackQuantity;
     @Schema(description = "Общая стоимость для недостающего кол-ва данного продукта.")
     private BigDecimal lackQuantityPrice;
-    @Schema(description = "Теги указаныне для данного продукта. Если продукт не содержит тегов - данный список будет пустым.")
+    @Schema(description = "Теги указанные для данного продукта. Если продукт не содержит тегов - данный список будет пустым.")
     private List<String> tags;
     @Schema(description = """
-            Показывает - был ли даный продукт выбран пользователем из всех других продуктов
+            Показывает - был ли данный продукт выбран пользователем из всех других продуктов
              соответствующих указанному ингредиенту (указанному с помощью поля ingredientIndex).
              Если это так - принимает значение true, иначе false.
             """)
     private boolean isChecked;
 
     @Schema(description = """
-            Порядковый номер (индекс) продукта среди всех продуктов соответстющих некоторому ингредиенту блюда.
+            Порядковый номер (индекс) продукта среди всех продуктов соответствующих некоторому ингредиенту блюда.
             """)
     private int productIndex;
 

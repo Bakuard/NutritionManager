@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.impl.ProductRepositoryPostgres;
 import com.bakuard.nutritionManager.model.*;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -10,7 +10,7 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class DishRepositoryTest {
 
@@ -46,24 +46,16 @@ class DishRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData conf;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
-        try {
-            JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                    "UsedImages", "JwsBlackList",
-                    "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
-                    "Menus", "Dishes", "Products", "Users");
-            transactionManager.commit(status);
-        } catch(RuntimeException e) {
-            transactionManager.rollback(status);
-            throw e;
-        }
+        commit(() -> JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                        "UsedImages", "JwsBlackList",
+                        "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
+                        "Menus", "Dishes", "Products", "Users"));
     }
 
     @Test
@@ -83,48 +75,18 @@ class DishRepositoryTest {
     @DisplayName("""
             save(dish):
              no dishes in DB
-             => return true
-            """)
-    public void save2() {
-        User user = createAndSaveUser(1);
-        Dish dish = createDish(1, user);
-
-        boolean actual = commit(() -> dishRepository.save(dish));
-
-        Assertions.assertTrue(actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             no dishes in DB
              => add dish
             """)
-    public void save3() {
+    public void save2() {
         User user = createAndSaveUser(1);
         Dish expected = createDish(1, user);
 
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             there are dishes in DB,
-             dish id not exists
-             => return true
-            """)
-    public void save4() {
-        User user = createAndSaveUser(1);
-        createAndSaveDishes(user);
-        Dish dish = createDish(7, user);
-
-        boolean actual = commit(() -> dishRepository.save(dish));
-
-        Assertions.assertTrue(actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -134,7 +96,7 @@ class DishRepositoryTest {
              dish id not exists
              => add dish
             """)
-    public void save5() {
+    public void save3() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish expected = createDish(7, user);
@@ -142,7 +104,9 @@ class DishRepositoryTest {
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -153,7 +117,7 @@ class DishRepositoryTest {
              user has a dish with the same name and other id
              => exception
             """)
-    public void save6() {
+    public void save4() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish dish = new Dish.Builder().
@@ -164,7 +128,7 @@ class DishRepositoryTest {
                 setUnit("unit A").
                 setDescription("description A").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?id=7").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 tryBuild();
 
@@ -180,81 +144,9 @@ class DishRepositoryTest {
              there are dishes in DB,
              dish id exists,
              dish state was changed
-             => return true
-            """)
-    public void save7() {
-        User user = createAndSaveUser(1);
-        createAndSaveDishes(user);
-        Dish dish = createDish(7, user);
-        commit(() -> dishRepository.save(dish));
-
-        Dish updatedDish = new Dish.Builder().
-                setId(toUUID(7)).
-                setUser(user).
-                setName("updated dish").
-                setServingSize(BigDecimal.TEN).
-                setUnit("updated unit").
-                setDescription("updated description").
-                setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
-                setConfig(appConfiguration).
-                setRepository(productRepository).
-                addTag("tag 2").
-                addTag("2 tag").
-                addTag("new tag").
-                addTag("tag new").
-                addIngredient(
-                        new DishIngredient.Builder().
-                                setId(toUUID(0)).
-                                setFilter(
-                                        Filter.orElse(
-                                                Filter.and(
-                                                        Filter.user(user.getId()),
-                                                        Filter.minTags(new Tag("common tag")),
-                                                        Filter.anyCategory("name A"),
-                                                        Filter.anyShop("shop A"),
-                                                        Filter.anyGrade("variety A"),
-                                                        Filter.anyManufacturer("manufacturer A")
-                                                ),
-                                                Filter.and(
-                                                        Filter.user(user.getId()),
-                                                        Filter.minTags(new Tag("tag B"))
-                                                )
-                                        )
-                                ).
-                                setName("ingredient 1").
-                                setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
-                ).
-                addIngredient(
-                        new DishIngredient.Builder().
-                                setId(toUUID(1)).
-                                setFilter(
-                                        Filter.and(
-                                                Filter.user(user.getId()),
-                                                Filter.anyCategory("name A", "name B", "name C"),
-                                                Filter.anyShop("shop B", "shop A"),
-                                                Filter.anyGrade("variety B")
-                                        )
-                                ).
-                                setName("ingredient 3").
-                                setQuantity(new BigDecimal("5.4")).
-                                setConfig(appConfiguration)
-                ).
-                tryBuild();
-        boolean actual = commit(() -> dishRepository.save(updatedDish));
-
-        Assertions.assertTrue(actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             there are dishes in DB,
-             dish id exists,
-             dish state was changed
              => update dish
             """)
-    public void save8() {
+    public void save5() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish dish = createDish(7, user);
@@ -268,7 +160,7 @@ class DishRepositoryTest {
                 setUnit("updated unit").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag 2").
                 addTag("2 tag").
@@ -295,7 +187,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -310,13 +202,15 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("5.4")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
         commit(() -> dishRepository.save(expected));
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -328,7 +222,7 @@ class DishRepositoryTest {
              user has dish with the same name and other id
              => exception
             """)
-    public void save9() {
+    public void save6() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish dish = createDish(7, user);
@@ -342,7 +236,7 @@ class DishRepositoryTest {
                 setUnit("updated unit").
                 setDescription("updated description").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?updatedImageUrl").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag 2").
                 addTag("2 tag").
@@ -369,7 +263,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -384,7 +278,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("5.4")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
 
@@ -400,28 +294,9 @@ class DishRepositoryTest {
              there are dishes in DB,
              dish id exists,
              dish state wasn't changed,
-             => return false
-            """)
-    public void save10() {
-        User user = createAndSaveUser(1);
-        createAndSaveDishes(user);
-        Dish dish = createDish(7, user);
-
-        commit(() -> dishRepository.save(dish));
-        boolean actual = commit(() -> dishRepository.save(dish));
-
-        Assertions.assertFalse(actual);
-    }
-
-    @Test
-    @DisplayName("""
-            save(dish):
-             there are dishes in DB,
-             dish id exists,
-             dish state wasn't changed,
              => don't update dish
             """)
-    public void save11() {
+    public void save7() {
         User user = createAndSaveUser(1);
         createAndSaveDishes(user);
         Dish expected = createDish(7, user);
@@ -430,7 +305,9 @@ class DishRepositoryTest {
         commit(() -> dishRepository.save(expected));
 
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(7));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -509,7 +386,7 @@ class DishRepositoryTest {
         commit(() -> dishRepository.tryRemove(user.getId(), toUUID(1)));
         Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -526,7 +403,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.tryRemove(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -570,7 +449,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(100));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -586,7 +465,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual = dishRepository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -603,7 +482,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.getById(user.getId(), toUUID(100)).orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -682,7 +563,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.tryGetById(user.getId(), toUUID(100));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -726,7 +609,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual =  dishRepository.getByName(user.getId(), "unknown dish");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -742,7 +625,7 @@ class DishRepositoryTest {
 
         Optional<Dish> actual = dishRepository.getByName(user.getId(), "dish A");
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -759,7 +642,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.getByName(user.getId(), "dish A").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -838,7 +723,9 @@ class DishRepositoryTest {
 
         Dish actual = dishRepository.tryGetByName(user.getId(), "dish A");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -870,7 +757,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -886,7 +773,7 @@ class DishRepositoryTest {
 
         int actual = dishRepository.getDishesNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -910,7 +797,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -934,7 +821,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -959,7 +846,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -984,7 +871,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1012,7 +899,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1040,7 +927,7 @@ class DishRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1075,7 +962,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1097,9 +986,11 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(4, 30).
+                createPageMetadata(4, conf.pagination().dishMaxPageSize()).
                 createPage(dishes);
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1121,9 +1012,11 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(3, 1).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(3, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1150,7 +1043,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1177,9 +1072,11 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(2, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1207,9 +1104,11 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(0, 3));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1237,7 +1136,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1268,9 +1169,11 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().dishMaxPageSize()).
                 createPage(dishes.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1301,7 +1204,9 @@ class DishRepositoryTest {
         );
 
         Page<Dish> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1330,7 +1235,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1347,7 +1252,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(7, actual);
+        Assertions.assertThat(actual).isEqualTo(7);
     }
 
     @Test
@@ -1379,7 +1284,7 @@ class DishRepositoryTest {
         );
 
         Page<Tag> expected = Page.empty();
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1399,9 +1304,9 @@ class DishRepositoryTest {
         );
 
         Page<Tag> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(7, 200).
+                createPageMetadata(7, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllTags(dishes).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1430,7 +1335,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1447,7 +1352,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -1479,7 +1384,7 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = Page.empty();
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1499,9 +1404,9 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllUnits(dishes).subList(2, 3));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1530,7 +1435,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(actualUser.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1547,7 +1452,7 @@ class DishRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -1579,7 +1484,7 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = Page.empty();
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1599,9 +1504,9 @@ class DishRepositoryTest {
         );
 
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(getAllNames(dishes).subList(2, 4));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
 
@@ -1618,11 +1523,11 @@ class DishRepositoryTest {
         }
     }
 
-    private void commit(Action action) {
+    private void commit(Runnable action) {
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         TransactionStatus status = transactionManager.getTransaction(def);
         try {
-            action.act();
+            action.run();
             transactionManager.commit(status);
         } catch(RuntimeException e) {
             transactionManager.rollback(status);
@@ -1639,7 +1544,7 @@ class DishRepositoryTest {
                 setId(toUUID(userId)).
                 setName("User#" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
         commit(() -> userRepository.save(user));
         return user;
@@ -1650,7 +1555,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(1)).
                         setUser(user).
                         setCategory("name A").
@@ -1671,7 +1576,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(2)).
                         setUser(user).
                         setCategory("name A").
@@ -1692,7 +1597,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(3)).
                         setUser(user).
                         setCategory("name A").
@@ -1713,7 +1618,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(4)).
                         setUser(user).
                         setCategory("name B").
@@ -1734,7 +1639,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(5)).
                         setUser(user).
                         setCategory("name B").
@@ -1755,7 +1660,7 @@ class DishRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(6)).
                         setUser(user).
                         setCategory("name B").
@@ -1788,7 +1693,7 @@ class DishRepositoryTest {
                 setUnit("unit A").
                 setDescription("description A").
                 setImageUrl("https://nutritionmanager.xyz/dishes/images?id=1").
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository).
                 addTag("tag A").
                 addTag("common tag").
@@ -1817,7 +1722,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 1").
                                 setQuantity(BigDecimal.TEN).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1839,7 +1744,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 2").
                                 setQuantity(new BigDecimal("2.5")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 addIngredient(
                         new DishIngredient.Builder().
@@ -1855,7 +1760,7 @@ class DishRepositoryTest {
                                 ).
                                 setName("ingredient 3").
                                 setQuantity(new BigDecimal("0.1")).
-                                setConfig(appConfiguration)
+                                setConfig(conf)
                 ).
                 tryBuild();
     }
@@ -1872,7 +1777,7 @@ class DishRepositoryTest {
                         setUnit("unit A").
                         setDescription("description 1").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=1").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 1").
                         addTag("tag A").
@@ -1898,7 +1803,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -1920,7 +1825,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 2").
                                         setQuantity(new BigDecimal("2.5")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -1936,7 +1841,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 3").
                                         setQuantity(new BigDecimal("0.1")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );
@@ -1950,7 +1855,7 @@ class DishRepositoryTest {
                         setUnit("unit A").
                         setDescription("description 2").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=2").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 2").
                         addTag("tag A").
@@ -1976,7 +1881,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );
@@ -1990,7 +1895,7 @@ class DishRepositoryTest {
                         setUnit("unit B").
                         setDescription("description 3").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=3").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 3").
                         addTag("tag B").
@@ -2016,7 +1921,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -2035,7 +1940,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 2").
                                         setQuantity(new BigDecimal("2.5")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -2051,7 +1956,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 3").
                                         setQuantity(new BigDecimal("0.1")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );
@@ -2065,7 +1970,7 @@ class DishRepositoryTest {
                         setUnit("unit C").
                         setDescription("description 4").
                         setImageUrl("https://nutritionmanager.xyz/dishes/images?id=4").
-                        setConfig(appConfiguration).
+                        setConfig(conf).
                         setRepository(productRepository).
                         addTag("tag 4").
                         addTag("tag B").
@@ -2088,7 +1993,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 1").
                                         setQuantity(BigDecimal.TEN).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         addIngredient(
                                 new DishIngredient.Builder().
@@ -2107,7 +2012,7 @@ class DishRepositoryTest {
                                         ).
                                         setName("ingredient 2").
                                         setQuantity(new BigDecimal("2.5")).
-                                        setConfig(appConfiguration)
+                                        setConfig(conf)
                         ).
                         tryBuild()
         );

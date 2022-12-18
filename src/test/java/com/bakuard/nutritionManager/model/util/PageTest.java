@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.model.util;
 
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +17,8 @@ class PageTest {
         Page.Metadata metadata = PageableByNumber.
                 of(10, 0).
                 createPageMetadata(0, 200);
-
-        Assertions.assertEquals(BigInteger.ZERO, metadata.getTotalPages());
+        
+        Assertions.assertThat(metadata.getTotalPages()).isZero();
     }
 
     @Test
@@ -33,7 +33,7 @@ class PageTest {
                 of(10, 0).
                 createPageMetadata(9, 200);
 
-        Assertions.assertEquals(BigInteger.ONE, metadata.getTotalPages());
+        Assertions.assertThat(metadata.getTotalPages()).isEqualTo(BigInteger.ONE);
     }
 
     @Test
@@ -48,7 +48,7 @@ class PageTest {
                 of(10, 0).
                 createPageMetadata(10, 200);
 
-        Assertions.assertEquals(BigInteger.ONE, metadata.getTotalPages());
+        Assertions.assertThat(metadata.getTotalPages()).isEqualTo(BigInteger.ONE);
     }
 
     @Test
@@ -63,7 +63,7 @@ class PageTest {
                 of(1, 0).
                 createPageMetadata(10, 200);
 
-        Assertions.assertEquals(BigInteger.TEN, metadata.getTotalPages());
+        Assertions.assertThat(metadata.getTotalPages()).isEqualTo(BigInteger.TEN);
     }
 
     @Test
@@ -78,7 +78,7 @@ class PageTest {
                 of(10, 0).
                 createPageMetadata(101, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(11), metadata.getTotalPages());
+        Assertions.assertThat(metadata.getTotalPages()).isEqualTo(BigInteger.valueOf(11));
     }
 
     @Test
@@ -92,7 +92,7 @@ class PageTest {
                 of(10, -1).
                 createPageMetadata(1, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, metadata.getActualNumber());
+        Assertions.assertThat(metadata.getActualNumber()).isZero();
     }
 
     @Test
@@ -106,7 +106,7 @@ class PageTest {
                 of(10, 1000).
                 createPageMetadata(101, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(10), metadata.getActualNumber());
+        Assertions.assertThat(metadata.getActualNumber()).isEqualTo(BigInteger.TEN);
     }
 
     @Test
@@ -120,7 +120,7 @@ class PageTest {
                 of(10, 1).
                 createPageMetadata(0, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, metadata.getActualNumber());
+        Assertions.assertThat(metadata.getActualNumber()).isZero();
     }
 
     @Test
@@ -134,7 +134,7 @@ class PageTest {
                 of(0, 0).
                 createPageMetadata(10, 200);
 
-        Assertions.assertEquals(1, metadata.getActualSize());
+        Assertions.assertThat(metadata.getActualSize()).isEqualTo(1);
     }
 
     @Test
@@ -148,7 +148,7 @@ class PageTest {
                 of(10, 1).
                 createPageMetadata(0, 200);
 
-        Assertions.assertEquals(0, metadata.getActualSize());
+        Assertions.assertThat(metadata.getActualSize()).isZero();
     }
 
     @Test
@@ -163,7 +163,7 @@ class PageTest {
                 of(1000, 1).
                 createPageMetadata(1000, 200);
 
-        Assertions.assertEquals(200, metadata.getActualSize());
+        Assertions.assertThat(metadata.getActualSize()).isEqualTo(200);
     }
 
     @Test
@@ -178,7 +178,7 @@ class PageTest {
                 of(1000, 1).
                 createPageMetadata(100, 200);
 
-        Assertions.assertEquals(100, metadata.getActualSize());
+        Assertions.assertThat(metadata.getActualSize()).isEqualTo(100);
     }
 
     @Test
@@ -194,7 +194,7 @@ class PageTest {
                 of(10, 10).
                 createPageMetadata(101, 200);
 
-        Assertions.assertEquals(1, metadata.getActualSize());
+        Assertions.assertThat(metadata.getActualSize()).isEqualTo(1);
     }
 
     @Test
@@ -208,7 +208,7 @@ class PageTest {
                 of(1, 0).
                 createPageMetadata(0, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, metadata.getOffset());
+        Assertions.assertThat(metadata.getOffset()).isZero();
     }
 
     @Test
@@ -224,7 +224,7 @@ class PageTest {
                 of(10, 0).
                 createPageMetadata(100, 200);
 
-        Assertions.assertEquals(BigInteger.ZERO, metadata.getOffset());
+        Assertions.assertThat(metadata.getOffset()).isZero();
     }
 
     @Test
@@ -240,7 +240,7 @@ class PageTest {
                 of(10, 5).
                 createPageMetadata(100, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(50), metadata.getOffset());
+        Assertions.assertThat(metadata.getOffset()).isEqualTo(BigInteger.valueOf(50));
     }
 
     @Test
@@ -257,7 +257,7 @@ class PageTest {
                 of(10, 9).
                 createPageMetadata(100, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(90), metadata.getOffset());
+        Assertions.assertThat(metadata.getOffset()).isEqualTo(BigInteger.valueOf(90));
     }
 
     @Test
@@ -274,7 +274,7 @@ class PageTest {
                 of(10, 9).
                 createPageMetadata(91, 200);
 
-        Assertions.assertEquals(BigInteger.valueOf(90), metadata.getOffset());
+        Assertions.assertThat(metadata.getOffset()).isEqualTo(BigInteger.valueOf(90));
     }
 
     @Test
@@ -291,7 +291,7 @@ class PageTest {
                 createPage(createFullList(0, 10));
 
         Optional<Integer> actual = page.getByGlobalIndex(-1);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -308,7 +308,7 @@ class PageTest {
                 createPage(createFullList(0, 10));
 
         Optional<Integer> actual = lastPage.getByGlobalIndex(100);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -325,7 +325,7 @@ class PageTest {
                 createPage(createFullList(0, 10));
 
         Optional<Integer> actual = lastPage.getByGlobalIndex(101);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -341,7 +341,7 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<Integer> actual = page.getByGlobalIndex(9);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -357,7 +357,7 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<Integer> actual = page.getByGlobalIndex(20);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -373,7 +373,9 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<Integer> actual = page.getByGlobalIndex(10);
-        Assertions.assertEquals(10, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(10);
     }
 
     @Test
@@ -389,7 +391,9 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<Integer> actual = page.getByGlobalIndex(19);
-        Assertions.assertEquals(19, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(19);
     }
 
     @Test
@@ -405,7 +409,9 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<Integer> actual = page.getByGlobalIndex(15);
-        Assertions.assertEquals(15, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(15);
     }
 
     @Test
@@ -421,7 +427,7 @@ class PageTest {
                 createPage(List.of());
 
         Optional<Integer> actual = page.getByGlobalIndex(15);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -436,7 +442,7 @@ class PageTest {
                 createPageMetadata(0, 200).
                 createPage(List.of());
 
-        Assertions.assertThrows(NullPointerException.class, () -> page.getByGlobalIndex(null));
+        Assertions.assertThatNullPointerException().isThrownBy(() -> page.getByGlobalIndex(null));
     }
 
     @Test
@@ -451,7 +457,7 @@ class PageTest {
                 createPageMetadata(0, 200).
                 createPage(List.of());
 
-        Assertions.assertThrows(NullPointerException.class, () -> page.getGlobalIndexFor(null));
+        Assertions.assertThatNullPointerException().isThrownBy(() -> page.getGlobalIndexFor(null));
     }
 
     @Test
@@ -464,7 +470,7 @@ class PageTest {
         Page<Integer> page = Page.empty();
 
         Optional<BigInteger> actual = page.getGlobalIndexFor(i -> i == 15);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -481,7 +487,7 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<BigInteger> actual = page.getGlobalIndexFor(i -> i == -100);
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -498,7 +504,9 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<BigInteger> actual = page.getGlobalIndexFor(i -> i == 12);
-        Assertions.assertEquals(BigInteger.valueOf(12), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(BigInteger.valueOf(12));
     }
 
     @Test
@@ -515,7 +523,9 @@ class PageTest {
                 createPage(createFullList(10, 10));
 
         Optional<BigInteger> actual = page.getGlobalIndexFor(i -> (i % 2) != 0);
-        Assertions.assertEquals(BigInteger.valueOf(11), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(BigInteger.valueOf(11));
     }
 
 

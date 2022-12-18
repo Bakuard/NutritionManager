@@ -1,25 +1,20 @@
 package com.bakuard.nutritionManager;
 
-import com.bakuard.nutritionManager.model.Entity;
-import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.Pair;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.RuleException;
 import com.bakuard.nutritionManager.validation.ValidateException;
-
 import org.junit.jupiter.api.Assertions;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
 public class AssertUtil {
 
     @SafeVarargs
-    public static void assertValidateException(Action action,
+    public static void assertValidateException(Runnable action,
                                                Pair<String, Constraint>... expectedConstraintsAndMessageKeys) {
         try {
-            action.act();
+            action.run();
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ValidateException)) {
@@ -55,11 +50,11 @@ public class AssertUtil {
         }
     }
 
-    public static void assertValidateException(Action action,
+    public static void assertValidateException(Runnable action,
                                                String expectedMessageKey,
                                                Constraint expectedConstraint) {
         try {
-            action.act();
+            action.run();
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ValidateException)) {
@@ -89,10 +84,10 @@ public class AssertUtil {
         }
     }
 
-    public static void assertValidateException(Action action,
+    public static void assertValidateException(Runnable action,
                                                Constraint... expectedConstraints) {
         try {
-            action.act();
+            action.run();
             Assertions.fail("Expected exception, but nothing be thrown");
         } catch(Exception e) {
             if(!(e instanceof ValidateException)) {
@@ -114,26 +109,6 @@ public class AssertUtil {
                 }
             }
         }
-    }
-
-    public static void assertEquals(BigDecimal a, BigDecimal b) {
-        if(a.compareTo(b) != 0) Assertions.fail("Expected: " + a + ", actual: " + b);
-    }
-
-    public static <T extends Entity<T>> void assertEquals(T a, T b) {
-        if(!a.equalsFullState(b)) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
-    }
-
-    public static <T extends Entity<T>> void assertEquals(Page<T> a, Page<T> b) {
-        boolean isEqual = a.getMetadata().equals(b.getMetadata()) &&
-                IntStream.range(0, a.getMetadata().getActualSize()).
-                        allMatch(i -> {
-                            T entityA = a.getContent().get(i);
-                            T entityB = b.getContent().get(i);
-                            return entityA.equalsFullState(entityB);
-                        });
-
-        if(!isEqual) Assertions.fail("\nExpected: " + a + "\n  Actual: " + b);
     }
 
 }

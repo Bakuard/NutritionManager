@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dal.impl;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.MenuRepository;
 import com.bakuard.nutritionManager.dal.impl.mappers.MenuFilterMapper;
@@ -33,40 +33,32 @@ import static org.jooq.impl.DSL.*;
 public class MenuRepositoryPostgres implements MenuRepository {
 
     private JdbcTemplate statement;
-    private AppConfigData appConfig;
+    private ConfigData conf;
     private DishRepositoryPostgres dishRepository;
     private MenuFilterMapper menuFilterMapper;
 
     public MenuRepositoryPostgres(DataSource dataSource,
-                                  AppConfigData appConfig,
+                                  ConfigData conf,
                                   DishRepositoryPostgres dishRepository) {
         statement = new JdbcTemplate(dataSource);
         this.dishRepository = dishRepository;
-        this.appConfig = appConfig;
+        this.conf = conf;
         menuFilterMapper = new MenuFilterMapper();
     }
 
     @Override
-    public boolean save(Menu menu) {
+    public void save(Menu menu) {
         Validator.check("MenuRepository.menu", notNull(menu));
 
         Menu oldMenu = getById(menu.getUser().getId(), menu.getId()).orElse(null);
 
-        boolean newData = false;
         try {
-            if(oldMenu == null) {
-                addNewMenu(menu);
-                newData = true;
-            } else if(!menu.equalsFullState(oldMenu)) {
-                updateMenu(menu);
-                newData = true;
-            }
+            if(doesMenuExist(menu.getId())) updateMenu(menu);
+            else addNewMenu(menu);
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save menu", e).
                     addReason(Rule.of("MenuRepository.menu", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
-
-        return newData;
     }
 
     @Override
@@ -140,7 +132,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     setName(rs.getString("name")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig);
+                                    setConfig(conf);
                         }
 
                         String tagValue = rs.getString("tagValue");
@@ -154,7 +146,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
                                             setId(itemId).
-                                            setConfig(appConfig).
+                                            setConfig(conf).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
                             items.add(itemId);
@@ -258,7 +250,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     setName(rs.getString("name")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig);
+                                    setConfig(conf);
                         }
 
                         String tagValue = rs.getString("tagValue");
@@ -272,7 +264,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
                                             setId(itemId).
-                                            setConfig(appConfig).
+                                            setConfig(conf).
                                             setQuantity(rs.getBigDecimal("quantity"))
                             );
                             items.add(itemId);
@@ -348,7 +340,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Page<Menu> getMenus(Criteria criteria) {
         int menusNumber = getMenusNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(menusNumber, 30);
+                createPageMetadata(menusNumber, conf.pagination().menuMaxPageSize());
 
         if(metadata.isEmpty()) return Page.empty();
 
@@ -408,7 +400,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                                     setName(rs.getString("name")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig);
+                                    setConfig(conf);
 
                             lastMenuId = menuId;
                             tags.clear();
@@ -426,7 +418,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
                             builder.addItem(
                                     new MenuItem.LoadBuilder().
                                             setId(itemId).
-                                            setConfig(appConfig).
+                                            setConfig(conf).
                                             setQuantity(rs.getBigDecimal("itemQuantity"))
                             );
                             items.add(itemId);
@@ -488,7 +480,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(tagsNumber, 1000);
+                createPageMetadata(tagsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -522,7 +514,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public Page<String> getNames(Criteria criteria) {
         int namesNumber = getNamesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(namesNumber, 1000);
+                createPageMetadata(namesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -790,21 +782,28 @@ public class MenuRepositoryPostgres implements MenuRepository {
         }
     }
 
+    private boolean doesMenuExist(UUID menuId) {
+        return statement.query(
+                "select count(*) > 0 as doesMenuExist from Menus where menuId = ?;",
+                ps -> ps.setObject(1, menuId),
+                rs -> {
+                    boolean result = false;
+                    if(rs.next()) result = rs.getBoolean("doesMenuExist");
+                    return result;
+                }
+        );
+    }
+
 
     private List<SortField<?>> getOrderFields(Sort menuSort,
                                               String tableName) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
 
-        for(int i = 0; i < menuSort.getParametersNumber(); i++) {
-            switch(menuSort.getParameter(i)) {
-                case "name" -> {
-                    if(menuSort.isAscending(i))
-                        fields.add(field(tableName + ".name").asc());
-                    else
-                        fields.add(field(tableName + ".name").desc());
-                }
-            }
-        }
+        menuSort.forEachParam(param -> {
+            if(param.isAscending()) fields.add(field(tableName + "." + param.param()).asc());
+            else fields.add(field(tableName + "." + param.param()).desc());
+        });
+
         fields.add(field(tableName + ".menuId").asc());
         if("M".equals(tableName)) {
             fields.add(field("MenuItems.index").asc());

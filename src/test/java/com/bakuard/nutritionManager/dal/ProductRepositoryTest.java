@@ -1,8 +1,8 @@
 package com.bakuard.nutritionManager.dal;
 
-import com.bakuard.nutritionManager.Action;
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
@@ -11,7 +11,8 @@ import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class ProductRepositoryTest {
 
@@ -45,24 +46,16 @@ class ProductRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData conf;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
-        try {
-            JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                    "UsedImages", "JwsBlackList",
-                    "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
-                    "Menus", "Dishes", "Products", "Users");
-            transactionManager.commit(status);
-        } catch(RuntimeException e) {
-            transactionManager.rollback(status);
-            throw e;
-        }
+        commit(() -> JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "UsedImages", "JwsBlackList",
+                "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
+                "Menus", "Dishes", "Products", "Users"));
     }
 
     @Test
@@ -75,44 +68,22 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("save(product): no products in DB => return true")
-    void save2() {
-        User user = createAndSaveUser(1);
-        Product product = createProduct(1, user);
-
-        Assertions.assertTrue(commit(() -> repository.save(product)));
-    }
-
-    @Test
     @DisplayName("save(product): no products in DB => add product")
-    void save3() {
+    void save2() {
         User user = createAndSaveUser(1);
         Product expected = createProduct(1, user);
 
         commit(() -> repository.save(expected));
         Product actual = repository.tryGetById(user.getId(), expected.getId());
 
-        AssertUtil.assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("save(product): there are products in DB, product id not exists => return true")
-    void save4() {
-        User user1 = createAndSaveUser(1);
-        User user2 = createAndSaveUser(2);
-        Product product1 = createProduct(1, user1);
-        Product product2 = createProduct(2, user1);
-        Product addedProduct = createProduct(3, user2);
-
-        commit(() -> repository.save(product1));
-        commit(() -> repository.save(product2));
-
-        Assertions.assertTrue(commit(() -> repository.save(addedProduct)));
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
     @DisplayName("save(product): there are products in DB, product id not exists => add product")
-    void save5() {
+    void save3() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
         Product product1 = createProduct(1, user1);
@@ -124,7 +95,9 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
 
         Product actual = repository.tryGetById(user2.getId(), toUUID(3));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -135,12 +108,12 @@ class ProductRepositoryTest {
              user has a product with the same productContext and other id in the database
              => exception
             """)
-    void save6() {
+    void save4() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
         Product addedProduct = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(3)).
                 setUser(user).
                 setCategory("name#2").
@@ -176,48 +149,9 @@ class ProductRepositoryTest {
              there are products in DB,
              product id exists,
              product state was changed
-             => return true
-            """)
-    void save7() {
-        User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user);
-        Product product2 = createProduct(2, user);
-        commit(() -> repository.save(product1));
-        commit(() -> repository.save(product2));
-
-        Product updatedProduct = new Product.Builder().
-                setAppConfiguration(appConfiguration).
-                setId(toUUID(1)).
-                setUser(user).
-                setCategory("updated name").
-                setShop("updated shop").
-                setGrade("updated grade").
-                setManufacturer("updated manufacturer").
-                setUnit("updated unit").
-                setPrice(BigDecimal.TEN).
-                setPackingSize(BigDecimal.TEN).
-                setQuantity(BigDecimal.TEN).
-                setDescription("updated description").
-                setImageUrl("https://nutritionmanager.xyz/products/images?updatedImageUrl").
-                addTag("tag 1").
-                addTag("1 tag").
-                addTag("updated tag 2").
-                addTag("2 tag updated").
-                tryBuild();
-        boolean isSaved = commit(() -> repository.save(updatedProduct));
-
-        Assertions.assertTrue(isSaved);
-    }
-
-    @Test
-    @DisplayName("""
-            save(product):
-             there are products in DB,
-             product id exists,
-             product state was changed
              => update product
             """)
-    void save8() {
+    void save5() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
@@ -225,7 +159,7 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product2));
 
         Product expected = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(1)).
                 setUser(user).
                 setCategory("updated name").
@@ -246,7 +180,9 @@ class ProductRepositoryTest {
         commit(() -> repository.save(expected));
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -258,12 +194,12 @@ class ProductRepositoryTest {
              user has a product with the same productContext in the database
              => exception
             """)
-    void save9() {
+    void save6() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
         Product updatedProduct = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(2)).
                 setUser(user).
                 setCategory("name#1").
@@ -300,30 +236,9 @@ class ProductRepositoryTest {
              there are products in DB,
              product id exists,
              product state wasn't changed
-             => return false
-            """)
-    void save10() {
-        User user = createAndSaveUser(1);
-        Product product1 = createProduct(1, user);
-        Product product2 = createProduct(2, user);
-
-        commit(() -> repository.save(product1));
-        commit(() -> repository.save(product2));
-
-        Assertions.assertFalse(
-                repository.save(product1)
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            save(product):
-             there are products in DB,
-             product id exists,
-             product state wasn't changed
              => don't update product
             """)
-    void save11() {
+    void save7() {
         User user = createAndSaveUser(1);
         Product product1 = createProduct(1, user);
         Product product2 = createProduct(2, user);
@@ -334,7 +249,9 @@ class ProductRepositoryTest {
         commit(() -> repository.save(product1));
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -351,7 +268,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("tryRemove(userId, productId): userId is null => exception")
     void tryRemove2() {
-        User user = createAndSaveUser(1);
+        createAndSaveUser(1);
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryRemove(null, toUUID(1))),
@@ -406,7 +323,7 @@ class ProductRepositoryTest {
         commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -423,7 +340,9 @@ class ProductRepositoryTest {
 
         Product actual = commit(() -> repository.tryRemove(user.getId(), toUUID(1)));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -440,7 +359,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("getById(userId, productId): userId is null => exception")
     void getById2() {
-        User user = createAndSaveUser(1);
+        createAndSaveUser(1);
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.getById(null, toUUID(1))),
@@ -459,7 +378,7 @@ class ProductRepositoryTest {
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(256));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -475,7 +394,7 @@ class ProductRepositoryTest {
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -492,7 +411,11 @@ class ProductRepositoryTest {
 
         Optional<Product> actual = repository.getById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.type(Product.class)).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -509,7 +432,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("tryGetById(userId, productId): userId is null => exception")
     void tryGetById2() {
-        User user = createAndSaveUser(1);
+        createAndSaveUser(1);
 
         AssertUtil.assertValidateException(
                 () -> commit(() -> repository.tryGetById(null, toUUID(1))),
@@ -563,7 +486,9 @@ class ProductRepositoryTest {
 
         Product actual = repository.tryGetById(user.getId(), toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -592,7 +517,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -616,7 +541,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -634,7 +559,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(6, actual);
+        Assertions.assertThat(actual).isEqualTo(6);
     }
 
     @Test
@@ -658,7 +583,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -691,7 +616,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(1, actual);
+        Assertions.assertThat(actual).isEqualTo(1);
     }
 
     @Test
@@ -715,7 +640,7 @@ class ProductRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(6, actual);
+        Assertions.assertThat(actual).isEqualTo(6);
     }
 
     @Test
@@ -741,7 +666,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -769,7 +694,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -801,7 +726,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -833,7 +758,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -865,7 +790,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -897,7 +822,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -929,7 +854,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -963,7 +888,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -997,7 +922,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1030,7 +955,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -1081,7 +1006,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -1134,7 +1059,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(1, actual);
+        Assertions.assertThat(actual).isEqualTo(1);
     }
 
     @Test
@@ -1184,7 +1109,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -1209,8 +1134,7 @@ class ProductRepositoryTest {
     void getProducts2() {
         User user1 = createAndSaveUser(1);
         User user2 = createAndSaveUser(2);
-        List<Product> products = createAndSaveProducts(user1);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user1);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1218,7 +1142,9 @@ class ProductRepositoryTest {
                         setFilter(Filter.user(user2.getId()))
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1233,7 +1159,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(6, 200).
+                createPageMetadata(6, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 5));
 
         Page<Product> actual = repository.getProducts(
@@ -1243,7 +1169,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1258,7 +1186,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(5, 1).
-                createPageMetadata(6, 200).
+                createPageMetadata(6, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1268,7 +1196,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1283,7 +1213,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(3, 5));
 
         Page<Product> actual = repository.getProducts(
@@ -1298,7 +1228,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1313,7 +1245,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1328,7 +1260,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1352,7 +1286,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -1371,7 +1305,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(1, 0).
-                createPageMetadata(1, 200).
+                createPageMetadata(1, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(5, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1389,7 +1323,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1402,8 +1338,7 @@ class ProductRepositoryTest {
             """)
     void getProducts9() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1420,7 +1355,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1439,7 +1376,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 2));
 
         Page<Product> actual = repository.getProducts(
@@ -1457,7 +1394,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1474,8 +1413,7 @@ class ProductRepositoryTest {
             """)
     void getProducts11() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1491,7 +1429,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1508,7 +1448,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(3, 6));
 
         Page<Product> actual = repository.getProducts(
@@ -1525,7 +1465,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1541,8 +1483,7 @@ class ProductRepositoryTest {
             """)
     void getProducts13() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1558,7 +1499,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1575,8 +1518,7 @@ class ProductRepositoryTest {
             """)
     void getProducts14() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1593,7 +1535,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1611,7 +1555,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 3));
 
         Page<Product> actual = repository.getProducts(
@@ -1628,7 +1572,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1645,8 +1591,7 @@ class ProductRepositoryTest {
             """)
     void getProducts16() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1662,7 +1607,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1681,8 +1628,7 @@ class ProductRepositoryTest {
             """)
     void getProducts17() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1699,7 +1645,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1720,7 +1668,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Product> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 2));
 
         Page<Product> actual = repository.getProducts(
@@ -1739,7 +1687,9 @@ class ProductRepositoryTest {
                         setSort(Sort.productDefaultSort())
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1757,8 +1707,7 @@ class ProductRepositoryTest {
             """)
     void getProducts19() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
-        Page<Product> expected = Page.empty();
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -1775,7 +1724,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -1830,9 +1781,11 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(0, 2));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1889,9 +1842,11 @@ class ProductRepositoryTest {
         );
 
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(1, 200).
+                createPageMetadata(1, conf.pagination().productMaxPageSize()).
                 createPage(products.subList(3, 4));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1937,12 +1892,12 @@ class ProductRepositoryTest {
                                 )
                         ).
                         setSort(
-                                Sort.products().desc("price")
+                                Sort.products("price_desc")
                         )
         );
 
         Page<Product> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().productMaxPageSize()).
                 createPage(
                         List.of(
                                 products.get(5),
@@ -1951,7 +1906,9 @@ class ProductRepositoryTest {
                                 products.get(0)
                         )
                 );
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -1976,7 +1933,7 @@ class ProductRepositoryTest {
             """)
     void getProducts23() {
         User user = createAndSaveUser(1);
-        List<Product> products = createAndSaveProducts(user);
+        createAndSaveProducts(user);
 
         Page<Product> actual = repository.getProducts(
                 new Criteria().
@@ -2003,8 +1960,9 @@ class ProductRepositoryTest {
                         )
         );
 
-        Page<Product> expected = Page.empty();
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(Page.empty());
     }
 
     @Test
@@ -2033,7 +1991,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2049,7 +2007,7 @@ class ProductRepositoryTest {
 
         int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user.getId())));
 
-        Assertions.assertEquals(9, actual);
+        Assertions.assertThat(actual).isEqualTo(9);
     }
 
     @Test
@@ -2072,7 +2030,7 @@ class ProductRepositoryTest {
                 )
         );
 
-        Assertions.assertEquals(5, actual);
+        Assertions.assertThat(actual).isEqualTo(5);
     }
 
     @Test
@@ -2105,7 +2063,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(Page.empty(), actual);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
@@ -2120,7 +2078,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(9, 200).
+                createPageMetadata(9, conf.pagination().itemsMaxPageSize()).
                 createPage(createTags(products).subList(0, 5));
 
         Page<Tag> actual = repository.getTags(
@@ -2129,7 +2087,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2144,7 +2102,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(4, 2).
-                createPageMetadata(9, 200).
+                createPageMetadata(9, conf.pagination().itemsMaxPageSize()).
                 createPage(createTags(products).subList(8, 9));
 
         Page<Tag> actual = repository.getTags(
@@ -2153,7 +2111,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 2))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2168,7 +2126,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(5, 200).
+                createPageMetadata(5, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of(
                         new Tag("common tag"),
                         new Tag("tag A"),
@@ -2188,7 +2146,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2203,7 +2161,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<Tag> expected = PageableByNumber.of(4, 1).
-                createPageMetadata(5, 200).
+                createPageMetadata(5, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of(
                         new Tag("value 3")
                 ));
@@ -2219,7 +2177,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2248,7 +2206,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2266,7 +2224,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(3, actual);
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
@@ -2290,7 +2248,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2322,7 +2280,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2336,7 +2294,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop A", "shop B", "shop C"));
 
         Page<String> actual = repository.getShops(
@@ -2345,7 +2303,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(3, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2359,7 +2317,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(3, 200).
+                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop C"));
 
         Page<String> actual = repository.getShops(
@@ -2368,7 +2326,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2382,7 +2340,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
@@ -2396,7 +2354,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2410,7 +2368,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("shop A", "shop B"));
 
         Page<String> actual = repository.getShops(
@@ -2424,7 +2382,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2453,7 +2411,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2471,7 +2429,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(4, actual);
+        Assertions.assertThat(actual).isEqualTo(4);
     }
 
     @Test
@@ -2495,7 +2453,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2527,7 +2485,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2541,7 +2499,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety A", "variety B", "variety C", "variety D"));
 
         Page<String> actual = repository.getGrades(
@@ -2550,7 +2508,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2564,7 +2522,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(3, 1).
-                createPageMetadata(4, 200).
+                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety D"));
 
         Page<String> actual = repository.getGrades(
@@ -2573,7 +2531,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(3, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2587,7 +2545,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getGrades(
@@ -2601,7 +2559,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2615,7 +2573,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("variety A", "variety B"));
 
         Page<String> actual = repository.getGrades(
@@ -2629,7 +2587,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(4, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2658,7 +2616,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2675,7 +2633,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2707,7 +2665,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2721,7 +2679,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("name A", "name B"));
 
         Page<String> actual = repository.getCategories(
@@ -2730,7 +2688,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2744,7 +2702,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(1, 1).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("name B"));
 
         Page<String> actual = repository.getCategories(
@@ -2753,7 +2711,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(1, 1))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2782,7 +2740,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(0, actual);
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
@@ -2800,7 +2758,7 @@ class ProductRepositoryTest {
                 new Criteria().setFilter(Filter.user(user.getId()))
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2824,7 +2782,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertEquals(2, actual);
+        Assertions.assertThat(actual).isEqualTo(2);
     }
 
     @Test
@@ -2856,7 +2814,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2870,7 +2828,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2879,7 +2837,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2893,7 +2851,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2902,7 +2860,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2916,7 +2874,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, 200).
+                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A", "manufacturer B"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2930,7 +2888,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(2, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2944,7 +2902,7 @@ class ProductRepositoryTest {
         User user = createAndSaveUser(1);
         createAndSaveProducts(user);
         Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(1, 200).
+                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
                 createPage(List.of("manufacturer A"));
 
         Page<String> actual = repository.getManufacturers(
@@ -2958,7 +2916,7 @@ class ProductRepositoryTest {
                         setPageable(PageableByNumber.of(5, 0))
         );
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -2999,7 +2957,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3029,7 +2987,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3057,7 +3015,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3089,7 +3047,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3117,7 +3075,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3143,7 +3101,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3171,7 +3129,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3198,9 +3156,11 @@ class ProductRepositoryTest {
                                 )
                         )
         );
-
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3230,7 +3190,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3262,7 +3222,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3290,8 +3250,10 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(107), actual.get());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(107));
     }
 
     @Test
@@ -3316,9 +3278,11 @@ class ProductRepositoryTest {
                                 )
                         )
         );
-
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3348,7 +3312,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3371,8 +3335,10 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3402,7 +3368,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -3451,8 +3417,10 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isPresent());
-        AssertUtil.assertEquals(new BigDecimal(62), actual.get());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(62));
     }
 
     @Test
@@ -3501,7 +3469,7 @@ class ProductRepositoryTest {
                         )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
 
@@ -3518,11 +3486,11 @@ class ProductRepositoryTest {
         }
     }
 
-    private void commit(Action action) {
+    private void commit(Runnable action) {
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         TransactionStatus status = transactionManager.getTransaction(def);
         try {
-            action.act();
+            action.run();
             transactionManager.commit(status);
         } catch(RuntimeException e) {
             transactionManager.rollback(status);
@@ -3535,7 +3503,7 @@ class ProductRepositoryTest {
                 setId(toUUID(userId)).
                 setName("User#" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
         commit(() -> userRepository.save(user));
         return user;
@@ -3543,7 +3511,7 @@ class ProductRepositoryTest {
 
     private Product createProduct(int productId, User user) {
         return new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(toUUID(productId)).
                 setUser(user).
                 setCategory("name#" + productId).
@@ -3575,7 +3543,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(1)).
                         setUser(user).
                         setCategory("name A").
@@ -3596,7 +3564,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(2)).
                         setUser(user).
                         setCategory("name A").
@@ -3617,7 +3585,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(3)).
                         setUser(user).
                         setCategory("name A").
@@ -3638,7 +3606,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(4)).
                         setUser(user).
                         setCategory("name B").
@@ -3659,7 +3627,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(5)).
                         setUser(user).
                         setCategory("name B").
@@ -3680,7 +3648,7 @@ class ProductRepositoryTest {
 
         products.add(
                 new Product.Builder().
-                        setAppConfiguration(appConfiguration).
+                        setAppConfiguration(conf).
                         setId(toUUID(6)).
                         setUser(user).
                         setCategory("name B").

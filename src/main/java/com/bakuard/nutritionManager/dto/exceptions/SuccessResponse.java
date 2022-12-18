@@ -4,10 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Schema(description = "Представляет стандартный ответ об успешном ввыполнении всех типов запросов, кроме GET.")
+@Schema(description = "Представляет стандартный ответ об успешном выполнении всех типов запросов, кроме GET.")
 public class SuccessResponse<T> {
 
     @Schema(description = "Время отправки ответа")
@@ -20,8 +21,8 @@ public class SuccessResponse<T> {
     @Schema(description = "Дополнительные данные ответа на запрос связанные с бизнес логикой")
     private T body;
 
-    public SuccessResponse(String message, String title, T body) {
-        timestamp = LocalDateTime.now();
+    public SuccessResponse(String message, String title, T body, Clock clock) {
+        timestamp = LocalDateTime.now(clock);
         this.message = message;
         this.title = title;
         this.body = body;

@@ -1,15 +1,16 @@
 package com.bakuard.nutritionManager.service.report;
 
 import com.bakuard.nutritionManager.model.Dish;
-import com.bakuard.nutritionManager.model.Product;
-
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 public class DishProductsDataSource implements JRDataSource {
 
@@ -18,10 +19,12 @@ public class DishProductsDataSource implements JRDataSource {
     private Dish.ProductGroup current;
     private BigDecimal servingNumber;
     private Dish dish;
+    private Clock clock;
 
     public DishProductsDataSource(Dish dish,
                                   BigDecimal servingNumber,
-                                  List<Dish.ProductConstraint> constraints) {
+                                  List<Dish.ProductConstraint> constraints,
+                                  Clock clock) {
         ingredientProducts = dish.getProductForEachIngredient(constraints);
         productsIterator = dish.groupByProduct(ingredientProducts).stream().
                 sorted(Comparator.comparing(item -> item.product().getContext().getShop())).
@@ -30,6 +33,7 @@ public class DishProductsDataSource implements JRDataSource {
 
         this.dish = dish;
         this.servingNumber = servingNumber;
+        this.clock = clock;
     }
 
     @Override
@@ -46,7 +50,7 @@ public class DishProductsDataSource implements JRDataSource {
         switch(jrField.getName()) {
             case "dishName" -> result = dish.getName();
             case "servingNumber" -> result = format(servingNumber);
-            case "creationReportData" -> result = LocalDate.now().toString();
+            case "creationReportData" -> result = LocalDate.now(clock).toString();
             case "totalPrice" -> result = format(
                     dish.getLackProductPrice(ingredientProducts, servingNumber).orElseThrow()
             );

@@ -29,7 +29,7 @@ public class ProductResponse {
     private String grade;
     @Schema(description = "Один из производителей продуктов указанной категории.")
     private String manufacturer;
-    @Schema(description = "Цена прдукта указанной категории, сорта, производителя и продающегося в указанном магазине.")
+    @Schema(description = "Цена продукта указанной категории, сорта, производителя и продающегося в указанном магазине.")
     private BigDecimal price;
     @Schema(description = "Размер упаковки.")
     private BigDecimal packingSize;

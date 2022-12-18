@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
 
 @Schema(description = """
-        Учетные данные пользователя указываемые им при аутентификации, регистарции или смене учетных данных.
+        Учетные данные пользователя указываемые им при аутентификации, регистрации или смене учетных данных.
         """)
 public class CredentialsForEnterRequest {
 

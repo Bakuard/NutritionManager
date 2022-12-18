@@ -1,7 +1,8 @@
 package com.bakuard.nutritionManager.model;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.model.filters.Filter;
@@ -10,10 +11,16 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableById;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,13 +31,13 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestConfig.class)
+@TestPropertySource(locations = "classpath:test.properties")
 class DishTest {
 
-    private AppConfigData conf = AppConfigData.builder().
-            setNumberPrecision("16").
-            setNumberRoundingMod("CEILING").
-            setNumberScale("6").
-            build();
+    @Autowired
+    private ConfigData conf;
 
     @Test
     @DisplayName("""
@@ -128,7 +135,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantity(ip, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -149,7 +156,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantity(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(18), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(18));
     }
 
     @Test
@@ -248,7 +258,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantityPrice(ip, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -269,7 +279,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackPackageQuantityPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(1980), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1980));
     }
 
     @Test
@@ -388,7 +401,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(List.of(), BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -413,7 +426,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -438,7 +451,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(4000), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(4000));
     }
 
     @Test
@@ -463,7 +479,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(6090), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(6090));
     }
 
     @Test
@@ -500,7 +519,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getLackProductPrice(ip, BigDecimal.TEN);
 
-        AssertUtil.assertEquals(new BigDecimal(8850), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(8850));
     }
 
     @Test
@@ -518,7 +540,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(-1, 0);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -536,7 +558,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(1, 0);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -554,7 +576,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(2, 0);
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -576,7 +598,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, -1);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -595,7 +621,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 0);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -619,7 +649,9 @@ class DishTest {
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 4);
 
         Dish.IngredientProduct expected = ingredientProduct(product(user, 4), 0, 4);
-        Assertions.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(expected);
     }
 
     @Test
@@ -642,7 +674,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 5);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -665,7 +701,11 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(0, 6);
 
-        Assertions.assertTrue(actual.orElseThrow().product().isEmpty());
+        Assertions.assertThat(actual).
+                isPresent().
+                get().
+                extracting(Dish.IngredientProduct::product, InstanceOfAssertFactories.optional(Product.class)).
+                isEmpty();
     }
 
     @Test
@@ -749,7 +789,7 @@ class DishTest {
 
         Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(1000), toUUID(10));
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -788,7 +828,9 @@ class DishTest {
         Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(0), toUUID(1000));
 
         Dish.IngredientProduct expected = emptyIngredientProduct(0, -1);
-        Assertions.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(expected);
     }
 
     @Test
@@ -827,7 +869,9 @@ class DishTest {
         Optional<Dish.IngredientProduct> actual = dish.getProduct(toUUID(0), toUUID(10));
 
         Dish.IngredientProduct expected = ingredientProduct(product(user, 10),0, 10);
-        Assertions.assertEquals(expected, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                contains(expected);
     }
 
     @Test
@@ -889,7 +933,7 @@ class DishTest {
                 )
         );
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -936,7 +980,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -983,7 +1027,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1030,7 +1074,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1077,7 +1121,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 1), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1124,7 +1168,7 @@ class DishTest {
                 ingredientProduct(product(user, 11), 1, 0),
                 ingredientProduct(product(user, 200), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1171,7 +1215,7 @@ class DishTest {
                 ingredientProduct(product(user, 11), 1, 0),
                 ingredientProduct(product(user, 200), 2, 1)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1220,7 +1264,7 @@ class DishTest {
                 ingredientProduct(product(user, 1), 1, 1),
                 ingredientProduct(product(user, 3), 2, 3)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1274,7 +1318,7 @@ class DishTest {
                 ingredientProduct(product(user, 1), 1, 1),
                 ingredientProduct(product(user, 3), 2, 3)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1322,7 +1366,7 @@ class DishTest {
                 ingredientProduct(product(user, 0), 1, 0),
                 ingredientProduct(product(user, 4), 2, 4)
         );
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -1338,7 +1382,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.ZERO, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1358,7 +1402,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.ZERO, actual);
+        Assertions.assertThat(actual).isZero();
     }
 
     @Test
@@ -1390,7 +1434,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.valueOf(50), actual);
+        Assertions.assertThat(actual).isEqualTo(BigInteger.valueOf(50));
     }
 
     @Test
@@ -1422,7 +1466,7 @@ class DishTest {
 
         BigInteger actual = dish.getNumberIngredientCombinations();
 
-        Assertions.assertEquals(BigInteger.valueOf(100), actual);
+        Assertions.assertThat(actual).isEqualTo(BigInteger.valueOf(100));
     }
 
     @Test
@@ -1438,7 +1482,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1462,7 +1506,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1504,7 +1548,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -1553,7 +1600,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(200), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(200));
     }
 
     @Test
@@ -1610,7 +1660,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(7700), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(7700));
     }
 
     @Test
@@ -1666,7 +1719,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMinPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1850), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1850));
     }
 
     @Test
@@ -1682,7 +1738,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1706,7 +1762,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1748,7 +1804,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -1796,7 +1855,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1500), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1500));
     }
 
     @Test
@@ -1852,7 +1914,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1350), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1350));
     }
 
     @Test
@@ -1909,7 +1974,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getMaxPrice();
 
-        AssertUtil.assertEquals(new BigDecimal(2050), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(2050));
     }
 
     @Test
@@ -1925,7 +1993,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -1949,7 +2017,7 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -2011,8 +2079,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-
-        AssertUtil.assertEquals(BigDecimal.ZERO, actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -2084,7 +2154,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal(850), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(850));
     }
 
     @Test
@@ -2172,7 +2245,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal(4525), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(4525));
     }
 
     @Test
@@ -2259,7 +2335,10 @@ class DishTest {
 
         Optional<BigDecimal> actual = dish.getAveragePrice();
 
-        AssertUtil.assertEquals(new BigDecimal(1950), actual.orElseThrow());
+        Assertions.assertThat(actual).
+                isPresent().
+                get(InstanceOfAssertFactories.BIG_DECIMAL).
+                isEqualByComparingTo(new BigDecimal(1950));
     }
 
 
@@ -2268,7 +2347,7 @@ class DishTest {
                 setId(toUUID(1)).
                 setName("User").
                 setPassword("password").
-                setEmail("user@mail.com").
+                setEmail("user@confirmationMail.com").
                 tryBuild();
     }
 
@@ -2322,13 +2401,13 @@ class DishTest {
         return new Criteria().
                 setPageable(PageableByNumber.ofIndex(30, productIndex)).
                 setFilter(filter).
-                setSort(Sort.products().asc("price"));
+                setSort(Sort.products("price"));
     }
 
     private Criteria criteriaById(int productId, Filter filter) {
         return new Criteria().
                 setPageable(PageableById.of(30, toUUID(productId))).
-                setSort(Sort.products().asc("price")).
+                setSort(Sort.products("price")).
                 setFilter(filter);
     }
 
@@ -2353,7 +2432,7 @@ class DishTest {
                                       int productIndex,
                                       BiFunction<User, Integer, Product.Builder> productFactory) {
         Page.Metadata metadata = PageableByNumber.ofIndex(30, productIndex).
-                createPageMetadata(1000, 30);
+                createPageMetadata(1000, conf.pagination().productMaxPageSize());
 
         int offset = metadata.getOffset().intValue();
         List<Product> products = IntStream.range(0, metadata.getActualSize()).
@@ -2367,7 +2446,7 @@ class DishTest {
                                       BiFunction<User, Integer, Product.Builder> productFactory,
                                       int... productIds) {
         Page.Metadata metadata = PageableByNumber.of(30 , 0).
-                createPageMetadata(productIds.length, 30);
+                createPageMetadata(productIds.length, conf.pagination().productMaxPageSize());
 
         List<Product> products = Arrays.stream(productIds).
                 mapToObj(i -> productFactory.apply(user, i).tryBuild()).
@@ -2387,7 +2466,7 @@ class DishTest {
                 orElse(-1);
         Page.Metadata metadata = pageable.createPageMetaData(productIds.length,
                 index % productIds.length,
-                30);
+                conf.pagination().productMaxPageSize());
 
         List<Product> products = Arrays.stream(productIds).
                 mapToObj(i -> productFactory.apply(user, i).tryBuild()).

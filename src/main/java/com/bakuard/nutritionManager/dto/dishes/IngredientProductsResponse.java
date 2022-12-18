@@ -16,7 +16,7 @@ public class IngredientProductsResponse {
     private String productCategory;
     @Schema(description = """
             Список всех докупаемых продуктов данного ингредиента. Особые случаи: <br/>
-            1. Если данному ингредиенту не соответстует ни один продукт, то данный список будет пустым. <br/>
+            1. Если данному ингредиенту не соответствует ни один продукт, то данный список будет пустым. <br/>
             """)
     private List<ProductAsDishIngredientResponse> products;
 

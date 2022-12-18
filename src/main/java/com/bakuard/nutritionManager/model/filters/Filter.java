@@ -1,9 +1,7 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.model.Tag;
-import com.bakuard.nutritionManager.model.User;
-import com.bakuard.nutritionManager.validation.*;
-
+import com.bakuard.nutritionManager.validation.ValidateException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 

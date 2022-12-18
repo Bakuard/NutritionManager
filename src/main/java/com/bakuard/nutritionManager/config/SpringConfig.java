@@ -1,5 +1,8 @@
 package com.bakuard.nutritionManager.config;
 
+import com.bakuard.nutritionManager.config.configData.ConfigData;
+import com.bakuard.nutritionManager.config.security.RequestContext;
+import com.bakuard.nutritionManager.config.security.RequestContextImpl;
 import com.bakuard.nutritionManager.dal.*;
 import com.bakuard.nutritionManager.dal.impl.*;
 import com.bakuard.nutritionManager.dto.DtoMapper;
@@ -9,19 +12,23 @@ import com.bakuard.nutritionManager.service.ImageUploaderService;
 import com.bakuard.nutritionManager.service.JwsService;
 import com.bakuard.nutritionManager.service.menuGenerator.MenuGeneratorService;
 import com.bakuard.nutritionManager.service.report.ReportService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -36,7 +43,7 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import javax.servlet.MultipartConfigElement;
 import javax.sql.DataSource;
-import java.io.IOException;
+import java.time.Clock;
 
 @SpringBootApplication(
         exclude = {SecurityAutoConfiguration.class},
@@ -47,32 +54,19 @@ import java.io.IOException;
 )
 @EnableTransactionManagement
 @EnableScheduling
+@ConfigurationPropertiesScan
+@SecurityScheme(name = "commonToken", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
+@SecurityScheme(name = "registrationToken", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
+@SecurityScheme(name = "restorePassToken", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
-    public AppConfigData appConfigData(Environment env) throws IOException {
-        return AppConfigData.builder().
-                setNumberPrecision(env.getProperty("decimal.precision")).
-                setNumberRoundingMod(env.getProperty("decimal.rounding")).
-                setNumberScale(env.getProperty("decimal.numberScale")).
-                setMailServer(env.getProperty("mail.server")).
-                setMailPassword(env.getProperty("mail.server.password")).
-                setDatabaseName(env.getProperty("db.name")).
-                setDatabaseUser(env.getProperty("db.user")).
-                setDatabasePassword(env.getProperty("db.password")).
-                setAwsUserId(env.getProperty("AWS.userId")).
-                setAwsAccessKey(env.getProperty("AWS.accessKeyId")).
-                setAwsSecretKey(env.getProperty("AWS.secretKey")).
-                build();
-    }
-
-    @Bean
-    public DataSource dataSource(AppConfigData appConfigData) {
+    public DataSource dataSource(ConfigData configData) {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
-        hikariConfig.setUsername(appConfigData.getDatabaseUser());
-        hikariConfig.setPassword(appConfigData.getDatabasePassword());
-        hikariConfig.addDataSourceProperty("databaseName", appConfigData.getDatabaseName());
+        hikariConfig.setUsername(configData.database().user());
+        hikariConfig.setPassword(configData.database().password());
+        hikariConfig.addDataSourceProperty("databaseName", configData.database().name());
         hikariConfig.setAutoCommit(false);
         hikariConfig.addDataSourceProperty("portNumber", "5432");
         hikariConfig.addDataSourceProperty("serverName", "localhost");
@@ -97,20 +91,25 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public ProductRepository productRepository(DataSource dataSource, AppConfigData appConfiguration) {
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
+
+    @Bean
+    public ProductRepository productRepository(DataSource dataSource, ConfigData appConfiguration) {
         return new ProductRepositoryPostgres(dataSource, appConfiguration);
     }
 
     @Bean
     public DishRepository dishRepository(DataSource dataSource,
-                                         AppConfigData appConfiguration,
+                                         ConfigData appConfiguration,
                                          ProductRepositoryPostgres productRepository) {
         return new DishRepositoryPostgres(dataSource, appConfiguration, productRepository);
     }
 
     @Bean
     public MenuRepository menuRepository(DataSource dataSource,
-                                         AppConfigData appConfiguration,
+                                         ConfigData appConfiguration,
                                          DishRepositoryPostgres dishRepository) {
         return new MenuRepositoryPostgres(dataSource, appConfiguration, dishRepository);
     }
@@ -121,8 +120,9 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource) {
-        return new JwsBlackListPostgres(dataSource);
+    public JwsBlackListRepository jwsBlackListRepository(DataSource dataSource,
+                                                         Clock clock) {
+        return new JwsBlackListPostgres(dataSource, clock);
     }
 
     @Bean
@@ -131,33 +131,38 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JwsService jwsService(JwsBlackListRepository jwsBlackListRepository) {
-        return new JwsService(jwsBlackListRepository);
+    public JwsService jwsService(JwsBlackListRepository jwsBlackListRepository,
+                                 Clock clock,
+                                 ObjectMapper objectMapper) {
+        return new JwsService(jwsBlackListRepository, clock, objectMapper);
     }
 
     @Bean
-    public EmailService emailService(AppConfigData appConfiguration) {
+    public EmailService emailService(ConfigData appConfiguration) {
         return new EmailService(appConfiguration);
     }
 
     @Bean
-    public AuthService authService(JwsService jwsService, EmailService emailService, UserRepository userRepository) {
-        return new AuthService(jwsService, emailService, userRepository);
+    public AuthService authService(JwsService jwsService,
+                                   EmailService emailService,
+                                   UserRepository userRepository,
+                                   ConfigData configData) {
+        return new AuthService(jwsService, emailService, userRepository, configData);
     }
 
     @Bean(initMethod = "loadTemplates")
-    public ReportService reportService() {
-        return new ReportService();
+    public ReportService reportService(Clock clock) {
+        return new ReportService(clock);
     }
 
     @Bean
-    public ImageUploaderService imageUploaderService(AppConfigData appConfigData, ImageRepository imageRepository) {
-        return new ImageUploaderService(appConfigData, imageRepository);
+    public ImageUploaderService imageUploaderService(ConfigData configData, ImageRepository imageRepository) {
+        return new ImageUploaderService(configData, imageRepository);
     }
 
     @Bean
-    public MenuGeneratorService menuGeneratorService(AppConfigData appConfigData) {
-        return new MenuGeneratorService(appConfigData);
+    public MenuGeneratorService menuGeneratorService(ConfigData configData) {
+        return new MenuGeneratorService(configData);
     }
 
     @Bean
@@ -174,14 +179,16 @@ public class SpringConfig implements WebMvcConfigurer {
                                DishRepository dishRepository,
                                MenuRepository menuRepository,
                                MessageSource messageSource,
-                               AppConfigData appConfiguration) {
+                               ConfigData appConfiguration,
+                               Clock clock) {
         return new DtoMapper(
                 userRepository,
                 productRepository,
                 dishRepository,
                 menuRepository,
                 messageSource,
-                appConfiguration);
+                appConfiguration,
+                clock);
     }
 
     @Bean
@@ -190,6 +197,11 @@ public class SpringConfig implements WebMvcConfigurer {
         messageSource.setBasenames("locales/exceptions", "locales/success");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
+    }
+
+    @Bean
+    public RequestContext requestContext() {
+        return new RequestContextImpl();
     }
 
     @Bean
@@ -211,7 +223,7 @@ public class SpringConfig implements WebMvcConfigurer {
                 info(
                         new Info().
                                 title("Nutrition Manager API").
-                                version("0.15.0").
+                                version("0.15.21").
                                 contact(new Contact().email("purplespicemerchant@gmail.com"))
                 );
     }

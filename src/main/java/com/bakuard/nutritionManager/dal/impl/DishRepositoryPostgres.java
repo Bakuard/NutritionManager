@@ -1,6 +1,6 @@
 package com.bakuard.nutritionManager.dal.impl;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.DishRepository;
 import com.bakuard.nutritionManager.dal.impl.mappers.DishFilterMapper;
@@ -39,16 +39,16 @@ import static org.jooq.impl.DSL.*;
 public class DishRepositoryPostgres implements DishRepository {
 
     private JdbcTemplate statement;
-    private AppConfigData appConfig;
+    private ConfigData conf;
     private ProductRepositoryPostgres productRepository;
     private ProductFilterMapper filterMapper;
     private ProductFilterJsonMapper filterJsonMapper;
     private DishFilterMapper dishFilterMapper;
 
     public DishRepositoryPostgres(DataSource dataSource,
-                                  AppConfigData appConfig,
+                                  ConfigData conf,
                                   ProductRepositoryPostgres productRepository) {
-        this.appConfig = appConfig;
+        this.conf = conf;
         this.productRepository = productRepository;
         statement = new JdbcTemplate(dataSource);
         filterMapper = new ProductFilterMapper();
@@ -57,26 +57,16 @@ public class DishRepositoryPostgres implements DishRepository {
     }
 
     @Override
-    public boolean save(Dish dish) {
+    public void save(Dish dish) {
         Validator.check("DishRepository.dish", notNull(dish));
 
-        Dish oldDish = getById(dish.getUser().getId(), dish.getId()).orElse(null);
-
-        boolean newData = false;
         try {
-            if(oldDish == null) {
-                addNewDish(dish);
-                newData = true;
-            } else if(!dish.equalsFullState(oldDish)) {
-                updateDish(dish);
-                newData = true;
-            }
+            if(doesDishExist(dish.getId())) updateDish(dish);
+            else addNewDish(dish);
         } catch(DuplicateKeyException e) {
             throw new ValidateException("Fail to save dish", e).
                     addReason(Rule.of("DishRepository.dish", failure(Constraint.ENTITY_MUST_BE_UNIQUE_IN_DB)));
         }
-
-        return newData;
     }
 
     @Override
@@ -137,7 +127,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig).
+                                    setConfig(conf).
                                     setRepository(productRepository);
                         }
 
@@ -156,7 +146,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                                 setName(rs.getString("ingredientName")).
                                                 setQuantity(rs.getBigDecimal("ingredientQuantity")).
                                                 setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
-                                                setConfig(appConfig)
+                                                setConfig(conf)
                                 );
                                 ingredients.add(ingredientId);
                             }
@@ -228,7 +218,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setUnit(rs.getString("unit")).
                                     setDescription(rs.getString("description")).
                                     setImageUrl(rs.getString("imagePath")).
-                                    setConfig(appConfig).
+                                    setConfig(conf).
                                     setRepository(productRepository);
                         }
 
@@ -247,7 +237,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                                 setName(rs.getString("ingredientName")).
                                                 setQuantity(rs.getBigDecimal("ingredientQuantity")).
                                                 setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
-                                                setConfig(appConfig)
+                                                setConfig(conf)
                                 );
                                 ingredients.add(ingredientId);
                             }
@@ -302,7 +292,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<Dish> getDishes(Criteria criteria) {
         int dishesNumber = getDishesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(dishesNumber, 30);
+                createPageMetadata(dishesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return Page.empty();
 
@@ -346,7 +336,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<Tag> getTags(Criteria criteria) {
         int tagsNumber = getTagsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(tagsNumber, 1000);
+                createPageMetadata(tagsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -380,7 +370,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<String> getUnits(Criteria criteria) {
         int unitsNumber = getUnitsNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(unitsNumber, 1000);
+                createPageMetadata(unitsNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -412,7 +402,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public Page<String> getNames(Criteria criteria) {
         int namesNumber = getNamesNumber(criteria);
         Page.Metadata metadata = criteria.getPageable(PageableByNumber.class).
-                createPageMetadata(namesNumber, 1000);
+                createPageMetadata(namesNumber, conf.pagination().itemsMaxPageSize());
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
@@ -548,7 +538,7 @@ public class DishRepositoryPostgres implements DishRepository {
                         setUnit(rs.getString("unit")).
                         setDescription(rs.getString("description")).
                         setImageUrl(rs.getString("imagePath")).
-                        setConfig(appConfig).
+                        setConfig(conf).
                         setRepository(productRepository);
 
                 lastDishId = dishId;
@@ -571,7 +561,7 @@ public class DishRepositoryPostgres implements DishRepository {
                                     setName(rs.getString("ingredientName")).
                                     setQuantity(rs.getBigDecimal("ingredientQuantity")).
                                     setFilter(filterJsonMapper.toFilter(rs.getString("ingredientFilter"))).
-                                    setConfig(appConfig)
+                                    setConfig(conf)
                     );
                     ingredients.add(ingredientId);
                 }
@@ -762,21 +752,28 @@ public class DishRepositoryPostgres implements DishRepository {
         );
     }
 
+    private boolean doesDishExist(UUID dishId) {
+        return statement.query(
+                "select count(*) > 0 as doesDishExist from Dishes where dishId = ?;",
+                ps -> ps.setObject(1, dishId),
+                rs -> {
+                    boolean result = false;
+                    if(rs.next()) result = rs.getBoolean("doesDishExist");
+                    return result;
+                }
+        );
+    }
+
 
     private List<SortField<?>> getOrderFields(Sort dishSort,
                                               String tableName) {
         ArrayList<SortField<?>> fields = new ArrayList<>();
 
-        for(int i = 0; i < dishSort.getParametersNumber(); i++) {
-            switch(dishSort.getParameter(i)) {
-                case "name" -> {
-                    if(dishSort.isAscending(i))
-                        fields.add(field(tableName + ".name").asc());
-                    else
-                        fields.add(field(tableName + ".name").desc());
-                }
-            }
-        }
+        dishSort.forEachParam(param -> {
+            if(param.isAscending()) fields.add(field(tableName + "." + param.param()).asc());
+            else fields.add(field(tableName + "." + param.param()).desc());
+        });
+
         fields.add(field(tableName + ".dishId").asc());
         if("D".equals(tableName)) {
             fields.add(field("DishIngredients.index").asc());

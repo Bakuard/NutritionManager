@@ -1,6 +1,8 @@
 package com.bakuard.nutritionManager.service;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.auth.policy.Principal;
 import com.amazonaws.auth.policy.Resource;
@@ -12,7 +14,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.ImageRepository;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
@@ -42,12 +44,20 @@ public class ImageUploaderService implements DisposableBean {
 
     private final AmazonS3 s3;
     private final ImageRepository imageRepository;
+    private final AWSStaticCredentialsProvider credentialsProvider;
 
-    public ImageUploaderService(AppConfigData config, ImageRepository imageRepository) {
+    public ImageUploaderService(ConfigData config, ImageRepository imageRepository) {
+        //Because AWS resources use DNS name entries that occasionally change
+        java.security.Security.setProperty("networkaddress.cache.ttl", "60");
+
+        credentialsProvider = new AWSStaticCredentialsProvider(
+                new BasicAWSCredentials(config.aws().accessKey(), config.aws().secretKey())
+        );
+
         this.imageRepository = imageRepository;
 
         s3 = AmazonS3ClientBuilder.standard().
-                withCredentials(config.getAwsCredentialsProvider()).
+                withCredentials(credentialsProvider).
                 withRegion(Regions.US_EAST_1).
                 build();
 
@@ -58,7 +68,7 @@ public class ImageUploaderService implements DisposableBean {
                                 .withActions(S3Actions.GetObject)
                                 .withResources(new Resource("arn:aws:s3:::nutritionmanagerimages/*")),
                         new Statement(Statement.Effect.Allow)
-                                .withPrincipals(new Principal(config.getAwsUserId()))
+                                .withPrincipals(new Principal(config.aws().userId()))
                                 .withActions(S3Actions.PutObject)
                                 .withResources(new Resource("arn:aws:s3:::nutritionmanagerimages/*"))
                 );

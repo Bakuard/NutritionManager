@@ -1,112 +1,190 @@
 package com.bakuard.nutritionManager.model.filters;
 
-import com.bakuard.nutritionManager.validation.*;
+import com.bakuard.nutritionManager.validation.Validator;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
-import static com.bakuard.nutritionManager.validation.Rule.*;
+import static com.bakuard.nutritionManager.validation.Rule.anyMatch;
 
+/**
+ * Представляет параметры сортировки. Также содержит набор статических методов для преобразования
+ * параметров сортировки заданных в виде строки в объекты данного класса.
+ */
 public class Sort {
 
+    /**
+     * Возвращает параметры сортировки по умолчанию для продуктов.
+     */
     public static Sort productDefaultSort() {
-        return products().asc("category");
+        return products("category");
     }
 
+    /**
+     * Возвращает параметры сортировки по умолчанию для блюд.
+     */
     public static Sort dishDefaultSort() {
-        return dishes().asc("name");
+        return dishes("name");
     }
 
+    /**
+     * Возвращает параметры сортировки по умолчанию для меню.
+     */
     public static Sort menuDefaultSort() {
-        return dishes().asc("name");
+        return menus("name");
     }
 
-    public static Sort products() {
-        return new Sort(List.of("category", "price"));
+    /**
+     * Преобразует параметры сортировки sortRules в объект Sort. При этом проверяется -
+     * поддерживаются ли указанные параметры для продуктов. <br/><br/>
+     * Формат строки sortRules: <br/>
+     * Общий вид: field1_direction, field2_direction, ..., fieldN_direction
+     * <ol>
+     * <li> где fieldN - поле сортировки. </li>
+     * <li> direction - направление сортировки. Допустимые значения - "asc", "desc", "ascending", "descending".
+     *                  Направление сортировки можно опустить оставив только поле. В таком случае по умолчанию
+     *                  используется значение "asc". </li>
+     * </ol>
+     * Пример: category, price_desc
+     * @param sortRules параметры сортировки в виде строки
+     * @return параметры сортировки в виде объекта данного класса
+     */
+    public static Sort products(String sortRules) {
+        List<Param> params = toSortRuleStream(sortRules).
+                map(p -> {
+                    String[] sr = p.split("_");
+                    return new Param(checkParameter(sr, "products"), checkDirection(sr));
+                }).
+                toList();
+        return params.isEmpty() ? productDefaultSort() : new Sort(params);
     }
 
-    public static Sort products(List<String> sortRules) {
-        if(sortRules == null) {
-            return productDefaultSort();
-        } else {
-            Sort sort = products();
-            sortRules.stream().
-                    filter(Objects::nonNull).
-                    map(sortRule -> sortRule.split("_")).
-                    forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
-            return sort.getParametersNumber() > 0 ? sort : productDefaultSort();
+    /**
+     * Преобразует параметры сортировки sortRules в объект Sort. При этом проверяется -
+     * поддерживаются ли указанные параметры для блюд. <br/><br/>
+     * Формат строки sortRules: <br/>
+     * Общий вид: field1_direction, field2_direction, ..., fieldN_direction
+     * <ol>
+     * <li> где fieldN - поле сортировки. </li>
+     * <li> direction - направление сортировки. Допустимые значения - "asc", "desc", "ascending", "descending".
+     *                  Направление сортировки можно опустить оставив только поле. В таком случае по умолчанию
+     *                  используется значение "asc". </li>
+     * </ol>
+     * Пример: name, dishId_desc
+     * @param sortRules параметры сортировки в виде строки
+     * @return параметры сортировки в виде объекта данного класса
+     */
+    public static Sort dishes(String sortRules) {
+        List<Param> params = toSortRuleStream(sortRules).
+                map(p -> {
+                    String[] sr = p.split("_");
+                    return new Param(checkParameter(sr, "dishes"), checkDirection(sr));
+                }).
+                toList();
+        return params.isEmpty() ? dishDefaultSort() : new Sort(params);
+    }
+
+    /**
+     * Преобразует параметры сортировки sortRules в объект Sort. При этом проверяется -
+     * поддерживаются ли указанные параметры для меню. <br/><br/>
+     * Формат строки sortRules: <br/>
+     * Общий вид: field1_direction, field2_direction, ..., fieldN_direction
+     * <ol>
+     * <li> где fieldN - поле сортировки. </li>
+     * <li> direction - направление сортировки. Допустимые значения - "asc", "desc", "ascending", "descending".
+     *                  Направление сортировки можно опустить оставив только поле. В таком случае по умолчанию
+     *                  используется значение "asc". </li>
+     * </ol>
+     * Пример: name, menuId_desc
+     * @param sortRules параметры сортировки в виде строки
+     * @return параметры сортировки в виде объекта данного класса
+     */
+    public static Sort menus(String sortRules) {
+        List<Param> params = toSortRuleStream(sortRules).
+                map(p -> {
+                    String[] sr = p.split("_");
+                    return new Param(checkParameter(sr, "menus"), checkDirection(sr));
+                }).
+                toList();
+        return params.isEmpty() ? menuDefaultSort() : new Sort(params);
+    }
+
+
+    private static boolean checkDirection(String[] preparedSortRule) {
+        String sortDirection = preparedSortRule.length > 1 ? preparedSortRule[1] : "asc";
+        final String processedSortDirection = StringUtils.normalizeSpace(sortDirection).toUpperCase();
+        boolean isAscending = true;
+
+        Validator.check("Sort.direction",
+                anyMatch(List.of("asc", "desc", "ascending", "descending"), p -> p.equalsIgnoreCase(sortDirection))
+        );
+
+        switch(processedSortDirection) {
+            case "ASC", "ASCENDING" -> isAscending = true;
+            case "DESC", "DESCENDING" -> isAscending = false;
         }
+
+        return isAscending;
     }
 
-    public static Sort dishes() {
-        return new Sort(List.of("name"));
-    }
+    private static String checkParameter(String[] preparedSortRule, String sortedEntityTypeName) {
+        final String processedParameter = StringUtils.normalizeSpace(preparedSortRule[0]);
 
-    public static Sort dishes(List<String> sortRules) {
-        if(sortRules == null) {
-            return dishDefaultSort();
-        } else {
-            Sort sort = dishes();
-            sortRules.stream().
-                    filter(Objects::nonNull).
-                    map(sortRule -> sortRule.split("_")).
-                    forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
-            return sort.getParametersNumber() > 0 ? sort : dishDefaultSort();
+        switch(sortedEntityTypeName) {
+            case "products" -> Validator.check(
+                    "Sort.products.parameter", anyMatch(List.of("category", "price", "productId"), processedParameter)
+            );
+            case "dishes" -> Validator.check(
+                    "Sort.dishes.parameter", anyMatch(List.of("name", "dishId"), processedParameter)
+            );
+            case "menus" -> Validator.check(
+                    "Sort.menus.parameter", anyMatch(List.of("name", "menuId"), processedParameter)
+            );
+            default -> throw new IllegalArgumentException(
+                    "Unknown sortedEntityTypeName = '" + sortedEntityTypeName + '\'');
         }
+
+        return processedParameter;
     }
 
-    public static Sort menus() {
-        return new Sort(List.of("name"));
-    }
-
-    public static Sort menus(List<String> sortRules) {
-        if(sortRules == null || sortRules.isEmpty()) {
-            return menuDefaultSort();
-        } else {
-            Sort sort = menus();
-            sortRules.stream().
-                    filter(Objects::nonNull).
-                    map(sortRule -> sortRule.split("_")).
-                    forEach(parameters -> sort.put(parameters[0], sort.toDirection(parameters[1])));
-            return sort.getParametersNumber() > 0 ? sort : menuDefaultSort();
-        }
+    private static Stream<String> toSortRuleStream(String sortRules) {
+        return sortRules == null || sortRules.isBlank() ?
+                Stream.empty() :
+                Arrays.stream(sortRules.split(",")).map(String::trim);
     }
 
 
-    private final List<String> parameters;
-    private final List<Boolean> directions;
-    private final List<String> validParameters;
+    private final List<Param> parameters;
 
-    private Sort(List<String> validParameters) {
-        this.validParameters = validParameters;
-        parameters = new ArrayList<>();
-        directions = new ArrayList<>();
+    private Sort(List<Param> parameters) {
+        this.parameters = parameters;
     }
 
-    public Sort asc(String parameter) {
-        return put(parameter, true);
+    /**
+     * Возвращает все параметры сортировки в порядке указанном при создании данного объекта.
+     */
+    public List<Param> getParameters() {
+        return Collections.unmodifiableList(parameters);
     }
 
-    public Sort desc(String parameter) {
-        return put(parameter, false);
+    /**
+     * Возвращает все параметры сортировки в виде Stream, который возвращает из в порядке указанном
+     * при создании данного объекта.
+     */
+    public Stream<Param> getParametersAsStream() {
+        return parameters.stream();
     }
 
-    public int getParametersNumber() {
-        return parameters.size();
-    }
-
-    public String getParameter(int parameterIndex) {
-        return parameters.get(parameterIndex);
-    }
-
-    public boolean isAscending(int parameterIndex) {
-        return directions.get(parameterIndex);
-    }
-
-    public boolean isDescending(int parameterIndex) {
-        return !directions.get(parameterIndex);
+    /**
+     * Перебирает все параметры сортировки в порядке указанном при создании данного объекта.
+     * @param action функция обратного вызова обрабатывающая каждый параметр сортировки.
+     */
+    public void forEachParam(Consumer<Param> action) {
+        parameters.forEach(action);
     }
 
     @Override
@@ -114,53 +192,30 @@ public class Sort {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Sort sort = (Sort) o;
-        return parameters.equals(sort.parameters) &&
-                directions.equals(sort.directions);
+        return parameters.equals(sort.parameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parameters, directions);
+        return parameters.hashCode();
     }
 
     @Override
     public String toString() {
-        return "Sort{" +
-                "parameters=" + parameters +
-                ", directions=" + directions +
-                ", validParameters=" + validParameters +
-                '}';
+        return "Sort" + parameters;
     }
 
 
-    private boolean toDirection(String direction) {
-        Container<Boolean> d = new Container<>();
+    public static record Param(String param, boolean direction) {
 
-        Validator.check(
-                () -> new ValidateException("Unknown sort direction"),
-                Rule.of("Sort.direction", notNull(direction).
-                        and(() -> {
-                            if("asc".equalsIgnoreCase(direction)) d.set(true);
-                            else if("desc".equalsIgnoreCase(direction)) d.set(false);
+        public boolean isAscending() {
+            return direction;
+        }
 
-                            if(d.isEmpty()) return failure(Constraint.ANY_MATCH);
-                            else return success(Constraint.ANY_MATCH);
-                        })
-                )
-        );
+        public boolean isDescending() {
+            return !direction;
+        }
 
-        return d.get();
-    }
-
-    private Sort put(String parameter, boolean isAscending) {
-        Validator.check(
-                "Sort.parameter", notNull(parameter).and(() -> anyMatch(validParameters, parameter))
-        );
-
-        parameters.add(parameter);
-        directions.add(isAscending);
-
-        return this;
     }
 
 }

@@ -1,10 +1,11 @@
 package com.bakuard.nutritionManager.dal;
 
 import com.bakuard.nutritionManager.AssertUtil;
-import com.bakuard.nutritionManager.config.AppConfigData;
+import com.bakuard.nutritionManager.TestConfig;
+import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.validation.Constraint;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBTestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
 class UserRepositoryTest {
 
@@ -33,24 +34,16 @@ class UserRepositoryTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
     @Autowired
-    private AppConfigData appConfiguration;
+    private ConfigData appConfiguration;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void beforeEach() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
-        try {
-            JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                    "UsedImages", "JwsBlackList",
-                    "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
-                    "Menus", "Dishes", "Products", "Users");
-            transactionManager.commit(status);
-        } catch(RuntimeException e) {
-            transactionManager.rollback(status);
-            throw e;
-        }
+        commit(() -> JdbcTestUtils.deleteFromTables(jdbcTemplate,
+                "UsedImages", "JwsBlackList",
+                "MenuItems", "DishIngredients", "MenuTags", "DishTags", "ProductTags",
+                "Menus", "Dishes", "Products", "Users"));
     }
 
     @Test
@@ -63,39 +56,21 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("save(user): no user in DB => return true")
-    public void save2() {
-        User user = createUser(1);
-
-        Assertions.assertTrue(repository.save(user));
-    }
-
-    @Test
     @DisplayName("save(user): no user in DB => add user")
-    public void save3() {
+    public void save2() {
         User expected = createUser(1);
 
         commit(() -> repository.save(expected));
 
         User actual = repository.tryGetById(toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("save(user): there are users in DB, user id not exists => return true")
-    public void save4() {
-        User user1 = createUser(1);
-        User user2 = createUser(2);
-        User addedUser = createUser(3);
-        repository.save(user1);
-        repository.save(user2);
-
-        Assertions.assertTrue(repository.save(addedUser));
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
     @DisplayName("save(user): there are users in DB, user id not exists => add user")
-    public void save5() {
+    public void save3() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         User expected = createUser(3);
@@ -105,12 +80,14 @@ class UserRepositoryTest {
         commit(() -> repository.save(expected));
 
         User actual = repository.tryGetById(toUUID(3));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
     @DisplayName("save(user): there is user with same name => exception")
-    public void save6() {
+    public void save4() {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
@@ -125,7 +102,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("save(user): there is user with same password => exception")
-    public void save7() {
+    public void save5() {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
@@ -145,7 +122,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("save(user): there is user with same email => exception")
-    public void save8() {
+    public void save6() {
         User user1 = createUser(1);
         commit(() -> repository.save(user1));
 
@@ -168,29 +145,9 @@ class UserRepositoryTest {
             save(user):
              user already saved in DB,
              user state was changed
-             => return true
-            """)
-    public void save9() {
-        User user = createUser(1);
-        repository.save(user);
-
-        User expected = new User(user);
-        expected.setName("new name");
-        expected.setPassword("new password");
-        expected.setEmail("new email");
-        boolean isSaved = repository.save(expected);
-
-        Assertions.assertTrue(isSaved);
-    }
-
-    @Test
-    @DisplayName("""
-            save(user):
-             user already saved in DB,
-             user state was changed
              => update user
             """)
-    public void save10() {
+    public void save7() {
         User user = createUser(1);
         commit(() -> repository.save(user));
 
@@ -201,7 +158,9 @@ class UserRepositoryTest {
         commit(() -> repository.save(expected));
 
         User actual =  repository.tryGetById(toUUID(1));
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -212,7 +171,7 @@ class UserRepositoryTest {
              there is user in DB with same name
              => exception
             """)
-    public void save11() {
+    public void save8() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         commit(() -> repository.save(user1));
@@ -235,7 +194,7 @@ class UserRepositoryTest {
              there is user in DB with same password
              => exception
             """)
-    public void save12() {
+    public void save9() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         commit(() -> repository.save(user1));
@@ -263,7 +222,7 @@ class UserRepositoryTest {
              there is user in DB with same email
              => exception
             """)
-    public void save13() {
+    public void save10() {
         User user1 = createUser(1);
         User user2 = createUser(2);
         commit(() -> repository.save(user1));
@@ -288,23 +247,9 @@ class UserRepositoryTest {
             save(user):
              user already saved in DB,
              user state wasn't changed
-             => return false
-            """)
-    public void save14() {
-        User user = createUser(1);
-        commit(() -> repository.save(user));
-
-        Assertions.assertFalse(repository.save(user));
-    }
-
-    @Test
-    @DisplayName("""
-            save(user):
-             user already saved in DB,
-             user state wasn't changed
              => don't update user
             """)
-    public void save15() {
+    public void save11() {
         User user = createUser(1);
         User expected = new User(user);
         commit(() -> repository.save(user));
@@ -312,7 +257,9 @@ class UserRepositoryTest {
         commit(() -> repository.save(user));
 
         User actual = repository.tryGetById(toUUID(1));
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -331,7 +278,8 @@ class UserRepositoryTest {
         repository.save(user);
 
         Optional<User> actual = repository.getById(toUUID(2));
-        Assertions.assertTrue(actual.isEmpty());
+        
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -343,7 +291,9 @@ class UserRepositoryTest {
 
         User actual = repository.getById(toUUID(1)).orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -376,7 +326,9 @@ class UserRepositoryTest {
 
         User actual = repository.tryGetById(toUUID(1));
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -395,7 +347,7 @@ class UserRepositoryTest {
         repository.save(user);
 
         Optional<User> actual = repository.getByName("unknown name");
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -407,7 +359,9 @@ class UserRepositoryTest {
 
         User actual = repository.getByName("User1").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -451,7 +405,9 @@ class UserRepositoryTest {
 
         User actual = repository.tryGetByName("User1");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -470,7 +426,7 @@ class UserRepositoryTest {
         repository.save(user);
 
         Optional<User> actual = repository.getByEmail("unknownUser@gmail.com");
-        Assertions.assertTrue(actual.isEmpty());
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
@@ -480,9 +436,11 @@ class UserRepositoryTest {
         User expected = new User(user);
         commit(() -> repository.save(user));
 
-        User actual = repository.getByEmail("user1@mail.com").orElseThrow();
+        User actual = repository.getByEmail("user1@confirmationMail.com").orElseThrow();
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
     @Test
@@ -509,7 +467,7 @@ class UserRepositoryTest {
         commit(() -> repository.save(user));
 
         AssertUtil.assertValidateException(
-                () -> repository.tryGetByEmail("newEmail@mail.com"),
+                () -> repository.tryGetByEmail("newEmail@confirmationMail.com"),
                 Constraint.ENTITY_MUST_EXISTS_IN_DB
         );
     }
@@ -524,9 +482,11 @@ class UserRepositoryTest {
         User expected = createUser(1);
         commit(() -> repository.save(expected));
 
-        User actual = repository.tryGetByEmail("user1@mail.com");
+        User actual = repository.tryGetByEmail("user1@confirmationMail.com");
 
-        AssertUtil.assertEquals(expected, actual);
+        Assertions.assertThat(actual).
+                usingRecursiveComparison().
+                isEqualTo(expected);
     }
 
 
@@ -543,12 +503,24 @@ class UserRepositoryTest {
         }
     }
 
+    private void commit(Runnable action) {
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(def);
+        try {
+            action.run();
+            transactionManager.commit(status);
+        } catch(RuntimeException e) {
+            transactionManager.rollback(status);
+            throw e;
+        }
+    }
+
     private User createUser(int userId) {
         return new User.Builder().
                 setId(toUUID(userId)).
                 setName("User" + userId).
                 setPassword("password" + userId).
-                setEmail("user" + userId + "@mail.com").
+                setEmail("user" + userId + "@confirmationMail.com").
                 tryBuild();
     }
 

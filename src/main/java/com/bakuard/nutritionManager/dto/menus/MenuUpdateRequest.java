@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Schema(description = """
-        Данные используемые в запросе на обновление меню. Не допускаетс, чтобы у пользвователя было два и более
+        Данные используемые в запросе на обновление меню. Не допускается, чтобы у пользователя было два и более
          меню с одинаковым наименованием.
         """)
 public class MenuUpdateRequest {
@@ -26,7 +26,7 @@ public class MenuUpdateRequest {
     private String name;
     @Schema(description = """
             Путь к изображению данного меню. Ограничения: <br/>
-            1. Должен быть null ИЛИ представлять собой корректный URl адресс.<br/>
+            1. Должен быть null ИЛИ представлять собой корректный URl адрес.<br/>
             """)
     private String imageUrl;
     @Schema(description = "Описание данного меню.")

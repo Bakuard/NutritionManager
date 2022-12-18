@@ -20,7 +20,7 @@ public class MenuAddRequest {
     private String name;
     @Schema(description = """
             Путь к изображению данного меню. Ограничения: <br/>
-            1. Должен быть null ИЛИ представлять собой корректный URl адресс.<br/>
+            1. Должен быть null ИЛИ представлять собой корректный URl адрес.<br/>
             """)
     private String imageUrl;
     @Schema(description = "Описание данного меню.")
