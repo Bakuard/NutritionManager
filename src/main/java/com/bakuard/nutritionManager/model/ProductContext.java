@@ -4,7 +4,6 @@ import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.validation.Container;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 
@@ -23,7 +22,7 @@ import static com.bakuard.nutritionManager.validation.Rule.*;
  * Представляет контекстные данные о продукте. Под контекстными здесь подразумевается совокупность
  * уточняющих данных о продукте, таких как категория, производитель, место продажи, сорт и т.д.
  * ContextProduct различающиеся хотя бы одним полем считаются разными объектами.<br/><br/>
- * Объекты даного класса не изменяемы.
+ * Объекты данного класса не изменяемы.
  */
 public class ProductContext {
 
@@ -147,7 +146,7 @@ public class ProductContext {
     }
 
     /**
-     * Проверяет - содердится ли уквазанный тег в данном объекте.
+     * Проверяет - содержится ли указанный тег в данном объекте.
      * @param tag искомый тег.
      * @return true - если указанный тег содержится в данном продукте, иначе - false.
      */

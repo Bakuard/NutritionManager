@@ -92,7 +92,7 @@ public class DishController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400",
-                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "401",
@@ -118,7 +118,7 @@ public class DishController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400",
-                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "401",
@@ -228,7 +228,7 @@ public class DishController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400",
-                    description = "Если нарушен хотя бы один из инвариантов связаный с параметрами запроса",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с параметрами запроса",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "401",
@@ -248,7 +248,7 @@ public class DishController {
             @Parameter(description = "Номер страницы выборки. Нумерация начинается с нуля. Не может быть null.", required = true)
             int page,
             @RequestParam("size")
-            @Parameter(description = "Размер страницы выборки. Диапозон значений - [1, 30]. Не может быть null.", required = true)
+            @Parameter(description = "Размер страницы выборки. Диапазон значений - [1, 30]. Не может быть null.", required = true)
             int size,
             @RequestParam(value = "sort", required = false)
             @Parameter(description = """
@@ -336,7 +336,7 @@ public class DishController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400",
-                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "401",
@@ -375,7 +375,7 @@ public class DishController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "400",
-                    description = "Если нарушен хотя бы один из инвариантов связаный с телом запроса",
+                    description = "Если нарушен хотя бы один из инвариантов связанный с телом запроса",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "401",

@@ -8,7 +8,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Schema(description = "Представляет стандартный ответ об успешном ввыполнении всех типов запросов, кроме GET.")
+@Schema(description = "Представляет стандартный ответ об успешном выполнении всех типов запросов, кроме GET.")
 public class SuccessResponse<T> {
 
     @Schema(description = "Время отправки ответа")

@@ -15,11 +15,4 @@ public interface Entity<T> {
      */
     public UUID getId();
 
-    /**
-     * Сравнивает полное состояние (значение всех полей) двух сущностей.
-     * @param other сущность, с которой выполняестя сравнение.
-     * @return true - если полное состояние сущностей равно, иначе - false.
-     */
-    public boolean equalsFullState(T other);
-
 }

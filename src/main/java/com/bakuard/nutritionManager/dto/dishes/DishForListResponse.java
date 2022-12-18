@@ -13,7 +13,7 @@ public class DishForListResponse {
 
     @Schema(description = "Поле указывающее тип данного объекта. Имеет значение Dish.")
     private String type;
-    @Schema(description = "Уникальный идентфикатор блюда.")
+    @Schema(description = "Уникальный идентификатор блюда.")
     private UUID id;
     @Schema(description = "Путь к изображению данного блюда.")
     private URL imageUrl;

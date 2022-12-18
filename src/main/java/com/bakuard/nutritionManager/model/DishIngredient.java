@@ -12,7 +12,7 @@ import java.util.UUID;
 import static com.bakuard.nutritionManager.validation.Rule.*;
 
 /**
- * Ингредиент блюда. В качестве ингредиента можно задать не только один конкретный продукт, а множетсво
+ * Ингредиент блюда. В качестве ингредиента можно задать не только один конкретный продукт, а множество
  * взаимозаменяемых продуктов, каждый из которых можно использовать в качестве данного ингредиента блюда.
  * Указанное множество продуктов упорядоченно по цене в порядке возрастания.
  */
@@ -107,15 +107,6 @@ public class DishIngredient implements Entity<DishIngredient> {
         );
 
         return quantity.multiply(servingNumber, config.decimal().mathContext());
-    }
-
-    @Override
-    public boolean equalsFullState(DishIngredient other) {
-        return id.equals(other.id) &&
-                name.equals(other.name) &&
-                filter.equals(other.filter) &&
-                quantity.equals(other.quantity) &&
-                config == other.config;
     }
 
     @Override
@@ -219,8 +210,8 @@ public class DishIngredient implements Entity<DishIngredient> {
         }
 
         /**
-         * Устанавливает конфигурациооные данные всего приложения.
-         * @param config конфигурациооные данные всего приложения.
+         * Устанавливает конфигурационные данные всего приложения.
+         * @param config конфигурационные данные всего приложения.
          * @return этот же объект.
          */
         public Builder setConfig(ConfigData config) {
@@ -229,7 +220,7 @@ public class DishIngredient implements Entity<DishIngredient> {
         }
 
         /**
-         * Проверяет - имеют ли все соответсвующие поля данного объекта указанные значения.
+         * Проверяет - имеют ли все соответствующие поля данного объекта указанные значения.
          * @param name наименование ингредиента.
          * @param filter ограничение задающее множество взаимозаменяемых продуктов.
          * @param quantity кол-во создаваемого ингредиента необходимого для приготовления одной порции блюда.

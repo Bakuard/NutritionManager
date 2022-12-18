@@ -19,7 +19,7 @@ public class GenerateMenuRequest {
             """)
     private String menuName;
     @Schema(description = """
-            Минимально необходимое кол-во примемов пищи на одного человека. Ограничения: <br/>
+            Минимально необходимое кол-во примеров пищи на одного человека. Ограничения: <br/>
             1. Должно быть больше нуля. <br/>
             """)
     private int minMealsNumber;

@@ -15,7 +15,7 @@ public class DishResponse {
 
     @Schema(description = "Поле указывающее тип данного объекта. Всегда имеет значение Dish.")
     private String type;
-    @Schema(description = "Уникальный идентфикатор блюда.")
+    @Schema(description = "Уникальный идентификатор блюда.")
     private UUID id;
     @Schema(description = "Данные пользователя, которому принадлежит блюдо.")
     private UserResponse user;

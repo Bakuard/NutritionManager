@@ -10,7 +10,7 @@ import java.util.UUID;
 @Schema(description = "Возвращаемый список продуктов каждого ингредиента блюда.")
 public class DishProductsResponse {
 
-    @Schema(description = "Уникальный идентфикатор блюда.")
+    @Schema(description = "Уникальный идентификатор блюда.")
     private UUID dishId;
     @Schema(description = "Наименование блюда")
     private String dishName;

@@ -18,7 +18,7 @@ public class MenuFieldsResponse {
             """)
     private List<FieldResponse> menuNames;
     @Schema(description = """
-            Теги всех меню пользователя. Если ни одного меню этого пользователя нет ни одноо тега - данный список
+            Теги всех меню пользователя. Если ни одного меню этого пользователя нет ни одного тега - данный список
              будет пустым.
             """)
     private List<FieldResponse> menuTags;

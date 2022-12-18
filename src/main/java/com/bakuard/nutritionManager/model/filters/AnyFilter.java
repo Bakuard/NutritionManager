@@ -1,7 +1,6 @@
 package com.bakuard.nutritionManager.model.filters;
 
 import com.bakuard.nutritionManager.validation.Validator;
-
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.Objects;
 import static com.bakuard.nutritionManager.validation.Rule.*;
 
 /**
- * Данное огрнаничение используется при фильтрации продуктов, блюд и меню по какому-то конкретному полю строкового
+ * Данное ограничение используется при фильтрации продуктов, блюд и меню по какому-то конкретному полю строкового
  * типа. Если значение искомого поля продукта, блюда или меню соответствует любому из перечисленных в данном
  * фильтре значений - то такой продукт, блюдо или меню соответствует данному фильтру.<br/><br/>
  * Определить фильтруемое поле можно по возвращаемому значению метода {@link #getType()}<br/><br/>

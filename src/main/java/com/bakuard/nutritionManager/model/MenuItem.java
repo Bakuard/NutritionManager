@@ -92,14 +92,6 @@ public class MenuItem implements Entity<MenuItem> {
     }
 
     @Override
-    public boolean equalsFullState(MenuItem other) {
-        return id.equals(other.id) &&
-                dish.equalsFullState(other.dish) &&
-                quantity.equals(other.quantity) &&
-                config == other.config;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

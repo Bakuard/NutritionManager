@@ -1,11 +1,14 @@
 package com.bakuard.nutritionManager.validation;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 /**
- * Обобщенный тип исключений, все наследники которого указывают, что было нарушенно один или несколько
- * инвариантов при констрировании или изменении бизнес сущности.
+ * Обобщенный тип исключений, все наследники которого указывают, что было нарушено один или несколько
+ * инвариантов при конструировании или изменении бизнес сущности.
  */
 public class ValidateException extends RuntimeException implements Iterable<RuleException> {
 

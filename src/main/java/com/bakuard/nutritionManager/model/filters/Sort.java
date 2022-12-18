@@ -32,7 +32,7 @@ public class Sort {
     }
 
     /**
-     * Возвращает параметры сортировки по умолчанию для менюф.
+     * Возвращает параметры сортировки по умолчанию для меню.
      */
     public static Sort menuDefaultSort() {
         return menus("name");
