@@ -278,8 +278,7 @@ public class DishController {
                       имеет значение null или является пустым массивом - в выборку попадут блюда имеющие с своем
                       составе продукты любых категорий.
                       Если массив задается - все элементы должны содержать как минимум один отображаемый символ.
-                     """,
-                    schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> productCategories,
             @RequestParam(value = "tags", required = false)
             @Parameter(description = """
