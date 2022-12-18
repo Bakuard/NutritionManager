@@ -9,20 +9,18 @@ public class JwsAuthentication extends AbstractAuthenticationToken {
 
     private final String jws;
     private Object jwsBody;
+    private String path;
 
-    public JwsAuthentication(Collection<? extends GrantedAuthority> authorities, String jws) {
-        super(authorities);
-        this.jws = jws;
-    }
-
-    public JwsAuthentication(String jws) {
+    public JwsAuthentication(String jws, String path) {
         super(null);
         this.jws = jws;
+        this.path = path;
     }
 
-    public JwsAuthentication(String jws, Object jwsBody) {
+    public JwsAuthentication(String jws, String path, Object jwsBody) {
         super(null);
         this.jws = jws;
+        this.path = path;
         this.jwsBody = jwsBody;
     }
 
@@ -44,5 +42,8 @@ public class JwsAuthentication extends AbstractAuthenticationToken {
         return jwsBody;
     }
 
+    public String getPath() {
+        return path;
+    }
 
 }

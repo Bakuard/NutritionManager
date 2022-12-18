@@ -85,7 +85,7 @@ public class Sort {
                     return new Param(checkParameter(sr, "dishes"), checkDirection(sr));
                 }).
                 toList();
-        return params.isEmpty() ? productDefaultSort() : new Sort(params);
+        return params.isEmpty() ? dishDefaultSort() : new Sort(params);
     }
 
     /**
@@ -110,7 +110,7 @@ public class Sort {
                     return new Param(checkParameter(sr, "menus"), checkDirection(sr));
                 }).
                 toList();
-        return params.isEmpty() ? productDefaultSort() : new Sort(params);
+        return params.isEmpty() ? menuDefaultSort() : new Sort(params);
     }
 
 

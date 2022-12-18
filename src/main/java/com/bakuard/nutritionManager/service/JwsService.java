@@ -72,7 +72,6 @@ public class JwsService {
                 setId(UUID.randomUUID().toString()).
                 claim("body", json).
                 claim("bodyType", jwsBody.getClass().getName()).
-                claim("keyName", keyName).
                 signWith(keyPair.getPrivate()).
                 compact();
     }
@@ -88,13 +87,13 @@ public class JwsService {
      *                      2. если срок действия токена истек. <br/>
      *                      3. если токен был изменен после его подписания. <br/>
      */
-    public <T> T parseJws(String jws) {
+    public <T> T parseJws(String jws, String keyName) {
         Objects.requireNonNull(jws, "jws can't be null");
+        Objects.requireNonNull(keyName, "keyName can't be null");
 
-        String keyPairName = parseKeyPairName(jws);
-        KeyPair keyPair = keyPairs.get(keyPairName);
-
+        KeyPair keyPair = keyPairs.get(keyName);
         Claims claims = parseJws(jws, keyPair);
+
         assertNotInBlackList(claims);
         return parseJwsBody(claims);
     }
@@ -126,20 +125,6 @@ public class JwsService {
                 getBody();
     }
 
-    private String parseKeyPairName(String jws) {
-        final String preparedJws = jws.startsWith("Bearer ") ? jws.substring(7) : jws;
-
-        String keyPairName =  tryCatch(() -> objectMapper.readTree(decodeJwsBody(preparedJws)),
-                e -> new MalformedJwtException("Jws has incorrect format '" + jws + '\'')).
-                findPath("keyName").
-                textValue();
-        if(keyPairName == null) throw new MalformedJwtException("Missing key name");
-        if(!keyPairs.containsKey(keyPairName)) {
-            throw new MalformedJwtException("Unknown key-pair with name '" + keyPairName + '\'');
-        }
-        return keyPairName;
-    }
-
     private <T> T parseJwsBody(Claims claims) {
         String json = claims.get("body", String.class);
         Class<?> jwsBodyType = tryCatch(() -> Class.forName(claims.get("bodyType", String.class)), RuntimeException::new);
@@ -151,11 +136,6 @@ public class JwsService {
                 ofEpochMilli(claims.getExpiration().getTime()).
                 atZone(clock.getZone()).
                 toLocalDateTime();
-    }
-
-    private String decodeJwsBody(String jws) {
-        String[] data = jws.split("\\.");
-        return new String(Base64.getUrlDecoder().decode(data[1]));
     }
 
     private void assertNotInBlackList(Claims claims) {

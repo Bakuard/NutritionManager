@@ -22,7 +22,9 @@ public class JwsFilter extends OncePerRequestFilter {
 
         if(token != null && token.startsWith("Bearer ") &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
-            SecurityContextHolder.getContext().setAuthentication(new JwsAuthentication(token));
+            SecurityContextHolder.getContext().setAuthentication(
+                    new JwsAuthentication(token, request.getRequestURI())
+            );
         }
         filterChain.doFilter(request, response);
     }

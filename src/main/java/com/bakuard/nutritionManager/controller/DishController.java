@@ -288,8 +288,7 @@ public class DishController {
                       имеет значение null или является пустым массивом - в выборку попадут блюда имеющие любые
                       теги или не имеющие их вовсе.
                       Если массив задается - все элементы должны содержать как минимум один отображаемый символ.
-                     """,
-                    schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> tags) {
         UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
 

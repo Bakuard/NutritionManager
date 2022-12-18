@@ -23,9 +23,14 @@ public class JwsAuthenticationProvider implements AuthenticationProvider {
         String jws = request.getJws();
 
         try {
-            Object jwsBody = jwsService.parseJws(jws);
+            Object jwsBody = null;
+            switch(request.getPath()) {
+                case "/auth/registration" -> jwsBody = jwsService.parseJws(jws, "registration");
+                case "/auth/changeCredential" -> jwsBody = jwsService.parseJws(jws, "restorePassword");
+                default -> jwsBody = jwsService.parseJws(jws, "commonToken");
+            }
 
-            JwsAuthentication response = new JwsAuthentication(jws, jwsBody);
+            JwsAuthentication response = new JwsAuthentication(jws, request.getPath(), jwsBody);
             response.setAuthenticated(true);
             return response;
         } catch(Exception e) {

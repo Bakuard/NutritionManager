@@ -314,8 +314,7 @@ public class MenuController {
                       составе хотя бы одно из указанных блюд. Если параметр имеет значение null или является
                       пустым массивом - в выборку попадут меню имеющие с своем составе любые блюда.
                       Если массив задается - все элементы должны содержать как минимум один отображаемый символ.
-                     """,
-                    schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> dishNames,
             @RequestParam(value = "tags", required = false)
             @Parameter(description = """
@@ -324,8 +323,7 @@ public class MenuController {
                       имеет значение null или является пустым массивом - в выборку попадут меню
                       имеющие любые теги или не имеющие их вовсе.
                       Если массив задается - все элементы должны содержать как минимум один отображаемый символ.
-                     """,
-                    schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> tags) {
         UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
         logger.info("Get menus for list by filter: user={}, page={}, size={}, userId={}, " +

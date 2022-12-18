@@ -310,8 +310,7 @@ public class ProductController {
                       продукты связанные с любыми категориями.
                       Если массив задается - все элементы должны содержать как минимум
                       один отображаемый символ.
-                    """,
-                    schema = @Schema(defaultValue = "null"))
+                    """)
             List<String> categories,
             @RequestParam(value = "shops", required = false)
             @Parameter(description = """
@@ -321,8 +320,7 @@ public class ProductController {
                       продукты связанные с любыми магазинами.
                       Если массив задается - все элементы должны содержать как минимум
                       один отображаемый символ.
-                     """,
-                     schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> shops,
             @RequestParam(value = "grades", required = false)
             @Parameter(description = """
@@ -332,8 +330,7 @@ public class ProductController {
                       продукты связанные с любыми сортами.
                       Если массив задается - все элементы должны содержать как минимум один
                       отображаемый символ.
-                     """,
-                     schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> grades,
             @RequestParam(value = "manufacturers", required = false)
             @Parameter(description = """
@@ -343,8 +340,7 @@ public class ProductController {
                       продукты связанные с любыми производителями.
                       Если массив задается - все элементы должны содержать как минимум один
                       отображаемый символ.
-                     """,
-                     schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> manufacturers,
             @RequestParam(value = "tags", required = false)
             @Parameter(description = """
@@ -354,8 +350,7 @@ public class ProductController {
                       продукты связанные с любыми тегами.
                       Если массив задается -  все элементы должны содержать как минимум
                       один отображаемый символ.
-                     """,
-                     schema = @Schema(defaultValue = "null"))
+                     """)
             List<String> tags) {
         UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
         logger.info("Get products by filter: user={}, page={}, size={}, userId={}, sortRule={}, onlyFridge={}, " +
