@@ -24,5 +24,10 @@ jobs:
               uses: harmon758/postgresql-action@v1
               with: 
                   postgresql version: '11'
-            - name: who am i
-              run: whoami
+            - name: create database and user
+              run: | 
+                  psql
+                  create database "NutritionManagerUnitTest";
+                  create user nutrition_manager_tester with encrypted password 'nutrition_manager_tester';
+                  grant all privileges on database "NutritionManagerUnitTest" to nutrition_manager_tester;
+                  \q;
