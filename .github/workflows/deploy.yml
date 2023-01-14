@@ -2,6 +2,9 @@ name: deploy
 run-name: ${{ github.actor }} deploy NutritionManager on AWS
 
 on: 
+    workflow_dispatch:
+        branches: 
+            - 'cicd'
     push: 
         branches: 
             - 'cicd'
@@ -21,14 +24,9 @@ jobs:
                   java-version: '17'
                   distribution: adopt-hotspot
             - name: Set up Postgresql
-              run: |
-                  sudo apt update
-                  sudo apt install postgresql postgresql-contrib
-                  sudo systemctl start postgresql.service
-            - name: create database and user
-              run: |
-                  psql
-                  create database "NutritionManagerUnitTest";
-                  create user nutrition_manager_tester with encrypted password 'nutrition_manager_tester';
-                  grant all privileges on database "NutritionManagerUnitTest" to nutrition_manager_tester;
-                  \q
+              uses: harmon758/postgresql-action@v1
+              with: 
+                  postgresql db: NutritionManagerUnitTest
+                  postgresql user: nutrition_manager_tester
+                  postgresql password: nutrition_manager_tester
+                  postgresql version: 11
