@@ -25,10 +25,10 @@ jobs:
                   sudo apt update
                   sudo apt install postgresql postgresql-contrib
                   sudo systemctl start postgresql.service
-            #- name: create database and user
-              #run: | 
-                  #psql
-                  #create database "NutritionManagerUnitTest";
-                  #create user nutrition_manager_tester with encrypted password 'nutrition_manager_tester';
-                  #grant all privileges on database "NutritionManagerUnitTest" to nutrition_manager_tester;
-                  #\q;
+            - name: create database and user
+              run: |
+                  psql
+                  create database "NutritionManagerUnitTest";
+                  create user nutrition_manager_tester with encrypted password 'nutrition_manager_tester';
+                  grant all privileges on database "NutritionManagerUnitTest" to nutrition_manager_tester;
+                  \q
