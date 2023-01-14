@@ -2,27 +2,27 @@ name: deploy
 run-name: ${{ github.actor }} deploy NutritionManager on AWS
 
 on: 
-	push:
-		branches:
-			- 'cicd'
-	pull_request:
-		branches:
-			- 'cicd'
-			
-jobs:
-	run-unit-tests:
-		runs-on: ubuntu-latest
-		steps: 
-			- name: copy my repository to runner
-			uses: actions/checkout@v3
-			- name: Set up JDK 17
-			uses: actions/setup-java@v3
-			with:
-				java-version: '17'
-				distribution: adopt-hotspot
-			- name: Set up Postgresql
-			uses: harmon758/postgresql-action@v1
-			with:
-				postgresql version: '11'
-			- name: who am i
-			run: whoami
+    push: 
+        branches: 
+            - 'cicd'
+    pull_request: 
+        branches: 
+            - 'cicd'
+
+jobs: 
+    run-unit-tests: 
+        runs-on: ubuntu-latest
+        steps: 
+            - name: copy my repository to runner
+              uses: actions/checkout@v3
+            - name: Set up JDK 17
+              uses: actions/setup-java@v3
+              with: 
+                  java-version: '17'
+                  distribution: adopt-hotspot
+            - name: Set up Postgresql
+              uses: harmon758/postgresql-action@v1
+              with: 
+                  postgresql version: '11'
+            - name: who am i
+              run: whoami
