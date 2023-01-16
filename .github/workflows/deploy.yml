@@ -30,3 +30,6 @@ jobs:
                   postgresql user: nutrition_manager_tester
                   postgresql password: nutrition_manager_tester
                   postgresql version: 11
+            - name: Run unit tests
+              run: mvn --batch-mode --update-snapshots package
+              
