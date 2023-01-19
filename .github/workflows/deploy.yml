@@ -30,6 +30,27 @@ jobs:
                   postgresql user: nutrition_manager_tester
                   postgresql password: nutrition_manager_tester
                   postgresql version: 11
-            - name: Run unit tests
+            - name: Run unit tests and build project
               run: mvn --batch-mode --update-snapshots package
-              
+            - name: Remeber build file name
+              run: |
+                  cd target
+                  echo "buildFile=`find *.jar`" >> $GITHUB_ENV 
+            - name: Upload Files to server
+              uses: siva1024/scp-deployer@latest
+              with:
+                host: ${{ nutritionmanager.xyz }}
+                username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
+                key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
+                source: "${{ env.buildFile }}"
+                target: "~/nutritionmanager"
+            - name: Run application on server
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ nutritionmanager.xyz }}
+                  username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
+                  key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
+                  script: |
+                      cd nutritionmanager
+                      ./stop
+                      ./start "${{ env.buildFile }}"
