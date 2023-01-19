@@ -47,7 +47,7 @@ jobs:
             - name: Run application on server
               uses: appleboy/ssh-action@master
               with:
-                  host: ${{ nutritionmanager.xyz }}
+                  host: nutritionmanager.xyz
                   username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                   key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
                   script: |
