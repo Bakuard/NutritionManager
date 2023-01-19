@@ -39,7 +39,7 @@ jobs:
             - name: Upload Files to server
               uses: siva1024/scp-deployer@latest
               with:
-                host: ${{ nutritionmanager.xyz }}
+                host: nutritionmanager.xyz
                 username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                 key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
                 source: "${{ env.buildFile }}"
