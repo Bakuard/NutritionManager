@@ -51,6 +51,6 @@ jobs:
                   username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                   key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
                   script: |
-                      cd nutritionmanager
-                      ./stop
-                      ./start "${{ env.buildFile }}"
+                       cd nutritionmanager
+                       ./stop
+                       ./start "${{ env.buildFile }}" &
