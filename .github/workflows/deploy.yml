@@ -2,9 +2,6 @@ name: deploy
 run-name: ${{ github.actor }} deploy NutritionManager on AWS
 
 on: 
-    workflow_dispatch:
-        branches: 
-            - 'cicd'
     push: 
         branches: 
             - 'cicd'
@@ -37,7 +34,7 @@ jobs:
                   cd target
                   echo "buildFile=`find *.jar`" >> $GITHUB_ENV 
             - name: Upload Files to server
-              uses: siva1024/scp-deployer@latest
+              uses: appleboy/scp-action@master
               with:
                 host: nutritionmanager.xyz
                 username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
@@ -50,6 +47,7 @@ jobs:
                   host: nutritionmanager.xyz
                   username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                   key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
+                  command_timeout: 35s
                   script: |
                        cd nutritionmanager
                        ./stop
