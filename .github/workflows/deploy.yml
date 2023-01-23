@@ -33,6 +33,7 @@ jobs:
               run: |
                   cd target
                   echo "buildFile=`find *.jar`" >> $GITHUB_ENV 
+                  echo "${{ env.buildFile }}"
             - name: Upload Files to server
               uses: appleboy/scp-action@master
               with:
