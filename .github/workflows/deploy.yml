@@ -32,8 +32,8 @@ jobs:
             - name: Remeber build file name
               run: |
                   cd target
-                  echo "buildFile=`find *.jar`" >> $GITHUB_ENV 
-                  echo "${{ env.buildFile }}"
+                  ls -la
+                  echo "buildFile=`find . -maxdepth 1 -name '*\.jar'`" >> $GITHUB_ENV 
             - name: Upload Files to server
               uses: appleboy/scp-action@master
               with:
