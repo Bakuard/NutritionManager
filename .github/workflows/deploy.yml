@@ -49,12 +49,13 @@ jobs:
                   host: nutritionmanager.xyz
                   username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                   key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
-                  command_timeout: 1m
+                  command_timeout: 90s
                   script: |
                        cd nutritionmanager
                        cp "${{ env.buildFileInDirectory }}" ./
                        rm -r target
                        ./stop
                        ./start "${{ env.buildFile }}" &
-                       sleep 40
+                       sleep 30
+                       echo "exit from ssh"
                        exit
