@@ -61,7 +61,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 "/auth/verifyEmailForChangeCredentials",
                                 "/api",
                                 "/apiStandardFormat/**",
-                                "/swagger-ui/**"
+                                "/swagger-ui/**",
+                                "/actuator/health"
                         ).permitAll().
                         anyRequest().authenticated().
                 and().
