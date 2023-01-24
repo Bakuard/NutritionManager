@@ -49,7 +49,7 @@ jobs:
                   host: nutritionmanager.xyz
                   username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                   key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
-                  command_timeout: 35s
+                  command_timeout: 1m
                   script: |
                        cd nutritionmanager
                        cp "${{ env.buildFileInDirectory }}" ./
