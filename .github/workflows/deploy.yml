@@ -43,7 +43,6 @@ jobs:
                 key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
                 source: "${{ env.buildFileInDirectory }}"
                 target: "/home/ubuntu/nutritionmanager"
-                strip_components: 1
             - name: Run application on server
               uses: appleboy/ssh-action@master
               with:
@@ -53,5 +52,7 @@ jobs:
                   command_timeout: 35s
                   script: |
                        cd nutritionmanager
+                       cp "${{ env.buildFileInDirectory }}" ./
+                       rm -r target
                        ./stop
                        ./start "${{ env.buildFile }}" &
