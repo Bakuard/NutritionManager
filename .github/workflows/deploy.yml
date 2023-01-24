@@ -56,7 +56,7 @@ jobs:
                        cp "${{ env.buildFileInDirectory }}" ./
                        rm -r target
                        ./stop
-                       ./start "${{ env.buildFile }}" &
+                       ./start "${{ env.buildFile }}"
+                       echo "application was running"
                        sleep 30
-                       echo "exit from ssh"
-                       exit 0
+                       cat nohup.out
