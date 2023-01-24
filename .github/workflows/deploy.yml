@@ -56,3 +56,5 @@ jobs:
                        rm -r target
                        ./stop
                        ./start "${{ env.buildFile }}" &
+                       sleep 40
+                       exit
