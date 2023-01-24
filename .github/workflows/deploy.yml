@@ -31,18 +31,18 @@ jobs:
               run: mvn --batch-mode --update-snapshots package
             - name: Remeber build file name
               run: |
+                  echo "buildFileInDirectory=`find ./target -maxdepth 1 -name '*.jar'`" >> $GITHUB_ENV
                   cd target
                   ls -la
-                  echo "buildFile=`find . -maxdepth 1 -name '*.jar'`" >> $GITHUB_ENV 
-                  echo "uploaded file is ${{ env.buildFile }}"
+                  echo "buildFile=`find . -maxdepth 1 -name '*.jar'`" >> $GITHUB_ENV
             - name: Upload Files to server
               uses: appleboy/scp-action@master
               with:
                 host: nutritionmanager.xyz
                 username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                 key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
-                source: "${{ env.buildFile }}"
-                target: "~/nutritionmanager"
+                source: "${{ env.buildFileInDirectory }}"
+                target: "/home/ubuntu/nutritionmanager"
             - name: Run application on server
               uses: appleboy/ssh-action@master
               with:
