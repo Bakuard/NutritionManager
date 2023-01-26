@@ -55,7 +55,7 @@ jobs:
                   cp "${{ env.buildFileInDirectory }}" ./
                   rm -r target
                   ./stop
-                  ./start "${{ env.buildFile }}" &
+                  nohup ./start "${{ env.buildFile }}" &>/dev/null &
                   sleep 30
                   echo "close connection with server"
                   exit
