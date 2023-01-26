@@ -35,28 +35,28 @@ jobs:
                   cd target
                   ls -la
                   echo "buildFile=`find . -maxdepth 1 -name '*.jar'`" >> $GITHUB_ENV
+            - name: Add host to known hosts
+              uses: kielabokkie/ssh-key-and-known-hosts-action@v1
+              with:
+                  ssh-private-key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
+                  ssh-host: ${{ secrets.NUTRITION_MANAGER_AWS_HOST }}
             - name: Upload Files to server
               uses: appleboy/scp-action@master
               with:
-                host: nutritionmanager.xyz
+                host: ${{ secrets.NUTRITION_MANAGER_AWS_HOST }}
                 username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
                 key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
                 source: "${{ env.buildFileInDirectory }}"
                 target: "/home/ubuntu/nutritionmanager"
             - name: Run application on server
-              uses: appleboy/ssh-action@master
-              with:
-                  host: nutritionmanager.xyz
-                  username: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}
-                  key: ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_KEY }}
-                  command_timeout: 1m
-                  script_stop: true
-                  script: |
-                       cd nutritionmanager
-                       cp "${{ env.buildFileInDirectory }}" ./
-                       rm -r target
-                       ./stop
-                       ./start "${{ env.buildFile }}"
-                       echo "application was running"
-                       sleep 30
-                       cat nohup.out
+              run: |
+                  ssh ${{ secrets.NUTRITION_MANAGER_AWS_INSTANCE_USER }}@${{ secrets.NUTRITION_MANAGER_AWS_HOST }} <<EOT
+                  cd nutritionmanager
+                  cp "${{ env.buildFileInDirectory }}" ./
+                  rm -r target
+                  ./stop
+                  ./start "${{ env.buildFile }}"
+                  sleep 30
+                  echo "close connection with server"
+                  exit
+                  EOT
