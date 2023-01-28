@@ -8,31 +8,28 @@ import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
 import com.bakuard.nutritionManager.model.filters.Sort;
+import com.bakuard.nutritionManager.model.filters.UserFilter;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.model.util.PageableByNumber;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-
 import org.jooq.Condition;
-import org.jooq.Field;
 import org.jooq.SortField;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static com.bakuard.nutritionManager.validation.Rule.*;
@@ -89,59 +86,33 @@ public class ProductRepositoryPostgres implements ProductRepository {
                 "ProductRepository.productId", notNull(productId)
         );
 
-        return statement.query(
-                (Connection con) -> con.prepareStatement("""
-                    SELECT Products.*, Users.*, ProductTags.*
-                        FROM Products
-                        LEFT JOIN Users
-                          ON Products.userId = Users.userId
-                        LEFT JOIN ProductTags
-                          ON Products.productId = ProductTags.productId
-                        WHERE Products.productId = ? AND Products.userId = ?
-                        ORDER BY ProductTags.index;
-                    """),
-                (PreparedStatement ps) -> {
+        return Stream.of(new ProductAggregateRootBuilders()).
+                peek(aggregateRootBuilders -> loadAndFillProductAggregateRoot(con -> {
+                            PreparedStatement ps = con.prepareStatement("""
+                                    SELECT * FROM Products
+                                        INNER JOIN Users ON Users.userId = Products.userId
+                                        WHERE Products.productId = ? AND Products.userId = ?;
+                                    """);
+                            ps.setObject(1, productId);
+                            ps.setObject(2, userId);
+                            return ps;
+                        },
+                        aggregateRootBuilders)).
+                filter(aggregateRootBuilders -> !aggregateRootBuilders.isEmpty()).
+                peek(aggregateRootBuilders -> loadUser(userId).
+                        map(user -> aggregateRootBuilders.products.get(0).setUser(user))).
+                peek(aggregateRootBuilders -> loadAndFillProductTags(con -> {
+                    PreparedStatement ps = con.prepareStatement("""
+                            select * from ProductTags
+                             inner join Products on ProductTags.productId = Products.productId
+                             where Products.productId = ?
+                             order by ProductTags.index;
+                            """);
                     ps.setObject(1, productId);
-                    ps.setObject(2, userId);
-                },
-                (ResultSet rs) -> {
-                    Product.Builder builder = null;
-
-                    while(rs.next()) {
-                        if(builder == null) {
-                            builder = new Product.Builder().
-                                    setAppConfiguration(conf).
-                                    setId(productId).
-                                    setUser(
-                                            new User.LoadBuilder().
-                                                    setId((UUID) rs.getObject("userId")).
-                                                    setName(rs.getString("name")).
-                                                    setEmail(rs.getString("email")).
-                                                    setPasswordHash(rs.getString("passwordHash")).
-                                                    setSalt(rs.getString("salt")).
-                                                    tryBuild()
-                                    ).
-                                    setCategory(rs.getString("category")).
-                                    setShop(rs.getString("shop")).
-                                    setGrade(rs.getString("grade")).
-                                    setManufacturer(rs.getString("manufacturer")).
-                                    setUnit(rs.getString("unit")).
-                                    setPrice(rs.getBigDecimal("price")).
-                                    setPackingSize(rs.getBigDecimal("packingSize")).
-                                    setQuantity(rs.getBigDecimal("quantity")).
-                                    setDescription(rs.getString("description")).
-                                    setImageUrl(rs.getString("imagePath"));
-                        }
-
-                        String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull()) builder.addTag(tagValue);
-                    }
-
-                    return builder == null ?
-                            Optional.empty() :
-                            Optional.ofNullable(builder.tryBuild());
-                }
-        );
+                    return ps;
+                }, aggregateRootBuilders)).
+                map(aggregateRootBuilders -> aggregateRootBuilders.products().get(0).tryBuild()).
+                findAny();
     }
 
     @Override
@@ -159,98 +130,40 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Page.Metadata metadata = criteria.tryGetPageable(PageableByNumber.class).
                 createPageMetadata(productsNumber, conf.pagination().productMaxPageSize());
 
-        if(metadata.isEmpty()) return metadata.createPage(List.of());
+        if(metadata.isEmpty()) return Page.empty();
 
-        List<String> fieldsName = new ArrayList<>();
-        List<Field<?>> fields = new ArrayList<>();
-        fields.add(field("*"));
-        if(criteria.getFilter() != null) {
-            List<Condition> conditions = filterMapper.toConditions(criteria.getFilter());
-            for(int i = 0; i < conditions.size(); i++) {
-                String fieldName = "condition" + i;
-                fieldsName.add(fieldName);
-
-                Field<?> field = field("(" + conditions.get(i) + ") as " + fieldName);
-                fields.add(field);
-            }
-        }
-
-        Condition condition = fieldsName.stream().
-                map(field -> field(field).isTrue()).
-                reduce(Condition::or).
-                orElse(trueCondition());
-
-        String query =
-            select(field("*")).
-                from(
-                    select(field("*")).
-                        from(
-                            select(fields).
-                                from("Products").
-                                asTable("{LabeledProducts}")
+        final String aggregateRootQuery =
+                select(field("*")).
+                        from("Products").
+                        where(
+                            filterMapper.toConditions(criteria.getFilter()).stream().
+                                    reduce(Condition::or).
+                                    orElse(trueCondition())
                         ).
-                        where(condition).
-                        orderBy(getOrderFields(fieldsName, criteria.tryGetSort(), "LabeledProducts")).
+                        orderBy(getOrderFields(criteria.tryGetSort(), "Products")).
                         limit(inline(metadata.getActualSize())).
                         offset(inline(metadata.getOffset())).
-                        asTable("{P}")
-                ).
-                leftJoin("ProductTags").
-                    on(field("P.productId").eq(field("ProductTags.productId"))).
-                leftJoin("Users").
-                    on(field("P.userId").eq(field("Users.userId"))).
-                orderBy(getOrderFields(fieldsName, criteria.tryGetSort(), "P")).
-                getSQL().
-                replace("\"{P}\"", "as P").//Этот костыль исправляет странное поведение JOOQ в конструкциях asTable()
-                replace("\"{LabeledProducts}\"", "as LabeledProducts");
+                        getSQL();
 
-        List<Product> products = statement.query(
-                query,
-                (ResultSet rs) -> {
-                    List<Product> result = new ArrayList<>();
-
-                    Product.Builder builder = null;
-                    UUID lastProductId = null;
-                    while(rs.next()) {
-                        UUID productId = (UUID)rs.getObject("productId");
-                        if(!productId.equals(lastProductId)) {
-                            if(builder != null) result.add(builder.tryBuild());
-                            builder = new Product.Builder().
-                                    setAppConfiguration(conf).
-                                    setId(productId).
-                                    setUser(
-                                            new User.LoadBuilder().
-                                                    setId((UUID) rs.getObject("userId")).
-                                                    setName(rs.getString("name")).
-                                                    setEmail(rs.getString("email")).
-                                                    setPasswordHash(rs.getString("passwordHash")).
-                                                    setSalt(rs.getString("salt")).
-                                                    tryBuild()
-                                    ).
-                                    setCategory(rs.getString("category")).
-                                    setShop(rs.getString("shop")).
-                                    setGrade(rs.getString("grade")).
-                                    setManufacturer(rs.getString("manufacturer")).
-                                    setUnit(rs.getString("unit")).
-                                    setPrice(rs.getBigDecimal("price")).
-                                    setPackingSize(rs.getBigDecimal("packingSize")).
-                                    setQuantity(rs.getBigDecimal("quantity")).
-                                    setDescription(rs.getString("description")).
-                                    setImageUrl(rs.getString("imagePath"));
-                            lastProductId = productId;
-                        }
-
-                        String tagValue = rs.getString("tagValue");
-                        if(!rs.wasNull()) builder.addTag(tagValue);
-
-
-                    }
-
-                    if(builder != null) result.add(builder.tryBuild());
-
-                    return result;
-                }
-        );
+        List<Product> products = Stream.of(new ProductAggregateRootBuilders()).
+                peek(aggregateRootBuilders -> loadAndFillProductAggregateRoot(
+                        con -> con.prepareStatement(aggregateRootQuery),
+                        aggregateRootBuilders
+                )).
+                filter(aggregateRootBuilders -> !aggregateRootBuilders.isEmpty()).
+                peek(aggregateRootBuilders -> loadUser(((UserFilter)criteria.getFilter().findAny(USER)).getUserId()).
+                        ifPresent(user -> aggregateRootBuilders.products().forEach(p -> p.setUser(user)))).
+                peek(aggregateRootBuilders -> loadAndFillProductTags(
+                        con -> con.prepareStatement("""
+                            select * from ProductTags
+                             inner join (%s) as TempTable
+                              on ProductTags.productId = TempTable.productId
+                             order by ProductTags.index;
+                            """.formatted(aggregateRootQuery)),
+                        aggregateRootBuilders)).
+                flatMap(aggregateRootBuilders -> aggregateRootBuilders.products().stream().
+                        map(Product.Builder::tryBuild)).
+                collect(Collectors.toCollection(ArrayList::new));
 
         return metadata.createPage(products);
     }
@@ -699,24 +612,92 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
     }
 
+    private Optional<User> loadUser(UUID userId) {
+        return statement.query("""
+                select * from users where users.userId = ?;
+                """,
+                ps -> ps.setObject(1, userId),
+                rs -> {
+                    User result = null;
 
-    private List<SortField<?>> getOrderFields(List<String> optionalFields,
-                                              Sort productSort,
+                    if(rs.next()) {
+                        result = new User.LoadBuilder().
+                                setId((UUID) rs.getObject("userId")).
+                                setName(rs.getString("name")).
+                                setEmail(rs.getString("email")).
+                                setPasswordHash(rs.getString("passwordHash")).
+                                setSalt(rs.getString("salt")).
+                                tryBuild();
+                    }
+
+                    return Optional.ofNullable(result);
+                });
+    }
+
+    private void loadAndFillProductAggregateRoot(PreparedStatementCreator queryCreate,
+                                                 ProductAggregateRootBuilders aggregateRootBuilders) {
+        statement.query(
+                queryCreate,
+                (ResultSet rs) -> {
+                    UUID productId = (UUID) rs.getObject("productId");
+
+                    Product.Builder builder = new Product.Builder().
+                            setAppConfiguration(conf).
+                            setId(productId).
+                            setCategory(rs.getString("category")).
+                            setShop(rs.getString("shop")).
+                            setGrade(rs.getString("grade")).
+                            setManufacturer(rs.getString("manufacturer")).
+                            setUnit(rs.getString("unit")).
+                            setPrice(rs.getBigDecimal("price")).
+                            setPackingSize(rs.getBigDecimal("packingSize")).
+                            setQuantity(rs.getBigDecimal("quantity")).
+                            setDescription(rs.getString("description")).
+                            setImageUrl(rs.getString("imagePath"));
+
+                    aggregateRootBuilders.products().add(builder);
+                    aggregateRootBuilders.productsById().put(productId, builder);
+                }
+        );
+    }
+
+    private void loadAndFillProductTags(PreparedStatementCreator queryCreate,
+                                        ProductAggregateRootBuilders aggregateRootBuilders) {
+            statement.query(
+                    queryCreate,
+                    rs -> {
+                        UUID productId = (UUID) rs.getObject("productId");
+                        aggregateRootBuilders.productsById().get(productId).addTag(rs.getString("tagValue"));
+                    });
+    }
+
+
+    private List<SortField<?>> getOrderFields(Sort productSort,
                                               String tableName) {
-        ArrayList<SortField<?>> fields = new ArrayList<>();
-
-        optionalFields.forEach(f -> fields.add(field(tableName + "." + f).desc()));
+        ArrayList<SortField<?>> result = new ArrayList<>();
 
         productSort.forEachParam(param -> {
-            if(param.isAscending()) fields.add(field(tableName + "." + param.param()).asc());
-            else fields.add(field(tableName + "." + param.param()).desc());
+            if(param.isAscending()) result.add(field(tableName + "." + param.param()).asc());
+            else result.add(field(tableName + "." + param.param()).desc());
         });
 
-        fields.add(field(tableName + ".productId").asc());
-        if("P".equals(tableName)) {
-            fields.add(field("ProductTags.index").asc());
+        result.add(field(tableName + ".productId").asc());
+
+        return result;
+    }
+
+
+    private record ProductAggregateRootBuilders(List<Product.Builder> products,
+                                                Map<UUID, Product.Builder> productsById) {
+
+        public ProductAggregateRootBuilders() {
+            this(new ArrayList<>(), new HashMap<>());
         }
-        return fields;
+
+        public boolean isEmpty() {
+            return products.isEmpty();
+        }
+
     }
 
 }

@@ -48,7 +48,7 @@ public class OrElseFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "Or{" +
+        return "OrElseFilter{" +
                 "operands=" + operands +
                 '}';
     }
