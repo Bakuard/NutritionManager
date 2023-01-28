@@ -379,7 +379,10 @@ public class ProductController {
 
     @Operation(summary = """
             Возвращает производителей, торговые точки, сорта, категории и теги всех продуктов пользователя
-             сделавшего запрос.
+             сделавшего запрос. При этом, если пользователь указывает в аргументах некоторые из перечисленных
+             выше данных, то возвращаемый результат будет ограничен этими данными, например: если пользователь
+             задал некоторого производителя, то будут возвращены указанный производитель, а также все категории,
+             теги, сорта и торговые точки имеющие связь с указанным производителем.
             """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
@@ -391,7 +394,37 @@ public class ProductController {
     @SecurityRequirement(name = "commonToken")
     @GetMapping("/getAllProductsFields")
     @Transactional
-    public ResponseEntity<ProductFieldsResponse> getAllProductsFields() {
+    public ResponseEntity<ProductFieldsResponse> getAllProductsFields(
+            @RequestParam(value = "category", required = false)
+            @Parameter(description = """
+                    Массив категорий продуктов уже выбранных пользователем.
+                     Список может быть пустым или иметь значение null.
+                    """)
+            List<String> categories,
+            @RequestParam(value = "shops", required = false)
+            @Parameter(description = """
+                     Массив магазинов продуктов уже выбранных пользователем.
+                      Список может быть пустым или иметь значение null.
+                     """)
+            List<String> shops,
+            @RequestParam(value = "grades", required = false)
+            @Parameter(description = """
+                     Массив сортов продуктов уже выбранных пользователем.
+                      Список может быть пустым или иметь значение null.
+                     """)
+            List<String> grades,
+            @RequestParam(value = "manufacturers", required = false)
+            @Parameter(description = """
+                     Массив производителей продуктов уже выбранных пользователем.
+                      Список может быть пустым или иметь значение null.
+                     """)
+            List<String> manufacturers,
+            @RequestParam(value = "tags", required = false)
+            @Parameter(description = """
+                     Массив тегов продуктов уже выбранных пользователем.
+                      Список может быть пустым или иметь значение null.
+                     """)
+            List<String> tags) {
         UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
         logger.info("Get products categories, sorts, tags, manufacturers, shops for user {}", userId);
 
