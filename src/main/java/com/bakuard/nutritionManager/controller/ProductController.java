@@ -7,6 +7,8 @@ import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.products.*;
+import com.bakuard.nutritionManager.dto.products.fields.ProductFieldsByCategoryResponse;
+import com.bakuard.nutritionManager.dto.products.fields.ProductFieldsResponse;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.service.ImageUploaderService;
@@ -396,6 +398,24 @@ public class ProductController {
         ProductFieldsResponse response = mapper.toProductFieldsResponse(userId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = """
+            Возвращает производителей, торговые точки, сорта и теги всех продуктов пользователя,
+              сделавшего запрос, сгруппированные по категориям.
+            """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401",
+                    description = "Если передан некорректный токен или токен не указан",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)))
+    })
+    @SecurityRequirement(name = "commonToken")
+    @GetMapping("/getProductsFieldsByCategories")
+    @Transactional
+    public ResponseEntity<List<ProductFieldsByCategoryResponse>> getProductsFieldsByCategories() {
+        return ResponseEntity.ok().build();
     }
 
 }
