@@ -479,15 +479,19 @@ public class ProductRepositoryPostgres implements ProductRepository {
                           productId,
                           userId,
                           category,
+                          
                           shop,
                           grade,
                           manufacturer,
+                          
                           contextHash,
                           description,
                           imagePath,
+                          
                           quantity,
                           unit,
                           price,
+                          
                           packingSize
                         ) VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,? ,?);
                         """,

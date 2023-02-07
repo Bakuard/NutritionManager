@@ -10,7 +10,7 @@ CREATE TABLE ProductFiltering (
     userId UUID NOT NULL,
     filterValue VARCHAR(256) NOT NULL,
     filterType VARCHAR(128) NOT NULL,
-    productIndexes VARBIT NOT NULL
+    productIndexes VARBIT NOT NULL,
     FOREIGN KEY(userId) REFERENCES Users(userId) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(userId, filterValue, filterType)
 );
@@ -76,33 +76,56 @@ END
 $$;
 
 ---------------------------create-triggers-for-add-new-product--------------------------------------
-CREATE FUNCTION addNewProductToProductFiltering() returns trigger as $$
+CREATE FUNCTION generateProductIntegerIndex() returns trigger AS $$
+    DECLARE bits VARBIT;
+            bitsNumber INT;
+            productIndex INT;
+    BEGIN
+        SELECT ProductIntegerIndexes.productIndexes INTO bits
+            FROM ProductIntegerIndexes
+            WHERE ProductIntegerIndexes.userId = NEW.userId;
+
+        IF bits IS NULL THEN
+            INSERT INTO ProductIntegerIndexes(userId, productIndexes)
+                VALUES (NEW.userId, 0::bit(1000)::varbit);
+            bitsNumber := 1000;
+        ELSE
+            bitsNumber := bit_length(bits);
+        END IF;
+
+        productIndex := 0;
+        WHILE productIndex < bitsNumber AND get_bit(bits, bitsNumber - 1 - productIndex) = 1 LOOP
+            productIndex := productIndex + 1;
+        END LOOP;
+        NEW.integerIndex := productIndex;
+
+        IF productIndex = bitsNumber THEN
+            bitsNumber := (productIndex / 1000 + 1) * 1000;
+            UPDATE ProductIntegerIndexes
+                SET productIndexes = (lpad('0', 1000, '0')::varbit) || productIndexes
+                WHERE ProductIntegerIndexes.userId = NEW.userId;
+        END IF;
+
+        UPDATE ProductIntegerIndexes
+            SET productIndexes = set_bit(productIndexes, bitsNumber - 1 - productIndex, 1)
+            WHERE ProductIntegerIndexes.userId = NEW.userId;
+
+        RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION addNewProductToProductFiltering() returns trigger AS $$
     DECLARE bitsNumber INT;
             filterRow record;
     BEGIN
         SELECT bit_length(productIndexes) INTO bitsNumber
             FROM ProductIntegerIndexes
             WHERE ProductIntegerIndexes.userId = NEW.userId;
-        IF bitsNumber IS NULL THEN
-            bitsNumber := (NEW.integerIndex / 1000 + 1) * 1000;
-            INSERT INTO ProductIntegerIndexes(userId, productIndexes)
-                VALUES (NEW.userId, 1::bit(1000)::varbit);
-        ELSIF bitsNumber < (NEW.integerIndex / 1000 + 1) * 1000 THEN
-            bitsNumber := (NEW.integerIndex / 1000 + 1) * 1000;
-            UPDATE ProductIntegerIndexes
-                SET productIndexes = set_bit((lpad('0', 1000, '0')::varbit) || productIndexes,
-                                             bitsNumber - 1 - NEW.integerIndex,
-                                             1)
-                WHERE ProductIntegerIndexes.userId = NEW.userId;
-            UPDATE ProductFiltering
-                SET productIndexes = (lpad('0', 1000, '0')::varbit) || productIndexes
-                WHERE ProductFiltering.userId = NEW.userId;
-        END IF;
 
         INSERT INTO ProductFiltering(userId, filterValue, filterType, productIndexes)
             VALUES (NEW.userId, NEW.category, 'category', lpad('0', bitsNumber, '0')::varbit),
             (NEW.userId, NEW.shop, 'shop', lpad('0', bitsNumber, '0')::varbit),
-            (NEW.userId, NEW.grade, 'grade', lpad('0', bitsNumber, '0'))::varbit),
+            (NEW.userId, NEW.grade, 'grade', lpad('0', bitsNumber, '0')::varbit),
             (NEW.userId, NEW.manufacturer, 'manufacturer', lpad('0', bitsNumber, '0')::varbit)
             ON CONFLICT DO NOTHING;
 
@@ -123,17 +146,17 @@ CREATE FUNCTION addNewProductToProductFiltering() returns trigger as $$
     END;
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION addNewProductTagToProductFiltering() returns trigger as $$
+CREATE FUNCTION addNewProductTagToProductFiltering() returns trigger AS $$
     DECLARE product_row record;
             bitsNumber INT;
     BEGIN
         SELECT * INTO product_row
             FROM Products
-            INNER JOIN Products ON ProductTags.productId = Products.productId
+            INNER JOIN ProductTags ON Products.productId = ProductTags.productId
             WHERE ProductTags.productId = NEW.productId AND ProductTags.tagValue = NEW.tagValue;
         SELECT bit_length(productIndexes) INTO bitsNumber
             FROM ProductIntegerIndexes
-            WHERE ProductIntegerIndexes.userId = NEW.userId;
+            WHERE ProductIntegerIndexes.userId = product_row.userId;
 
         INSERT INTO ProductFiltering(userId, filterValue, filterType, productIndexes)
             VALUES (product_row.userId, product_row.tagValue, 'tag', lpad('0', bitsNumber, '0')::varbit)
@@ -147,13 +170,15 @@ CREATE FUNCTION addNewProductTagToProductFiltering() returns trigger as $$
     END;
 $$ LANGUAGE plpgsql;
 
+CREATE TRIGGER generateProductIntegerIndexTrigger BEFORE INSERT ON Products
+    FOR EACH ROW EXECUTE FUNCTION generateProductIntegerIndex();
 CREATE TRIGGER addNewProductToProductFilteringTrigger AFTER INSERT ON Products
-    FOR EACH ROW EXECUTE addNewProductToProductFiltering();
+    FOR EACH ROW EXECUTE FUNCTION addNewProductToProductFiltering();
 CREATE TRIGGER addNewProductTagToProductFilteringTrigger AFTER INSERT ON ProductTags
-    FOR EACH ROW EXECUTE addNewProductTagToProductFiltering();
+    FOR EACH ROW EXECUTE FUNCTION addNewProductTagToProductFiltering();
 
 ---------------------------create-triggers-for-delete-product---------------------------------------
-CREATE FUNCTION deleteProductFromProductFiltering() returns trigger as $$
+CREATE FUNCTION deleteProductFromProductFiltering() returns trigger AS $$
     DECLARE bitsNumber INT;
     BEGIN
         SELECT bit_length(productIndexes) INTO bitsNumber
@@ -173,10 +198,10 @@ CREATE FUNCTION deleteProductFromProductFiltering() returns trigger as $$
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER deleteProductFromProductFilteringTrigger AFTER DELETE ON Products
-    FOR EACH ROW EXECUTE deleteProductFromProductFiltering();
+    FOR EACH ROW EXECUTE FUNCTION deleteProductFromProductFiltering();
 
 ---------------------------create-triggers-for-update-product---------------------------------------
-CREATE FUNCTION updateProductInProductFiltering() returns trigger as $$
+CREATE FUNCTION updateProductInProductFiltering() returns trigger AS $$
     DECLARE bitsNumber INT;
     BEGIN
         SELECT bit_length(productIndexes) INTO bitsNumber
@@ -190,7 +215,7 @@ CREATE FUNCTION updateProductInProductFiltering() returns trigger as $$
         INSERT INTO ProductFiltering(userId, filterValue, filterType, productIndexes)
             VALUES (NEW.userId, NEW.category, 'category', lpad('0', bitsNumber, '0')::varbit),
             (NEW.userId, NEW.shop, 'shop', lpad('0', bitsNumber, '0')::varbit),
-            (NEW.userId, NEW.grade, 'grade', lpad('0', bitsNumber, '0'))::varbit),
+            (NEW.userId, NEW.grade, 'grade', lpad('0', bitsNumber, '0')::varbit),
             (NEW.userId, NEW.manufacturer, 'manufacturer', lpad('0', bitsNumber, '0')::varbit)
             ON CONFLICT DO NOTHING;
 
@@ -211,17 +236,17 @@ CREATE FUNCTION updateProductInProductFiltering() returns trigger as $$
     END;
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION updateProductTagInProductFiltering() returns trigger as $$
+CREATE FUNCTION updateProductTagInProductFiltering() returns trigger AS $$
     DECLARE product_row record;
             bitsNumber INT;
     BEGIN
         SELECT * INTO product_row
             FROM Products
-            INNER JOIN Products ON ProductTags.productId = Products.productId
+            INNER JOIN ProductTags ON Products.productId = ProductTags.productId
             WHERE ProductTags.productId = NEW.productId AND ProductTags.tagValue = NEW.tagValue;
         SELECT bit_length(productIndexes) INTO bitsNumber
             FROM ProductIntegerIndexes
-            WHERE ProductIntegerIndexes.userId = NEW.userId;
+            WHERE ProductIntegerIndexes.userId = product_row.userId;
 
         INSERT INTO ProductFiltering(userId, filterValue, filterType, productIndexes)
             VALUES (product_row.userId, product_row.tagValue, 'tag', lpad('0', bitsNumber, '0')::varbit)
@@ -236,6 +261,6 @@ CREATE FUNCTION updateProductTagInProductFiltering() returns trigger as $$
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER updateProductInProductFilteringTrigger AFTER UPDATE ON Products
-    FOR EACH ROW EXECUTE updateProductInProductFiltering();
+    FOR EACH ROW EXECUTE FUNCTION updateProductInProductFiltering();
 CREATE TRIGGER updateProductTagInProductFilteringTrigger AFTER UPDATE ON ProductTags
-    FOR EACH ROW EXECUTE updateProductTagInProductFiltering();
+    FOR EACH ROW EXECUTE FUNCTION updateProductTagInProductFiltering();
