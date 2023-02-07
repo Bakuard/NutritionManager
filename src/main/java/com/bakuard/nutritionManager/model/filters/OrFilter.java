@@ -9,13 +9,13 @@ import java.util.Objects;
 
 import static com.bakuard.nutritionManager.validation.Rule.*;
 
-public class OrElseFilter extends AbstractFilter {
+public class OrFilter extends AbstractFilter {
 
     private final ImmutableList<Filter> operands;
 
-    OrElseFilter(List<Filter> operands) {
+    OrFilter(List<Filter> operands) {
         Validator.check(
-                "OrElseFilter.operands", notNull(operands).
+                "OrFilter.operands", notNull(operands).
                         and(() -> notContainsNull(operands)).
                         and(() -> min(operands.size(), 2))
         );
@@ -25,7 +25,7 @@ public class OrElseFilter extends AbstractFilter {
 
     @Override
     public Type getType() {
-        return Type.OR_ELSE;
+        return Type.OR;
     }
 
     @Override
@@ -37,8 +37,8 @@ public class OrElseFilter extends AbstractFilter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OrElseFilter orElseFilter = (OrElseFilter) o;
-        return operands.equals(orElseFilter.operands);
+        OrFilter orFilter = (OrFilter) o;
+        return operands.equals(orFilter.operands);
     }
 
     @Override
@@ -48,9 +48,7 @@ public class OrElseFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "OrElseFilter{" +
-                "operands=" + operands +
-                '}';
+        return "OrFilter" + operands;
     }
 
 }

@@ -1723,7 +1723,7 @@ class MenuRepositoryTest {
                         new DishIngredient.Builder().
                                 setId(toUUID(ingredient1)).
                                 setFilter(
-                                        Filter.orElse(
+                                        Filter.or(
                                                 Filter.and(
                                                         Filter.user(user.getId()),
                                                         Filter.minTags(new com.bakuard.nutritionManager.model.Tag("common tag")),
@@ -1746,7 +1746,7 @@ class MenuRepositoryTest {
                         new DishIngredient.Builder().
                                 setId(toUUID(ingredient2)).
                                 setFilter(
-                                        Filter.orElse(
+                                        Filter.or(
                                                 Filter.and(
                                                         Filter.user(user.getId()),
                                                         Filter.minTags(new com.bakuard.nutritionManager.model.Tag("value 1")),

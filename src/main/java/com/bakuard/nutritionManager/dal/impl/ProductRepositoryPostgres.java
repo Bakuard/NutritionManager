@@ -135,11 +135,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         final String aggregateRootQuery =
                 select(field("*")).
                         from("Products").
-                        where(
-                            filterMapper.toConditions(criteria.getFilter()).stream().
-                                    reduce(Condition::or).
-                                    orElse(trueCondition())
-                        ).
+                        where(filterMapper.toCondition(criteria.getFilter())).
                         orderBy(getOrderFields(criteria.tryGetSort(), "Products")).
                         limit(inline(metadata.getActualSize())).
                         offset(inline(metadata.getOffset())).

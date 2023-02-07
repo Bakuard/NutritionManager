@@ -963,7 +963,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = false,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -985,7 +985,7 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -1014,7 +1014,7 @@ class ProductRepositoryTest {
             getProductsNumber(criteria):
              user have some products,
              onlyFridge = true,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1036,7 +1036,7 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
@@ -1066,7 +1066,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1088,7 +1088,7 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -1735,7 +1735,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1758,7 +1758,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -1794,7 +1794,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = true,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1817,7 +1817,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
@@ -1855,7 +1855,7 @@ class ProductRepositoryTest {
              user have some products,
              onlyFridge = false,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     CategoryConstraint - match exists,
                     ManufacturerConstraint - match exists
@@ -1875,7 +1875,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.anyCategory("name B"),
@@ -1916,7 +1916,7 @@ class ProductRepositoryTest {
             getProducts(criteria):
              user have some products,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1939,7 +1939,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -3396,7 +3396,7 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -3448,7 +3448,7 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),

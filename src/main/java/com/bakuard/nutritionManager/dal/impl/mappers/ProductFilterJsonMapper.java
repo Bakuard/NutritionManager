@@ -61,7 +61,7 @@ public class ProductFilterJsonMapper {
 
             if("values".equals(fieldName)) {
                 switch(type) {
-                    case OR_ELSE -> result = toOrElseFilter(parser);
+                    case OR -> result = toOrElseFilter(parser);
                     case AND -> result = toAndFilter(parser);
                     case MIN_TAGS -> result = toMinTagsFilter(parser);
                     case CATEGORY -> result = toCategoryFilter(parser);
@@ -76,7 +76,7 @@ public class ProductFilterJsonMapper {
         return result;
     }
 
-    private OrElseFilter toOrElseFilter(JsonParser parser) throws IOException {
+    private OrFilter toOrElseFilter(JsonParser parser) throws IOException {
         List<Filter> values = new ArrayList<>();
 
         parser.nextToken(); //BEGIN_ARRAY
@@ -84,7 +84,7 @@ public class ProductFilterJsonMapper {
             values.add(switchFilter(parser));
         }
 
-        return Filter.orElse(values);
+        return Filter.or(values);
     }
 
     private AndFilter toAndFilter(JsonParser parser) throws IOException {
@@ -164,7 +164,7 @@ public class ProductFilterJsonMapper {
 
     private void switchFilter(Filter filter, JsonGenerator writer) throws IOException {
         switch(filter.getType()) {
-            case OR_ELSE -> toJson((OrElseFilter) filter, writer);
+            case OR -> toJson((OrFilter) filter, writer);
             case AND -> toJson((AndFilter) filter, writer);
             case MIN_TAGS -> toJson((MinTagsFilter) filter, writer);
             case CATEGORY, SHOPS, GRADES, MANUFACTURER -> toJson((AnyFilter) filter, writer);
@@ -172,7 +172,7 @@ public class ProductFilterJsonMapper {
         }
     }
 
-    private void toJson(OrElseFilter filter, JsonGenerator writer) throws IOException {
+    private void toJson(OrFilter filter, JsonGenerator writer) throws IOException {
         writer.writeStartObject();
 
         writer.writeStringField("type", filter.getType().name());

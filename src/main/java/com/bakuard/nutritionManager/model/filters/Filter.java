@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface Filter {
 
     public static enum Type {
-        OR_ELSE,
+        OR,
         AND,
         MIN_TAGS,
         CATEGORY,
@@ -34,8 +34,9 @@ public interface Filter {
      * @param other другие не обязательные операнды ограничения AndFilter.
      * @return новый объект ограничения AndFilter.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из операндов имеет значение null.<br/>
-     *          2. если передаваемый массив операндов имеет значение null.
+     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
+     *          2. если хотябы один из операндов имеет значение null.<br/>
+     *          3. если передаваемый список операндов имеет значение null.
      */
     public static AndFilter and(Filter a, Filter b, Filter... other) {
         return new AndFilter(toList(a, b, other));
@@ -46,39 +47,38 @@ public interface Filter {
      * @param filters список ограничений выступающих как операнды данного ограничения.
      * @return новый объект ограничения AndFilter.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
-     *          2. если хотябы один из операндов имеет значение null.<br/>
-     *          3. если передаваемый список операндов имеет значение null.
+     *          1. если хотя бы один из операндов имеет значение null.<br/>
+     *          2. если передаваемый массив операндов имеет значение null.
      */
     public static AndFilter and(List<Filter> filters) {
         return new AndFilter(filters);
     }
 
     /**
-     * Создает и возвращает новый объект OrElseFilter для указываемых ограничений.
-     * @param a первый обязательный операнд ограничения OrElseFilter.
-     * @param b второй обязательный операнд ограничения OrElseFilter.
-     * @param other необязательные операнды ограничения OrElseFilter.
-     * @return возвращает новый объект OrElseFilter для указываемых ограничений.
+     * Создает и возвращает новый объект {@link OrFilter} для указываемых ограничений.
+     * @param a первый обязательный операнд ограничения.
+     * @param b второй обязательный операнд ограничения.
+     * @param other необязательные операнды ограничения.
+     * @return возвращает новый объект {@link OrFilter} для указываемых ограничений.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
-     *          2. если хотябы один из операндов имеет значение null.<br/>
-     *          3. если передаваемый список операндов имеет значение null.
+     *          1. если хотя бы один из операндов имеет значение null.<br/>
+     *          2. если передаваемый массив операндов имеет значение null.
      */
-    public static OrElseFilter orElse(Filter a, Filter b, Filter... other) {
-        return new OrElseFilter(toList(a, b, other));
+    public static OrFilter or(Filter a, Filter b, Filter... other) {
+        return new OrFilter(toList(a, b, other));
     }
 
     /**
-     * Создает и возвращает новый объект OrElseFilter для указываемых ограничений.
+     * Создает и возвращает новый объект {@link OrFilter} для указываемых ограничений.
      * @param filters список ограничений выступающих как операнды данного ограничения.
-     * @return возвращает новый объект OrElseFilter для указываемых ограничений.
+     * @return возвращает новый объект {@link OrFilter} для указываемых ограничений.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из операндов имеет значение null.<br/>
-     *          2. если передаваемый массив операндов имеет значение null.
+     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
+     *          2. если хотя бы один из операндов имеет значение null.<br/>
+     *          3. если передаваемый список операндов имеет значение null.
      */
-    public static OrElseFilter orElse(List<Filter> filters) {
-        return new OrElseFilter(filters);
+    public static OrFilter or(List<Filter> filters) {
+        return new OrFilter(filters);
     }
 
     public static AnyFilter anyCategory(String a, String... other) {

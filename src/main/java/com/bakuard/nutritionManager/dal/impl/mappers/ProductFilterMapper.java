@@ -35,8 +35,8 @@ public class ProductFilterMapper {
             case MANUFACTURER -> {
                 return manufacturerFilter((AnyFilter) filter);
             }
-            case OR_ELSE -> {
-                return orElseFilter((OrElseFilter) filter);
+            case OR -> {
+                return orElseFilter((OrFilter) filter);
             }
             case USER -> {
                 return userFilter((UserFilter) filter);
@@ -49,45 +49,8 @@ public class ProductFilterMapper {
         }
     }
 
-    public List<Condition> toConditions(Filter filter) {
-        switch(filter.getType()) {
-            case AND -> {
-                return List.of(andFilter((AndFilter) filter));
-            }
-            case MIN_TAGS -> {
-                return List.of(minTagsFilter((MinTagsFilter) filter));
-            }
-            case CATEGORY -> {
-                return List.of(categoryFilter((AnyFilter) filter));
-            }
-            case SHOPS -> {
-                return List.of(shopFilter((AnyFilter) filter));
-            }
-            case GRADES -> {
-                return List.of(gradeFilter((AnyFilter) filter));
-            }
-            case MANUFACTURER -> {
-                return List.of(manufacturerFilter((AnyFilter) filter));
-            }
-            case OR_ELSE -> {
-                OrElseFilter orElse = (OrElseFilter) filter;
-                return orElse.getOperands().stream().
-                        map(this::toCondition).
-                        toList();
-            }
-            case USER -> {
-                return List.of(userFilter((UserFilter) filter));
-            }
-            case MIN_QUANTITY -> {
-                return List.of(quantityFilter((QuantityFilter) filter));
-            }
-            default -> throw new UnsupportedOperationException(
-                    "Unsupported operation for " + filter.getType() + " constraint");
-        }
-    }
 
-
-    private Condition orElseFilter(OrElseFilter filter) {
+    private Condition orElseFilter(OrFilter filter) {
         Condition condition = toCondition(filter.getOperands().get(0));
         for(int i = 1; i < filter.getOperands().size(); i++) {
             condition = condition.or(toCondition(filter.getOperands().get(i)));
