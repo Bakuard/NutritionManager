@@ -3,12 +3,11 @@ package com.bakuard.nutritionManager.model.filters;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 public interface Filter {
 
@@ -180,21 +179,24 @@ public interface Filter {
 
 
     private static List<String> toList(String a, String... other) {
-        ArrayList<String> result = Lists.newArrayList(other);
+        ArrayList<String> result = new ArrayList<>();
         result.add(a);
+        result.addAll(Arrays.asList(other));
         return result;
     }
 
     private static List<Tag> toList(Tag a, Tag... other) {
-        ArrayList<Tag> result = Lists.newArrayList(other);
+        ArrayList<Tag> result = new ArrayList<>();
         result.add(a);
+        result.addAll(Arrays.asList(other));
         return result;
     }
 
     private static List<Filter> toList(Filter a, Filter b, Filter... other) {
-        ArrayList<Filter> result = Lists.newArrayList(other);
+        ArrayList<Filter> result = new ArrayList<>();
         result.add(a);
         result.add(b);
+        result.addAll(Arrays.asList(other));
         return result;
     }
 
@@ -203,10 +205,100 @@ public interface Filter {
 
     public ImmutableList<Filter> getOperands();
 
-    public boolean containsOnly(Type... types);
+    /**
+     * Возвращает непосредственного родителя для данного фильтра. Если фильтр является корнем дерева
+     * фильтров - возвращает null.
+     * @return ближайшего родителя для данного фильтра или null.
+     */
+    public Filter getParent();
 
-    public boolean containsAtLeast(Type... types);
+    public default boolean typeIs(Type type) {
+        return getType() == type;
+    }
 
-    public <T extends Filter> T findAny(Type type);
+    public default boolean typeIsOneOf(Type... types) {
+        boolean result = false;
+        for(int i = 0; i < types.length && !result; ++i) {
+            result = getType() == types[i];
+        }
+        return result;
+    }
+
+    public boolean containsMax(Type... types);
+
+    public boolean containsMax(int maxMatch, Type... types);
+
+    public boolean containsMax(int maxMatch, int maxDepth, Type... types);
+
+    public boolean containsExactly(Type... types);
+
+    public boolean containsExactly(int matchNumber, Type... types);
+
+    public boolean containsExactly(int matchNumber, int maxDepth, Type... types);
+
+    public boolean containsMin(Type... types);
+
+    public boolean containsMin(int minMatch, Type... types);
+
+    public boolean containsMin(int minMatch, int maxDepth, Type... types);
+
+    /**
+     * Возвращает Stream из отдельных фильтров в порядке соотвествующим обходу дерева фильтров в ширину.
+     */
+    public default Stream<IterableFilter> getAllFilters() {
+        final IterableFilter firstItem = new IterableFilter(this, 0);
+
+        UnaryOperator<IterableFilter> filterIterator = new UnaryOperator<>() {
+            private final ArrayDeque<IterableFilter> queue = new ArrayDeque<>();
+
+            @Override
+            public IterableFilter apply(IterableFilter iterableFilter) {
+                IterableFilter result = null;
+                List<Filter> operands = iterableFilter.filter().getOperands();
+                for(int i = 0; i < operands.size(); i++) {
+                    IterableFilter addedFilter = new IterableFilter(
+                            operands.get(i), iterableFilter.depth() + 1);
+                    queue.addFirst(addedFilter);
+                }
+
+                if(!queue.isEmpty()) {
+                    result = queue.removeLast();
+                }
+                return result;
+            }
+        };
+
+        return Stream.iterate(firstItem, Objects::nonNull, filterIterator);
+    }
+
+    public int getDepth();
+
+    public default <T extends Filter> Optional<T> findAny(Type type) {
+        Filter result = type == getType() ? this : null;
+
+        for(int i = 0; i < getOperands().size() && result == null; i++) {
+            result = getOperands().get(i).findAny(type).orElse(null);
+        }
+
+        return Optional.ofNullable((T)result);
+    }
+
+    public default <T extends Filter> Optional<T> findFirstDirectChild(Type type) {
+        return (Optional<T>) getOperands().stream().
+                filter(filter -> filter.getType() == type).
+                findFirst();
+    }
+
+    /**
+     * Находит и возвращает ближайшего родителя имеющего указанный тип. Если среди родителей
+     * данного фильтра нет родителя с указанным типом - возвращает пустой Optional.
+     * @param type тип искомого родителя
+     * @return ближайшего родителя имеющего указанный тип.
+     */
+    public default <T extends Filter> Optional<T> findFirstParent(Type type) {
+        Filter filter = getParent();
+        while(filter != null && filter.getType() != type) filter = filter.getParent();
+        return Optional.ofNullable((T)filter);
+    }
 
 }

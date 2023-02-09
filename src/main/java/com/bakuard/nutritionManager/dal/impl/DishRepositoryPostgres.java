@@ -434,7 +434,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getDishesNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = selectCount().
@@ -449,7 +449,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("DishTags.tagValue"))).
@@ -472,7 +472,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getUnitsNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("Dishes.unit"))).
@@ -493,7 +493,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getNamesNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("Dishes.name"))).

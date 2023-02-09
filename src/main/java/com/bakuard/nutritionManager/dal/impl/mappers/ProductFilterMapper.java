@@ -1,11 +1,12 @@
 package com.bakuard.nutritionManager.dal.impl.mappers;
 
 import com.bakuard.nutritionManager.model.filters.*;
-
 import org.jooq.Condition;
+import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 
-import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.jooq.impl.DSL.*;
 
@@ -36,7 +37,7 @@ public class ProductFilterMapper {
                 return manufacturerFilter((AnyFilter) filter);
             }
             case OR -> {
-                return orElseFilter((OrFilter) filter);
+                return orFilter((OrFilter) filter);
             }
             case USER -> {
                 return userFilter((UserFilter) filter);
@@ -50,7 +51,7 @@ public class ProductFilterMapper {
     }
 
 
-    private Condition orElseFilter(OrFilter filter) {
+    private Condition orFilter(OrFilter filter) {
         Condition condition = toCondition(filter.getOperands().get(0));
         for(int i = 1; i < filter.getOperands().size(); i++) {
             condition = condition.or(toCondition(filter.getOperands().get(i)));
@@ -100,6 +101,20 @@ public class ProductFilterMapper {
         return field("manufacturer").in(
                 filter.getValues().stream().map(DSL::inline).toList()
         );
+    }
+
+    private String fieldFilter(UUID userId, Stream<String> arrayValues, String filterType) {
+        return resultQuery("""
+                select bit_or(ProductFiltering.productIndexes)
+                    from ProductFiltering
+                    where ProductFiltering.userId = {0}
+                          and ProductFiltering.filterValue in ({1})
+                          and ProductFiltering.filterType = {2}
+                """,
+                userId,
+                list(arrayValues.map(DSL::field).toList()),
+                filterType
+        ).getSQL(ParamType.INLINED);
     }
 
     private Condition userFilter(UserFilter filter) {

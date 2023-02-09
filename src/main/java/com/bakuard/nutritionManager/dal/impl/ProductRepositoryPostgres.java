@@ -15,7 +15,6 @@ import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-import org.jooq.Condition;
 import org.jooq.SortField;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -147,7 +146,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
                         aggregateRootBuilders
                 )).
                 filter(aggregateRootBuilders -> !aggregateRootBuilders.isEmpty()).
-                peek(aggregateRootBuilders -> loadUser(((UserFilter)criteria.getFilter().findAny(USER)).getUserId()).
+                peek(aggregateRootBuilders -> loadUser(criteria.getFilter().
+                        <UserFilter>findAny(USER).
+                        orElseThrow().
+                        getUserId()).
                         ifPresent(user -> aggregateRootBuilders.products().forEach(p -> p.setUser(user)))).
                 peek(aggregateRootBuilders -> loadAndFillProductTags(
                         con -> con.prepareStatement("""
@@ -330,7 +332,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getProductsNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = selectCount().
@@ -345,7 +347,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("ProductTags.tagValue"))).
@@ -368,7 +370,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getShopsNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.getFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.getFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("Products.shop"))).
@@ -389,7 +391,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getGradesNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("Products.grade"))).
@@ -410,8 +412,8 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getCategoriesNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER) &&
-                                criteria.tryGetFilter().containsOnly(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER) &&
+                                criteria.tryGetFilter().containsExactly(USER)))
         );
 
         String query = select(countDistinct(field("Products.category"))).
@@ -432,7 +434,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getManufacturersNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("Products.manufacturer"))).
@@ -454,7 +456,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
                         and(() -> notNull(criteria.getFilter())).
-                        and(() -> isTrue(criteria.getFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.getFilter().containsMin(USER)))
         );
 
         String query = select(sum(field("price", BigDecimal.class)).as("totalPrice")).

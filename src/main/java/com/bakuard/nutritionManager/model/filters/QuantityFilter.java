@@ -38,11 +38,6 @@ public class QuantityFilter extends AbstractFilter {
         return Type.MIN_QUANTITY;
     }
 
-    @Override
-    public ImmutableList<Filter> getOperands() {
-        return ImmutableList.of();
-    }
-
     public BigDecimal getQuantity() {
         return quantity;
     }
@@ -67,10 +62,7 @@ public class QuantityFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "Quantity{" +
-                "quantity=" + quantity +
-                ", relative=" + relative +
-                '}';
+        return "Quantity(" + relative + ", " + quantity + ')';
     }
 
 }

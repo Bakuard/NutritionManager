@@ -37,11 +37,6 @@ public class AnyFilter extends AbstractFilter {
         return type;
     }
 
-    @Override
-    public ImmutableList<Filter> getOperands() {
-        return ImmutableList.of();
-    }
-
     public ImmutableList<String> getValues() {
         return values;
     }
@@ -62,10 +57,7 @@ public class AnyFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "AnyFilter{" +
-                "values=" + values +
-                ", type=" + type +
-                '}';
+        return "AnyFilter(" + type + ')' + values;
     }
 
 }

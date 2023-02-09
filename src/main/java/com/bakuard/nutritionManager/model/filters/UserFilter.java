@@ -23,11 +23,6 @@ public class UserFilter extends AbstractFilter {
         return Type.USER;
     }
 
-    @Override
-    public ImmutableList<Filter> getOperands() {
-        return ImmutableList.of();
-    }
-
     public UUID getUserId() {
         return userId;
     }
@@ -47,9 +42,7 @@ public class UserFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "UserFilter{" +
-                "userId=" + userId +
-                '}';
+        return "UserFilter(" + userId + ')';
     }
 
 }

@@ -546,7 +546,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public int getMenusNumber(Criteria criteria) {
         Validator.check(
                 "MenuRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = selectCount().
@@ -561,7 +561,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
                 "MenuRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("MenuTags.tagValue"))).
@@ -584,7 +584,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public int getNamesNumber(Criteria criteria) {
         Validator.check(
                 "MenuRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
         );
 
         String query = select(countDistinct(field("Menus.name"))).

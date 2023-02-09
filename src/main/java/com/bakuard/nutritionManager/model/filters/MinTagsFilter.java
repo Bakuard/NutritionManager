@@ -30,11 +30,6 @@ public class MinTagsFilter extends AbstractFilter {
         return Type.MIN_TAGS;
     }
 
-    @Override
-    public ImmutableList<Filter> getOperands() {
-        return ImmutableList.of();
-    }
-
     public ImmutableSortedSet<Tag> getTags() {
         return tags;
     }
@@ -54,9 +49,7 @@ public class MinTagsFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "MinTags{" +
-                "tags=" + tags +
-                '}';
+        return "MinTags" + tags;
     }
 
 }
