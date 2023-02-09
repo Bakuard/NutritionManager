@@ -49,7 +49,7 @@ public class MinTagsFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "MinTags" + tags;
+        return getType().name() + tags;
     }
 
 }

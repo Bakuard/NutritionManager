@@ -49,7 +49,7 @@ public class AndFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "AndFilter" + operands;
+        return getType().name() + operands;
     }
 
 }

@@ -49,7 +49,7 @@ public class OrFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "OrFilter" + operands;
+        return getType().name() + operands;
     }
 
 }

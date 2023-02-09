@@ -57,7 +57,7 @@ public class AnyFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "AnyFilter(" + type + ')' + values;
+        return getType().name() + values;
     }
 
 }

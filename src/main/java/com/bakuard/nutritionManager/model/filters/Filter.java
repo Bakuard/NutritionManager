@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface Filter {
@@ -34,7 +35,7 @@ public interface Filter {
      * @return новый объект ограничения AndFilter.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
      *          1. если кол-во ограничений в списке filters меньше двух.<br/>
-     *          2. если хотябы один из операндов имеет значение null.<br/>
+     *          2. если хотя бы один из операндов имеет значение null.<br/>
      *          3. если передаваемый список операндов имеет значение null.
      */
     public static AndFilter and(Filter a, Filter b, Filter... other) {
@@ -145,7 +146,7 @@ public interface Filter {
      * @param values теги для которых определяется создаваемое ограничение MinTagsFilter.
      * @return новый объект MinTagsFilter.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из элементов имеет значение null.<br/>
+     *          1. если хотя бы один из элементов имеет значение null.<br/>
      *          2. если передаваемый список имеет значение null.<br/>
      *          3. если передаваемый список пустой.
      */
@@ -245,7 +246,7 @@ public interface Filter {
     /**
      * Возвращает Stream из отдельных фильтров в порядке соотвествующим обходу дерева фильтров в ширину.
      */
-    public default Stream<IterableFilter> getAllFilters() {
+    public default Stream<IterableFilter> bfs() {
         final IterableFilter firstItem = new IterableFilter(this, 0);
 
         UnaryOperator<IterableFilter> filterIterator = new UnaryOperator<>() {
@@ -263,6 +264,35 @@ public interface Filter {
 
                 if(!queue.isEmpty()) {
                     result = queue.removeLast();
+                }
+                return result;
+            }
+        };
+
+        return Stream.iterate(firstItem, Objects::nonNull, filterIterator);
+    }
+
+    /**
+     * Возвращает Stream из отдельных фильтров в порядке соотвествующим обходу дерева фильтров в глубину.
+     */
+    public default Stream<IterableFilter> dfs() {
+        final IterableFilter firstItem = new IterableFilter(this, 0);
+
+        UnaryOperator<IterableFilter> filterIterator = new UnaryOperator<>() {
+            private final ArrayDeque<IterableFilter> stack = new ArrayDeque<>();
+
+            @Override
+            public IterableFilter apply(IterableFilter iterableFilter) {
+                IterableFilter result = null;
+                List<Filter> operands = iterableFilter.filter().getOperands();
+                for(int i = operands.size() - 1; i >= 0; i--) {
+                    IterableFilter addedFilter = new IterableFilter(
+                            operands.get(i), iterableFilter.depth() + 1);
+                    stack.addFirst(addedFilter);
+                }
+
+                if(!stack.isEmpty()) {
+                    result = stack.removeFirst();
                 }
                 return result;
             }
@@ -299,6 +329,75 @@ public interface Filter {
         Filter filter = getParent();
         while(filter != null && filter.getType() != type) filter = filter.getParent();
         return Optional.ofNullable((T)filter);
+    }
+
+    /**
+     * Проверяет - находится ли текущий фильтр в дизъюнктивной нормальной форме (ДНФ).
+     * @return true - если фильтр находится в ДНФ, false - в противном случае.
+     */
+    public default boolean isDnf() {
+        if(!typeIsOneOf(Type.AND, Type.OR)) {
+            return true;
+        } else if(typeIs(Type.AND) && getOperands().stream().anyMatch(f -> f.typeIs(Type.OR))) {
+            return false;
+        } else {
+            boolean result = true;
+            for(int i = 0; i < getOperands().size(); i++) {
+                result &= getOperands().get(i).isDnf();
+            }
+            return result;
+        }
+    }
+
+    /**
+     * Создает и возвращает новый фильтр представляющий дизъюнктивную нормальную форму текущего
+     * фильтра.
+     */
+    public default Filter toDnf() {
+        Filter result = this;
+
+        if(typeIs(Type.OR)) {
+            result = or(getOperands().stream().map(Filter::toDnf).toList());
+        } else if(typeIs(Type.AND)) {
+            ArrayList<Filter> operands = getOperands().stream().
+                    map(Filter::toDnf).
+                    collect(Collectors.toCollection(ArrayList::new));
+
+            int orFilterIndex = 0;
+            while(orFilterIndex < operands.size() && !operands.get(orFilterIndex).typeIs(Type.OR)) ++orFilterIndex;
+
+            if(orFilterIndex < operands.size()) {
+                ArrayList<Filter> andFilters = new ArrayList<>();
+                Filter orFilter = operands.remove(orFilterIndex);
+                for(int i = 0; i < orFilter.getOperands().size(); i++) {
+                    ArrayList<Filter> andFilterOperands = new ArrayList<>(operands);
+                    andFilterOperands.add(orFilter.getOperands().get(i));
+                    andFilters.add(and(andFilterOperands).toDnf());
+                }
+                result = or(andFilters);
+            } else {
+                result = and(operands);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Возвращает строковое представление данного фильтра в плоском виде: каждый фильтр
+     * указан на отдельной строке, порядок фильтров в строке соответствует порядоку обхода дерева
+     * фильтров в глубину.
+     * @return строковое представление данного фильтра.
+     */
+    public default String toPrettyString() {
+        return dfs().map(
+                iterableFilter -> "-".repeat(iterableFilter.depth()) +
+                        (iterableFilter.filter().typeIsOneOf(Type.AND, Type.OR) ?
+                                iterableFilter.filter().getType() :
+                                iterableFilter.filter()) +
+                System.lineSeparator()).
+                reduce(String::concat).
+                orElseThrow();
     }
 
 }

@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.model.filters;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -94,7 +95,6 @@ public abstract class AbstractFilter implements Filter {
     public int getDepth() {
         return calculateDepth(0);
     }
-
 
     protected void matchAll(int depth, Type[] types) {
         if(depth >= 0) {

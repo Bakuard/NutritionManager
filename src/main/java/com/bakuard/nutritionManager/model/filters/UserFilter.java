@@ -42,7 +42,7 @@ public class UserFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "UserFilter(" + userId + ')';
+        return getType() + "(" + userId + ')';
     }
 
 }

@@ -62,7 +62,7 @@ public class QuantityFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "Quantity(" + relative + ", " + quantity + ')';
+        return getType() + "(" + relative + ", " + quantity + ')';
     }
 
 }
