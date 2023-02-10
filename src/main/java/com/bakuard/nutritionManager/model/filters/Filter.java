@@ -357,7 +357,12 @@ public interface Filter {
         Filter result = this;
 
         if(typeIs(Type.OR)) {
-            result = or(getOperands().stream().map(Filter::toDnf).toList());
+            result = or(
+                    getOperands().stream().
+                            map(Filter::toDnf).
+                            flatMap(f -> f.typeIs(Type.OR) ? f.getOperands().stream() : Stream.of(f)).
+                            toList()
+            );
         } else if(typeIs(Type.AND)) {
             ArrayList<Filter> operands = getOperands().stream().
                     map(Filter::toDnf).
@@ -367,16 +372,25 @@ public interface Filter {
             while(orFilterIndex < operands.size() && !operands.get(orFilterIndex).typeIs(Type.OR)) ++orFilterIndex;
 
             if(orFilterIndex < operands.size()) {
-                ArrayList<Filter> andFilters = new ArrayList<>();
                 Filter orFilter = operands.remove(orFilterIndex);
-                for(int i = 0; i < orFilter.getOperands().size(); i++) {
-                    ArrayList<Filter> andFilterOperands = new ArrayList<>(operands);
-                    andFilterOperands.add(orFilter.getOperands().get(i));
-                    andFilters.add(and(andFilterOperands).toDnf());
-                }
-                result = or(andFilters);
+                result = or(
+                        orFilter.getOperands().stream().
+                                map(f -> {
+                                    ArrayList<Filter> listF = new ArrayList<>(operands);
+                                    listF.add(f);
+                                    return listF;
+                                }).
+                                map(Filter::and).
+                                map(Filter::toDnf).
+                                flatMap(f -> f.typeIs(Type.OR) ? f.getOperands().stream() : Stream.of(f)).
+                                toList()
+                );
             } else {
-                result = and(operands);
+                result = and(
+                        operands.stream().
+                                flatMap(f -> f.typeIs(Type.AND) ? f.getOperands().stream() : Stream.of(f)).
+                                toList()
+                );
             }
         }
 

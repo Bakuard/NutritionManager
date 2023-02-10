@@ -2,7 +2,6 @@ package com.bakuard.nutritionManager.model.filters;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -965,33 +964,28 @@ class FilterTest {
                 map(iterableFilter -> iterableFilter.filter().getType()).
                 containsExactly(
                         OR,
-                            OR,
-                                OR,
-                                    AND,
-                                        USER,
-                                        MIN_QUANTITY,
-                                        MANUFACTURER,
-                                        GRADES,
-                                    AND,
-                                        USER,
-                                        MIN_QUANTITY,
-                                        MANUFACTURER,
-                                        AND,
-                                            GRADES,
-                                            CATEGORY,
-                                OR,
-                                    AND,
-                                        USER,
-                                        MIN_QUANTITY,
-                                        USER,
-                                        GRADES,
-                                    AND,
-                                        USER,
-                                        MIN_QUANTITY,
-                                        USER,
-                                        AND,
-                                            GRADES,
-                                            CATEGORY,
+                            AND,
+                                USER,
+                                MIN_QUANTITY,
+                                MANUFACTURER,
+                                GRADES,
+                            AND,
+                                USER,
+                                MIN_QUANTITY,
+                                MANUFACTURER,
+                                GRADES,
+                                CATEGORY,
+                            AND,
+                                USER,
+                                MIN_QUANTITY,
+                                USER,
+                                GRADES,
+                            AND,
+                                USER,
+                                MIN_QUANTITY,
+                                USER,
+                                GRADES,
+                                CATEGORY,
                             SHOPS
                 );
     }
@@ -1002,7 +996,7 @@ class FilterTest {
              filter has several items,
              filter has AND and OR filters,
              filter logical form is DNF
-             => return same filter
+             => return the equivalent filter with open brackets
             """)
     public void toDnf3() {
         Filter filter = Filter.or(
@@ -1042,7 +1036,29 @@ class FilterTest {
         Filter actual = filter.toDnf();
 
         Assertions.assertThat(actual).
-                isEqualTo(filter).
+                isEqualTo(
+                        Filter.or(
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.greater(BigDecimal.ZERO),
+                                        Filter.anyManufacturer("a", "b", "c", "d"),
+                                        Filter.user(toUUID(2)),
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyCategory("a", "b", "c")
+                                ),
+                                Filter.anyShop("a", "b", "c"),
+                                Filter.anyManufacturer("a", "b", "c", "d"),
+                                Filter.user(toUUID(3)),
+                                Filter.anyCategory("a", "b"),
+                                Filter.and(
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyCategory("a", "b", "c")
+                                ),
+                                Filter.anyManufacturer("a", "b", "c", "d"),
+                                Filter.user(toUUID(2))
+                        )
+                ).
                 extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
                 isTrue();
     }
@@ -1052,7 +1068,7 @@ class FilterTest {
             toDnf():
              filter has several items,
              filter has only AND filters
-             => return same filter
+             => return the equivalent filter with open brackets
             """)
     public void toDnf4() {
         Filter filter = Filter.and(
@@ -1077,7 +1093,18 @@ class FilterTest {
         Filter actual = filter.toDnf();
 
         Assertions.assertThat(actual).
-                isEqualTo(filter).
+                isEqualTo(
+                        Filter.and(
+                                Filter.user(toUUID(1)),
+                                Filter.greater(BigDecimal.ZERO),
+                                Filter.anyManufacturer("a", "b", "c", "d"),
+                                Filter.user(toUUID(2)),
+                                Filter.anyGrade("a", "b", "c"),
+                                Filter.anyGrade("a", "b", "c"),
+                                Filter.anyCategory("a", "b", "c"),
+                                Filter.anyShop("a", "b", "c")
+                        )
+                ).
                 extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
                 isTrue();
     }
@@ -1088,7 +1115,7 @@ class FilterTest {
              filter has several items,
              filter has only AND filters,
              filter tree is degenerate
-             => return same filter
+             => return the equivalent filter with open brackets
             """)
     public void toDnf5() {
         Filter filter = Filter.and(
@@ -1114,7 +1141,17 @@ class FilterTest {
         Filter actual = filter.toDnf();
 
         Assertions.assertThat(actual).
-                isEqualTo(filter).
+                isEqualTo(
+                        Filter.and(
+                                Filter.user(toUUID(1)),
+                                Filter.anyManufacturer("a"),
+                                Filter.anyShop("a", "b", "c", "d"),
+                                Filter.anyCategory("a"),
+                                Filter.user(toUUID(2)),
+                                Filter.user(toUUID(3)),
+                                Filter.anyGrade("a", "b", "c")
+                        )
+                ).
                 extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
                 isTrue();
     }
@@ -1124,7 +1161,7 @@ class FilterTest {
             toDnf():
              filter has several items,
              filter has only OR filters
-             => return same filter
+             => return the equivalent filter with open brackets
             """)
     public void toDnf6() {
         Filter filter = Filter.or(
@@ -1138,7 +1175,7 @@ class FilterTest {
                         Filter.or(
                                 Filter.anyGrade("a", "b", "c"),
                                 Filter.or(
-                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyGrade("d", "e", "f"),
                                         Filter.anyCategory("a", "b", "c")
                                 )
                         )
@@ -1149,7 +1186,18 @@ class FilterTest {
         Filter actual = filter.toDnf();
 
         Assertions.assertThat(actual).
-                isEqualTo(filter).
+                isEqualTo(
+                        Filter.or(
+                                Filter.user(toUUID(1)),
+                                Filter.greater(BigDecimal.ZERO),
+                                Filter.anyManufacturer("a", "b", "c", "d"),
+                                Filter.user(toUUID(2)),
+                                Filter.anyGrade("a", "b", "c"),
+                                Filter.anyGrade("d", "e", "f"),
+                                Filter.anyCategory("a", "b", "c"),
+                                Filter.anyShop("a", "b", "c")
+                        )
+                ).
                 extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
                 isTrue();
     }
@@ -1160,7 +1208,7 @@ class FilterTest {
              filter has several items,
              filter has only OR filters,
              filter tree is degenerate
-             => return same filter
+             => return the equivalent filter with open brackets
             """)
     public void toDnf7() {
         Filter filter = Filter.or(
@@ -1186,7 +1234,17 @@ class FilterTest {
         Filter actual = filter.toDnf();
 
         Assertions.assertThat(actual).
-                isEqualTo(filter).
+                isEqualTo(
+                        Filter.or(
+                                Filter.user(toUUID(1)),
+                                Filter.anyManufacturer("a"),
+                                Filter.anyShop("a", "b", "c", "d"),
+                                Filter.anyCategory("a"),
+                                Filter.user(toUUID(2)),
+                                Filter.user(toUUID(3)),
+                                Filter.anyGrade("a", "b", "c")
+                        )
+                ).
                 extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
                 isTrue();
     }
@@ -1215,25 +1273,25 @@ class FilterTest {
 
         Filter actual = filter.toDnf();
 
-        Assertions.assertThat(actual.dfs()).
-                map(iterableFilter -> iterableFilter.filter().getType()).
-                containsExactly(
-                        OR,
-                            AND,
-                                USER,
-                                AND,
-                                    MANUFACTURER,
-                                        AND,
-                                            SHOPS,
-                                            CATEGORY,
-                            AND,
-                                USER,
-                                AND,
-                                    MANUFACTURER,
-                                        AND,
-                                            SHOPS,
-                                            GRADES
-                );
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        Filter.or(
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyManufacturer("a"),
+                                        Filter.anyShop("a", "b", "c", "d"),
+                                        Filter.anyCategory("a")
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyManufacturer("a"),
+                                        Filter.anyShop("a", "b", "c", "d"),
+                                        Filter.anyGrade("a", "b", "c")
+                                )
+                        )
+                ).
+                extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
+                isTrue();
     }
 
     @Test
@@ -1267,33 +1325,37 @@ class FilterTest {
 
         Filter actual = filter.toDnf();
 
-        Assertions.assertThat(actual.dfs()).
-                map(iterableFilter -> iterableFilter.filter().getType()).
-                containsExactly(
-                    OR,
-                        AND,
-                            USER,
-                            MANUFACTURER,
-                        OR,
-                            AND,
-                                USER,
-                                SHOPS,
-                            OR,
-                                AND,
-                                    USER,
-                                    CATEGORY,
-                                OR,
-                                    AND,
-                                        USER,
-                                        USER,
-                                    OR,
-                                        AND,
-                                            USER,
-                                            USER,
-                                        AND,
-                                            USER,
-                                            GRADES
-                );
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        Filter.or(
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyManufacturer("a")
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyShop("a", "b", "c", "d")
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyCategory("a")
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.user(toUUID(2))
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.user(toUUID(3))
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyGrade("a", "b", "c")
+                                )
+                        )
+                ).
+                extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
+                isTrue();
     }
 
     @Test
@@ -1331,41 +1393,45 @@ class FilterTest {
 
         Filter actual = filter.toDnf();
 
-        Assertions.assertThat(actual.dfs()).
-                map(iterableFilter -> iterableFilter.filter().getType()).
-                containsExactly(
-                        OR,
-                            OR,
-                                OR,
-                                    AND,
-                                        USER,
-                                        USER,
-                                    AND,
-                                        USER,
-                                        GRADES,
-                                OR,
-                                    AND,
-                                        SHOPS,
-                                        USER,
-                                    AND,
-                                        SHOPS,
-                                        GRADES,
-                            OR,
-                                OR,
-                                    AND,
-                                        USER,
-                                        USER,
-                                    AND,
-                                        USER,
-                                        GRADES,
-                                OR,
-                                    AND,
-                                        SHOPS,
-                                        USER,
-                                    AND,
-                                        SHOPS,
-                                        GRADES
-                );
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        Filter.or(
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.user(toUUID(2))
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyGrade("a", "b", "c")
+                                ),
+                                Filter.and(
+                                        Filter.anyShop("a", "b", "c"),
+                                        Filter.user(toUUID(2))
+                                ),
+                                Filter.and(
+                                        Filter.anyShop("a", "b", "c"),
+                                        Filter.anyGrade("a", "b", "c")
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(3)),
+                                        Filter.user(toUUID(4))
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(3)),
+                                        Filter.anyGrade("d", "e", "f")
+                                ),
+                                Filter.and(
+                                        Filter.anyShop("d", "e", "f"),
+                                        Filter.user(toUUID(4))
+                                ),
+                                Filter.and(
+                                        Filter.anyShop("d", "e", "f"),
+                                        Filter.anyGrade("d", "e", "f")
+                                )
+                        )
+                ).
+                extracting(Filter::isDnf, InstanceOfAssertFactories.BOOLEAN).
+                isTrue();
     }
 
     @Test
