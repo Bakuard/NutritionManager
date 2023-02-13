@@ -331,6 +331,21 @@ public interface Filter {
         return Optional.ofNullable((T)filter);
     }
 
+    public default <T extends Filter> Optional<T> findFirstSibling(Type type) {
+        Filter result = null;
+
+        if(getParent() != null) {
+            List<Filter> siblings = getParent().getOperands();
+            int index = 0;
+            while(index < siblings.size() && !siblings.get(index).typeIs(type)) ++index;
+            if(index < siblings.size()) result = siblings.get(index);
+        } else if(typeIs(type)) {
+            result = this;
+        }
+
+        return Optional.ofNullable((T)result);
+    }
+
     /**
      * Проверяет - находится ли текущий фильтр в дизъюнктивной нормальной форме (ДНФ).
      * @return true - если фильтр находится в ДНФ, false - в противном случае.

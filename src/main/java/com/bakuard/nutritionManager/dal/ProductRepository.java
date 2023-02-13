@@ -135,22 +135,6 @@ public interface ProductRepository {
     public int getProductsNumber(Criteria criteria);
 
     /**
-     * Возвращает кол-во всех тегов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие теги надо подсчитывать.
-     * @return кол-во всех тегов удовлетворяющих ограничению criteria.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getTagsNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во магазинов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие магазины подсчитывать.
-     * @return выборку из магазинов продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getShopsNumber(Criteria criteria);
-
-    /**
      * Возвращает кол-во сортов удовлетворяющих ограничению criteria (см. {@link Criteria}).
      * @param criteria критерии указывающие какие сорта подсчитывать.
      * @return выборку из сортов продуктов.

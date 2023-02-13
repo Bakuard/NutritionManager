@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -1491,6 +1492,80 @@ class FilterTest {
                         new IterableFilter(leaf8, 1)
                 );
     }
+
+    @Test
+    @DisplayName("""
+            findFirstSibling(type):
+             filter is root of filter tree,
+             filter has not this type
+             => return empty Optional
+            """)
+    public void findFirstSibling1() {
+        Filter filter = Filter.user(toUUID(1));
+
+        Optional<Filter> actual = filter.findFirstSibling(MANUFACTURER);
+
+        Assertions.assertThat(actual).isEmpty();
+    }
+
+    @Test
+    @DisplayName("""
+            findFirstSibling(type):
+             filter is root of filter tree,
+             filter has this type
+             => return this filter
+            """)
+    public void findFirstSibling2() {
+        Filter filter = Filter.user(toUUID(1));
+
+        Optional<Filter> actual = filter.findFirstSibling(USER);
+
+        Assertions.assertThat(actual).contains(filter);
+    }
+
+    @Test
+    @DisplayName("""
+            findFirstSibling(type):
+             filter has not sibling with such type,
+             filter has not this type
+             => return empty Optional
+            """)
+    public void findFirstSibling3() {
+        Filter filter = Filter.user(toUUID(1));
+        Filter.and(
+                filter,
+                Filter.anyGrade("a", "b", "c"),
+                Filter.anyShop("a", "b", "c"),
+                Filter.anyManufacturer("a", "b", "c")
+        );
+
+        Optional<Filter> actual = filter.findFirstSibling(CATEGORY);
+
+        Assertions.assertThat(actual).isEmpty();
+    }
+
+    @Test
+    @DisplayName("""
+            findFirstSibling(type):
+             filter has sibling with such type,
+             filter has not this type
+             => return empty Optional
+            """)
+    public void findFirstSibling4() {
+        Filter filter = Filter.user(toUUID(1));
+        Filter.and(
+                filter,
+                Filter.anyGrade("a", "b", "c"),
+                Filter.anyShop("a", "b", "c"),
+                Filter.anyShop("d", "e", "f"),
+                Filter.anyManufacturer("a", "b", "c")
+        );
+
+        Optional<Filter> actual = filter.findFirstSibling(SHOPS);
+
+        Assertions.assertThat(actual).contains(Filter.anyShop("a", "b", "c"));
+    }
+
 
 
     private UUID toUUID(int number) {

@@ -344,50 +344,6 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getTagsNumber(Criteria criteria) {
-        Validator.check(
-                "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
-        );
-
-        String query = select(countDistinct(field("ProductTags.tagValue"))).
-                from("ProductTags").
-                join("Products").
-                on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                getSQL();
-
-        return statement.query(
-                query,
-                (ResultSet rs) -> {
-                    rs.next();
-                    return rs.getInt(1);
-                }
-        );
-    }
-
-    @Override
-    public int getShopsNumber(Criteria criteria) {
-        Validator.check(
-                "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.getFilter().containsMin(USER)))
-        );
-
-        String query = select(countDistinct(field("Products.shop"))).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                getSQL();
-
-        return statement.query(
-                query,
-                (ResultSet rs) -> {
-                    rs.next();
-                    return rs.getInt(1);
-                }
-        );
-    }
-
-    @Override
     public int getGradesNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
@@ -466,6 +422,49 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         return Optional.ofNullable(
                 statement.queryForObject(query, BigDecimal.class)
+        );
+    }
+
+
+    private int getTagsNumber(Criteria criteria) {
+        Validator.check(
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
+        );
+
+        String query = select(countDistinct(field("ProductTags.tagValue"))).
+                from("ProductTags").
+                join("Products").
+                on(field("Products.productId").eq(field("ProductTags.productId"))).
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
+                getSQL();
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
+    }
+
+    private int getShopsNumber(Criteria criteria) {
+        Validator.check(
+                "ProductRepository.criteria", notNull(criteria).
+                        and(() -> isTrue(criteria.getFilter().containsMin(USER)))
+        );
+
+        String query = select(countDistinct(field("Products.shop"))).
+                from("Products").
+                where(filterMapper.toCondition(criteria.tryGetFilter())).
+                getSQL();
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
         );
     }
 
