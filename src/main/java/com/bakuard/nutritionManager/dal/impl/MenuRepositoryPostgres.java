@@ -12,9 +12,7 @@ import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-
 import org.jooq.SortField;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -546,7 +544,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public int getMenusNumber(Criteria criteria) {
         Validator.check(
                 "MenuRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = selectCount().
@@ -561,7 +559,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
                 "MenuRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = select(countDistinct(field("MenuTags.tagValue"))).
@@ -584,7 +582,7 @@ public class MenuRepositoryPostgres implements MenuRepository {
     public int getNamesNumber(Criteria criteria) {
         Validator.check(
                 "MenuRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsAtLeast(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = select(countDistinct(field("Menus.name"))).

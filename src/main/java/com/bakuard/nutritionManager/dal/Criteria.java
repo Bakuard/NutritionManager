@@ -3,7 +3,6 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Pageable;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import java.util.Objects;

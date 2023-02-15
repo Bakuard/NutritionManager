@@ -524,7 +524,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              filter not specified
             """)
     void getProductsNumber3() {
@@ -548,7 +548,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              filter not specified
             """)
     void getProductsNumber4() {
@@ -590,8 +590,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlFridge = true,
-             filter is AndConstraint. Operands:
+             consider only those products that the user has,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -623,7 +623,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              filter is MinTags,
              matches exist
             """)
@@ -647,7 +647,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              filter is ShopsConstraint,
              matches exist
             """)
@@ -673,8 +673,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 CategoryConstraint - matches exist,
                 GradesConstraints - matches exist,
              matches exist
@@ -701,8 +701,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches not exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -733,8 +733,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches not exist,
                 ShopsConstraint - matches exist,
@@ -765,8 +765,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches not exist,
@@ -797,8 +797,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -829,8 +829,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -861,8 +861,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -895,8 +895,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -929,8 +929,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is AndConstraint. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is AndFilter. Operands:
                 MinTags - matches exist,
                 CategoryConstraint - matches exist,
                 ShopsConstraint - matches exist,
@@ -962,8 +962,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = false,
-             filter is OrElse. Operands:
+             consider all the user's products, whether he has them or not,
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -985,7 +985,7 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -1013,8 +1013,8 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             onlyFridge = true,
-             filter is OrElse. Operands:
+             consider only those products that the user has,
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1036,7 +1036,7 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
@@ -1066,7 +1066,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProductsNumber(criteria):
              user have some products,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1088,7 +1088,7 @@ class ProductRepositoryTest {
         int actual = repository.getProductsNumber(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -1151,7 +1151,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              get full page,
              filter not specified
             """)
@@ -1178,7 +1178,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              get partial page
              filter not specified
             """)
@@ -1205,7 +1205,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              get full page
              filter not specified
             """)
@@ -1237,7 +1237,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              get partial page
              filter not specified
             """)
@@ -1293,9 +1293,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              pageable = full,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1332,7 +1332,7 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              pageable = empty,
              filter is MinTags - match exists
             """)
@@ -1364,9 +1364,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = full,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1403,9 +1403,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = empty,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
@@ -1438,9 +1438,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              pageable = partial,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists
             """)
@@ -1474,9 +1474,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              pageable = empty,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
                 GradesConstraints - match exists
@@ -1508,9 +1508,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              pageable = empty,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1544,9 +1544,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = partial,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 ShopsConstraint - match exists,
                 GradesConstraints - match exists
@@ -1581,9 +1581,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = empty,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
@@ -1616,9 +1616,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = empty,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1654,9 +1654,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = full,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1696,9 +1696,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = empty,
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
@@ -1733,9 +1733,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1758,7 +1758,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -1792,9 +1792,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = true,
+             consider only those products that the user has,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1817,7 +1817,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.greater(BigDecimal.ZERO),
@@ -1853,9 +1853,9 @@ class ProductRepositoryTest {
     @DisplayName("""
             getProducts(criteria):
              user have some products,
-             onlyFridge = false,
+             consider all the user's products, whether he has them or not,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     CategoryConstraint - match exists,
                     ManufacturerConstraint - match exists
@@ -1875,7 +1875,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.anyCategory("name B"),
@@ -1916,7 +1916,7 @@ class ProductRepositoryTest {
             getProducts(criteria):
              user have some products,
              pageable = full,
-             filter is OrElse. Operands:
+             filter is Or. Operands:
                 first operand is AndConstraint. Operands:
                     MinTags - match not exists,
                     CategoryConstraint - match not exists,
@@ -1939,7 +1939,7 @@ class ProductRepositoryTest {
                 new Criteria().
                         setPageable(PageableByNumber.of(5, 0)).
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -1963,74 +1963,6 @@ class ProductRepositoryTest {
         Assertions.assertThat(actual).
                 usingRecursiveComparison().
                 isEqualTo(Page.empty());
-    }
-
-    @Test
-    @DisplayName("""
-            getTagsNumber(criteria):
-             criteria is null
-             => exception
-            """)
-    void getTagsNumber1() {
-        AssertUtil.assertValidateException(
-                () -> repository.getTagsNumber(null),
-                Constraint.NOT_NULL
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            getTagsNumber(criteria):
-             user haven't any products
-             => return 0
-            """)
-    void getTagsNumber2() {
-        User user = createAndSaveUser(1);
-
-        int actual = repository.getTagsNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
-        );
-
-        Assertions.assertThat(actual).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("""
-            getTagsNumber(criteria):
-             user have some products,
-             productName not specified
-             => return correct result
-            """)
-    void getTagsNumber3() {
-        User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getTagsNumber(new Criteria().setFilter(Filter.user(user.getId())));
-
-        Assertions.assertThat(actual).isEqualTo(9);
-    }
-
-    @Test
-    @DisplayName("""
-            getTagsNumber(criteria):
-             user have some products,
-             productName specified
-             => return correct result
-            """)
-    void getTagsNumber4() {
-        User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getTagsNumber(
-                new Criteria().setFilter(
-                        Filter.and(
-                                Filter.user(user.getId()),
-                                Filter.anyCategory("name A")
-                        )
-                )
-        );
-
-        Assertions.assertThat(actual).isEqualTo(5);
     }
 
     @Test
@@ -2069,186 +2001,680 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getTags(criteria):
-             user have some product,
-             pageable is full,
-             productName not specified
-             => return full page
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                ShopsConstraint - match not exists,
+                ManufacturerConstraint - match exists,
+             result not exists
+             => return empty Page
             """)
     void getTags3() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Tag> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(9, conf.pagination().itemsMaxPageSize()).
-                createPage(createTags(products).subList(0, 5));
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyShop("unknown shop"),
+                Filter.anyManufacturer("manufacturer A")
+        );
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(5, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getTags(criteria):
-             user have some product,
-             pageable is partial,
-             productName not specified
-             => return partial page
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturers - match not exists
+             result not exists
+             => return empty Page
             """)
     void getTags4() {
         User user = createAndSaveUser(1);
         List<Product> products = createAndSaveProducts(user);
-        Page<Tag> expected = PageableByNumber.of(4, 2).
-                createPageMetadata(9, conf.pagination().itemsMaxPageSize()).
-                createPage(createTags(products).subList(8, 9));
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(4, 2))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getTags(criteria):
-             user have some product,
-             pageable is full,
-             productName specified
-             => return full page
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
             """)
     void getTags5() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<Tag> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(5, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of(
-                        new Tag("common tag"),
-                        new Tag("tag A"),
-                        new Tag("value 1"),
-                        new Tag("value 2"),
-                        new Tag("value 3")
-                ));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyCategory("unknown name"),
+                Filter.anyGrade("unknown grade")
+        );
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(5, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getTags(criteria):
-             user have some product,
-             pageable is partial,
-             productName specified
-             => return partial page
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match not exists
+             result not exists
+             => return empty Page
             """)
     void getTags6() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<Tag> expected = PageableByNumber.of(4, 1).
-                createPageMetadata(5, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of(
-                        new Tag("value 3")
-                ));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B", "name C"),
+                Filter.anyShop("unknown shop")
+        );
 
         Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(4, 1))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
-            getShopsNumber(criteria):
-             criteria is null
-             => exception
-            """)
-    void getShopsNumber1() {
-        AssertUtil.assertValidateException(
-                () -> repository.getShopsNumber(null),
-                Constraint.NOT_NULL
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            getShopsNumber(criteria):
-             user haven't any products
-             => return 0
-            """)
-    void getShopsNumber2() {
-        User user = createAndSaveUser(1);
-
-        int actual = repository.getShopsNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
-        );
-
-        Assertions.assertThat(actual).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("""
-            getShopsNumber(criteria):
+            getTags(criteria):
              user have some products,
-             productName not specified
-             => return correct result
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
             """)
-    void getShopsNumber3() {
+    void getTags7() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getShopsNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
         );
 
-        Assertions.assertThat(actual).isEqualTo(3);
-    }
-
-    @Test
-    @DisplayName("""
-            getShopsNumber(criteria):
-             user have some products,
-             productName specified
-             => return correct result
-            """)
-    void getShopsNumber4() {
-        User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getShopsNumber(
+        Page<Tag> actual = repository.getTags(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        )
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(2);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match not exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags8() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("unknown category 1"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags9() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags10() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags11() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("shop A", "shop B")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match not exists,
+                Grades - match exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags12() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A"), new Tag("unknown tag")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("variety 1", "variety 2"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Shops - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags13() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("unknown grade")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Shops - match exists,
+                Grades - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags14() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("grade A", "grade B")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags15() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getTags16() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A","shop B", "shop C"),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new Tag("common tag"),
+                                        new Tag("tag B"),
+                                        new Tag("value 6")
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags17() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getTags18() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop C")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists
+             result exists
+             => return correct Page
+            """)
+    void getTags19() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A")
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(5, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new Tag("common tag"),
+                                        new Tag("tag A"),
+                                        new Tag("value 1"),
+                                        new Tag("value 2"),
+                                        new Tag("value 3")
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getTags20() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A", "manufacturer B")
+                )
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(7, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new Tag("common tag"),
+                                        new Tag("tag A"),
+                                        new Tag("tag B"),
+                                        new Tag("value 3"),
+                                        new Tag("value 4"),
+                                        new Tag("value 5"),
+                                        new Tag("value 6")
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             filter is UserFilter
+             => return all shops
+            """)
+    void getTags21() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.user(user.getId());
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(9, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new Tag("common tag"),
+                                        new Tag("tag A"),
+                                        new Tag("tag B"),
+                                        new Tag("value 1"),
+                                        new Tag("value 2"),
+                                        new Tag("value 3"),
+                                        new Tag("value 4"),
+                                        new Tag("value 5"),
+                                        new Tag("value 6")
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getTags(criteria):
+             user have some products,
+             consider only those products that the user has,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+            """)
+    void getTags22() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A"),
+                        Filter.greater(BigDecimal.ZERO)
+                )
+        );
+
+        Page<Tag> actual = repository.getTags(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new Tag("common tag"),
+                                        new Tag("tag B"),
+                                        new Tag("value 4")
+                                ))
+                );
     }
 
     @Test
@@ -2287,173 +2713,648 @@ class ProductRepositoryTest {
     @DisplayName("""
             getShops(criteria):
              user have some products,
-             pageable is full,
-             productName not specified
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                ShopsConstraint - match not exists,
+                ManufacturerConstraint - match exists,
+             result not exists
+             => return empty Page
             """)
     void getShops3() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(3, 0).
-                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("shop A", "shop B", "shop C"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyShop("unknown shop"),
+                Filter.anyManufacturer("manufacturer A")
+        );
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(3, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getShops(criteria):
              user have some products,
-             pageable is partial,
-             productName not specified
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturers - match not exists
+             result not exists
+             => return empty Page
             """)
     void getShops4() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(2, 1).
-                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("shop C"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(2, 1))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getShops(criteria):
              user have some products,
-             pageable is full,
-             productName specified
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
             """)
     void getShops5() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("shop A", "shop B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyCategory("unknown name"),
+                Filter.anyGrade("unknown grade")
+        );
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(2, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getShops(criteria):
              user have some products,
-             pageable is partial,
-             productName specified
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match not exists
+             result not exists
+             => return empty Page
             """)
     void getShops6() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("shop A", "shop B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B", "name C"),
+                Filter.anyShop("unknown shop")
+        );
 
         Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(5, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
-            getGradesNumber(criteria):
-             criteria is null
-             => exception
-            """)
-    void getGradesNumber1() {
-        AssertUtil.assertValidateException(
-                () -> repository.getGradesNumber(null),
-                Constraint.NOT_NULL
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            getGradesNumber(criteria):
-             user haven't any products
-             => return 0
-            """)
-    void getGradesNumber2() {
-        User user = createAndSaveUser(1);
-
-        int actual = repository.getGradesNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
-        );
-
-        Assertions.assertThat(actual).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("""
-            getGradesNumber(criteria):
+            getShops(criteria):
              user have some products,
-             productName not specified
-             => return correct result
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
             """)
-    void getGradesNumber3() {
+    void getShops7() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getGradesNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
         );
 
-        Assertions.assertThat(actual).isEqualTo(4);
-    }
-
-    @Test
-    @DisplayName("""
-            getGradesNumber(criteria):
-             user have some products,
-             productName specified
-             => return correct result
-            """)
-    void getGradesNumber4() {
-        User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getGradesNumber(
+        Page<String> actual = repository.getShops(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        )
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(2);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match not exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops8() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("unknown category 1"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops9() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops10() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops11() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("shop A", "shop B")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match not exists,
+                Grades - match exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops12() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A"), new Tag("unknown tag")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("variety 1", "variety 2"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Shops - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops13() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("unknown grade")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Shops - match exists,
+                Grades - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops14() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("grade A", "grade B")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops15() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getShops16() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A","shop B", "shop C"),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("shop C"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops17() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getShops18() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop C")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists
+             result exists
+             => return correct Page
+            """)
+    void getShops19() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A")
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("shop A", "shop B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getShops20() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A", "manufacturer B")
+                )
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("shop B", "shop C"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             filter is UserFilter
+             => return correct Page
+            """)
+    void getShops21() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.user(user.getId());
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("shop A", "shop B", "shop C"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getShops(criteria):
+             user have some products,
+             consider only those products that the user has,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getShops22() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A"),
+                        Filter.greater(BigDecimal.ZERO)
+                )
+        );
+
+        Page<String> actual = repository.getShops(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("shop B"))
+                );
     }
 
     @Test
@@ -2492,148 +3393,648 @@ class ProductRepositoryTest {
     @DisplayName("""
             getGrades(criteria):
              user have some products,
-             pageable is full,
-             productName not specified
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                ShopsConstraint - match not exists,
+                ManufacturerConstraint - match exists,
+             result not exists
+             => return empty Page
             """)
     void getGrades3() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("variety A", "variety B", "variety C", "variety D"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyShop("unknown shop"),
+                Filter.anyManufacturer("manufacturer A")
+        );
 
         Page<String> actual = repository.getGrades(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(4, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getGrades(criteria):
              user have some products,
-             pageable is partial,
-             productName not specified
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturers - match not exists
+             result not exists
+             => return empty Page
             """)
     void getGrades4() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(3, 1).
-                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("variety D"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
 
         Page<String> actual = repository.getGrades(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(3, 1))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getGrades(criteria):
              user have some products,
-             pageable is full,
-             productName specified
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
             """)
     void getGrades5() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("variety A", "variety B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyCategory("unknown name"),
+                Filter.anyGrade("unknown grade")
+        );
 
         Page<String> actual = repository.getGrades(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(2, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getGrades(criteria):
              user have some products,
-             pageable is partial,
-             productName specified
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match not exists
+             result not exists
+             => return empty Page
             """)
     void getGrades6() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(4, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("variety A", "variety B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B", "name C"),
+                Filter.anyShop("unknown shop")
+        );
 
         Page<String> actual = repository.getGrades(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(4, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
-            getCategoriesNumber(criteria):
-             criteria is null
-             => exception
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
             """)
-    void getCategoriesNumber1() {
-        AssertUtil.assertValidateException(
-                () -> repository.getCategoriesNumber(null),
-                Constraint.NOT_NULL
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            getCategoriesNumber(criteria):
-             user haven't any products
-             => return 0
-            """)
-    void getCategoriesNumber2() {
+    void getGrades7() {
         User user = createAndSaveUser(1);
-
-        int actual = repository.getCategoriesNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
         );
 
-        Assertions.assertThat(actual).isEqualTo(0);
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
-            getCategoriesNumber(criteria):
-             user have some products
-             => return correct result
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match not exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
             """)
-    void getCategoriesNumber3() {
+    void getGrades8() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getCategoriesNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("unknown category 1"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
         );
 
-        Assertions.assertThat(actual).isEqualTo(2);
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades9() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades10() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades11() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("shop A", "shop B")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match not exists,
+                Grades - match exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades12() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A"), new Tag("unknown tag")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("variety 1", "variety 2"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Shops - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades13() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("unknown grade")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Shops - match exists,
+                Grades - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades14() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("grade A", "grade B")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades15() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getGrades16() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A","shop B", "shop C"),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("variety D"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades17() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getGrades18() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop C")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists
+             result exists
+             => return correct Page
+            """)
+    void getGrades19() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A")
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("variety A", "variety B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getGrades20() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A", "manufacturer B")
+                )
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("variety B", "variety C", "variety D"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             filter is UserFilter
+             => return correct Page
+            """)
+    void getGrades21() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.user(user.getId());
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("variety A", "variety B", "variety C", "variety D"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getGrades(criteria):
+             user have some products,
+             consider only those products that the user has,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getGrades22() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A"),
+                        Filter.greater(BigDecimal.ZERO)
+                )
+        );
+
+        Page<String> actual = repository.getGrades(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("variety C"))
+                );
     }
 
     @Test
@@ -2672,117 +4073,648 @@ class ProductRepositoryTest {
     @DisplayName("""
             getCategories(criteria):
              user have some products,
-             pageable is partial
-             => return correct result
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                ShopsConstraint - match not exists,
+                ManufacturerConstraint - match exists,
+             result not exists
+             => return empty Page
             """)
     void getCategories3() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("name A", "name B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyShop("unknown shop"),
+                Filter.anyManufacturer("manufacturer A")
+        );
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(5, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getCategories(criteria):
              user have some products,
-             pageable is full
-             => return correct result
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturers - match not exists
+             result not exists
+             => return empty Page
             """)
     void getCategories4() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(1, 1).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("name B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
 
         Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(1, 1))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
-            getManufacturersNumber(criteria):
-             criteria is null
-             => exception
-            """)
-    void getManufacturersNumber1() {
-        AssertUtil.assertValidateException(
-                () -> repository.getManufacturersNumber(null),
-                Constraint.NOT_NULL
-        );
-    }
-
-    @Test
-    @DisplayName("""
-            getManufacturersNumber(criteria):
-             user haven't any products
-             => return 0
-            """)
-    void getManufacturersNumber2() {
-        User user = createAndSaveUser(1);
-
-        int actual = repository.getManufacturersNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
-        );
-
-        Assertions.assertThat(actual).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("""
-            getManufacturersNumber(criteria):
+            getCategories(criteria):
              user have some products,
-             productName not specified
-             => return correct result
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
             """)
-    void getManufacturersNumber3() {
+    void getCategories5() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getManufacturersNumber(
-                new Criteria().setFilter(Filter.user(user.getId()))
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyCategory("unknown name"),
+                Filter.anyGrade("unknown grade")
         );
 
-        Assertions.assertThat(actual).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("""
-            getManufacturersNumber(criteria):
-             user have some products,
-             productName specified
-             => return correct result
-            """)
-    void getManufacturersNumber4() {
-        User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-
-        int actual = repository.getManufacturersNumber(
+        Page<String> actual = repository.getCategories(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name B")
-                                )
-                        )
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(2);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories6() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B", "name C"),
+                Filter.anyShop("unknown shop")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories7() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match not exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories8() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("unknown category 1"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories9() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories10() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories11() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("shop A", "shop B")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match not exists,
+                Grades - match exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories12() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A"), new Tag("unknown tag")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("variety 1", "variety 2"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Shops - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories13() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("unknown grade")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Shops - match exists,
+                Grades - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories14() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("grade A", "grade B")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories15() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getCategories16() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A","shop B", "shop C"),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("name B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories17() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getCategories18() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop C")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists
+             result exists
+             => return correct Page
+            """)
+    void getCategories19() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A")
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("name A"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getCategories20() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A", "manufacturer B")
+                )
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("name A", "name B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             filter is UserFilter
+             => return correct Page
+            """)
+    void getCategories21() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.user(user.getId());
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("name A", "name B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getCategories(criteria):
+             user have some products,
+             consider only those products that the user has,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getCategories22() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A"),
+                        Filter.greater(BigDecimal.ZERO)
+                )
+        );
+
+        Page<String> actual = repository.getCategories(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("name B"))
+                );
     }
 
     @Test
@@ -2821,102 +4753,648 @@ class ProductRepositoryTest {
     @DisplayName("""
             getManufacturers(criteria):
              user have some products,
-             pageable is full,
-             productName not specified
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                ShopsConstraint - match not exists,
+                ManufacturerConstraint - match exists,
+             result not exists
+             => return empty Page
             """)
     void getManufacturers3() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("manufacturer A", "manufacturer B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyShop("unknown shop"),
+                Filter.anyManufacturer("manufacturer A")
+        );
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(2, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getManufacturers(criteria):
              user have some products,
-             pageable is partial,
-             productName not specified
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturers - match not exists
+             result not exists
+             => return empty Page
             """)
     void getManufacturers4() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("manufacturer A", "manufacturer B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(Filter.user(user.getId())).
-                        setPageable(PageableByNumber.of(5, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getManufacturers(criteria):
              user have some products,
-             pageable is full,
-             productName specified
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
             """)
     void getManufacturers5() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(2, 0).
-                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("manufacturer A", "manufacturer B"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag")),
+                Filter.anyCategory("unknown name"),
+                Filter.anyGrade("unknown grade")
+        );
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name B")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(2, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
     }
 
     @Test
     @DisplayName("""
             getManufacturers(criteria):
              user have some products,
-             pageable is partial,
-             productName specified
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match not exists
+             result not exists
+             => return empty Page
             """)
     void getManufacturers6() {
         User user = createAndSaveUser(1);
-        createAndSaveProducts(user);
-        Page<String> expected = PageableByNumber.of(5, 0).
-                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
-                createPage(List.of("manufacturer A"));
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A", "name B", "name C"),
+                Filter.anyShop("unknown shop")
+        );
 
         Page<String> actual = repository.getManufacturers(
                 new Criteria().
-                        setFilter(
-                                Filter.and(
-                                        Filter.user(user.getId()),
-                                        Filter.anyCategory("name A")
-                                )
-                        ).
-                        setPageable(PageableByNumber.of(5, 0))
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
         );
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers7() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyShop("shop A", "shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match not exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers8() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("unknown category 1"),
+                Filter.anyGrade("variety A", "variety B"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers9() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers10() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers11() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("shop A", "shop B")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match not exists,
+                Shops - match not exists,
+                Grades - match exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers12() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag"), new Tag("tag A"), new Tag("unknown tag")),
+                Filter.anyCategory("unknown name 1", "unknown name 2"),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("variety 1", "variety 2"),
+                Filter.anyManufacturer("unknown manufacturer 1", "unknown manufacturer 2")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Shops - match not exists,
+                Grades - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers13() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyShop("unknown shop 1", "unknown shop 2"),
+                Filter.anyGrade("unknown grade")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Shops - match exists,
+                Grades - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers14() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("grade A", "grade B")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match not exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match not exists,
+                Manufacturer - match not exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers15() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("unknown tag 1"), new Tag("unknown tag 2")),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop A","shop B"),
+                Filter.anyGrade("unknown grade"),
+                Filter.anyManufacturer("unknown manufacturer")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists,
+                Shops - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getManufacturers16() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A", "name B"),
+                Filter.anyShop("shop A","shop B", "shop C"),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A", "manufacturer B")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("manufacturer B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Grades - match exists,
+                Manufacturer - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers17() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyGrade("variety D"),
+                Filter.anyManufacturer("manufacturer A")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                Category - match exists,
+                Shops - match exists
+             result not exists
+             => return empty Page
+            """)
+    void getManufacturers18() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.anyCategory("name A"),
+                Filter.anyShop("shop C")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is AndFilter. Operands:
+                MinTags - match exists,
+                Category - match exists
+             result exists
+             => return correct Page
+            """)
+    void getManufacturers19() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.and(
+                Filter.user(user.getId()),
+                Filter.minTags(new Tag("common tag")),
+                Filter.anyCategory("name A")
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("manufacturer A"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getManufacturers20() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A", "manufacturer B")
+                )
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("manufacturer A", "manufacturer B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             filter is UserFilter
+             => return correct Page
+            """)
+    void getManufacturers21() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.user(user.getId());
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("manufacturer A", "manufacturer B"))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getManufacturers(criteria):
+             user have some products,
+             consider only those products that the user has,
+             filter is OrFilter. Operands:
+                AndFilter:
+                    MinTags - match exists,
+                    Category - match not exists,
+                    Shops - match not exists
+                AndFilter:
+                    Grades - match exists,
+                    Manufacturer - match exists
+             result exists
+             => return correct Page
+            """)
+    void getManufacturers22() {
+        User user = createAndSaveUser(1);
+        List<Product> products = createAndSaveProducts(user);
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.minTags(new Tag("tag A")),
+                        Filter.anyCategory("unknown name"),
+                        Filter.anyShop("unknown shop")
+                ),
+                Filter.and(
+                        Filter.user(user.getId()),
+                        Filter.anyGrade("variety B", "variety C", "variety D"),
+                        Filter.anyManufacturer("manufacturer A"),
+                        Filter.greater(BigDecimal.ZERO)
+                )
+        );
+
+        Page<String> actual = repository.getManufacturers(
+                new Criteria().
+                        setFilter(filter).
+                        setPageable(PageableByNumber.of(20, 0))
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(20, 0).
+                                createPageMetadata(1, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of("manufacturer A"))
+                );
     }
 
     @Test
@@ -2935,7 +5413,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match not exists,
                 ShopsConstraint - match not exists,
                 ManufacturerConstraint - match exists
@@ -2963,7 +5441,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
                 GradesConstraint - match exists,
@@ -2993,7 +5471,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match exists,
                 GradesConstraint - match not exists
@@ -3021,7 +5499,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
@@ -3053,7 +5531,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 ShopsConstraint - match exists,
                 GradesConstraint - match not exists
@@ -3081,7 +5559,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match not exists
              => return empty Optional
@@ -3107,7 +5585,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match not exists,
                 GradesConstraint - match exists,
                 ManufacturerConstraint - match not exists
@@ -3135,7 +5613,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match exists,
                 GradesConstraint - match exists
@@ -3166,7 +5644,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
@@ -3196,7 +5674,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match exists,
@@ -3228,7 +5706,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match exists,
                 CategoryConstraint - match exists,
                 ManufacturerConstraint - match exists
@@ -3259,7 +5737,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 GradesConstraint - match exists,
                 ManufacturerConstraint - match exists
              => return Optional with correct result
@@ -3288,7 +5766,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 CategoryConstraint - match exists,
                 ShopsConstraint - match not exists,
                 GradesConstraint - match not exists,
@@ -3344,7 +5822,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("""
             getProductsSum(criteria):
-             filter is AndConstraint. Operands:
+             filter is AndFilter. Operands:
                 MinTags - match not exists,
                 CategoryConstraint - match not exists,
                 ShopsConstraint - match not exists,
@@ -3396,7 +5874,7 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),
@@ -3448,7 +5926,7 @@ class ProductRepositoryTest {
         Optional<BigDecimal> actual = repository.getProductsSum(
                 new Criteria().
                         setFilter(
-                                Filter.orElse(
+                                Filter.or(
                                         Filter.and(
                                                 Filter.user(user.getId()),
                                                 Filter.minTags(new Tag("unknown tag")),

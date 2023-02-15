@@ -170,7 +170,7 @@ class DishRepositoryTest {
                         new DishIngredient.Builder().
                                 setId(toUUID(0)).
                                 setFilter(
-                                        Filter.orElse(
+                                        Filter.or(
                                                 Filter.and(
                                                         Filter.user(user.getId()),
                                                         Filter.minTags(new Tag("common tag")),
@@ -246,7 +246,7 @@ class DishRepositoryTest {
                         new DishIngredient.Builder().
                                 setId(toUUID(0)).
                                 setFilter(
-                                        Filter.orElse(
+                                        Filter.or(
                                                 Filter.and(
                                                         Filter.user(user.getId()),
                                                         Filter.minTags(new Tag("common tag")),
@@ -1705,7 +1705,7 @@ class DishRepositoryTest {
                         new DishIngredient.Builder().
                                 setId(toUUID(0)).
                                 setFilter(
-                                    Filter.orElse(
+                                    Filter.or(
                                             Filter.and(
                                                     Filter.user(user.getId()),
                                                     Filter.minTags(new Tag("common tag")),
@@ -1728,7 +1728,7 @@ class DishRepositoryTest {
                         new DishIngredient.Builder().
                                 setId(toUUID(1)).
                                 setFilter(
-                                        Filter.orElse(
+                                        Filter.or(
                                                 Filter.and(
                                                         Filter.user(user.getId()),
                                                         Filter.minTags(new Tag("value 1")),
@@ -1786,7 +1786,7 @@ class DishRepositoryTest {
                                 new DishIngredient.Builder().
                                         setId(toUUID(1001)).
                                         setFilter(
-                                                Filter.orElse(
+                                                Filter.or(
                                                         Filter.and(
                                                                 Filter.user(user.getId()),
                                                                 Filter.minTags(new Tag("common tag")),
@@ -1809,7 +1809,7 @@ class DishRepositoryTest {
                                 new DishIngredient.Builder().
                                         setId(toUUID(1002)).
                                         setFilter(
-                                                Filter.orElse(
+                                                Filter.or(
                                                         Filter.and(
                                                                 Filter.user(user.getId()),
                                                                 Filter.minTags(new Tag("value 1")),
@@ -1864,7 +1864,7 @@ class DishRepositoryTest {
                                 new DishIngredient.Builder().
                                         setId(toUUID(1004)).
                                         setFilter(
-                                                Filter.orElse(
+                                                Filter.or(
                                                         Filter.and(
                                                                 Filter.user(user.getId()),
                                                                 Filter.minTags(new Tag("common tag")),
@@ -1904,7 +1904,7 @@ class DishRepositoryTest {
                                 new DishIngredient.Builder().
                                         setId(toUUID(1005)).
                                         setFilter(
-                                                Filter.orElse(
+                                                Filter.or(
                                                         Filter.and(
                                                                 Filter.user(user.getId()),
                                                                 Filter.minTags(new Tag("tag B"))
@@ -1927,7 +1927,7 @@ class DishRepositoryTest {
                                 new DishIngredient.Builder().
                                         setId(toUUID(1006)).
                                         setFilter(
-                                                Filter.orElse(
+                                                Filter.or(
                                                         Filter.and(
                                                                 Filter.user(user.getId()),
                                                                 Filter.anyShop("shop B")
@@ -1979,7 +1979,7 @@ class DishRepositoryTest {
                                 new DishIngredient.Builder().
                                         setId(toUUID(1008)).
                                         setFilter(
-                                                Filter.orElse(
+                                                Filter.or(
                                                         Filter.and(
                                                                 Filter.user(user.getId()),
                                                                 Filter.minTags(new Tag("tag B"))
@@ -1999,7 +1999,7 @@ class DishRepositoryTest {
                                 new DishIngredient.Builder().
                                         setId(toUUID(1009)).
                                         setFilter(
-                                                Filter.orElse(
+                                                Filter.or(
                                                         Filter.and(
                                                                 Filter.user(user.getId()),
                                                                 Filter.anyShop("variety C")
