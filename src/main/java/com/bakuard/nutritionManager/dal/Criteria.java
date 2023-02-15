@@ -3,7 +3,6 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.model.filters.Filter;
 import com.bakuard.nutritionManager.model.filters.Sort;
 import com.bakuard.nutritionManager.model.util.Pageable;
-import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.Validator;
 
 import java.util.Objects;
@@ -35,10 +34,6 @@ public class Criteria {
         return this;
     }
 
-    public Pageable getPageable() {
-        return pageable;
-    }
-
     public <T extends Pageable> T getPageable(Class<T> type) {
         return type.cast(pageable);
     }
@@ -49,12 +44,6 @@ public class Criteria {
 
     public Filter getFilter() {
         return filter;
-    }
-
-    public Pageable tryGetPageable() {
-        Validator.check("Criteria.pageable", notNull(pageable));
-
-        return pageable;
     }
 
     public <T extends Pageable> T tryGetPageable(Class<T> type) {

@@ -3,17 +3,16 @@ package com.bakuard.nutritionManager.model.filters;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 public interface Filter {
 
     public static enum Type {
-        OR_ELSE,
+        OR,
         AND,
         MIN_TAGS,
         CATEGORY,
@@ -34,8 +33,9 @@ public interface Filter {
      * @param other другие не обязательные операнды ограничения AndFilter.
      * @return новый объект ограничения AndFilter.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из операндов имеет значение null.<br/>
-     *          2. если передаваемый массив операндов имеет значение null.
+     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
+     *          2. если хотя бы один из операндов имеет значение null.<br/>
+     *          3. если передаваемый список операндов имеет значение null.
      */
     public static AndFilter and(Filter a, Filter b, Filter... other) {
         return new AndFilter(toList(a, b, other));
@@ -46,39 +46,38 @@ public interface Filter {
      * @param filters список ограничений выступающих как операнды данного ограничения.
      * @return новый объект ограничения AndFilter.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
-     *          2. если хотябы один из операндов имеет значение null.<br/>
-     *          3. если передаваемый список операндов имеет значение null.
+     *          1. если хотя бы один из операндов имеет значение null.<br/>
+     *          2. если передаваемый массив операндов имеет значение null.
      */
     public static AndFilter and(List<Filter> filters) {
         return new AndFilter(filters);
     }
 
     /**
-     * Создает и возвращает новый объект OrElseFilter для указываемых ограничений.
-     * @param a первый обязательный операнд ограничения OrElseFilter.
-     * @param b второй обязательный операнд ограничения OrElseFilter.
-     * @param other необязательные операнды ограничения OrElseFilter.
-     * @return возвращает новый объект OrElseFilter для указываемых ограничений.
+     * Создает и возвращает новый объект {@link OrFilter} для указываемых ограничений.
+     * @param a первый обязательный операнд ограничения.
+     * @param b второй обязательный операнд ограничения.
+     * @param other необязательные операнды ограничения.
+     * @return возвращает новый объект {@link OrFilter} для указываемых ограничений.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
-     *          2. если хотябы один из операндов имеет значение null.<br/>
-     *          3. если передаваемый список операндов имеет значение null.
+     *          1. если хотя бы один из операндов имеет значение null.<br/>
+     *          2. если передаваемый массив операндов имеет значение null.
      */
-    public static OrElseFilter orElse(Filter a, Filter b, Filter... other) {
-        return new OrElseFilter(toList(a, b, other));
+    public static OrFilter or(Filter a, Filter b, Filter... other) {
+        return new OrFilter(toList(a, b, other));
     }
 
     /**
-     * Создает и возвращает новый объект OrElseFilter для указываемых ограничений.
+     * Создает и возвращает новый объект {@link OrFilter} для указываемых ограничений.
      * @param filters список ограничений выступающих как операнды данного ограничения.
-     * @return возвращает новый объект OrElseFilter для указываемых ограничений.
+     * @return возвращает новый объект {@link OrFilter} для указываемых ограничений.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из операндов имеет значение null.<br/>
-     *          2. если передаваемый массив операндов имеет значение null.
+     *          1. если кол-во ограничений в списке filters меньше двух.<br/>
+     *          2. если хотя бы один из операндов имеет значение null.<br/>
+     *          3. если передаваемый список операндов имеет значение null.
      */
-    public static OrElseFilter orElse(List<Filter> filters) {
-        return new OrElseFilter(filters);
+    public static OrFilter or(List<Filter> filters) {
+        return new OrFilter(filters);
     }
 
     public static AnyFilter anyCategory(String a, String... other) {
@@ -146,7 +145,7 @@ public interface Filter {
      * @param values теги для которых определяется создаваемое ограничение MinTagsFilter.
      * @return новый объект MinTagsFilter.
      * @throws ValidateException если выполняется одно из следующих условий:<br/>
-     *          1. если хотябы один из элементов имеет значение null.<br/>
+     *          1. если хотя бы один из элементов имеет значение null.<br/>
      *          2. если передаваемый список имеет значение null.<br/>
      *          3. если передаваемый список пустой.
      */
@@ -180,21 +179,24 @@ public interface Filter {
 
 
     private static List<String> toList(String a, String... other) {
-        ArrayList<String> result = Lists.newArrayList(other);
+        ArrayList<String> result = new ArrayList<>();
         result.add(a);
+        result.addAll(Arrays.asList(other));
         return result;
     }
 
     private static List<Tag> toList(Tag a, Tag... other) {
-        ArrayList<Tag> result = Lists.newArrayList(other);
+        ArrayList<Tag> result = new ArrayList<>();
         result.add(a);
+        result.addAll(Arrays.asList(other));
         return result;
     }
 
     private static List<Filter> toList(Filter a, Filter b, Filter... other) {
-        ArrayList<Filter> result = Lists.newArrayList(other);
+        ArrayList<Filter> result = new ArrayList<>();
         result.add(a);
         result.add(b);
+        result.addAll(Arrays.asList(other));
         return result;
     }
 
@@ -203,10 +205,163 @@ public interface Filter {
 
     public ImmutableList<Filter> getOperands();
 
-    public boolean containsOnly(Type... types);
+    public default boolean typeIs(Type type) {
+        return getType() == type;
+    }
 
-    public boolean containsAtLeast(Type... types);
+    public default boolean typeIsOneOf(Type... types) {
+        boolean result = false;
+        for(int i = 0; i < types.length && !result; ++i) {
+            result = getType() == types[i];
+        }
+        return result;
+    }
 
-    public <T extends Filter> T findAny(Type type);
+    public int matchingTypesNumber(Type... types);
+
+    public int typesNumber();
+
+    /**
+     * Возвращает Stream из отдельных фильтров в порядке соотвествующим обходу дерева фильтров в ширину.
+     */
+    public default Stream<IterableFilter> bfs() {
+        final IterableFilter firstItem = new IterableFilter(this, 0);
+
+        UnaryOperator<IterableFilter> filterIterator = new UnaryOperator<>() {
+            private final ArrayDeque<IterableFilter> queue = new ArrayDeque<>();
+
+            @Override
+            public IterableFilter apply(IterableFilter iterableFilter) {
+                IterableFilter result = null;
+                List<Filter> operands = iterableFilter.filter().getOperands();
+                for(int i = 0; i < operands.size(); i++) {
+                    IterableFilter addedFilter = new IterableFilter(
+                            operands.get(i), iterableFilter.depth() + 1);
+                    queue.addFirst(addedFilter);
+                }
+
+                if(!queue.isEmpty()) {
+                    result = queue.removeLast();
+                }
+                return result;
+            }
+        };
+
+        return Stream.iterate(firstItem, Objects::nonNull, filterIterator);
+    }
+
+    /**
+     * Возвращает Stream из отдельных фильтров в порядке соотвествующим обходу дерева фильтров в глубину.
+     */
+    public default Stream<IterableFilter> dfs() {
+        final IterableFilter firstItem = new IterableFilter(this, 0);
+
+        UnaryOperator<IterableFilter> filterIterator = new UnaryOperator<>() {
+            private final ArrayDeque<IterableFilter> stack = new ArrayDeque<>();
+
+            @Override
+            public IterableFilter apply(IterableFilter iterableFilter) {
+                IterableFilter result = null;
+                List<Filter> operands = iterableFilter.filter().getOperands();
+                for(int i = operands.size() - 1; i >= 0; i--) {
+                    IterableFilter addedFilter = new IterableFilter(
+                            operands.get(i), iterableFilter.depth() + 1);
+                    stack.addFirst(addedFilter);
+                }
+
+                if(!stack.isEmpty()) {
+                    result = stack.removeFirst();
+                }
+                return result;
+            }
+        };
+
+        return Stream.iterate(firstItem, Objects::nonNull, filterIterator);
+    }
+
+    public int getDepth();
+
+    public default <T extends Filter> Optional<T> findAny(Type type) {
+        Filter result = type == getType() ? this : null;
+
+        for(int i = 0; i < getOperands().size() && result == null; i++) {
+            result = getOperands().get(i).findAny(type).orElse(null);
+        }
+
+        return Optional.ofNullable((T)result);
+    }
+
+    public default <T extends Filter> Optional<T> findFirstDirectChild(Type type) {
+        return (Optional<T>) getOperands().stream().
+                filter(filter -> filter.getType() == type).
+                findFirst();
+    }
+
+    /**
+     * Проверяет - находится ли текущий фильтр в дизъюнктивной нормальной форме (ДНФ).
+     * @return true - если фильтр находится в ДНФ, false - в противном случае.
+     */
+    public default boolean isDnf() {
+        if(!typeIsOneOf(Type.AND, Type.OR)) {
+            return true;
+        } else if(typeIs(Type.AND) && getOperands().stream().anyMatch(f -> f.typeIs(Type.OR))) {
+            return false;
+        } else {
+            boolean result = true;
+            for(int i = 0; i < getOperands().size(); i++) {
+                result &= getOperands().get(i).isDnf();
+            }
+            return result;
+        }
+    }
+
+    /**
+     * Создает и возвращает новый фильтр представляющий дизъюнктивную нормальную форму текущего
+     * фильтра.
+     */
+    public Filter toDnf();
+
+    /**
+     * Создает и возвращает новый фильтр являющийся результатом удаления всех лишних операторов
+     * AND и OR используя ассоциативное свойство этих операций.
+     */
+    public default Filter openBrackets() {
+        Filter filter = this;
+
+        if(typeIs(Type.OR)) {
+            filter = or(
+                getOperands().stream().
+                        map(Filter::openBrackets).
+                        flatMap(f -> f.typeIs(Type.OR) ? f.getOperands().stream() : Stream.of(f)).
+                        toList()
+            );
+        } else if(typeIs(Type.AND)) {
+            filter = and(
+                    getOperands().stream().
+                            map(Filter::openBrackets).
+                            flatMap(f -> f.typeIs(Type.AND) ? f.getOperands().stream() : Stream.of(f)).
+                            toList()
+            );
+        }
+
+        return filter;
+    }
+
+    /**
+     * Возвращает строковое представление данного фильтра в плоском виде: каждый фильтр
+     * указан на отдельной строке, порядок фильтров в строке соответствует порядоку обхода дерева
+     * фильтров в глубину.
+     * @return строковое представление данного фильтра.
+     */
+    public default String toPrettyString() {
+        return dfs().map(
+                iterableFilter -> "-".repeat(iterableFilter.depth()) +
+                        (iterableFilter.filter().typeIsOneOf(Type.AND, Type.OR) ?
+                                iterableFilter.filter().getType() :
+                                iterableFilter.filter()) +
+                System.lineSeparator()).
+                reduce(String::concat).
+                orElseThrow();
+    }
 
 }

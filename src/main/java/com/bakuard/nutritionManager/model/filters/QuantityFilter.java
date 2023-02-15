@@ -38,11 +38,6 @@ public class QuantityFilter extends AbstractFilter {
         return Type.MIN_QUANTITY;
     }
 
-    @Override
-    public ImmutableList<Filter> getOperands() {
-        return ImmutableList.of();
-    }
-
     public BigDecimal getQuantity() {
         return quantity;
     }
@@ -55,9 +50,8 @@ public class QuantityFilter extends AbstractFilter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        QuantityFilter quantityFilter1 = (QuantityFilter) o;
-        return quantity.equals(quantityFilter1.quantity) &&
-                relative == quantityFilter1.relative;
+        QuantityFilter that = (QuantityFilter) o;
+        return Objects.equals(quantity, that.quantity) && relative == that.relative;
     }
 
     @Override
@@ -67,10 +61,7 @@ public class QuantityFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "Quantity{" +
-                "quantity=" + quantity +
-                ", relative=" + relative +
-                '}';
+        return getType() + "(" + relative + ", " + quantity + ')';
     }
 
 }

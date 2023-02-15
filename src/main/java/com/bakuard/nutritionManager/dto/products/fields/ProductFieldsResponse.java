@@ -1,4 +1,4 @@
-package com.bakuard.nutritionManager.dto.products;
+package com.bakuard.nutritionManager.dto.products.fields;
 
 import com.bakuard.nutritionManager.dto.FieldResponse;
 

@@ -216,6 +216,10 @@ public class Sort {
             return !direction;
         }
 
+        public String getDirectionAsString() {
+            return isAscending() ? "asc" : "desc";
+        }
+
     }
 
 }

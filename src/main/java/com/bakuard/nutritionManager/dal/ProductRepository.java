@@ -1,5 +1,7 @@
 package com.bakuard.nutritionManager.dal;
 
+import com.bakuard.nutritionManager.dal.projection.ProductField;
+import com.bakuard.nutritionManager.dal.projection.ProductFields;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.ProductContext;
 import com.bakuard.nutritionManager.model.Tag;
@@ -7,7 +9,6 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -127,52 +128,22 @@ public interface ProductRepository {
     public Page<String> getManufacturers(Criteria criteria);
 
     /**
+     * Возвращает выборку из всех значений указанного поля продуктов заданного пользователя, сгруппированную
+     * по категориям. Все значения указанного поля будут упорядочены в лексикографическом порядке в
+     * пределах каждой категории.
+     * @param field искомое поле
+     * @param userId идентификатор пользователя, из продуктов которого делается выборка.
+     * @return выборку из всех значений заданного поля, сгруппированную по категориям.
+     */
+    public <T> Page<ProductField<T>> getFieldsGroupingByCategory(ProductFields field, UUID userId);
+
+    /**
      * Возвращает кол-во всех продуктов удовлетворяющих ограничениям criteria (см. {@link Criteria}).
      * @param criteria критерии указывающие какие продукты подсчитывать.
      * @return кол-во всех продуктов удовлетворяющих ограничениям criteria.
      * @throws ValidateException если criteria является null.
      */
     public int getProductsNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во всех тегов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие теги надо подсчитывать.
-     * @return кол-во всех тегов удовлетворяющих ограничению criteria.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getTagsNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во магазинов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие магазины подсчитывать.
-     * @return выборку из магазинов продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getShopsNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во сортов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие сорта подсчитывать.
-     * @return выборку из сортов продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getGradesNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во категорий продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие категории подсчитывать.
-     * @return выборку из категорий продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getCategoriesNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во производителей продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие каких производителей подсчитывать.
-     * @return выборку из производителей продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getManufacturersNumber(Criteria criteria);
 
     /**
      * Возвращает сумму цен всех продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).

@@ -1,11 +1,11 @@
 package com.bakuard.nutritionManager.dal.impl.mappers;
 
 import com.bakuard.nutritionManager.model.filters.*;
-
+import com.bakuard.nutritionManager.validation.Constraint;
+import com.bakuard.nutritionManager.validation.Rule;
+import com.bakuard.nutritionManager.validation.ValidateException;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
-
-import java.util.List;
 
 import static org.jooq.impl.DSL.*;
 
@@ -15,7 +15,19 @@ public class ProductFilterMapper {
 
     }
 
-    public Condition toCondition(Filter filter) {
+    public String toCondition(Filter filter) {
+        filter = filter.toDnf();
+
+        if(hasFilterCorrectStructure(filter)) {
+            return parseFilterWithExtendedStructure(filter).toString();
+        } else {
+            throw new ValidateException("Incorrect filter structure:\n" + filter.toPrettyString()).
+                    addReason(Rule.of("", Rule.failure(Constraint.CORRECT_STRUCTURE)));
+        }
+    }
+
+
+    private Condition parseFilterWithExtendedStructure(Filter filter) {
         switch(filter.getType()) {
             case AND -> {
                 return andFilter((AndFilter) filter);
@@ -35,8 +47,8 @@ public class ProductFilterMapper {
             case MANUFACTURER -> {
                 return manufacturerFilter((AnyFilter) filter);
             }
-            case OR_ELSE -> {
-                return orElseFilter((OrElseFilter) filter);
+            case OR -> {
+                return orFilter((OrFilter) filter);
             }
             case USER -> {
                 return userFilter((UserFilter) filter);
@@ -49,62 +61,24 @@ public class ProductFilterMapper {
         }
     }
 
-    public List<Condition> toConditions(Filter filter) {
-        switch(filter.getType()) {
-            case AND -> {
-                return List.of(andFilter((AndFilter) filter));
-            }
-            case MIN_TAGS -> {
-                return List.of(minTagsFilter((MinTagsFilter) filter));
-            }
-            case CATEGORY -> {
-                return List.of(categoryFilter((AnyFilter) filter));
-            }
-            case SHOPS -> {
-                return List.of(shopFilter((AnyFilter) filter));
-            }
-            case GRADES -> {
-                return List.of(gradeFilter((AnyFilter) filter));
-            }
-            case MANUFACTURER -> {
-                return List.of(manufacturerFilter((AnyFilter) filter));
-            }
-            case OR_ELSE -> {
-                OrElseFilter orElse = (OrElseFilter) filter;
-                return orElse.getOperands().stream().
-                        map(this::toCondition).
-                        toList();
-            }
-            case USER -> {
-                return List.of(userFilter((UserFilter) filter));
-            }
-            case MIN_QUANTITY -> {
-                return List.of(quantityFilter((QuantityFilter) filter));
-            }
-            default -> throw new UnsupportedOperationException(
-                    "Unsupported operation for " + filter.getType() + " constraint");
-        }
-    }
-
-
-    private Condition orElseFilter(OrElseFilter filter) {
-        Condition condition = toCondition(filter.getOperands().get(0));
+    private Condition orFilter(OrFilter filter) {
+        Condition condition = parseFilterWithExtendedStructure(filter.getOperands().get(0));
         for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.or(toCondition(filter.getOperands().get(i)));
+            condition = condition.or(parseFilterWithExtendedStructure(filter.getOperands().get(i)));
         }
         return condition;
     }
 
     private Condition andFilter(AndFilter filter) {
-        Condition condition = toCondition(filter.getOperands().get(0));
+        Condition condition = parseFilterWithExtendedStructure(filter.getOperands().get(0));
         for(int i = 1; i < filter.getOperands().size(); i++) {
-            condition = condition.and(toCondition(filter.getOperands().get(i)));
+            condition = condition.and(parseFilterWithExtendedStructure(filter.getOperands().get(i)));
         }
         return condition;
     }
 
     private Condition minTagsFilter(MinTagsFilter filter) {
-        return field("productId").in(
+        return field("Products.productId").in(
                 select(field("ProductTags.productId")).
                         from("ProductTags").
                         where(field("ProductTags.tagValue").in(
@@ -162,6 +136,16 @@ public class ProductFilterMapper {
             }
             default -> throw new UnsupportedOperationException("Unknown relative = " + filter.getRelative());
         }
+    }
+
+
+    private boolean hasFilterCorrectStructure(Filter filter) {
+        return filter.typeIs(Filter.Type.USER) ||
+                filter.matchingTypesNumber(Filter.Type.USER, Filter.Type.AND) == 2 &&
+                filter.bfs().
+                        map(IterableFilter::filter).
+                        filter(f -> f.typeIs(Filter.Type.AND)).
+                        allMatch(f -> f.matchingTypesNumber(Filter.Type.USER) == 1);
     }
 
 }

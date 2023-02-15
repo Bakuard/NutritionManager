@@ -1,52 +1,108 @@
 package com.bakuard.nutritionManager.model.filters;
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public abstract class AbstractFilter implements Filter {
 
     @Override
-    public boolean containsOnly(Type... types) {
-        boolean match = findMatch(types) < types.length;
-
-        for(int i = 0; i < getOperands().size() && match; i++) {
-            match = getOperands().get(i).containsOnly(types);
-        }
-
-        return match;
+    public ImmutableList<Filter> getOperands() {
+        return ImmutableList.of();
     }
 
     @Override
-    public boolean containsAtLeast(Type... types) {
-        boolean[] matchTypes = new boolean[types.length];
-        matchAll(matchTypes, types);
+    public int matchingTypesNumber(Type... types) {
+        Type[] allTypes = Type.values();
+        matchAll(allTypes);
 
-        int i = 0;
-        while(i < matchTypes.length && matchTypes[i]) ++i;
-        return i == matchTypes.length;
+        int count = 0;
+        for(int i = 0; i < types.length; i++) {
+            if(allTypes[types[i].ordinal()] == null) ++count;
+        }
+
+        return count;
     }
 
-    protected int findMatch(Type... types) {
-        int i = 0;
-        while(i < types.length && getType() != types[i]) ++i;
-        return i;
+    @Override
+    public int typesNumber() {
+        Type[] allTypes = Type.values();
+        matchAll(allTypes);
+
+        int count = 0;
+        for(int i = 0; i < allTypes.length; i++) {
+            if(allTypes[i] == null) ++count;
+        }
+
+        return count;
     }
 
-    protected void matchAll(boolean[] matchTypes, Type[] types) {
-        int index = findMatch(types);
-        if(index < types.length) matchTypes[index] = true;
+    @Override
+    public int getDepth() {
+        return calculateDepth(0);
+    }
+
+    @Override
+    public Filter toDnf() {
+        return ((AbstractFilter)openBrackets()).toDnfRecursive().openBrackets();
+    }
+
+
+    protected void matchAll(Type[] types) {
+        int index = 0;
+        while(index < types.length && types[index] != getType()) ++index;
+        if(index < types.length) types[index] = null;
 
         for(int i = 0; i < getOperands().size(); i++) {
-            ((AbstractFilter)getOperands().get(i)).matchAll(matchTypes, types);
+            ((AbstractFilter)getOperands().get(i)).matchAll(types);
         }
     }
 
-    @Override
-    public <T extends Filter> T findAny(Type type) {
-        Filter result = type == getType() ? this : null;
+    protected int calculateDepth(final int currentDepth) {
+        int result = currentDepth;
 
-        for(int i = 0; i < getOperands().size() && result == null; i++) {
-            result = getOperands().get(i).findAny(type);
+        for(int i = 0; i < getOperands().size(); i++) {
+            AbstractFilter filter = (AbstractFilter) getOperands().get(i);
+            int childDepth = filter.calculateDepth(currentDepth + 1);
+            result = Math.max(result, childDepth);
         }
 
-        return (T)result;
+        return result;
+    }
+
+    protected Filter toDnfRecursive() {
+        Filter result = this;
+
+        if(typeIs(Type.OR)) {
+            result = Filter.or(getOperands().stream().map(Filter::toDnf).toList());
+        } else if(typeIs(Type.AND)) {
+            ArrayList<Filter> operands = getOperands().stream().
+                    map(Filter::toDnf).
+                    collect(Collectors.toCollection(ArrayList::new));
+
+            int orFilterIndex = 0;
+            while(orFilterIndex < operands.size() && !operands.get(orFilterIndex).typeIs(Type.OR)) ++orFilterIndex;
+
+            if(orFilterIndex < operands.size()) {
+                Filter orFilter = operands.remove(orFilterIndex);
+                result = Filter.or(
+                        orFilter.getOperands().stream().
+                                map(f -> {
+                                    ArrayList<Filter> listF = new ArrayList<>(operands);
+                                    listF.add(f);
+                                    return listF;
+                                }).
+                                map(Filter::and).
+                                map(Filter::toDnf).
+                                toList()
+                );
+            } else {
+                result = Filter.and(operands);
+            }
+        }
+
+        return result;
     }
 
 }

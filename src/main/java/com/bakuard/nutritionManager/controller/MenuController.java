@@ -7,6 +7,7 @@ import com.bakuard.nutritionManager.dto.DtoMapper;
 import com.bakuard.nutritionManager.dto.exceptions.ExceptionResponse;
 import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
+import com.bakuard.nutritionManager.dto.menus.fields.MenuFieldsResponse;
 import com.bakuard.nutritionManager.model.Menu;
 import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.service.ImageUploaderService;

@@ -4,6 +4,7 @@ import com.bakuard.nutritionManager.validation.Validator;
 
 import com.google.common.collect.ImmutableList;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.bakuard.nutritionManager.validation.Rule.notNull;
@@ -23,11 +24,6 @@ public class UserFilter extends AbstractFilter {
         return Type.USER;
     }
 
-    @Override
-    public ImmutableList<Filter> getOperands() {
-        return ImmutableList.of();
-    }
-
     public UUID getUserId() {
         return userId;
     }
@@ -37,19 +33,17 @@ public class UserFilter extends AbstractFilter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserFilter that = (UserFilter) o;
-        return userId.equals(that.userId);
+        return Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        return userId.hashCode();
+        return Objects.hash(userId);
     }
 
     @Override
     public String toString() {
-        return "UserFilter{" +
-                "userId=" + userId +
-                '}';
+        return getType() + "(" + userId + ')';
     }
 
 }

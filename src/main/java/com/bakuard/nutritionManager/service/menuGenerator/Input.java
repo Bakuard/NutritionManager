@@ -292,9 +292,9 @@ public class Input {
     private List<String> getAllProductCategories(List<DishMinPrice> dishMinPrices) {
         return dishMinPrices.stream().
                 flatMap(dmp -> dmp.dish().getIngredients().stream()).
-                map(ingredient -> (AnyFilter)ingredient.getFilter().findAny(Filter.Type.CATEGORY)).
-                filter(Objects::nonNull).
-                map(filter -> filter.getValues().get(0)).
+                map(ingredient -> ingredient.getFilter().<AnyFilter>findAny(Filter.Type.CATEGORY)).
+                filter(Optional::isPresent).
+                map(filter -> filter.orElseThrow().getValues().get(0)).
                 distinct().
                 toList();
     }
@@ -307,8 +307,10 @@ public class Input {
             for(DishMinPrice minPrice : dishMinPrices) {
                 ProductQuantity productQuantity = minPrice.dish().getIngredients().stream().
                         filter(ingredient -> {
-                            AnyFilter filter = ingredient.getFilter().findAny(Filter.Type.CATEGORY);
-                            return filter != null && filter.getValues().get(0).equals(category);
+                            return ingredient.getFilter().
+                                    <AnyFilter>findAny(Filter.Type.CATEGORY).
+                                    map(filter -> filter.getValues().get(0).equals(category)).
+                                    orElse(false);
                         }).
                         findFirst().
                         map(ingredient ->

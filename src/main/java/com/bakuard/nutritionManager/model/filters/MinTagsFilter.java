@@ -30,11 +30,6 @@ public class MinTagsFilter extends AbstractFilter {
         return Type.MIN_TAGS;
     }
 
-    @Override
-    public ImmutableList<Filter> getOperands() {
-        return ImmutableList.of();
-    }
-
     public ImmutableSortedSet<Tag> getTags() {
         return tags;
     }
@@ -43,8 +38,8 @@ public class MinTagsFilter extends AbstractFilter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MinTagsFilter minTagsFilter = (MinTagsFilter) o;
-        return tags.equals(minTagsFilter.tags);
+        MinTagsFilter that = (MinTagsFilter) o;
+        return Objects.equals(tags, that.tags);
     }
 
     @Override
@@ -54,9 +49,7 @@ public class MinTagsFilter extends AbstractFilter {
 
     @Override
     public String toString() {
-        return "MinTags{" +
-                "tags=" + tags +
-                '}';
+        return getType().name() + tags;
     }
 
 }
