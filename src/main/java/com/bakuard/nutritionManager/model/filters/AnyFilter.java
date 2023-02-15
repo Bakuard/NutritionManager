@@ -46,8 +46,7 @@ public class AnyFilter extends AbstractFilter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AnyFilter anyFilter = (AnyFilter) o;
-        return type == anyFilter.type &&
-                values.equals(anyFilter.values);
+        return Objects.equals(values, anyFilter.values) && type == anyFilter.type;
     }
 
     @Override

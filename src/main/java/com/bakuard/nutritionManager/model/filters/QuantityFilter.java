@@ -50,9 +50,8 @@ public class QuantityFilter extends AbstractFilter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        QuantityFilter quantityFilter1 = (QuantityFilter) o;
-        return quantity.equals(quantityFilter1.quantity) &&
-                relative == quantityFilter1.relative;
+        QuantityFilter that = (QuantityFilter) o;
+        return Objects.equals(quantity, that.quantity) && relative == that.relative;
     }
 
     @Override

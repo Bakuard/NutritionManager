@@ -15,7 +15,6 @@ import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-import org.jooq.SortField;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -131,14 +130,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         if(metadata.isEmpty()) return Page.empty();
 
-        final String aggregateRootQuery =
-                select(field("*")).
-                        from("Products").
-                        where(filterMapper.toCondition(criteria.getFilter())).
-                        orderBy(getOrderFields(criteria.tryGetSort(), "Products")).
-                        limit(inline(metadata.getActualSize())).
-                        offset(inline(metadata.getOffset())).
-                        getSQL();
+        final String aggregateRootQuery = """
+                select * from Products
+                    where %s
+                    order by %s
+                    limit %s
+                    offset %s
+                """.formatted(
+                        filterMapper.toCondition(criteria.getFilter()),
+                        getOrderFields(criteria.tryGetSort()),
+                        metadata.getActualSize(),
+                        metadata.getOffset()
+                );
 
         List<Product> products = Stream.of(new ProductAggregateRootBuilders()).
                 peek(aggregateRootBuilders -> loadAndFillProductAggregateRoot(
@@ -174,15 +177,19 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
-        String query = selectDistinct(field("ProductTags.tagValue")).
-                from("ProductTags").
-                join("Products").
-                    on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(filterMapper.toCondition(criteria.getFilter())).
-                orderBy(field("ProductTags.tagValue").asc()).
-                limit(inline(metadata.getActualSize())).
-                offset(inline(metadata.getOffset())).
-                getSQL();
+        String query = """
+                select distinct ProductTags.tagValue
+                    from ProductTags
+                    join Products on Products.productId = ProductTags.productId
+                    where %s
+                    order by ProductTags.tagValue asc
+                    limit %s
+                    offset %s
+                """.formatted(
+                        filterMapper.toCondition(criteria.getFilter()),
+                        metadata.getActualSize(),
+                        metadata.getOffset()
+                );
 
         List<Tag> tags = statement.query(
                 query,
@@ -208,13 +215,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
-        String query = selectDistinct(field("Products.shop")).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                orderBy(field("Products.shop").asc()).
-                limit(inline(metadata.getActualSize())).
-                offset(inline(metadata.getOffset())).
-                getSQL();
+        String query = """
+                select distinct Products.shop
+                    from Products
+                    where %s
+                    order by Products.shop asc
+                    limit %s
+                    offset %s
+                """.formatted(
+                        filterMapper.toCondition(criteria.tryGetFilter()),
+                        metadata.getActualSize(),
+                        metadata.getOffset()
+                );
 
         List<String> shops = statement.query(
                 query,
@@ -240,13 +252,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
-        String query = selectDistinct(field("Products.grade")).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                orderBy(field("Products.grade").asc()).
-                limit(inline(metadata.getActualSize())).
-                offset(inline(metadata.getOffset())).
-                getSQL();
+        String query = """
+                select distinct Products.grade
+                    from Products
+                    where %s
+                    order by Products.grade asc
+                    limit %s
+                    offset %s
+                """.formatted(
+                        filterMapper.toCondition(criteria.tryGetFilter()),
+                        metadata.getActualSize(),
+                        metadata.getOffset()
+                );
 
         List<String> grades = statement.query(
                 query,
@@ -272,13 +289,18 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
-        String query = selectDistinct(field("Products.category")).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                orderBy(field("Products.category").asc()).
-                limit(inline(metadata.getActualSize())).
-                offset(inline(metadata.getOffset())).
-                getSQL();
+        String query = """
+                select distinct Products.category
+                    from Products
+                    where %s
+                    order by Products.category asc
+                    limit %s
+                    offset %s
+                """.formatted(
+                        filterMapper.toCondition(criteria.tryGetFilter()),
+                        metadata.getActualSize(),
+                        metadata.getOffset()
+                );
 
         List<String> categories = statement.query(
                 query,
@@ -304,13 +326,19 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
-        String query = selectDistinct(field("Products.manufacturer")).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                orderBy(field("Products.manufacturer").asc()).
-                limit(inline(metadata.getActualSize())).
-                offset(inline(metadata.getOffset())).
-                getSQL();
+        String query = """
+                select distinct Products.manufacturer
+                    from Products
+                    where %s
+                    order by Products.manufacturer asc
+                    limit %s
+                    offset %s
+                """.
+                formatted(
+                        filterMapper.toCondition(criteria.tryGetFilter()),
+                        metadata.getActualSize(),
+                        metadata.getOffset()
+                );
 
         List<String> manufacturers = statement.query(
                 query,
@@ -332,7 +360,7 @@ public class ProductRepositoryPostgres implements ProductRepository {
     public int getProductsNumber(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = selectCount().
@@ -344,75 +372,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     @Override
-    public int getGradesNumber(Criteria criteria) {
-        Validator.check(
-                "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
-        );
-
-        String query = select(countDistinct(field("Products.grade"))).
-                from("Products").
-                where(filterMapper.toCondition(criteria.getFilter())).
-                getSQL();
-
-        return statement.query(
-                query,
-                (ResultSet rs) -> {
-                    rs.next();
-                    return rs.getInt(1);
-                }
-        );
-    }
-
-    @Override
-    public int getCategoriesNumber(Criteria criteria) {
-        Validator.check(
-                "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER) &&
-                                criteria.tryGetFilter().containsExactly(USER)))
-        );
-
-        String query = select(countDistinct(field("Products.category"))).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                getSQL();
-
-        return statement.query(
-                query,
-                (ResultSet rs) -> {
-                    rs.next();
-                    return rs.getInt(1);
-                }
-        );
-    }
-
-    @Override
-    public int getManufacturersNumber(Criteria criteria) {
-        Validator.check(
-                "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
-        );
-
-        String query = select(countDistinct(field("Products.manufacturer"))).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                getSQL();
-
-        return statement.query(
-                query,
-                (ResultSet rs) -> {
-                    rs.next();
-                    return rs.getInt(1);
-                }
-        );
-    }
-
-    @Override
     public Optional<BigDecimal> getProductsSum(Criteria criteria) {
         Validator.check(
                 "ProductRepository.criteria", notNull(criteria).
                         and(() -> notNull(criteria.getFilter())).
-                        and(() -> isTrue(criteria.getFilter().containsMin(USER)))
+                        and(() -> isTrue(criteria.getFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = select(sum(field("price", BigDecimal.class)).as("totalPrice")).
@@ -427,17 +391,14 @@ public class ProductRepositoryPostgres implements ProductRepository {
 
 
     private int getTagsNumber(Criteria criteria) {
-        Validator.check(
-                "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
-        );
+        Validator.check("ProductRepository.criteria", notNull(criteria));
 
-        String query = select(countDistinct(field("ProductTags.tagValue"))).
-                from("ProductTags").
-                join("Products").
-                on(field("Products.productId").eq(field("ProductTags.productId"))).
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                getSQL();
+        String query = """
+                select count(distinct ProductTags.tagValue)
+                    from ProductTags
+                    join Products on Products.productId = ProductTags.productId
+                    where %s
+                """.formatted(filterMapper.toCondition(criteria.tryGetFilter()));
 
         return statement.query(
                 query,
@@ -449,15 +410,67 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
     private int getShopsNumber(Criteria criteria) {
-        Validator.check(
-                "ProductRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.getFilter().containsMin(USER)))
-        );
+        Validator.check("ProductRepository.criteria", notNull(criteria));
 
-        String query = select(countDistinct(field("Products.shop"))).
-                from("Products").
-                where(filterMapper.toCondition(criteria.tryGetFilter())).
-                getSQL();
+        String query = """
+                select count(distinct Products.shop)
+                    from Products
+                    where %s
+                """.formatted(filterMapper.toCondition(criteria.tryGetFilter()));
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
+    }
+
+    private int getGradesNumber(Criteria criteria) {
+        Validator.check("ProductRepository.criteria", notNull(criteria));
+
+        String query = """
+                select count(distinct Products.grade)
+                    from Products
+                    where %s
+                """.formatted(filterMapper.toCondition(criteria.getFilter()));
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
+    }
+
+    private int getCategoriesNumber(Criteria criteria) {
+        Validator.check("ProductRepository.criteria", notNull(criteria));
+
+        String query = """
+                select count(distinct Products.category)
+                    from Products
+                    where %s
+                """.formatted(filterMapper.toCondition(criteria.tryGetFilter()));
+
+        return statement.query(
+                query,
+                (ResultSet rs) -> {
+                    rs.next();
+                    return rs.getInt(1);
+                }
+        );
+    }
+
+    private int getManufacturersNumber(Criteria criteria) {
+        Validator.check("ProductRepository.criteria", notNull(criteria));
+
+        String query = """
+                select count(distinct Products.manufacturer)
+                    from Products
+                    where %s
+                """.formatted(filterMapper.toCondition(criteria.tryGetFilter()));
 
         return statement.query(
                 query,
@@ -673,18 +686,12 @@ public class ProductRepositoryPostgres implements ProductRepository {
     }
 
 
-    private List<SortField<?>> getOrderFields(Sort productSort,
-                                              String tableName) {
-        ArrayList<SortField<?>> result = new ArrayList<>();
-
-        productSort.forEachParam(param -> {
-            if(param.isAscending()) result.add(field(tableName + "." + param.param()).asc());
-            else result.add(field(tableName + "." + param.param()).desc());
-        });
-
-        result.add(field(tableName + ".productId").asc());
-
-        return result;
+    private String getOrderFields(Sort productSort) {
+        return productSort.getParametersAsStream().
+                map(param -> "Products." + param.param() + " " + param.getDirectionAsString()).
+                reduce((a, b) -> a + ", " + b).
+                map(orderFields -> orderFields + ", Products.productId asc").
+                orElse("Products.productId asc");
     }
 
 

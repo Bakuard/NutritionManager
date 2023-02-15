@@ -17,9 +17,7 @@ import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import com.bakuard.nutritionManager.validation.Validator;
-
 import org.jooq.SortField;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -434,7 +432,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getDishesNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = selectCount().
@@ -449,7 +447,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getTagsNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = select(countDistinct(field("DishTags.tagValue"))).
@@ -472,7 +470,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getUnitsNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = select(countDistinct(field("Dishes.unit"))).
@@ -493,7 +491,7 @@ public class DishRepositoryPostgres implements DishRepository {
     public int getNamesNumber(Criteria criteria) {
         Validator.check(
                 "DishRepository.criteria", notNull(criteria).
-                        and(() -> isTrue(criteria.tryGetFilter().containsMin(USER)))
+                        and(() -> isTrue(criteria.tryGetFilter().matchingTypesNumber(USER) == 1))
         );
 
         String query = select(countDistinct(field("Dishes.name"))).
@@ -631,10 +629,10 @@ public class DishRepositoryPostgres implements DishRepository {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         DishIngredient ingredient = dish.getIngredients().get(i);
-                        String filterQuery = select(field("*")).
-                                from(table("Products")).
-                                where(filterMapper.toCondition(ingredient.getFilter())).
-                                getSQL();
+                        String filterQuery = """
+                                select * from Products
+                                    where %s
+                                """.formatted(filterMapper.toCondition(ingredient.getFilter()));
 
                         ps.setObject(1, ingredient.getId());
                         ps.setObject(2, dish.getId());
@@ -729,10 +727,10 @@ public class DishRepositoryPostgres implements DishRepository {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         DishIngredient ingredient = newVersion.getIngredients().get(i);
-                        String filterQuery = select(field("*")).
-                                from(table("Products")).
-                                where(filterMapper.toCondition(ingredient.getFilter())).
-                                getSQL();
+                        String filterQuery = """
+                                select * from Products
+                                    where %s
+                                """.formatted(filterMapper.toCondition(ingredient.getFilter()));
 
                         ps.setObject(1, ingredient.getId());
                         ps.setObject(2, newVersion.getId());

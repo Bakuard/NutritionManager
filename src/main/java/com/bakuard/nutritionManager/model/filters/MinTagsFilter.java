@@ -38,8 +38,8 @@ public class MinTagsFilter extends AbstractFilter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MinTagsFilter minTagsFilter = (MinTagsFilter) o;
-        return tags.equals(minTagsFilter.tags);
+        MinTagsFilter that = (MinTagsFilter) o;
+        return Objects.equals(tags, that.tags);
     }
 
     @Override

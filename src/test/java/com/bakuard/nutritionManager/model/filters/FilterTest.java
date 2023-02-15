@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -16,44 +15,27 @@ class FilterTest {
 
     @Test
     @DisplayName("""
-            containsExactly(matchNumber, maxDepth, types):
-             maxDepth = 0,
-             actual match < matchNumber
-             => return false
+            matchingTypesNumber(types):
+             count(filter nodes type) in types = 0,
+             filter has single node
+             => return 0
             """)
-    public void containsExactly1() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
+    public void matchingTypeNumber1() {
+        Filter filter = Filter.user(toUUID(1));
 
-        boolean actual = filter.containsExactly(2, 0, SHOPS, OR, AND);
+        int actual = filter.matchingTypesNumber(OR, AND, SHOPS);
 
-        Assertions.assertThat(actual).isFalse();
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
     @DisplayName("""
-            containsExactly(matchNumber, maxDepth, types):
-             maxDepth = 0,
-             actual match = matchNumber
-             => return true
+            matchingTypesNumber(types):
+             count(filter nodes type) in types = 0,
+             filter has several nodes
+             => return 0
             """)
-    public void containsExactly2() {
+    public void matchingTypeNumber2() {
         Filter filter = Filter.or(
                 Filter.and(
                         Filter.user(toUUID(1)),
@@ -73,19 +55,20 @@ class FilterTest {
                 Filter.anyShop("a", "b", "c")
         );
 
-        boolean actual = filter.containsExactly(1, 0, SHOPS, OR, AND);
+        int actual = filter.matchingTypesNumber(MIN_TAGS, MENUS);
 
-        Assertions.assertThat(actual).isTrue();
+        Assertions.assertThat(actual).isEqualTo(0);
     }
 
     @Test
     @DisplayName("""
-            containsExactly(matchNumber, maxDepth, types):
-             maxDepth = 0,
-             actual match > matchNumber
-             => return false
+            matchingTypesNumber(types):
+             count(filter nodes type) in types > 0,
+             count(filter nodes type) in types < types.length,
+             filter has several nodes
+             => return count(filter nodes type) in types
             """)
-    public void containsExactly3() {
+    public void matchingTypeNumber3() {
         Filter filter = Filter.or(
                 Filter.and(
                         Filter.user(toUUID(1)),
@@ -105,19 +88,20 @@ class FilterTest {
                 Filter.anyShop("a", "b", "c")
         );
 
-        boolean actual = filter.containsExactly(0, 0, MANUFACTURER, OR, AND);
+        int actual = filter.matchingTypesNumber(SHOPS, MIN_TAGS, AND, OR);
 
-        Assertions.assertThat(actual).isFalse();
+        Assertions.assertThat(actual).isEqualTo(3);
     }
 
     @Test
     @DisplayName("""
-            containsExactly(matchNumber, maxDepth, types):
-             maxDepth > 0,
-             actual match < matchNumber
-             => return false
+            matchingTypesNumber(types):
+             count(filter nodes type) in types > 0,
+             count(filter nodes type) in types = types.length,
+             filter has several nodes
+             => return count(filter nodes type) in types
             """)
-    public void containsExactly4() {
+    public void matchingTypeNumber4() {
         Filter filter = Filter.or(
                 Filter.and(
                         Filter.user(toUUID(1)),
@@ -137,19 +121,20 @@ class FilterTest {
                 Filter.anyShop("a", "b", "c")
         );
 
-        boolean actual = filter.containsExactly(2, 1, MANUFACTURER, CATEGORY, AND);
+        int actual = filter.matchingTypesNumber(AND, OR, USER, MIN_QUANTITY, MANUFACTURER, GRADES, CATEGORY);
 
-        Assertions.assertThat(actual).isFalse();
+        Assertions.assertThat(actual).isEqualTo(7);
     }
 
     @Test
     @DisplayName("""
-            containsExactly(matchNumber, maxDepth, types):
-             maxDepth > 0,
-             actual match = matchNumber
-             => return true
+            matchingTypesNumber(types):
+             count(filter nodes type) in types > 0,
+             count(filter nodes type) in types > types.length,
+             filter has several nodes
+             => return count(filter nodes type) in types
             """)
-    public void containsExactly5() {
+    public void matchingTypeNumber5() {
         Filter filter = Filter.or(
                 Filter.and(
                         Filter.user(toUUID(1)),
@@ -169,51 +154,32 @@ class FilterTest {
                 Filter.anyShop("a", "b", "c")
         );
 
-        boolean actual = filter.containsExactly(2, 1, SHOPS, CATEGORY, AND);
+        int actual = filter.matchingTypesNumber(USER, MIN_QUANTITY, MANUFACTURER, GRADES, CATEGORY);
 
-        Assertions.assertThat(actual).isTrue();
+        Assertions.assertThat(actual).isEqualTo(5);
     }
 
     @Test
     @DisplayName("""
-            containsExactly(matchNumber, maxDepth, types):
-             maxDepth > 0,
-             actual match > matchNumber
-             => return false
+            typesNumber():
+             filter has single node
+             => return 1
             """)
-    public void containsExactly6() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
+    public void typesNumber1() {
+        Filter filter = Filter.user(toUUID(1));
 
-        boolean actual = filter.containsExactly(2, 1, SHOPS, OR, AND);
+        int actual = filter.typesNumber();
 
-        Assertions.assertThat(actual).isFalse();
+        Assertions.assertThat(actual).isOne();
     }
 
     @Test
     @DisplayName("""
-            containsMin(minMatch, maxDepth, types):
-             maxDepth = 0,
-             actual match < minMatch
-             => return false
+            typesNumber():
+             filter has several nodes with same type
+             => return correct result
             """)
-    public void containsMin1() {
+    public void typesNumber2() {
         Filter filter = Filter.or(
                 Filter.and(
                         Filter.user(toUUID(1)),
@@ -233,361 +199,31 @@ class FilterTest {
                 Filter.anyShop("a", "b", "c")
         );
 
-        boolean actual = filter.containsMin(2, 0, SHOPS, OR, AND);
+        int actual = filter.typesNumber();
 
-        Assertions.assertThat(actual).isFalse();
+        Assertions.assertThat(actual).isEqualTo(8);
     }
 
     @Test
     @DisplayName("""
-            containsMin(minMatch, maxDepth, types):
-             maxDepth = 0,
-             actual match = minMatch
-             => return true
+            typesNumber():
+             each filter node has unique type
+             => return correct result
             """)
-    public void containsMin2() {
+    public void typesNumber3() {
         Filter filter = Filter.or(
+                Filter.user(toUUID(1)),
                 Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
+                        Filter.anyManufacturer("a"),
+                        Filter.anyShop("a", "b", "c", "d"),
+                        Filter.anyCategory("a"),
+                        Filter.anyGrade("a", "b", "c")
+                )
         );
 
-        boolean actual = filter.containsMin(1, 0, SHOPS, OR, AND);
+        int actual = filter.typesNumber();
 
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMin(minMatch, maxDepth, types):
-             maxDepth = 0,
-             actual match > minMatch
-             => return true
-            """)
-    public void containsMin3() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMin(0, 0, OR, CATEGORY, AND);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMin(minMatch, maxDepth, types):
-             maxDepth > 0,
-             actual match < minMatch
-             => return false
-            """)
-    public void containsMin4() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMin(2, 1, MANUFACTURER, CATEGORY, AND);
-
-        Assertions.assertThat(actual).isFalse();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMin(minMatch, maxDepth, types):
-             maxDepth > 0,
-             actual match = minMatch
-             => return true
-            """)
-    public void containsMin5() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMin(2, 1, SHOPS, CATEGORY, AND);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMin(minMatch, maxDepth, types):
-             maxDepth > 0,
-             actual match > minMatch
-             => return true
-            """)
-    public void containsMin6() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMin(2, 1, SHOPS, OR, AND);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMax(maxMatch, maxDepth, types):
-             maxDepth = 0,
-             actual match < maxMatch
-             => return true
-            """)
-    public void containsMax1() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMax(2, 0, SHOPS, OR, AND);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMax(maxMatch, maxDepth, types):
-             maxDepth = 0,
-             actual match = maxMatch
-             => return true
-            """)
-    public void containsMax2() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMax(1, 0, SHOPS, OR, AND);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMax(maxMatch, maxDepth, types):
-             maxDepth = 0,
-             actual match > maxMatch
-             => return false
-            """)
-    public void containsMax3() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMax(0, 0, OR, CATEGORY, AND);
-
-        Assertions.assertThat(actual).isFalse();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMax(maxMatch, maxDepth, types):
-             maxDepth > 0,
-             actual match < maxMatch
-             => return false
-            """)
-    public void containsMax4() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMax(2, 1, MANUFACTURER, CATEGORY, AND);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMax(maxMatch, maxDepth, types):
-             maxDepth > 0,
-             actual match = maxMatch
-             => return true
-            """)
-    public void containsMax5() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMax(2, 1, SHOPS, CATEGORY, AND);
-
-        Assertions.assertThat(actual).isTrue();
-    }
-
-    @Test
-    @DisplayName("""
-            containsMax(maxMatch, maxDepth, types):
-             maxDepth > 0,
-             actual match > maxMatch
-             => return false
-            """)
-    public void containsMax6() {
-        Filter filter = Filter.or(
-                Filter.and(
-                        Filter.user(toUUID(1)),
-                        Filter.greater(BigDecimal.ZERO),
-                        Filter.or(
-                                Filter.anyManufacturer("a", "b", "c", "d"),
-                                Filter.user(toUUID(2))
-                        ),
-                        Filter.or(
-                                Filter.anyGrade("a", "b", "c"),
-                                Filter.and(
-                                        Filter.anyGrade("a", "b", "c"),
-                                        Filter.anyCategory("a", "b", "c")
-                                )
-                        )
-                ),
-                Filter.anyShop("a", "b", "c")
-        );
-
-        boolean actual = filter.containsMax(2, 1, SHOPS, OR, AND);
-
-        Assertions.assertThat(actual).isFalse();
+        Assertions.assertThat(actual).isEqualTo(7);
     }
 
     @Test
@@ -1437,6 +1073,63 @@ class FilterTest {
 
     @Test
     @DisplayName("""
+            toDnf():
+             filter has several items,
+             filter form is DNF,
+             filter has extra AND and OR nodes
+             => return equals filter with open brackets
+            """)
+    public void toDnf11() {
+        Filter filter = Filter.or(
+                Filter.or(
+                        Filter.user(toUUID(1)),
+                        Filter.user(toUUID(2))
+                ),
+                Filter.and(
+                        Filter.and(
+                                Filter.user(toUUID(1)),
+                                Filter.anyManufacturer("a")
+                        ),
+                        Filter.and(
+                                Filter.anyShop("a", "b", "c", "d"),
+                                Filter.anyCategory("a")
+                        )
+                ),
+                Filter.and(
+                        Filter.and(
+                                Filter.user(toUUID(1)),
+                                Filter.anyManufacturer("a")
+                        ),
+                        Filter.anyShop("a", "b", "c", "d"),
+                        Filter.anyGrade("a", "b", "c")
+                )
+        );
+
+        Filter actual = filter.toDnf();
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        Filter.or(
+                                Filter.user(toUUID(1)),
+                                Filter.user(toUUID(2)),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyManufacturer("a"),
+                                        Filter.anyShop("a", "b", "c", "d"),
+                                        Filter.anyCategory("a")
+                                ),
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.anyManufacturer("a"),
+                                        Filter.anyShop("a", "b", "c", "d"),
+                                        Filter.anyGrade("a", "b", "c")
+                                )
+                        )
+                );
+    }
+
+    @Test
+    @DisplayName("""
             dfs():
              filter tree contains only one item
              => return this item
@@ -1495,77 +1188,170 @@ class FilterTest {
 
     @Test
     @DisplayName("""
-            findFirstSibling(type):
-             filter is root of filter tree,
-             filter has not this type
-             => return empty Optional
+            openBrackets():
+             filter has single node
+             => return same filter
             """)
-    public void findFirstSibling1() {
+    public void openBrackets1() {
         Filter filter = Filter.user(toUUID(1));
 
-        Optional<Filter> actual = filter.findFirstSibling(MANUFACTURER);
+        Filter actual = filter.openBrackets();
 
-        Assertions.assertThat(actual).isEmpty();
+        Assertions.assertThat(actual).isEqualTo(filter);
     }
 
     @Test
     @DisplayName("""
-            findFirstSibling(type):
-             filter is root of filter tree,
-             filter has this type
-             => return this filter
+            openBrackets():
+             filter has several nodes,
+             filter hasn't extra AND and OR nodes
+             => return same filter
             """)
-    public void findFirstSibling2() {
-        Filter filter = Filter.user(toUUID(1));
-
-        Optional<Filter> actual = filter.findFirstSibling(USER);
-
-        Assertions.assertThat(actual).contains(filter);
-    }
-
-    @Test
-    @DisplayName("""
-            findFirstSibling(type):
-             filter has not sibling with such type,
-             filter has not this type
-             => return empty Optional
-            """)
-    public void findFirstSibling3() {
-        Filter filter = Filter.user(toUUID(1));
-        Filter.and(
-                filter,
-                Filter.anyGrade("a", "b", "c"),
-                Filter.anyShop("a", "b", "c"),
-                Filter.anyManufacturer("a", "b", "c")
+    public void openBrackets2() {
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.or(
+                                Filter.user(toUUID(1)),
+                                Filter.anyShop("a", "b", "c")
+                        ),
+                        Filter.or(
+                                Filter.user(toUUID(2)),
+                                Filter.anyGrade("a", "b", "c")
+                        )
+                ),
+                Filter.and(
+                        Filter.or(
+                                Filter.user(toUUID(3)),
+                                Filter.anyShop("d", "e", "f")
+                        ),
+                        Filter.or(
+                                Filter.user(toUUID(4)),
+                                Filter.anyGrade("d", "e", "f")
+                        )
+                )
         );
 
-        Optional<Filter> actual = filter.findFirstSibling(CATEGORY);
+        Filter actual = filter.openBrackets();
 
-        Assertions.assertThat(actual).isEmpty();
+        Assertions.assertThat(actual).isEqualTo(filter);
     }
 
     @Test
     @DisplayName("""
-            findFirstSibling(type):
-             filter has sibling with such type,
-             filter has not this type
-             => return empty Optional
+            openBrackets():
+             filter has several nodes,
+             filter has extra AND and OR nodes,
+             filter tree is degenerate
+             => return optimized filter
             """)
-    public void findFirstSibling4() {
-        Filter filter = Filter.user(toUUID(1));
-        Filter.and(
-                filter,
-                Filter.anyGrade("a", "b", "c"),
-                Filter.anyShop("a", "b", "c"),
-                Filter.anyShop("d", "e", "f"),
-                Filter.anyManufacturer("a", "b", "c")
+    public void openBrackets3() {
+        Filter filter = Filter.and(
+                Filter.user(toUUID(1)),
+                Filter.or(
+                        Filter.anyManufacturer("a"),
+                        Filter.or(
+                                Filter.anyShop("a", "b", "c", "d"),
+                                Filter.or(
+                                        Filter.anyCategory("a"),
+                                        Filter.or(
+                                                Filter.user(toUUID(2)),
+                                                Filter.or(
+                                                        Filter.user(toUUID(3)),
+                                                        Filter.anyGrade("a", "b", "c")
+                                                )
+                                        )
+                                )
+                        )
+                )
         );
 
-        Optional<Filter> actual = filter.findFirstSibling(SHOPS);
+        Filter actual = filter.openBrackets();
 
-        Assertions.assertThat(actual).contains(Filter.anyShop("a", "b", "c"));
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        Filter.and(
+                                Filter.user(toUUID(1)),
+                                Filter.or(
+                                        Filter.anyManufacturer("a"),
+                                        Filter.anyShop("a", "b", "c", "d"),
+                                        Filter.anyCategory("a"),
+                                        Filter.user(toUUID(2)),
+                                        Filter.user(toUUID(3)),
+                                        Filter.anyGrade("a", "b", "c")
+                                )
+                        )
+                );
     }
 
+    @Test
+    @DisplayName("""
+            openBrackets():
+             filter has several nodes,
+             filter has extra AND and OR nodes
+             => return optimized filter
+            """)
+    public void openBrackets4() {
+        Filter filter = Filter.or(
+                Filter.and(
+                        Filter.user(toUUID(1)),
+                        Filter.greater(BigDecimal.ZERO),
+                        Filter.and(
+                                Filter.anyManufacturer("a", "b", "c", "d"),
+                                Filter.user(toUUID(2))
+                        ),
+                        Filter.and(
+                                Filter.anyGrade("a", "b", "c"),
+                                Filter.and(
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyCategory("a", "b", "c")
+                                )
+                        )
+                ),
+                Filter.anyShop("a", "b", "c"),
+                Filter.or(
+                        Filter.anyManufacturer("a", "b", "c", "d"),
+                        Filter.user(toUUID(3)),
+                        Filter.anyCategory("a", "b"),
+                        Filter.or(
+                                Filter.and(
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyCategory("a", "b", "c")
+                                ),
+                                Filter.or(
+                                        Filter.anyManufacturer("a", "b", "c", "d"),
+                                        Filter.user(toUUID(2))
+                                )
+                        )
+                )
+        );
+
+        Filter actual = filter.openBrackets();
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        Filter.or(
+                                Filter.and(
+                                        Filter.user(toUUID(1)),
+                                        Filter.greater(BigDecimal.ZERO),
+                                        Filter.anyManufacturer("a", "b", "c", "d"),
+                                        Filter.user(toUUID(2)),
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyCategory("a", "b", "c")
+                                ),
+                                Filter.anyShop("a", "b", "c"),
+                                Filter.anyManufacturer("a", "b", "c", "d"),
+                                Filter.user(toUUID(3)),
+                                Filter.anyCategory("a", "b"),
+                                Filter.and(
+                                        Filter.anyGrade("a", "b", "c"),
+                                        Filter.anyCategory("a", "b", "c")
+                                ),
+                                Filter.anyManufacturer("a", "b", "c", "d"),
+                                Filter.user(toUUID(2))
+                        )
+                );
+    }
 
 
     private UUID toUUID(int number) {

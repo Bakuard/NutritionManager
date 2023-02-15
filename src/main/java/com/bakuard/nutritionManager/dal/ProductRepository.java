@@ -135,30 +135,6 @@ public interface ProductRepository {
     public int getProductsNumber(Criteria criteria);
 
     /**
-     * Возвращает кол-во сортов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие сорта подсчитывать.
-     * @return выборку из сортов продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getGradesNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во категорий продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие какие категории подсчитывать.
-     * @return выборку из категорий продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getCategoriesNumber(Criteria criteria);
-
-    /**
-     * Возвращает кол-во производителей продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).
-     * @param criteria критерии указывающие каких производителей подсчитывать.
-     * @return выборку из производителей продуктов.
-     * @throws ValidateException если criteria является null.
-     */
-    public int getManufacturersNumber(Criteria criteria);
-
-    /**
      * Возвращает сумму цен всех продуктов удовлетворяющих ограничению criteria (см. {@link Criteria}).
      * Если нет ни одного продукта удовлетворяющего ограничению criteria - возвращает пустой Optional.
      * @param criteria критерии указывающие какие продукты учитывать

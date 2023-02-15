@@ -21,7 +21,6 @@ public class OrFilter extends AbstractFilter {
         );
 
         this.operands = ImmutableList.copyOf(operands);
-        this.operands.forEach(operand -> ((AbstractFilter)operand).parent = OrFilter.this);
     }
 
     @Override
@@ -39,7 +38,7 @@ public class OrFilter extends AbstractFilter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OrFilter orFilter = (OrFilter) o;
-        return operands.equals(orFilter.operands);
+        return Objects.equals(operands, orFilter.operands);
     }
 
     @Override

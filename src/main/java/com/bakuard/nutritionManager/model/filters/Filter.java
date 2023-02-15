@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface Filter {
@@ -206,13 +205,6 @@ public interface Filter {
 
     public ImmutableList<Filter> getOperands();
 
-    /**
-     * Возвращает непосредственного родителя для данного фильтра. Если фильтр является корнем дерева
-     * фильтров - возвращает null.
-     * @return ближайшего родителя для данного фильтра или null.
-     */
-    public Filter getParent();
-
     public default boolean typeIs(Type type) {
         return getType() == type;
     }
@@ -225,23 +217,9 @@ public interface Filter {
         return result;
     }
 
-    public boolean containsMax(Type... types);
+    public int matchingTypesNumber(Type... types);
 
-    public boolean containsMax(int maxMatch, Type... types);
-
-    public boolean containsMax(int maxMatch, int maxDepth, Type... types);
-
-    public boolean containsExactly(Type... types);
-
-    public boolean containsExactly(int matchNumber, Type... types);
-
-    public boolean containsExactly(int matchNumber, int maxDepth, Type... types);
-
-    public boolean containsMin(Type... types);
-
-    public boolean containsMin(int minMatch, Type... types);
-
-    public boolean containsMin(int minMatch, int maxDepth, Type... types);
+    public int typesNumber();
 
     /**
      * Возвращает Stream из отдельных фильтров в порядке соотвествующим обходу дерева фильтров в ширину.
@@ -320,33 +298,6 @@ public interface Filter {
     }
 
     /**
-     * Находит и возвращает ближайшего родителя имеющего указанный тип. Если среди родителей
-     * данного фильтра нет родителя с указанным типом - возвращает пустой Optional.
-     * @param type тип искомого родителя
-     * @return ближайшего родителя имеющего указанный тип.
-     */
-    public default <T extends Filter> Optional<T> findFirstParent(Type type) {
-        Filter filter = getParent();
-        while(filter != null && filter.getType() != type) filter = filter.getParent();
-        return Optional.ofNullable((T)filter);
-    }
-
-    public default <T extends Filter> Optional<T> findFirstSibling(Type type) {
-        Filter result = null;
-
-        if(getParent() != null) {
-            List<Filter> siblings = getParent().getOperands();
-            int index = 0;
-            while(index < siblings.size() && !siblings.get(index).typeIs(type)) ++index;
-            if(index < siblings.size()) result = siblings.get(index);
-        } else if(typeIs(type)) {
-            result = this;
-        }
-
-        return Optional.ofNullable((T)result);
-    }
-
-    /**
      * Проверяет - находится ли текущий фильтр в дизъюнктивной нормальной форме (ДНФ).
      * @return true - если фильтр находится в ДНФ, false - в противном случае.
      */
@@ -368,48 +319,32 @@ public interface Filter {
      * Создает и возвращает новый фильтр представляющий дизъюнктивную нормальную форму текущего
      * фильтра.
      */
-    public default Filter toDnf() {
-        Filter result = this;
+    public Filter toDnf();
+
+    /**
+     * Создает и возвращает новый фильтр являющийся результатом удаления всех лишних операторов
+     * AND и OR используя ассоциативное свойство этих операций.
+     */
+    public default Filter openBrackets() {
+        Filter filter = this;
 
         if(typeIs(Type.OR)) {
-            result = or(
-                    getOperands().stream().
-                            map(Filter::toDnf).
-                            flatMap(f -> f.typeIs(Type.OR) ? f.getOperands().stream() : Stream.of(f)).
-                            toList()
+            filter = or(
+                getOperands().stream().
+                        map(Filter::openBrackets).
+                        flatMap(f -> f.typeIs(Type.OR) ? f.getOperands().stream() : Stream.of(f)).
+                        toList()
             );
         } else if(typeIs(Type.AND)) {
-            ArrayList<Filter> operands = getOperands().stream().
-                    map(Filter::toDnf).
-                    collect(Collectors.toCollection(ArrayList::new));
-
-            int orFilterIndex = 0;
-            while(orFilterIndex < operands.size() && !operands.get(orFilterIndex).typeIs(Type.OR)) ++orFilterIndex;
-
-            if(orFilterIndex < operands.size()) {
-                Filter orFilter = operands.remove(orFilterIndex);
-                result = or(
-                        orFilter.getOperands().stream().
-                                map(f -> {
-                                    ArrayList<Filter> listF = new ArrayList<>(operands);
-                                    listF.add(f);
-                                    return listF;
-                                }).
-                                map(Filter::and).
-                                map(Filter::toDnf).
-                                flatMap(f -> f.typeIs(Type.OR) ? f.getOperands().stream() : Stream.of(f)).
-                                toList()
-                );
-            } else {
-                result = and(
-                        operands.stream().
-                                flatMap(f -> f.typeIs(Type.AND) ? f.getOperands().stream() : Stream.of(f)).
-                                toList()
-                );
-            }
+            filter = and(
+                    getOperands().stream().
+                            map(Filter::openBrackets).
+                            flatMap(f -> f.typeIs(Type.AND) ? f.getOperands().stream() : Stream.of(f)).
+                            toList()
+            );
         }
 
-        return result;
+        return filter;
     }
 
     /**
