@@ -1,15 +1,11 @@
 package com.bakuard.nutritionManager.dal.impl.mappers;
 
-import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.filters.*;
 import com.bakuard.nutritionManager.validation.Constraint;
 import com.bakuard.nutritionManager.validation.Rule;
 import com.bakuard.nutritionManager.validation.ValidateException;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
-
-import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.jooq.impl.DSL.*;
 

@@ -126,11 +126,7 @@ public class DtoMapper {
         return products.map(this::toProductResponse);
     }
 
-    public ProductFieldsResponse toProductFieldsResponse(UUID userId) {
-        Criteria criteria = new Criteria().
-                setPageable(PageableByNumber.of(1000, 0)).
-                setFilter(Filter.user(userId));
-
+    public ProductFieldsResponse toProductFieldsResponse(Criteria criteria) {
         Page<String> manufacturers = productRepository.getManufacturers(criteria);
         Page<String> grades = productRepository.getGrades(criteria);
         Page<String> shops = productRepository.getShops(criteria);
@@ -174,6 +170,27 @@ public class DtoMapper {
                 setPageable(PageableByNumber.of(size, page)).
                 setSort(Sort.products(sortRule)).
                 setFilter(filter);
+    }
+
+    public Criteria toProductCriteria(UUID userId,
+                                      List<String> categories,
+                                      List<String> shops,
+                                      List<String> grades,
+                                      List<String> manufacturers,
+                                      List<String> tags) {
+        List<Filter> filters = new ArrayList<>();
+        filters.add(Filter.user(userId));
+        if(categories != null && !categories.isEmpty()) filters.add(Filter.anyCategory(categories));
+        if(shops != null && !shops.isEmpty()) filters.add(Filter.anyShop(shops));
+        if(grades != null && !grades.isEmpty()) filters.add(Filter.anyGrade(grades));
+        if(manufacturers != null && !manufacturers.isEmpty()) filters.add(Filter.anyManufacturer(manufacturers));
+        if(tags != null && !tags.isEmpty()) filters.add(Filter.minTags(toTags(tags)));
+
+        Filter filter = null;
+        if(filters.size() == 1) filter = filters.get(0);
+        else filter = Filter.and(filters);
+
+        return new Criteria().setFilter(filter);
     }
 
 

@@ -426,9 +426,19 @@ public class ProductController {
                      """)
             List<String> tags) {
         UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
-        logger.info("Get products categories, sorts, tags, manufacturers, shops for user {}", userId);
+        logger.info("Get products all products fields for categories={}, shops={}, grades={}, manufacturers={}, tags={}, user={}",
+                categories, shops, grades, manufacturers, tags, userId);
 
-        ProductFieldsResponse response = mapper.toProductFieldsResponse(userId);
+        Criteria criteria = mapper.toProductCriteria(
+                userId,
+                categories,
+                shops,
+                grades,
+                manufacturers,
+                tags
+        );
+
+        ProductFieldsResponse response = mapper.toProductFieldsResponse(criteria);
 
         return ResponseEntity.ok(response);
     }
@@ -448,6 +458,11 @@ public class ProductController {
     @GetMapping("/getProductsFieldsByCategories")
     @Transactional
     public ResponseEntity<List<ProductFieldsByCategoryResponse>> getProductsFieldsByCategories() {
+        UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
+        logger.info("get products fields by categories for user={}", userId);
+
+        
+
         return ResponseEntity.ok().build();
     }
 
