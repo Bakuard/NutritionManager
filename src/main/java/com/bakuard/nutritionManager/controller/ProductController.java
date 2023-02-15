@@ -461,9 +461,9 @@ public class ProductController {
         UUID userId = requestContext.getCurrentJwsBodyAs(UUID.class);
         logger.info("get products fields by categories for user={}", userId);
 
-        
+        List<ProductFieldsByCategoryResponse> response = mapper.toProductFieldsByCategoryResponse(userId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
 }

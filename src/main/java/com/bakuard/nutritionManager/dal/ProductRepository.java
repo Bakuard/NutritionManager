@@ -1,5 +1,7 @@
 package com.bakuard.nutritionManager.dal;
 
+import com.bakuard.nutritionManager.dal.projection.ProductField;
+import com.bakuard.nutritionManager.dal.projection.ProductFields;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.ProductContext;
 import com.bakuard.nutritionManager.model.Tag;
@@ -7,7 +9,6 @@ import com.bakuard.nutritionManager.model.util.Page;
 import com.bakuard.nutritionManager.validation.ValidateException;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -125,6 +126,16 @@ public interface ProductRepository {
      * @throws ValidateException если criteria является null.
      */
     public Page<String> getManufacturers(Criteria criteria);
+
+    /**
+     * Возвращает выборку из всех значений указанного поля продуктов заданного пользователя, сгруппированную
+     * по категориям. Все значения указанного поля будут упорядочены в лексикографическом порядке в
+     * пределах каждой категории.
+     * @param field искомое поле
+     * @param userId идентификатор пользователя, из продуктов которого делается выборка.
+     * @return выборку из всех значений заданного поля, сгруппированную по категориям.
+     */
+    public <T> Page<ProductField<T>> getFieldsGroupingByCategory(ProductFields field, UUID userId);
 
     /**
      * Возвращает кол-во всех продуктов удовлетворяющих ограничениям criteria (см. {@link Criteria}).

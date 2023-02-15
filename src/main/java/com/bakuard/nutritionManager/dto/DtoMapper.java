@@ -2,6 +2,8 @@ package com.bakuard.nutritionManager.dto;
 
 import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.*;
+import com.bakuard.nutritionManager.dal.projection.ProductField;
+import com.bakuard.nutritionManager.dal.projection.ProductFields;
 import com.bakuard.nutritionManager.dto.auth.JwsResponse;
 import com.bakuard.nutritionManager.dto.dishes.*;
 import com.bakuard.nutritionManager.dto.dishes.fields.DishFieldsResponse;
@@ -11,6 +13,7 @@ import com.bakuard.nutritionManager.dto.exceptions.SuccessResponse;
 import com.bakuard.nutritionManager.dto.menus.*;
 import com.bakuard.nutritionManager.dto.menus.fields.MenuFieldsResponse;
 import com.bakuard.nutritionManager.dto.products.ProductAddRequest;
+import com.bakuard.nutritionManager.dto.products.fields.ProductFieldsByCategoryResponse;
 import com.bakuard.nutritionManager.dto.products.fields.ProductFieldsResponse;
 import com.bakuard.nutritionManager.dto.products.ProductResponse;
 import com.bakuard.nutritionManager.dto.products.ProductUpdateRequest;
@@ -42,7 +45,7 @@ public class DtoMapper {
     private ProductRepository productRepository;
     private DishRepository dishRepository;
     private MenuRepository menuRepository;
-    private ConfigData appConfiguration;
+    private ConfigData conf;
     private MessageSource messageSource;
     private Clock clock;
 
@@ -51,14 +54,14 @@ public class DtoMapper {
                      DishRepository dishRepository,
                      MenuRepository menuRepository,
                      MessageSource messageSource,
-                     ConfigData appConfiguration,
+                     ConfigData conf,
                      Clock clock) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.dishRepository = dishRepository;
         this.menuRepository = menuRepository;
         this.messageSource = messageSource;
-        this.appConfiguration = appConfiguration;
+        this.conf = conf;
         this.clock = clock;
     }
 
@@ -82,7 +85,7 @@ public class DtoMapper {
 
     public Product toProduct(UUID userId, ProductUpdateRequest dto) {
         Product.Builder builder = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 setId(dto.getId()).
                 setUser(userRepository.tryGetById(userId)).
                 setCategory(dto.getCategory()).
@@ -103,7 +106,7 @@ public class DtoMapper {
 
     public Product toProduct(UUID userId, ProductAddRequest dto) {
         Product.Builder builder = new Product.Builder().
-                setAppConfiguration(appConfiguration).
+                setAppConfiguration(conf).
                 generateId().
                 setUser(userRepository.tryGetById(userId)).
                 setCategory(dto.getCategory()).
@@ -141,6 +144,50 @@ public class DtoMapper {
         response.setCategories(categories.getContent().stream().map(FieldResponse::new).toList());
 
         return response;
+    }
+
+    public List<ProductFieldsByCategoryResponse> toProductFieldsByCategoryResponse(UUID userId) {
+        List<ProductFieldsByCategoryResponse> result = new ArrayList<>();
+        HashMap<String, ProductFieldsByCategoryResponse> map = new HashMap<>();
+
+        productRepository.<String>getFieldsGroupingByCategory(
+                ProductFields.SHOP,
+                userId
+        ).getContent().forEach(f -> {
+                 if(!map.containsKey(f.category())) {
+                     ProductFieldsByCategoryResponse p = new ProductFieldsByCategoryResponse();
+                     p.setCategory(f.category());
+                     map.put(f.category(), p);
+                     result.add(p);
+                 }
+
+                 map.get(f.category()).
+                         getShops().
+                         add(new FieldResponse(f.targetField()));
+        });
+
+        productRepository.<String>getFieldsGroupingByCategory(
+                ProductFields.MANUFACTURER,
+                userId
+        ).getContent().forEach(f -> map.get(f.category()).
+                getManufacturers().
+                add(new FieldResponse(f.targetField())));
+
+        productRepository.<String>getFieldsGroupingByCategory(
+                ProductFields.GRADE,
+                userId
+        ).getContent().forEach(f -> map.get(f.category()).
+                getGrades().
+                add(new FieldResponse(f.targetField())));
+
+        productRepository.<Tag>getFieldsGroupingByCategory(
+                ProductFields.TAG,
+                userId
+        ).getContent().forEach(f -> map.get(f.category()).
+                getTags().
+                add(new FieldResponse(f.targetField().getValue())));
+
+        return result;
     }
 
     public Criteria toProductCriteria(int page,
@@ -190,7 +237,9 @@ public class DtoMapper {
         if(filters.size() == 1) filter = filters.get(0);
         else filter = Filter.and(filters);
 
-        return new Criteria().setFilter(filter);
+        return new Criteria().
+                setFilter(filter).
+                setPageable(PageableByNumber.of(conf.pagination().itemsMaxPageSize(), 0));
     }
 
 
@@ -227,7 +276,7 @@ public class DtoMapper {
                 setUnit(dto.getUnit()).
                 setDescription(dto.getDescription()).
                 setImageUrl(dto.getImageUrl()).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository);
 
         dto.getIngredients().
@@ -255,7 +304,7 @@ public class DtoMapper {
                 setUnit(dto.getUnit()).
                 setDescription(dto.getDescription()).
                 setImageUrl(dto.getImageUrl()).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(productRepository);
 
         dto.getIngredients().ifPresent(ingredients ->
@@ -369,7 +418,7 @@ public class DtoMapper {
                 setName(dto.getName()).
                 setDescription(dto.getDescription()).
                 setImageUrl(dto.getImageUrl()).
-                setConfig(appConfiguration);
+                setConfig(conf);
 
         dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
@@ -387,7 +436,7 @@ public class DtoMapper {
                 setName(dto.getName()).
                 setDescription(dto.getDescription()).
                 setImageUrl(dto.getImageUrl()).
-                setConfig(appConfiguration);
+                setConfig(conf);
 
         dto.getTags().ifPresent(tags -> tags.forEach(builder::addTag));
 
@@ -657,7 +706,7 @@ public class DtoMapper {
     private DishIngredient.Builder toDishIngredient(UUID userId, IngredientUpdateRequest dto, int index) {
         return new DishIngredient.Builder().
                 setOrGenerateId(dto.getId()).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setName("Ингредиент №" + index + " - " + dto.getFilter().getCategory()).
                 setQuantity(dto.getQuantity()).
                 setFilter(toDishIngredientFilter(userId, dto.getFilter()));
@@ -666,7 +715,7 @@ public class DtoMapper {
     private DishIngredient.Builder toDishIngredient(UUID userId, IngredientAddRequest dto, int index) {
         return new DishIngredient.Builder().
                 generateId().
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setName("Ингредиент №" + index + " - " + dto.getFilter().getCategory()).
                 setQuantity(dto.getQuantity()).
                 setFilter(toDishIngredientFilter(userId, dto.getFilter()));
@@ -783,7 +832,7 @@ public class DtoMapper {
                 setOrGenerateId(dto.getId()).
                 setDishName(dto.getDishName()).
                 setQuantity(dto.getServingNumber()).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(dishRepository).
                 setUserId(userId);
     }
@@ -793,7 +842,7 @@ public class DtoMapper {
                 generateId().
                 setDishName(dto.getDishName()).
                 setQuantity(dto.getServingNumber()).
-                setConfig(appConfiguration).
+                setConfig(conf).
                 setRepository(dishRepository).
                 setUserId(userId);
     }

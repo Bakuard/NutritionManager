@@ -3,6 +3,7 @@ package com.bakuard.nutritionManager.dto.products.fields;
 import com.bakuard.nutritionManager.dto.FieldResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,7 +40,10 @@ public class ProductFieldsByCategoryResponse {
     private List<FieldResponse> shops;
 
     public ProductFieldsByCategoryResponse() {
-
+        tags = new ArrayList<>();
+        manufacturers = new ArrayList<>();
+        grades = new ArrayList<>();
+        shops = new ArrayList<>();
     }
 
     public String getCategory() {

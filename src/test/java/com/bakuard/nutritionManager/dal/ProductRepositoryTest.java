@@ -3,6 +3,8 @@ package com.bakuard.nutritionManager.dal;
 import com.bakuard.nutritionManager.AssertUtil;
 import com.bakuard.nutritionManager.TestConfig;
 import com.bakuard.nutritionManager.config.configData.ConfigData;
+import com.bakuard.nutritionManager.dal.projection.ProductField;
+import com.bakuard.nutritionManager.dal.projection.ProductFields;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
@@ -5950,6 +5952,244 @@ class ProductRepositoryTest {
         Assertions.assertThat(actual).isEmpty();
     }
 
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = category,
+             user haven't any products
+             => return empty Page
+            """)
+    void getFieldsGroupingByCategory1() {
+        User user = createAndSaveUser(1);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.CATEGORY,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = category,
+             user has several products
+             => return correct result
+            """)
+    void getFieldsGroupingByCategory2() {
+        User user = createAndSaveUser(1);
+        createAndSaveProducts(user);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.CATEGORY,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(100, 0).
+                                createPageMetadata(2, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new ProductField<>("name A", "name A"),
+                                        new ProductField<>("name B", "name B")
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = tag,
+             user haven't any products
+             => return empty Page
+            """)
+    void getFieldsGroupingByCategory3() {
+        User user = createAndSaveUser(1);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.TAG,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = tag,
+             user has several products
+             => return correct result
+            """)
+    void getFieldsGroupingByCategory4() {
+        User user = createAndSaveUser(1);
+        createAndSaveProducts(user);
+
+        Page<ProductField<Tag>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.TAG,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(100, 0).
+                                createPageMetadata(10, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new ProductField<>("name A", new Tag("common tag")),
+                                        new ProductField<>("name A", new Tag("tag A")),
+                                        new ProductField<>("name A", new Tag("value 1")),
+                                        new ProductField<>("name A", new Tag("value 2")),
+                                        new ProductField<>("name A", new Tag("value 3")),
+                                        new ProductField<>("name B", new Tag("common tag")),
+                                        new ProductField<>("name B", new Tag("tag B")),
+                                        new ProductField<>("name B", new Tag("value 4")),
+                                        new ProductField<>("name B", new Tag("value 5")),
+                                        new ProductField<>("name B", new Tag("value 6"))
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = manufacturer,
+             user haven't any products
+             => return empty Page
+            """)
+    void getFieldsGroupingByCategory5() {
+        User user = createAndSaveUser(1);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.MANUFACTURER,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = manufacturer,
+             user has several products
+             => return correct result
+            """)
+    void getFieldsGroupingByCategory6() {
+        User user = createAndSaveUser(1);
+        createAndSaveProducts(user);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.MANUFACTURER,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(100, 0).
+                                createPageMetadata(3, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new ProductField<>("name A", "manufacturer A"),
+                                        new ProductField<>("name B", "manufacturer A"),
+                                        new ProductField<>("name B", "manufacturer B")
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = grade,
+             user haven't any products
+             => return empty Page
+            """)
+    void getFieldsGroupingByCategory7() {
+        User user = createAndSaveUser(1);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.GRADE,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = grade,
+             user has several products
+             => return correct result
+            """)
+    void getFieldsGroupingByCategory8() {
+        User user = createAndSaveUser(1);
+        createAndSaveProducts(user);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.GRADE,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(100, 0).
+                                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new ProductField<>("name A", "variety A"),
+                                        new ProductField<>("name A", "variety B"),
+                                        new ProductField<>("name B", "variety C"),
+                                        new ProductField<>("name B", "variety D")
+                                ))
+                );
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = shop,
+             user haven't any products
+             => return empty Page
+            """)
+    void getFieldsGroupingByCategory9() {
+        User user = createAndSaveUser(1);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.SHOP,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).isEqualTo(Page.empty());
+    }
+
+    @Test
+    @DisplayName("""
+            getFieldsGroupingByCategory(field, userId):
+             field = shop,
+             user has several products
+             => return correct result
+            """)
+    void getFieldsGroupingByCategory10() {
+        User user = createAndSaveUser(1);
+        createAndSaveProducts(user);
+
+        Page<ProductField<String>> actual = repository.getFieldsGroupingByCategory(
+                ProductFields.SHOP,
+                user.getId()
+        );
+
+        Assertions.assertThat(actual).
+                isEqualTo(
+                        PageableByNumber.of(100, 0).
+                                createPageMetadata(4, conf.pagination().itemsMaxPageSize()).
+                                createPage(List.of(
+                                        new ProductField<>("name A", "shop A"),
+                                        new ProductField<>("name A", "shop B"),
+                                        new ProductField<>("name B", "shop B"),
+                                        new ProductField<>("name B", "shop C")
+                                ))
+                );
+    }
+
 
     private <T>T commit(Supplier<T> supplier) {
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
@@ -6148,14 +6388,6 @@ class ProductRepositoryTest {
         commit(() -> products.forEach(p -> repository.save(p)));
         
         return products;
-    }
-
-    private List<Tag> createTags(List<Product> allProducts) {
-        return allProducts.stream().
-                flatMap(p -> p.getContext().getTags().stream()).
-                distinct().
-                sorted().
-                toList();
     }
 
 }

@@ -4,6 +4,8 @@ import com.bakuard.nutritionManager.config.configData.ConfigData;
 import com.bakuard.nutritionManager.dal.Criteria;
 import com.bakuard.nutritionManager.dal.ProductRepository;
 import com.bakuard.nutritionManager.dal.impl.mappers.ProductFilterMapper;
+import com.bakuard.nutritionManager.dal.projection.ProductField;
+import com.bakuard.nutritionManager.dal.projection.ProductFields;
 import com.bakuard.nutritionManager.model.Product;
 import com.bakuard.nutritionManager.model.Tag;
 import com.bakuard.nutritionManager.model.User;
@@ -29,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.bakuard.nutritionManager.model.filters.Filter.Type.CATEGORY;
 import static com.bakuard.nutritionManager.model.filters.Filter.Type.USER;
 import static com.bakuard.nutritionManager.validation.Rule.*;
 import static org.jooq.impl.DSL.*;
@@ -178,10 +181,11 @@ public class ProductRepositoryPostgres implements ProductRepository {
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         String query = """
-                select distinct ProductTags.tagValue
+                select ProductTags.tagValue
                     from ProductTags
                     join Products on Products.productId = ProductTags.productId
                     where %s
+                    group by ProductTags.tagValue
                     order by ProductTags.tagValue asc
                     limit %s
                     offset %s
@@ -216,9 +220,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         String query = """
-                select distinct Products.shop
+                select Products.shop
                     from Products
                     where %s
+                    group by Products.shop
                     order by Products.shop asc
                     limit %s
                     offset %s
@@ -253,9 +258,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         String query = """
-                select distinct Products.grade
+                select Products.grade
                     from Products
                     where %s
+                    group by Products.grade
                     order by Products.grade asc
                     limit %s
                     offset %s
@@ -290,9 +296,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         String query = """
-                select distinct Products.category
+                select Products.category
                     from Products
                     where %s
+                    group by Products.category
                     order by Products.category asc
                     limit %s
                     offset %s
@@ -327,9 +334,10 @@ public class ProductRepositoryPostgres implements ProductRepository {
         if(metadata.isEmpty()) return metadata.createPage(List.of());
 
         String query = """
-                select distinct Products.manufacturer
+                select Products.manufacturer
                     from Products
                     where %s
+                    group by Products.manufacturer
                     order by Products.manufacturer asc
                     limit %s
                     offset %s
@@ -354,6 +362,92 @@ public class ProductRepositoryPostgres implements ProductRepository {
         );
 
         return metadata.createPage(manufacturers);
+    }
+
+    @Override
+    public <T> Page<ProductField<T>> getFieldsGroupingByCategory(ProductFields field, UUID userId) {
+        Page<ProductField<T>> result = null;
+
+        switch(field) {
+            case TAG -> {
+                int itemsNumber = statement.query(
+                        """
+                        select count(*)
+                            from (
+                                select Products.category, ProductTags.tagValue
+                                    from Products
+                                    inner join ProductTags on ProductTags.productId = Products.productId
+                                    group by Products.category, ProductTags.tagValue
+                            ) as Temp;
+                        """,
+                        (ResultSet rs) -> {
+                            rs.next();
+                            return rs.getInt(1);
+                        }
+                );
+
+                Page.Metadata metadata = PageableByNumber.of(conf.pagination().itemsMaxPageSize(), 0).
+                        createPageMetadata(itemsNumber, conf.pagination().itemsMaxPageSize());
+
+                List<ProductField<Tag>> content = statement.query("""
+                        select Products.category, ProductTags.tagValue
+                            from Products
+                            inner join ProductTags on ProductTags.productId = Products.productId
+                            group by Products.category, ProductTags.tagValue
+                            order by Products.category, ProductTags.tagValue;
+                        """,
+                        rs -> {
+                            ArrayList<ProductField<Tag>> temp = new ArrayList<>();
+
+                            while(rs.next()) {
+                                temp.add(new ProductField<>(rs.getString(1), new Tag(rs.getString(2))));
+                            }
+
+                            return temp;
+                        });
+
+                result = metadata.createPage(content).map(t -> (ProductField<T>)t);
+            }
+            case CATEGORY, SHOP, GRADE, MANUFACTURER -> {
+                int itemsNumber = statement.query(
+                        """
+                        select count(*)
+                            from (
+                                select Products.category, Products.%s
+                                    from Products
+                                    group by Products.category, Products.%s
+                            ) as Temp;
+                        """.formatted(field, field),
+                        (ResultSet rs) -> {
+                            rs.next();
+                            return rs.getInt(1);
+                        }
+                );
+
+                Page.Metadata metadata = PageableByNumber.of(conf.pagination().itemsMaxPageSize(), 0).
+                        createPageMetadata(itemsNumber, conf.pagination().itemsMaxPageSize());
+
+                List<ProductField<String>> content = statement.query("""
+                        select Products.category, Products.%s
+                            from Products
+                            group by Products.category, Products.%s
+                            order by Products.category, Products.%s
+                        """.formatted(field, field, field),
+                        rs -> {
+                            ArrayList<ProductField<String>> temp = new ArrayList<>();
+
+                            while(rs.next()) {
+                                temp.add(new ProductField<>(rs.getString(1), rs.getString(2)));
+                            }
+
+                            return temp;
+                        });
+
+                result = metadata.createPage(content).map(t -> (ProductField<T>)t);
+            }
+        }
+
+        return result;
     }
 
     @Override
